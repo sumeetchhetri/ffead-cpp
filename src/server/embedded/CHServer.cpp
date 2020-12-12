@@ -326,9 +326,11 @@ void* gracefullShutdown_monitor(void* args)
 	std::string port = ipaddr->substr(ipaddr->find(":")+1);
 
 	if(isSSLEnabled) {
+#ifdef HAVE_SSLINC
 		SSLClient sc;
 		sc.connection(ip, CastUtil::toInt(port));
 		sc.closeConnection();
+#endif
 	} else {
 		Client sc;
 		sc.connection(ip, CastUtil::toInt(port));
@@ -686,8 +688,9 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	}
 
 	ConfigurationData::getInstance();
+#ifdef HAVE_SSLINC
 	SSLHandler::setIsSSL(isSSLEnabled);
-
+#endif
 	strVec webdirs,webdirs1,pubfiles;
 	//ConfigurationHandler::listi(webpath,"/",true,webdirs,false);
 	CommonUtils::listFiles(webdirs, webpath, "/");
@@ -738,9 +741,9 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	{
 		logger << msg.what() << std::endl;
 	}
-
+#ifdef HAVE_SSLINC
     SSLHandler::initInstance(ConfigurationData::getInstance()->securityProperties);
-
+#endif
     logger << INTER_LIB_FILE << std::endl;
 
     bool libpresent = true;
@@ -1307,9 +1310,9 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	close(sockfd);
 
 	delete (HttpServiceHandler*)handler;
-
+#ifdef HAVE_SSLINC
 	SSLHandler::clear();
-
+#endif
 	ConfigurationHandler::destroyCaches();
 
 	ConfigurationData::getInstance()->clearAllSingletonBeans();
@@ -1382,6 +1385,7 @@ HttpReadTask* CHServer::httpReadFactoryMethod() {
 }
 
 SocketInterface* CHServer::createSocketInterface(SOCKET fd) {
+#ifdef HAVE_SSLINC
 	SSL* ssl = NULL;
 	BIO* io = NULL;
 	if(SocketInterface::init(fd, ssl, io, logger)) {
@@ -1390,4 +1394,8 @@ SocketInterface* CHServer::createSocketInterface(SOCKET fd) {
 		return new Http11Handler(fd, ssl, io, ConfigurationData::getInstance()->coreServerProperties.webPath,
 			techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
 	}
+#else
+	return new Http11Handler(fd, NULL, NULL, ConfigurationData::getInstance()->coreServerProperties.webPath,
+		techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
+#endif
 }

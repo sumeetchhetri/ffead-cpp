@@ -24,10 +24,14 @@
 #define CRYPTOHANDLER_H_
 #include "AppDefines.h"
 #include "Compatibility.h"  // WinSock subsystem
+#ifdef HAVE_SSLINC
 #include <openssl/engine.h>
 #include <openssl/hmac.h>
 #include <openssl/sha.h>
 #include <openssl/evp.h>
+#endif
+#include <stdlib.h>
+#include <memory.h>
 #include <stdio.h>
 #include "string"
 #include "cstring"
@@ -36,11 +40,10 @@
 #include <iomanip>
 
 class CryptoHandler {
+#ifndef HAVE_SSLINC
+	static const char base46_map[];
+#endif
 public:
-	static std::string base64encodeStr(const std::string& input);
-	static std::string base64decodeStr(const std::string& input);
-	static char* base64encode(const unsigned char *input, const int& length);
-	static char* base64decode(unsigned char *input, const int& length);
 	static char* hmac_sha1(char*, char*, const bool&);
 	static char* hmac_sha256(char*, char*, const bool&);
 	static char* hmac_sha384(char*, char*, const bool&);
@@ -50,6 +53,10 @@ public:
 	static std::string urlDecode(const std::string& str);
 	static void sanitizeHtml(std::string& data);
 	static void deSanitizeHtml(std::string& strret);
+	static std::string base64encodeStr(const std::string& input);
+	static std::string base64decodeStr(const std::string& input);
+	static char* base64encode(const unsigned char *input, const int& length);
+	static char* base64decode(unsigned char *input, const int& length);
 };
 
 #endif /* CRYPTOHANDLER_H_ */

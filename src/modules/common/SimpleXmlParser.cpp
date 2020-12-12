@@ -81,7 +81,7 @@ void SimpleXmlParser::sanitizeXml(std::string& strret) {
 	StringUtil::replaceAll(strret,"&gt;",">");
 }
 
-void SimpleXmlParser::readXML(std::string& xml, const std::string& parent, Element *par)
+void SimpleXmlParser::readXML(std::string xml, const std::string& parent, Element *par)
 {
 	if(xml=="")
 		return;

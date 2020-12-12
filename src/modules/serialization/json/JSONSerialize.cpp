@@ -179,7 +179,7 @@ void JSONSerialize::cleanSerializableObject(void* _1)
 void JSONSerialize::startContainerSerialization(void* _1, const std::string& className, const std::string& container)
 {
 	std::string* object = (std::string*)_1;
-	*object = "[";
+	*object += "[";
 }
 
 void JSONSerialize::endContainerSerialization(void* _1, const std::string& className, const std::string& container)
@@ -578,92 +578,92 @@ void JSONSerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::
 	switch(serOpt) {
 		case 1:
 		{
-			*object += "\"" + propName + "\" : \"" + *(std::string*)t + "\"";
+			*object += "\"" + propName + "\":\"" + *(std::string*)t + "\"";
 			break;
 		}
 		case 2:
 		{
 			std::string s;
 			s.push_back(((char*)t)[0]);
-			*object += "\"" + propName + "\" : \"" + s + "\"";
+			*object += "\"" + propName + "\":\"" + s + "\"";
 			break;
 		}
 		case 3:
 		{
 			std::string s;
 			s.push_back(((unsigned char*)t)[0]);
-			*object += "\"" + propName + "\" : \"" + s + "\"";
+			*object += "\"" + propName + "\":\"" + s + "\"";
 			break;
 		}
 		case 4:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::fromNumber(*(int*)t);
+			*object += "\"" + propName + "\":" + CastUtil::fromNumber(*(int*)t);
 			break;
 		}
 		case 5:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::fromNumber(*(unsigned int*)t);
+			*object += "\"" + propName + "\":" + CastUtil::fromNumber(*(unsigned int*)t);
 			break;
 		}
 		case 6:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::fromNumber(*(short*)t);
+			*object += "\"" + propName + "\":" + CastUtil::fromNumber(*(short*)t);
 			break;
 		}
 		case 7:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::fromNumber(*(unsigned short*)t);
+			*object += "\"" + propName + "\":" + CastUtil::fromNumber(*(unsigned short*)t);
 			break;
 		}
 		case 8:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::fromNumber(*(long*)t);
+			*object += "\"" + propName + "\":" + CastUtil::fromNumber(*(long*)t);
 			break;
 		}
 		case 9:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::fromNumber(*(unsigned long*)t);
+			*object += "\"" + propName + "\":" + CastUtil::fromNumber(*(unsigned long*)t);
 			break;
 		}
 		case 10:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::fromNumber(*(long long*)t);
+			*object += "\"" + propName + "\":" + CastUtil::fromNumber(*(long long*)t);
 			break;
 		}
 		case 11:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::fromNumber(*(unsigned long long*)t);
+			*object += "\"" + propName + "\":" + CastUtil::fromNumber(*(unsigned long long*)t);
 			break;
 		}
 		case 12:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::fromFloat(*(float*)t);
+			*object += "\"" + propName + "\":" + CastUtil::fromFloat(*(float*)t);
 			break;
 		}
 		case 13:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::fromDouble(*(double*)t);
+			*object += "\"" + propName + "\":" + CastUtil::fromDouble(*(double*)t);
 			break;
 		}
 		case 14:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::fromLongdouble(*(long double*)t);
+			*object += "\"" + propName + "\":" + CastUtil::fromLongdouble(*(long double*)t);
 			break;
 		}
 		case 15:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::fromBool(*(bool*)t);
+			*object += "\"" + propName + "\":" + CastUtil::fromBool(*(bool*)t);
 			break;
 		}
 		case 16:
 		{
 			DateFormat formt;
-			*object += "\"" + propName + "\" : \"" + formt.format((Date*)t) + "\"";
+			*object += "\"" + propName + "\":\"" + formt.format((Date*)t) + "\"";
 			break;
 		}
 		case 17:
 		{
-			*object += "\"" + propName + "\" : \"" + BinaryData::serilaize(*(BinaryData*)t) + "\"";
+			*object += "\"" + propName + "\":\"" + BinaryData::serilaize(*(BinaryData*)t) + "\"";
 		}
 	}
 }
@@ -671,7 +671,7 @@ void JSONSerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::
 void JSONSerialize::addObjectProperty(void* _1, const std::string& propName, std::string className)
 {
 	std::string* object = (std::string*)_1;
-	*object += "\"" + propName + "\" : ";
+	*object += "\"" + propName + "\":";
 }
 
 void* JSONSerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::string& className, const std::string& propName)

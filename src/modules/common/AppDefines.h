@@ -15,39 +15,42 @@
 */
 
 #define INC_MEMORYCACHE 1
-#define INC_REDISCACHE 1
+/* #undef INC_REDISCACHE */
 /* #undef INC_MEMCACHED */
 #define INC_SDORM 1
 #define INC_SDORM_SQL 1
 /* #undef INC_SDORM_MONGO */
 /* #undef INC_BINSER */
 #define INC_JOBS 1
-/* #undef APPLE */
+#define APPLE 1
 /* #undef MINGW */
-#define CYGWIN 1
+/* #undef CYGWIN */
 /* #undef DEBUG_MODE */
 
 /* #undef USE_EPOLL */
-/* #undef USE_KQUEUE */
+#define USE_KQUEUE 1
 /* #undef USE_EVPORT */
 /* #undef USE_DEVPOLL */
-#define USE_POLL 1
-#define USE_SELECT 1
+/* #undef USE_POLL */
+/* #undef USE_SELECT */
 /* #undef USE_WIN_IOCP */
+/* #undef USE_IO_URING */
 
+#define HAVE_LIBPQ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib/libpq.tbd
+#define HAVE_REGEX 1
 #define HAVE_SSLINC 1
 #define HAVE_SSLLIB /usr/local/opt/openssl/lib/libssl.dylib
 /* #undef HAVE_REDISINC */
 /* #undef HAVE_REDISLIB */
 /* #undef HAVE_MEMCACHEDINC */
 /* #undef HAVE_MEMCACHEDLIB */
-#define HAVE_CURLLIB /usr/lib/libcurl.dylib
+#define HAVE_CURLLIB /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib/libcurl.tbd
 #define HAVE_EXECINFOINC 1
 #define HAVE_UUIDINC 1
 /* #undef HAVE_OSSPUUIDINC */
 /* #undef HAVE_BSDUUIDINC */
 #define HAVE_SQLINC 1
-#define HAVE_ODBCLIB /usr/lib/libodbc.dll.a
+#define HAVE_ODBCLIB /usr/local/lib/libodbc.dylib
 /* #undef HAVE_MONGOINC */
 /* #undef HAVE_MONGOCLIB */
 /* #undef HAVE_BSONINC */
@@ -57,13 +60,14 @@
 /* #undef OS_SOLARIS */
 #define OS_LINUX 1
 /* #undef OS_MINGW */
-/* #undef OS_DARWIN */
+#define OS_DARWIN 1
+/* #undef OS_ANDROID */
 #define SRV_EMB 1
 /* #undef SRV_CINATRA */
 /* #undef SRV_LITHIUM */
 /* #undef SRV_DROGON */
-#define HAVE_ACCEPT4 1
-#define HAVE_TCP_QUICKACK 1
+/* #undef HAVE_ACCEPT4 */
+/* #undef HAVE_TCP_QUICKACK */
 /* #undef HAVE_TCP_DEFER_ACCEPT */
 #define HAVE_TCP_FASTOPEN 1
 

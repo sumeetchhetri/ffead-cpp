@@ -27,12 +27,15 @@
 /*HTTPS related*/
 #include <unistd.h>
 #include <sys/types.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
 #include "string"
 #include "Mutex.h"
 #include <fcntl.h>
+#include "LoggerFactory.h"
+#ifdef HAVE_SSLINC
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 #include "SSLHandler.h"
+#endif
 #include "Timer.h"
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -59,7 +62,7 @@ public:
 	virtual bool unRegisterWrite(SocketInterface* obj)=0;
 	virtual bool unRegisterRead(const SOCKET& descriptor)=0;
 	virtual bool registerWrite(SocketInterface* obj)=0;
-	virtual bool registerRead(SocketInterface* obj, const bool& isListeningSock = false)=0;
+	virtual bool registerRead(SocketInterface* obj, const bool& isListeningSock = false, bool epoll_et = true)=0;
 #if defined(USE_IO_URING)
 	virtual void post_write(SocketInterface* sfd, const std::string& data)=0;
 	virtual void post_read(SocketInterface* sfd)=0;
@@ -73,15 +76,24 @@ class SocketInterface {
 	Task* wrTsk;
 	static std::atomic<int> openSocks;
 	EventHandler* eh;
+#ifdef HAVE_SSLINC
 	SSL *ssl;
 	BIO *io;
+#else
+	void* ssl;
+	void* io;
+#endif
 	SOCKET fd;
 	std::atomic<bool> closed;
 	bool http2;
 	int io_uring_type;
 	//int io_uring_bid;
 	Logger logger;
+#if defined USE_IO_URING
 	char buff[2048];
+#else
+	char buff[8192];
+#endif
 	std::string buffer;
 	std::atomic<int> tid;
 	std::atomic<int> useCounter;
@@ -112,7 +124,9 @@ class SocketInterface {
 public:
 	int completeWrite();
 	int pushResponse(void* request, void* response, void* context, int reqPos);
+#ifdef HAVE_SSLINC
 	static bool init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger);
+#endif
 	int startRequest();
 	int endRequest(int reqPos);
 	bool allRequestsDone();
@@ -129,7 +143,7 @@ public:
 	std::string getAlpnProto();
 	bool isHttp2();
 	SocketInterface();
-	SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io);
+	SocketInterface(const SOCKET& fd, void* ssl, void* io);
 	virtual ~SocketInterface();
 	bool flush();
 	void closeSocket();

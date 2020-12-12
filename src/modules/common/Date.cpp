@@ -636,7 +636,7 @@ int Date::test()
 
 void Date::updateSeconds(const double& dseconds)
 {
-	long seconds = floor(dseconds);
+	long seconds = std::floor(dseconds);
 	double fraction = dseconds - (double)seconds;
 	long minutes = (seconds+seconds)/60;
 	seconds = (seconds+seconds)%60;
@@ -652,7 +652,7 @@ void Date::updateSeconds(const double& dseconds)
 
 void Date::updateMinutes(const double& dminutes)
 {
-	long minutes = floor(dminutes);
+	long minutes = std::floor(dminutes);
 	double fraction = dminutes - (double)minutes;
 	long extseconds = fraction*60 + seconds;
 	minutes += extseconds/60;
@@ -671,7 +671,7 @@ void Date::updateMinutes(const double& dminutes)
 
 void Date::updateHours(const double& dhours)
 {
-	long hours = floor(dhours);
+	long hours = std::floor(dhours);
 	double fraction = dhours - (double)hours;
 	long extminutes = fraction*60 + minutes;
 	hours += extminutes/60;

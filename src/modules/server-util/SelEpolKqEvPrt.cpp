@@ -533,7 +533,7 @@ bool SelEpolKqEvPrt::isListeningDescriptor(const SOCKET& descriptor)
 	return false;
 }
 
-bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningSock)
+bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningSock, bool epoll_et)
 {
 	#ifdef USE_IO_URING
 		return true;
@@ -548,8 +548,12 @@ bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningS
 #else
 		if(isListeningSock) {
 			fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFD, 0) | O_NONBLOCK);
-		} else if(!isListeningSock && SSLHandler::getInstance()->getIsSSL()) {
-			fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFD, 0) | O_NONBLOCK);
+		} else if(!isListeningSock) {
+#ifdef HAVE_SSLINC
+			if(SSLHandler::getInstance()->getIsSSL()) {
+				fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFD, 0) | O_NONBLOCK);
+			}
+#endif
 		}
 #endif
 		int i = 1;
@@ -570,23 +574,27 @@ bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningS
 	#elif defined USE_EPOLL || defined USE_WIN_IOCP
 		struct epoll_event ev;
 		memset(&ev, 0, sizeof(ev));
-		#if defined(EPOLLEXCLUSIVE)
-			//if(isListeningSock) {
-			//	ev.events = EPOLLIN | EPOLLEXCLUSIVE;
-			//} else {
+		if(!epoll_et) {
+			ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP;
+		} else {
+			#if defined(EPOLLEXCLUSIVE)
+				//if(isListeningSock) {
+				//	ev.events = EPOLLIN | EPOLLEXCLUSIVE;
+				//} else {
+					#ifdef USE_EPOLL_LT
+						ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP;
+					#else
+						ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | EPOLLET;
+					#endif
+				//}
+			#else
 				#ifdef USE_EPOLL_LT
 					ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP;
 				#else
 					ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | EPOLLET;
 				#endif
-			//}
-		#else
-			#ifdef USE_EPOLL_LT
-				ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP;
-			#else
-				ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | EPOLLET;
 			#endif
-		#endif
+		}
 		ev.data.ptr = obj;
 		if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, descriptor, &ev) < 0)
 		{
@@ -847,8 +855,12 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
 					while (true) {
 						sin_size = sizeof their_addr;
 #ifdef HAVE_ACCEPT4
+#ifdef HAVE_SSLINC
 						SOCKET newSocket = accept4(descriptor, (struct sockaddr *)&(their_addr), &sin_size,
 								SSLHandler::getInstance()->getIsSSL()?0:SOCK_NONBLOCK);
+#else
+						SOCKET newSocket = accept4(descriptor, (struct sockaddr *)&(their_addr), &sin_size, SOCK_NONBLOCK);
+#endif
 #else
 						SOCKET newSocket = accept(descriptor, (struct sockaddr *)&(their_addr), &sin_size);
 #endif

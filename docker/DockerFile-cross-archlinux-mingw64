@@ -15,7 +15,7 @@ RUN echo "[ownstuff]" >> /etc/pacman.conf \
 RUN pacman -S --noconfirm --noprogressbar glibc mingw-w64-gcc mingw-w64-make mingw-w64-configure \
 	mingw-w64-pkg-config mingw-w64-curl mingw-w64-openssl mingw-w64-zlib mingw-w64-jsoncpp \
 	mingw-w64-crt mingw-w64-headers mingw-w64-readline mingw-w64-cmake mingw-w64-dlfcn \
-	mingw-w64-pcre unzip wget tar grep sed make core/binutils diffutils base-devel
+	unzip wget tar grep sed make core/binutils diffutils base-devel
 
 ENV TARGET=x86_64-w64-mingw32
 
@@ -67,6 +67,9 @@ RUN cd libcuckoo-master && ${TARGET}-cmake -DCMAKE_INSTALL_PREFIX=/usr/${TARGET}
 WORKDIR /tmp
 RUN rm -rf libcuckoo-master
 
+RUN cd /tmp && wget -q https://github.com/kkos/oniguruma/releases/download/v6.9.6/onig-6.9.6.tar.gz && tar xf onig-6.9.6.tar.gz && \
+	cd onig-6.9.6 && ${TARGET}-cmake -DENABLE_BINARY_COMPATIBLE_POSIX_API=on . && ${TARGET}-make -j4 install
+
 WORKDIR /tmp
 RUN wget -q https://github.com/redis/hiredis/archive/8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
 RUN unzip -qq 8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
@@ -100,7 +103,7 @@ RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
 RUN mkdir build
 WORKDIR /tmp/ffead-cpp-src/build
-RUN ${TARGET}-cmake -DSRV_EMB=ON -DMOD_SDORM_MONGO=ON -DMOD_REDIS=on -DCMAKE_INC_PATH=/usr/${TARGET} ..
+RUN CC=${TARGET}-gcc CXX=${TARGET}-g++ ${TARGET}-cmake -DSRV_EMB=ON -DMOD_SDORM_MONGO=ON -DMOD_REDIS=on -DCMAKE_INC_PATH=/usr/${TARGET} ..
 RUN ${TARGET}-make install -j4
 RUN mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /opt/
 #WORKDIR /tmp/ffead-cpp-src

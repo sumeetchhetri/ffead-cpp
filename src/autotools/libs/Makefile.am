@@ -72,6 +72,10 @@ AM_CPPFLAGS +=  -I"../../framework" \
 				-I"../../modules/server-util" \
 				-I"../../modules/ssl" \
 				-I"../../modules/threads"
+if HAVE_SSL
+AM_CPPFLAGS += \
+				-I"../../modules/client-util/ssl"
+endif
 libffead_framework_la_SOURCES = \
 				../../framework/AfcUtil.cpp \
 				../../framework/ApplicationUtil.cpp \
@@ -105,7 +109,6 @@ libffead_modules_la_SOURCES += \
 						../../modules/cache/redis/RedisCacheImpl.cpp \
 						../../modules/client-util/Client.cpp \
 						../../modules/client-util/ClientInterface.cpp \
-						../../modules/client-util/SSLClient.cpp \
 						../../modules/client-util/HttpClient.cpp \
 						../../modules/component/AppContext.cpp \
 						../../modules/component/BeanContext.cpp \
@@ -206,6 +209,10 @@ libffead_modules_la_SOURCES += \
 						../../modules/threads/Thread.cpp \
 						../../modules/threads/ThreadLocal.cpp \
 						../../modules/threads/ThreadPool.cpp
+if HAVE_SSL
+libffead_modules_la_SOURCES += \
+						../../modules/client-util/ssl/SSLClient.cpp
+endif
 else
 if MOD_DEFAULT
 lib_LTLIBRARIES +=  libffead-framework.la
@@ -228,6 +235,10 @@ AM_CPPFLAGS +=  -I"../../framework" \
 		-I"../../modules/server-util" \
 		-I"../../modules/ssl" \
 		-I"../../modules/threads"
+if HAVE_SSL
+AM_CPPFLAGS += \
+				-I"../../modules/client-util/ssl"
+endif
 libffead_framework_la_SOURCES = \
 		../../framework/AfcUtil.cpp \
 		../../framework/ApplicationUtil.cpp \
@@ -259,7 +270,6 @@ libffead_modules_la_SOURCES += \
 				../../modules/cache/memory/MemoryCacheImpl.cpp \
 				../../modules/client-util/Client.cpp \
 				../../modules/client-util/ClientInterface.cpp \
-				../../modules/client-util/SSLClient.cpp \
 				../../modules/client-util/HttpClient.cpp \
 				../../modules/http/ContentTypes.cpp \
 				../../modules/http/CORSHandler.cpp \
@@ -332,6 +342,10 @@ libffead_modules_la_SOURCES += \
 				../../modules/threads/Thread.cpp \
 				../../modules/threads/ThreadLocal.cpp \
 				../../modules/threads/ThreadPool.cpp
+if HAVE_SSL
+libffead_modules_la_SOURCES += \
+				../../modules/client-util/ssl/SSLClient.cpp
+endif
 else
 if MOD_COMPONENT
 AM_CPPFLAGS += \

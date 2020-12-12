@@ -47,7 +47,9 @@
 #ifdef INC_JOBS
 #include "JobScheduler.h"
 #endif
+#ifdef HAVE_SSLINC
 #include "SSLHandler.h"
+#endif
 #include "ScriptHandler.h"
 #include "fstream"
 #include "iostream"

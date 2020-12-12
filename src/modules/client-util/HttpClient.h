@@ -23,7 +23,10 @@
 #ifndef SRC_MODULES_CLIENT_UTIL_HTTP_HTTPCLIENT_H_
 #define SRC_MODULES_CLIENT_UTIL_HTTP_HTTPCLIENT_H_
 
+#include "AppDefines.h"
+#ifdef HAVE_CURLLIB
 #include <curl/curl.h>
+#endif
 #include <string>
 #include <map>
 #include <cstdlib>
@@ -35,7 +38,9 @@ class HttpClient {
 	std::string baseUrl;
 	std::string _bd;
 	std::vector<std::string> _hd;
+#ifdef HAVE_CURLLIB
 	CURL* _h;
+#endif
 	static size_t onContent(void *res, size_t len, size_t mb, void *data);
 	static size_t onHeaders(void *res, size_t len, size_t mb, void *data);
 public:

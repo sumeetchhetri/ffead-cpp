@@ -44,6 +44,5 @@ std::string Expose::sayHello1(std::string i,int b,float d)
 
 YObject Expose::sayHello2(YObject i,int b,float d)
 {
-	YObject y;
-	return y;
+	return i;
 }

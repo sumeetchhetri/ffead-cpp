@@ -44,6 +44,5 @@ std::string MarkerExpose::sayHello1(std::string i,int b,float d)
 
 MarkerYObject MarkerExpose::sayHello2(MarkerYObject i,int b,float d)
 {
-	MarkerYObject y;
-	return y;
+	return i;
 }

@@ -27,7 +27,9 @@
 #include <math.h>
 #include "DateFormat.h"
 #include "HttpServiceHandler.h"
+#ifdef HAVE_SSLINC
 #include "SSLHandler.h"
+#endif
 #include "StringUtil.h"
 #include "ConfigurationHandler.h"
 #include "FormController.h"

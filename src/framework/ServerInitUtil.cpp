@@ -77,7 +77,10 @@ void ServerInitUtil::bootstrap(std::string serverRootDirectory, Logger& logger, 
 	}
 
 	ConfigurationData::getInstance();
+
+#ifdef HAVE_SSLINC
 	SSLHandler::setIsSSL(false);
+#endif
 
 	strVec webdirs,webdirs1,pubfiles;
 	//ConfigurationHandler::listi(webpath,"/",true,webdirs,false);

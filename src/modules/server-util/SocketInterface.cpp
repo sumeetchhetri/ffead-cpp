@@ -43,17 +43,24 @@ SocketInterface::SocketInterface() {
 	//io_uring_bid = -1;
 }
 
-SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
+SocketInterface::SocketInterface(const SOCKET& fd, void* ssl, void* io) {
 	http2 = false;
 	closed = false;
-	this->ssl = ssl;
-	this->io = io;
+#ifdef HAVE_SSLINC
+	this->ssl = (SSL*)ssl;
+	this->io = (BIO*)io;
+#else
+	ssl = NULL;
+	io = NULL;
+#endif
 	eh = NULL;
 	reqPos = 0;
 	current = 0;
 	address = StringUtil::toHEX((long long)this);
 	this->fd = fd;
+#ifdef HAVE_SSLINC
 	http2 = SSLHandler::getAlpnProto(fd).find("h2")==0;
+#endif
 	openSocks++;
 	tid = -1;
 	rdTsk = NULL;
@@ -72,6 +79,7 @@ void SocketInterface::unUse() {
 	useCounter--;
 }
 
+#ifdef HAVE_SSLINC
 bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger) {
 	if(SSLHandler::getInstance()->getIsSSL())
 	{
@@ -128,6 +136,7 @@ bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger
 	}
 	return false;
 }
+#endif
 
 SocketInterface::~SocketInterface() {
 	closeSocket();
@@ -273,7 +282,9 @@ int SocketInterface::writeDirect(const std::string& d, int off) {
 			default:
 				return er;
 		}
-	} else {
+	}
+#ifdef HAVE_SSLINC
+	else {
 		if(handleRenegotiation()) {
 			return 0;
 		}
@@ -289,6 +300,7 @@ int SocketInterface::writeDirect(const std::string& d, int off) {
 				return 0;
 		}
 	}
+#endif
 	return -1;
 }
 
@@ -315,7 +327,9 @@ int SocketInterface::writeTo(ResponseData* d)
 					break;
 			}
 		} while(er>0);
-	} else {
+	}
+#ifdef HAVE_SSLINC
+	else {
 		if(handleRenegotiation()) {
 			return 0;
 		}
@@ -339,6 +353,7 @@ int SocketInterface::writeTo(ResponseData* d)
 			}
 		} while(er!=0);
 	}
+#endif
 	return 1;
 }
 
@@ -401,7 +416,11 @@ int SocketInterface::readFrom()
 	if(ssl==NULL) {
 		int er = 0;
 		do {
+#if defined USE_IO_URING
 			er = recv(fd, buff, 2048, 0);
+#else
+			er = recv(fd, buff, 8192, 0);
+#endif
 			switch(er) {
 				case -1:
 				case 0:
@@ -419,11 +438,17 @@ int SocketInterface::readFrom()
 					break;
 			}
 		} while(er>0);
-	} else {
+	}
+#ifdef HAVE_SSLINC
+	else {
 		int er = 0;
 		int ser = 0;
 		do {
+#if defined USE_IO_URING
 			er  = BIO_read(io, buff, 2048);
+#else
+			er = BIO_read(io, buff, 8192);
+#endif
 			ser = SSL_get_error(ssl, er);
 			switch(ser) {
 				case SSL_ERROR_WANT_READ:
@@ -440,6 +465,7 @@ int SocketInterface::readFrom()
 			}
 		} while(er>0);
 	}
+#endif
 	return 1;
 }
 
@@ -452,12 +478,14 @@ std::string SocketInterface::getAddress() {
 
 bool SocketInterface::flush() {
 	bool fl = false;
+#ifdef HAVE_SSLINC
 	if(!closed && BIO_flush(io)<=0 && !BIO_should_retry(io))
 	{
 		logger.debug("Error flushing BIO");
 		closeSocket();
 		fl = true;
 	}
+#endif
 	return fl;
 }
 
@@ -468,11 +496,13 @@ void SocketInterface::closeSocket()
 #endif
 	if(!closed)
 	{
+#ifdef HAVE_SSLINC
 		if(SSLHandler::getInstance()->getIsSSL())
 		{
 			SSLHandler::getInstance()->closeSSL(fd,ssl,io);
 		}
 		else
+#endif
 		{
 			close(fd);
 		}
@@ -548,6 +578,7 @@ bool SocketInterface::isBlocking()
 
 bool SocketInterface::handleRenegotiation()
 {
+#ifdef HAVE_SSLINC
 	if(SSLHandler::getInstance()->securityProperties.client_auth==CLIENT_AUTH_REHANDSHAKE)
 	{
 		SSL_set_verify(ssl,SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,0);
@@ -580,11 +611,15 @@ bool SocketInterface::handleRenegotiation()
 			return true;
 		}
 	}
+#endif
 	return false;
 }
 
 std::string SocketInterface::getAlpnProto() {
+#ifdef HAVE_SSLINC
 	return SSLHandler::getAlpnProto(fd);
+#endif
+	return "";
 }
 
 bool SocketInterface::isHttp2() {
@@ -596,11 +631,11 @@ bool SocketInterface::hasPendingRead() {
 }
 
 void SocketInterface::doneRead() {
-	if(hasPendingRead()) {
 #if defined USE_IO_URING
+	if(hasPendingRead()) {
 		eh->post_read(this);
-#endif
 	}
+#endif
 #if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL) || defined(USE_EVPORT)
 	eh->registerRead(this);
 #endif

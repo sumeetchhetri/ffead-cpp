@@ -243,7 +243,7 @@ public:
 		}
 		else if(container.find("std::queue")==0 || container.find("queue")==0)
 		{
-			DummyQueue* dptr = (DummyQueue*)&cont;
+			DummyQueue* dptr = (DummyQueue*)cont;
 			std::deque<T>* tt = (std::deque<T>*)&dptr->dq;
 			int cnt = 0;
 			int size = tt->size();

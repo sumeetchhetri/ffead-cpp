@@ -31,7 +31,9 @@
 #include "RegexUtil.h"
 #include "CastUtil.h"
 #include "stdio.h"
+#ifdef HAVE_SSLINC
 #include <openssl/ssl.h>
+#endif
 #include "CryptoHandler.h"
 #include "MultipartContent.h"
 #include "Timer.h"

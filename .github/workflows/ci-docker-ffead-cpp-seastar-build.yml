@@ -5,14 +5,39 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
+env:
+  IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-seastar
+  IMG_VERSION: 5.3
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip_build]')"
+    if: "contains(github.event.head_commit.message, '[docker_seastar_push]')"
     steps:
     - uses: actions/checkout@v2
     - name: Build docker image for ffead-cpp with seastar backend
       run: |
-        cd lang-server-backends/c++/seastar
-        docker build --file seastar-http.dockerfile .
+        cd docker/techempower-config
+        docker build . --file ffead-cpp-seastar-base.dockerfile --tag $IMAGE_NAME
+    - name: Log into registry
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+    - name: Push base ffead-cpp image
+      run: |
+          IMAGE_ID=$IMAGE_NAME
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          #[[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `$IMG_VERSION` tag convention
+          [ "$VERSION" == "master" ] && VERSION=$IMG_VERSION
+
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION

@@ -89,7 +89,7 @@ Http2Frame* Http2Handler::getFrameByType(const std::string& data, Http2FrameHead
 	return NULL;
 }
 
-Http2Handler::Http2Handler(const SOCKET& fd, SSL* ssl, BIO* io, const bool& isServer, const std::string& webpath) : SocketInterface(fd, ssl, io) {
+Http2Handler::Http2Handler(const SOCKET& fd, void* ssl, void* io, const bool& isServer, const std::string& webpath) : SocketInterface(fd, ssl, io) {
 	this->highestStreamIdentifier = 0;
 	this->context.huffmanEncoding = true;
 	this->highestPushPromiseStreamIdentifier = 2;
@@ -103,7 +103,7 @@ Http2Handler::Http2Handler(const SOCKET& fd, SSL* ssl, BIO* io, const bool& isSe
 	logger = LoggerFactory::getLogger("Http2Handler");
 }
 
-Http2Handler::Http2Handler(const SOCKET& fd, SSL* ssl, BIO* io, const bool& isServer, const std::string& webpath, const std::string& settingsFrameData) : SocketInterface(fd, ssl, io) {
+Http2Handler::Http2Handler(const SOCKET& fd, void* ssl, void* io, const bool& isServer, const std::string& webpath, const std::string& settingsFrameData) : SocketInterface(fd, ssl, io) {
 	this->highestStreamIdentifier = 0;
 	this->context.huffmanEncoding = true;
 	this->highestPushPromiseStreamIdentifier = 2;

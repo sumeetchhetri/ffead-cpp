@@ -25,6 +25,7 @@
 #cmakedefine APPLE @APPLE@
 #cmakedefine MINGW @MINGW@
 #cmakedefine CYGWIN @CYGWIN@
+#cmakedefine EMSCRIPTEN @EMSCRIPTEN@
 #cmakedefine DEBUG_MODE @CMAKE_BUILD_TYPE@
 
 #cmakedefine USE_EPOLL @USE_EPOLL@

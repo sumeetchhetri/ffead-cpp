@@ -28,7 +28,9 @@
 #include "Timer.h"
 #include "sstream"
 #include "Client.h"
+#ifdef HAVE_SSLINC
 #include "SSLClient.h"
+#endif
 int main()
 {
 	#ifdef OS_MINGW
@@ -92,6 +94,7 @@ int main()
 	for (int var = 0; var < total; ++var)
 	{
 		ClientInterface* client;
+#ifdef HAVE_SSLINC
 		if(sslEnabled)
 		{
 			if(sslFile!="")
@@ -100,6 +103,7 @@ int main()
 				client = new SSLClient;
 		}
 		else
+#endif
 			client = new Client;
 		if(testCases[var].size()>=4)
 		{

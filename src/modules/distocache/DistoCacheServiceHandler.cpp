@@ -72,7 +72,7 @@ void DistoCacheServiceHandler::run()
 	SSL *ssl=NULL;
 	BIO *sbio=NULL;
 	BIO *io=NULL,*ssl_bio=NULL;
-
+#ifdef HAVE_SSLINC
 	if(isSSLEnabled)
 	{
 		sbio=BIO_new_socket(fd,BIO_CLOSE);
@@ -92,6 +92,7 @@ void DistoCacheServiceHandler::run()
 			return;
 		}
 	}
+#endif
 	while(true)
 	{
 		int cntlen = 0;
@@ -100,6 +101,7 @@ void DistoCacheServiceHandler::run()
 
 		if(isSSLEnabled)
 		{
+#ifdef HAVE_SSLINC
 			int er=-1;
 			er = BIO_read(io,buf,4);
 			switch(SSL_get_error(ssl,er))
@@ -119,6 +121,7 @@ void DistoCacheServiceHandler::run()
 			for(int i=0;i<er;i++)
 				alldat.push_back(buf[i]);
 			memset(&buf[0], 0, sizeof(buf));
+#endif
 		}
 		else
 		{
@@ -146,7 +149,9 @@ void DistoCacheServiceHandler::run()
 		{
 			if(isSSLEnabled)
 			{
+#ifdef HAVE_SSLINC
 				SSLHandler::getInstance()->closeSSL(fd, ssl, io);
+#endif
 			}
 			else
 			{
@@ -158,6 +163,7 @@ void DistoCacheServiceHandler::run()
 
 		if(isSSLEnabled)
 		{
+#ifdef HAVE_SSLINC
 			int er=-1;
 			while(lengthm>0)
 			{
@@ -181,6 +187,7 @@ void DistoCacheServiceHandler::run()
 					alldat.push_back(buf[i]);
 				memset(&buf[0], 0, sizeof(buf));
 			}
+#endif
 		}
 		else
 		{
@@ -574,6 +581,7 @@ void DistoCacheServiceHandler::run()
 		int toto = response.length();
 		if(isSSLEnabled)
 		{
+#ifdef HAVE_SSLINC
 			int er = BIO_write(io, response.c_str(), toto);
 			switch(SSL_get_error(ssl,er))
 			{
@@ -589,6 +597,7 @@ void DistoCacheServiceHandler::run()
 				}
 			}
 			BIO_flush(io);
+#endif
 		}
 		else
 		{

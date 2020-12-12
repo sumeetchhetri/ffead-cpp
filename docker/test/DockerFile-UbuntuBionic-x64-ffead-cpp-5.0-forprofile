@@ -98,7 +98,7 @@ RUN chown -R mysql:mysql /var/lib/mysql /var/log/mysql /var/run/mysqld /ssd
 
 
 #MONGODB
-RUN DEBIAN_FRONTEND=noninteractive apt-get -yqq update && apt-get -yqq install apt-transport-https mongodb-org > /dev/null
+RUN DEBIAN_FRONTEND=noninteractive apt-get -yqq update && apt-get -yqq install apt-transport-https mongodb-org=4.2.10  mongodb-org-mongos=4.2.10 mongodb-org-server=4.2.10 mongodb-org-shell=4.2.10 mongodb-org-tools=4.2.10 > /dev/null
 
 RUN mkdir -p /data/db
 RUN chmod 777 /data/db

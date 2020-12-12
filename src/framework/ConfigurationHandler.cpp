@@ -145,6 +145,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 #ifdef INC_COMP
 	ComponentGen gen;
 #endif
+#ifdef HAVE_SSLINC
 	if(SSLHandler::getInstance()->getIsSSL())
 	{
 		propMap sslsec = pread.getProperties(respath+"/security.prop");
@@ -199,6 +200,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 			}
 		}
 	}
+#endif
 	std::string rundyncontent;
 	std::string ajrt;
 

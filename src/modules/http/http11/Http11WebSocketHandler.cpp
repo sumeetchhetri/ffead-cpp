@@ -22,7 +22,7 @@
 
 #include "Http11WebSocketHandler.h"
 
-Http11WebSocketHandler::Http11WebSocketHandler(const SOCKET& fd, SSL* ssl, BIO* io, const std::string& url, const bool& isServer) : SocketInterface(fd, ssl, io) {
+Http11WebSocketHandler::Http11WebSocketHandler(const SOCKET& fd, void* ssl, void* io, const std::string& url, const bool& isServer) : SocketInterface(fd, ssl, io) {
 	logger = LoggerFactory::getLogger("Http11WebSocketHandler");
 	this->url = url;
 	this->h = NULL;

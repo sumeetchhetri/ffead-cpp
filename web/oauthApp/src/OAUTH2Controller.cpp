@@ -107,6 +107,7 @@ bool OAUTH2Controller::service(HttpRequest* req, HttpResponse* res)
 
 		if(tokse!="" && req->getRequestParams()["error_status"]=="")
 		{
+#ifdef HAVE_SSLINC
 			SSLClient client;
 			client.connection("graph.facebook.com",443);
 			std::string data = "GET /me/"+req->getRequestParams()["resource"]+"?access_token="+tokse;
@@ -119,6 +120,11 @@ bool OAUTH2Controller::service(HttpRequest* req, HttpResponse* res)
 			client.closeConnection();
 
 			res->setContent(parser.getContent());
+#else
+			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res->setContent("Access denied");
+#endif
 		}
 		else
 		{

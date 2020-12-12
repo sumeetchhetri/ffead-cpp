@@ -29,7 +29,9 @@
 #include "Connection.h"
 #include "CORSHandler.h"
 #include "CommonUtils.h"
+#ifdef HAVE_SSLINC
 #include "SSLHandler.h"
+#endif
 #include "ClassStructure.h"
 #include "SerializeBase.h"
 #include <functional>
@@ -37,6 +39,35 @@
 #include "Router.h"
 
 typedef void* (*toObjectFromJson) (const std::string&);
+
+#ifndef HAVE_SSLINC
+class SecurityProperties {
+public:
+	std::string cert_file;
+	std::string key_file;
+	std::string dh_file;
+	std::string ca_list;
+	std::string rand_file;
+	std::string sec_password;
+	std::string srv_auth_prvd;
+	std::string srv_auth_mode;
+	std::string srv_auth_file;
+	int client_auth;
+	bool isDHParams;
+	bool alpnEnabled;
+	std::vector<std::string> alpnProtoList;
+	friend class SSLHandler;
+	friend class ServiceTask;
+	friend class ConfigurationHandler;
+	friend class CHServer;
+	friend class SocketInterface;
+	SecurityProperties() {
+		client_auth = 0;
+		isDHParams = false;
+		alpnEnabled = false;
+	}
+};
+#endif
 
 class WsDetails {
 	std::string claz;

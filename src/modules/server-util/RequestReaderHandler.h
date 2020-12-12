@@ -31,11 +31,13 @@
 #include "map"
 #include "ServiceHandler.h"
 #include "LoggerFactory.h"
-#include "SSLClient.h"
 #include "Client.h"
 #include "concurrentqueue.h"
 #include "atomic"
+#ifdef HAVE_SSLINC
+#include "SSLClient.h"
 #include "SSLHandler.h"
+#endif
 
 typedef SocketInterface* (*SocketInterfaceFactory) (SOCKET);
 

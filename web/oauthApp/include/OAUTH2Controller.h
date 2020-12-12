@@ -28,7 +28,9 @@
 #include "Client.h"
 #include "HttpResponseParser.h"
 #include "CryptoHandler.h"
+#ifdef HAVE_SSLINC
 #include "SSLClient.h"
+#endif
 
 class OAUTH2Controller : public Controller{
 public:

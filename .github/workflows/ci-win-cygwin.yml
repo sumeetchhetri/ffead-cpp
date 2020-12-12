@@ -29,4 +29,6 @@ jobs:
     - name: Install dependencies and ffead-cpp
       run: |
         bash --login -c "cd /tmp && wget https://raw.githubusercontent.com/sumeetchhetri/ffead-cpp/master/docker/install_cygwin.sh && dos2unix install_cygwin.sh && chmod +x install_cygwin.sh && ./install_cygwin.sh"
-        set ErrorLevel=%ErrorLevel%
+        #set ErrorLevel=%ErrorLevel%
+        #IF ($ErrorLevel -ne 0) { exit 1 }
+        #exit 0

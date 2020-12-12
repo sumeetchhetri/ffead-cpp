@@ -1,0 +1,7 @@
+emcc ffead-cpp-glue.cpp -std=c++11 -o ffead-cpp-glue.js --bind
+
+https://github.com/madler/zlib
+
+https://github.com/sean-/ossp-uuid
+
+https://github.com/kkos/oniguruma

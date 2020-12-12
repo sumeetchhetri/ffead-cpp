@@ -121,9 +121,9 @@ bool Client::connection(const std::string& host, const int& port)
 	    connected = false;
 	}
 
-	if (errno != 0) {
+	if (error != 0) {
 	    /* socket has a non zero error status */
-	    fprintf(stderr, "socket error: %s\n", strerror(errno));
+	    fprintf(stderr, "socket error: %s\n", strerror(error));
 	    connected = false;
 	}
 
@@ -254,6 +254,7 @@ int Client::sendData(std::string data)
 
 std::string Client::getTextData(const std::string& hdrdelm, const std::string& cntlnhdr)
 {
+#ifdef HAVE_SSLINC
 	int er=-1;
 	bool flag = true;
 	std::string alldat;
@@ -363,6 +364,9 @@ std::string Client::getTextData(const std::string& hdrdelm, const std::string& c
 		memset(&buf[0], 0, sizeof(buf));
 	}
 	return alldat;
+#else
+	return "";
+#endif
 }
 
 int Client::receive(std::string& buf, const int& flag)

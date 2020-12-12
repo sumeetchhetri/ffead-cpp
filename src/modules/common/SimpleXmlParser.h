@@ -42,7 +42,7 @@ class SimpleXmlParser {
 		Logger logger;
 		std::string mode;
 		void sanitizeXml(std::string& data);
-		void readXML(std::string&, const std::string&, Element *);
+		void readXML(std::string, const std::string&, Element *);
 };
 
 #endif /* XMLPARSER_H_ */

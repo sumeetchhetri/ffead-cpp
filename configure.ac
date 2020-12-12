@@ -23,10 +23,10 @@ AS_HELP_STRING([--enable-debug],
 )
 if test "x$support_debug" = "xyes"; then
     AC_DEFINE(DEBUG, [], [set DEBUG mode])
-    AM_CXXFLAGS="$AM_CXXFLAGS -g -Wall"
+    AM_CXXFLAGS="$AM_CXXFLAGS -g -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -Wno-deprecated"
 else
     AC_DEFINE(NDEBUG, [], [unset DEBUG mode])
-    AM_CXXFLAGS="$AM_CXXFLAGS -O2"
+    AM_CXXFLAGS="$AM_CXXFLAGS -O2 -w"
     support_debug=no
 fi
 
@@ -67,7 +67,7 @@ local_os_type="unknown"
 os_flavor="unknown"
 is_librt_available="yes"
 use_wepoll="no"
-AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include -Wno-unknown-pragmas -Wno-delete-incomplete"
+AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
 CPPFLAGS="$CPPFLAGS -I/usr/local/include"
 LDFLAGS="$LDFLAGS -L/usr/local/lib -Wl,-undefined,error"
 is_exe="no"
@@ -1063,7 +1063,7 @@ AC_CHECK_HEADER([cstdatomic],
                      [AC_DEFINE(USE_CSTDATOMIC_H, [0], [cstdatomic support not found])], [-])
 CPP=$OLD_CPP
 
-AC_CHECK_HEADER([openssl/ssl.h],,[AC_MSG_ERROR([ssl header not found])])
+AC_CHECK_HEADER([openssl/ssl.h],AC_DEFINE(HAVE_SSLINC, 1, [Define if ssl is present]),[])
 
 if test "x$mod_sdormsql" = "xyes"; then
 	if test "x$os_flavor" = "xbsd"; then
@@ -1139,8 +1139,9 @@ AC_FUNC_FORK
 AC_FUNC_STRTOD
 AC_CHECK_FUNCS([malloc realloc clock_gettime floor gethostbyname memset pow regcomp select socket strcasecmp strtol strtoul accept4])
 AC_CHECK_LIB(pthreads, pthread_create,[], [AC_CHECK_LIB(pthread, pthread_create)])
-AC_CHECK_LIB([crypto], [SHA1_Init], [], [AC_MSG_ERROR([libcrypto not found])])
-AC_CHECK_LIB(ssl, SSL_read, [], [AC_MSG_ERROR([ssl library not found])])
+AC_CHECK_LIB([crypto], [SHA1_Init], [], [])
+AC_CHECK_LIB(ssl, SSL_read, [], [])
+AM_CONDITIONAL(HAVE_SSL, test "x$ac_cv_lib_ssl_SSL_read" = "xyes")
 AC_CHECK_LIB(z, compress,,AC_MSG_ERROR([no zlib; please install zlib or equivalent]))
 #AC_CHECK_LIB(c, dlopen, LIBDL="", [AC_CHECK_LIB(dl, dlopen, LIBDL="-ldl")])
 AC_CHECK_LIB(c, dlopen, ADD_LIBDL="", [AC_CHECK_LIB(dl, dlopen, ADD_LIBDL="-ldl")])
@@ -1212,7 +1213,7 @@ else
 fi
 
 NGX_CPP_FLAGS="$CPPFLAGS"
-CPPFLAGS="$CPPFLAGS -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -Wno-deprecated"
+#CPPFLAGS="$CPPFLAGS -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -Wno-deprecated"
 if test "x$with_top_inc_dir" != "x";then
 	NGX_LD_FLAGS="-L${with_top_inc_dir}/../lib"
 else

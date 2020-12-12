@@ -31,7 +31,7 @@ fi
 
 export LD_LIBRARY_PATH=$FFEAD_CPP_PATH/lib:/usr/local/lib:$LD_LIBRARY_PATH
 #echo $LD_LIBRARY_PATH
-export PATH=$FFEAD_CPP_PATH/lib:$PATH
+export PATH=$FFEAD_CPP_PATH/lib:/usr/local/lib:$PATH
 #echo $PATH
 
 cd $FFEAD_CPP_PATH/rtdcf/autotools

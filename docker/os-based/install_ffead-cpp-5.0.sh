@@ -28,7 +28,7 @@ do
   then
   	cat ffead.log
   	cat logs/jobs.log
-    echo "exiting...."
+    echo "ffead-cpp exiting due to failure...."
     exit 1
   fi
 done
@@ -41,11 +41,13 @@ do
   then
   	cat ffead.log
   	cat logs/jobs.log
-    echo "exiting....dlib"
+    echo "ffead-cpp exiting due to failure....dlib"
     exit 1
   fi
 done
-echo "normal shutdown"
-echo "ffead-cpp launched"
+echo "ffead-cpp start successful"
+sleep 5
+cd tests && chmod +x *.sh && ./runTests.sh
+echo "ffead-cpp normal shutdown"
 rm -f serv.ctrl
 pkill ffead-cpp

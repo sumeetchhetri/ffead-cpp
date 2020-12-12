@@ -30,7 +30,7 @@
 #include "vector"
 #include "CastUtil.h"
 #include "StringUtil.h"
-#include <math.h>
+#include <cmath>
 
 class Date {
 	struct tm ti;

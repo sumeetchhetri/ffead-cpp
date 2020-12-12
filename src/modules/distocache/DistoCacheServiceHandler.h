@@ -23,7 +23,9 @@
 #ifndef DITOCACHESERVICEHANDLER_H_
 #define DITOCACHESERVICEHANDLER_H_
 #include "LoggerFactory.h"
+#ifdef HAVE_SSLINC
 #include "SSLHandler.h"
+#endif
 #include "AMEFDecoder.h"
 #include "AMEFEncoder.h"
 #include "CacheMap.h"

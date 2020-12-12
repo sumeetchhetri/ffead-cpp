@@ -151,7 +151,7 @@ int Http11Handler::getTimeout() {
 	return connKeepAlive;
 }
 
-Http11Handler::Http11Handler(const SOCKET& fd, SSL* ssl, BIO* io, const std::string& webpath, const int& chunkSize,
+Http11Handler::Http11Handler(const SOCKET& fd, void* ssl, void* io, const std::string& webpath, const int& chunkSize,
 		const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) : SocketInterface(fd, ssl, io) {
 	isHeadersDone = false;
 	bytesToRead = 0;

@@ -90,7 +90,7 @@ jobs:
           if [ "$COUNTER" = 240 ]
           then
           	cat logs/jobs.log
-            echo "exiting...."
+            echo "ffead-cpp exiting due to failure...."
             exit 1
           fi
         done
@@ -102,9 +102,12 @@ jobs:
           if [ "$COUNTER" = 240 ]
           then
           	cat logs/jobs.log
-            echo "exiting....dlib"
+            echo "ffead-cpp exiting exiting due to failure....dlib"
             exit 1
           fi
         done
-        echo "normal shutdown"
+        echo "ffead-cpp start successful"
+        sleep 5
+        cd tests && chmod +x *.sh && ./runTests.sh
+        echo "ffead-cpp normal shutdown"
         pkill ffead-cpp

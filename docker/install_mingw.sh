@@ -60,7 +60,7 @@ wget -q https://github.com/redis/hiredis/archive/8e0264cfd6889b73c241b60736fe96b
 unzip 8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
 rm -f 8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
 cd hiredis-8e0264cfd6889b73c241b60736fe96ba1322ee6e
-cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64/ . && mingw32-make install
+cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64/ . && mingw32-make -j4 install
 cd /tmp
 rm -rf hiredis-8e0264cfd6889b73c241b60736fe96ba1322ee6e
 
@@ -68,8 +68,8 @@ wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.16.2/mongo
 tar xf mongo-c-driver-1.16.2.tar.gz
 rm -f mongo-c-driver-1.16.2.tar.gz
 cd mongo-c-driver-1.16.2/
-CC=/mingw64/bin/gcc.exe /mingw64/bin/cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_PREFIX="C:/msys64/mingw64/" -DCMAKE_C_FLAGS="-D__USE_MINGW_ANSI_STDIO=1"
-make install
+cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64/ -DCMAKE_C_FLAGS="-D__USE_MINGW_ANSI_STDIO=1" .
+mingw32-make -j4 install
 cd /tmp
 rm -rf mongo-c-driver-1.16.2
 
@@ -77,8 +77,44 @@ cd /tmp/ffead-cpp-src
 mkdir build
 cd build
 cmake -G "MinGW Makefiles" -DSRV_EMB=on -DMOD_REDIS=ON -DMOD_SDORM_MONGO=ON -DCMAKE_INC_PATH=/mingw64/ ..
-mingw32-make install -j4
-mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
+mingw32-make -j4 install
+#mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
+#cd /tmp/ffead-cpp-5.0-bin && chmod +x *.sh
+#export PATH=/tmp/ffead-cpp-5.0-bin/lib:/mingw64/bin:/mingw64/lib:$PATH
+#nohup bash -c "./server.sh > ffead.log &"
+#echo "Waiting for ffead-cpp to launch on port 8080..."
+#COUNTER=0
+#while [ ! -f lib/libinter.dll ]
+#do
+#  sleep 1
+#  COUNTER=$((COUNTER+1))
+#  if [ "$COUNTER" = 600 ]
+#  then
+#  	cat ffead.log
+#  	cat logs/jobs.log
+#    echo "ffead-cpp exiting due to failure...."
+#    exit 1
+#  fi
+#done
+#COUNTER=0
+#while [ ! -f lib/libdinter.dll ]
+#do
+#  sleep 1
+#  COUNTER=$((COUNTER+1))
+#  if [ "$COUNTER" = 120 ]
+#  then
+#  	cat ffead.log
+#  	cat logs/jobs.log
+#    echo "ffead-cpp exiting due to failure....dlib"
+#    exit 1
+#  fi
+#done
+#echo "ffead-cpp start successful"
+#sleep 5
+#cd tests && chmod +x *.sh && ./runTests.sh
+#echo "ffead-cpp normal shutdown"
+#rm -f serv.ctrl
+#pkill ffead-cpp
 #cd /tmp/ffead-cpp-src
 #chmod +x autogen.sh
 #sed -i'' -e "s|m4_include|#m4_include|g" configure.ac
@@ -91,4 +127,4 @@ mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
 #	--enable-srv_emb=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes --with-top_inc_dir=/mingw64/include
 #make install -j4
 #cd /tmp
-rm -rf /tmp/ffead-cpp-src
+#rm -rf /tmp/ffead-cpp-src

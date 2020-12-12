@@ -44,8 +44,10 @@
 #include "string"
 #include "cstring"
 #include <signal.h>
+#ifdef HAVE_SSLINC
 #include <openssl/err.h>
 #include <openssl/ssl.h>
+#endif
 #include "CastUtil.h"
 #include "LoggerFactory.h"
 #include "cstring"

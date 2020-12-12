@@ -14,7 +14,7 @@ export LD_LIBRARY_PATH=$FFEAD_CPP_PATH/lib:/usr/local/lib:$LD_LIBRARY_PATH
 echo $LD_LIBRARY_PATH
 export DYLD_FALLBACK_LIBRARY_PATH=$LD_LIBRARY_PATH
 echo $DYLD_FALLBACK_LIBRARY_PATH
-export PATH=$FFEAD_CPP_PATH/lib:$PATH
+export PATH=$FFEAD_CPP_PATH/lib:/usr/local/lib:$PATH
 echo $PATH
 rm -f $FFEAD_CPP_PATH/rtdcf/*.d $FFEAD_CPP_PATH/rtdcf/*.o 
 rm -f $FFEAD_CPP_PATH/*.cntrl

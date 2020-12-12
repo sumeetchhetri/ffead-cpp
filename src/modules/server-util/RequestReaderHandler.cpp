@@ -83,9 +83,11 @@ void RequestReaderHandler::stop(std::string ip, int port, bool isSSLEnabled) {
 		Thread::mSleep(1000);
 
 		if(isSSLEnabled) {
+#ifdef HAVE_SSLINC
 			SSLClient sc;
 			sc.connectionNB(ip, port);
 			sc.closeConnection();
+#endif
 		} else {
 			Client sc;
 			sc.connectionNB(ip, port);
@@ -247,8 +249,12 @@ void* RequestReaderHandler::handle_Old(void* inp) {
 					while (true) {
 						sin_size = sizeof their_addr;
 #ifdef HAVE_ACCEPT4
+#ifdef HAVE_SSLINC
 						SOCKET newSocket = accept4(ins->listenerSock, (struct sockaddr *)&(their_addr), &sin_size,
 								SSLHandler::getInstance()->getIsSSL()?0:SOCK_NONBLOCK);
+#else
+						SOCKET newSocket = accept4(ins->listenerSock, (struct sockaddr *)&(their_addr), &sin_size, SOCK_NONBLOCK);
+#endif
 #else
 						SOCKET newSocket = accept(ins->listenerSock, (struct sockaddr *)&(their_addr), &sin_size);
 #endif

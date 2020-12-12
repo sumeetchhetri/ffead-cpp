@@ -39,6 +39,10 @@ includedirsall += \
 	src/modules/ssl/*.h \
 	src/modules/threads/*.h \
 	src/framework/*.h
+if HAVE_SSL
+includedirsall += \
+				src/modules/client-util/ssl/*.h
+endif
 else
 if MOD_DEFAULT
 includedirsall +=  \
@@ -61,6 +65,10 @@ includedirsall +=  \
 	src/modules/ssl/*.h \
 	src/modules/threads/*.h \
 	src/framework/*.h
+if HAVE_SSL
+includedirsall += \
+				src/modules/client-util/ssl/*.h
+endif
 else
 if MOD_COMPONENT
 includedirsall += \
@@ -233,6 +241,15 @@ endif
 	cp -f ${includedirsall} ${prefix}/include/
 	cp -Rf rtdcf/* ${prefix}/rtdcf/
 	cp -Rf web/* ${prefix}/web
+if MOD_SDORM_SQL
+else
+	rm -rf ${prefix}/web/te-benchmark-um-mgr
+endif
+if MOD_SDORM_MONGO
+else
+	rm -rf ${prefix}/web/te-benchmark-um-pq
+	rm -rf ${prefix}/web/te-benchmark-um-pq-async
+endif
 	cp -Rf script/* ${prefix}/
 	-rm -f ${prefix}/lib/*.la ${prefix}/lib/*.lai
 	sed -i'' -e "s/TO_REPLACE_DEBUG/$(subst /,\/,@BUILD_DEBUG@)/" $(prefix)/resources/rundyn-configure.sh

@@ -74,7 +74,6 @@
 #include <fcntl.h>
 #include <sys/time.h>
 #include <queue>
-#include <curl/curl.h>
 #include "HttpClient.h"
 
 #ifdef INC_SDORM
@@ -112,8 +111,10 @@
 #include "ExtHandler.h"
 #include "ServiceTask.h"
 #include "ConfigurationHandler.h"
+#ifdef HAVE_SSLINC
 #include "SSLHandler.h"
 #include "SSLClient.h"
+#endif
 #include "Client.h"
 #include "ServiceTask.h"
 #include "Thread.h"
@@ -170,8 +171,6 @@ typedef void (*ReceiveTask1)(const int&);
 	return -1;
 }*/
 #endif
-
-
 
 class CHServer {
 	static int techunkSiz, connKeepAlive, maxReqHdrCnt, maxEntitySize;

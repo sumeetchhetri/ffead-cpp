@@ -2490,7 +2490,7 @@ bool HttpRequest::isClose() {
 	if(num_headers>0) {
 		for(int i=0;i<(int)num_headers;++i) {
 			if(HttpRequest::Connection.length()==headers_list[i].name_len && strncasecmp(headers_list[i].name, HttpRequest::Connection.c_str(), headers_list[i].name_len)==0) {
-				std::string_view hv{headers_list[i].value, headers_list[i].value_len};
+				/*std::string_view hv{headers_list[i].value, headers_list[i].value_len};
 				size_t s = hv.find_first_not_of(" \t");
 				size_t e = hv.find_last_not_of(" \t");
 				hv = hv.substr(s, e-s);
@@ -2501,7 +2501,8 @@ bool HttpRequest::isClose() {
 						 && (hv.at(4)=='e' || hv.at(4)=='E')) {
 					return true;
 				}
-				break;
+				break;*/
+				return strncasecmp(headers_list[i].value, "close", headers_list[i].value_len)==0;
 			}
 		}
 		return false;
@@ -2514,7 +2515,7 @@ bool HttpRequest::isKeepAlive() {
 	if(num_headers>0) {
 		for(int i=0;i<(int)num_headers;++i) {
 			if(HttpRequest::Connection.length()==headers_list[i].name_len && strncasecmp(headers_list[i].name, HttpRequest::Connection.c_str(), headers_list[i].name_len)==0) {
-				std::string_view hv{headers_list[i].value, headers_list[i].value_len};
+				/*std::string_view hv{headers_list[i].value, headers_list[i].value_len};
 				size_t s = hv.find_first_not_of(" \t");
 				size_t e = hv.find_last_not_of(" \t");
 				hv = hv.substr(s, e-s);
@@ -2530,7 +2531,8 @@ bool HttpRequest::isKeepAlive() {
 						 && (hv.at(9)=='e' || hv.at(9)=='E')) {
 					return true;
 				}
-				break;
+				break;*/
+				return strncasecmp(headers_list[i].value, "keep-alive", headers_list[i].value_len)==0;
 			}
 		}
 		return false;
@@ -2543,7 +2545,7 @@ bool HttpRequest::isUpgrade() {
 	if(num_headers>0) {
 		for(int i=0;i<(int)num_headers;++i) {
 			if(HttpRequest::Connection.length()==headers_list[i].name_len && strncasecmp(headers_list[i].name, HttpRequest::Connection.c_str(), headers_list[i].name_len)==0) {
-				std::string_view hv{headers_list[i].value, headers_list[i].value_len};
+				/*std::string_view hv{headers_list[i].value, headers_list[i].value_len};
 				size_t s = hv.find_first_not_of(" \t");
 				size_t e = hv.find_last_not_of(" \t");
 				hv = hv.substr(s, e-s);
@@ -2556,7 +2558,8 @@ bool HttpRequest::isUpgrade() {
 						 && (hv.at(6)=='e' || hv.at(6)=='E')) {
 					return true;
 				}
-				break;
+				break;*/
+				return strncasecmp(headers_list[i].value, "upgrade", headers_list[i].value_len)==0;
 			}
 		}
 		return false;

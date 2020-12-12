@@ -22,6 +22,13 @@
 
 #include "CryptoHandler.h"
 
+#ifndef HAVE_SSLINC
+const char CryptoHandler::base46_map[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+        'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+        'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+        'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
+#endif
+
 std::string CryptoHandler::base64encodeStr(const std::string& input)
 {
 	return std::string(base64encode((const unsigned char *)input.c_str(), input.length()));
@@ -34,6 +41,7 @@ std::string CryptoHandler::base64decodeStr(const std::string& input)
 
 char* CryptoHandler::base64decode(unsigned char *input, const int& length)
 {
+#ifdef HAVE_SSLINC
 	BIO *b64, *bmem;
 
 	char *buffer = (char *)malloc(length);
@@ -50,10 +58,34 @@ char* CryptoHandler::base64decode(unsigned char *input, const int& length)
 	BIO_free_all(bmem);
 
 	return buffer;
+#else
+	char counts = 0;
+	char buffer[4];
+	char* plain = (char*)malloc(length * 3 / 4);
+	int i = 0, p = 0;
+
+	for(i = 0; input[i] != '\0'; i++) {
+		char k;
+		for(k = 0 ; k < 64 && base46_map[k] != input[i]; k++);
+		buffer[counts++] = k;
+		if(counts == 4) {
+			plain[p++] = (buffer[0] << 2) + (buffer[1] >> 4);
+			if(buffer[2] != 64)
+				plain[p++] = (buffer[1] << 4) + (buffer[2] >> 2);
+			if(buffer[3] != 64)
+				plain[p++] = (buffer[2] << 6) + buffer[3];
+			counts = 0;
+		}
+	}
+
+	plain[p] = '\0';    /* string padding character */
+	return plain;
+#endif
 }
 
 char* CryptoHandler::base64encode(const unsigned char *input, const int& length)
 {
+#ifdef HAVE_SSLINC
 	BIO *bmem, *b64;
 	BUF_MEM *bptr;
 
@@ -72,10 +104,43 @@ char* CryptoHandler::base64encode(const unsigned char *input, const int& length)
 	BIO_free_all(b64);
 
 	return buff;
+#else
+	char counts = 0;
+	char buffer[3];
+	char* cipher = (char*)malloc(length * 4 / 3 + 4);
+	int i = 0, c = 0;
+
+	for(i = 0; input[i] != '\0'; i++) {
+		buffer[counts++] = input[i];
+		if(counts == 3) {
+			cipher[c++] = base46_map[buffer[0] >> 2];
+			cipher[c++] = base46_map[((buffer[0] & 0x03) << 4) + (buffer[1] >> 4)];
+			cipher[c++] = base46_map[((buffer[1] & 0x0f) << 2) + (buffer[2] >> 6)];
+			cipher[c++] = base46_map[buffer[2] & 0x3f];
+			counts = 0;
+		}
+	}
+
+	if(counts > 0) {
+		cipher[c++] = base46_map[buffer[0] >> 2];
+		if(counts == 1) {
+			cipher[c++] = base46_map[(buffer[0] & 0x03) << 4];
+			cipher[c++] = '=';
+		} else {                      // if counts == 2
+			cipher[c++] = base46_map[((buffer[0] & 0x03) << 4) + (buffer[1] >> 4)];
+			cipher[c++] = base46_map[(buffer[1] & 0x0f) << 2];
+		}
+		cipher[c++] = '=';
+	}
+
+	cipher[c] = '\0';   /* string padding character */
+	return cipher;
+#endif
 }
 
 char* CryptoHandler::hmac_sha1(char* datain, char* keyin, const bool& base64)
 {
+#ifdef HAVE_SSLINC
 	unsigned char* key = (unsigned char*) keyin;
 	unsigned char* data = (unsigned char*) datain;
 	unsigned char* result;
@@ -105,10 +170,14 @@ char* CryptoHandler::hmac_sha1(char* datain, char* keyin, const bool& base64)
 	if(base64)
 		return base64encode(result,result_len);
 	return (char*)result;
+#else
+	return NULL;
+#endif
 }
 
 char* CryptoHandler::hmac_sha256(char* datain, char* keyin, const bool& base64)
 {
+#ifdef HAVE_SSLINC
 	unsigned char* key = (unsigned char*) keyin;
 	unsigned char* data = (unsigned char*) datain;
 	unsigned char* result;
@@ -138,10 +207,14 @@ char* CryptoHandler::hmac_sha256(char* datain, char* keyin, const bool& base64)
 	if(base64)
 		return base64encode(result,result_len);
 	return (char*)result;
+#else
+	return NULL;
+#endif
 }
 
 char* CryptoHandler::hmac_sha384(char* datain, char* keyin, const bool& base64)
 {
+#ifdef HAVE_SSLINC
 	unsigned char* key = (unsigned char*) keyin;
 	unsigned char* data = (unsigned char*) datain;
 	unsigned char* result;
@@ -171,10 +244,14 @@ char* CryptoHandler::hmac_sha384(char* datain, char* keyin, const bool& base64)
 	if(base64)
 		return base64encode(result,result_len);
 	return (char*)result;
+#else
+	return NULL;
+#endif
 }
 
 char* CryptoHandler::hmac_sha512(char* datain, char* keyin, const bool& base64)
 {
+#ifdef HAVE_SSLINC
 	unsigned char* key = (unsigned char*) keyin;
 	unsigned char* data = (unsigned char*) datain;
 	unsigned char* result;
@@ -204,6 +281,9 @@ char* CryptoHandler::hmac_sha512(char* datain, char* keyin, const bool& base64)
 	if(base64)
 		return base64encode(result,result_len);
 	return (char*)result;
+#else
+	return NULL;
+#endif
 }
 
 
@@ -311,6 +391,7 @@ std::string CryptoHandler::urlEncode(const std::string& str)
 
 std::string CryptoHandler::sha1(const std::string& data)
 {
+#ifdef HAVE_SSLINC
 	unsigned char hash[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*)data.c_str(), data.length(), hash);
 	// Transform byte-array to string
@@ -322,6 +403,9 @@ std::string CryptoHandler::sha1(const std::string& data)
 	}
 	return shastr.str();*/
 	return std::string((const char*)hash, SHA_DIGEST_LENGTH);
+#else
+	return data;
+#endif
 }
 
 void CryptoHandler::sanitizeHtml(std::string& data) {

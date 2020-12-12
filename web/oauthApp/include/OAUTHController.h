@@ -28,7 +28,6 @@
 #include "Client.h"
 #include "HttpResponseParser.h"
 #include "CryptoHandler.h"
-#include "SSLClient.h"
 
 class OAUTHController : public Controller{
 public:

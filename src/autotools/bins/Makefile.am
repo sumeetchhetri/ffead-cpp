@@ -35,6 +35,10 @@ AM_CPPFLAGS +=  -I"../../framework" \
 				-I"../../modules/server-util" \
 				-I"../../modules/ssl" \
 				-I"../../modules/threads"
+if HAVE_SSL
+AM_CPPFLAGS += \
+				-I"../../modules/client-util/ssl"
+endif
 else
 if MOD_DEFAULT
 AM_CPPFLAGS +=  -I"../../framework" \
@@ -56,6 +60,10 @@ AM_CPPFLAGS +=  -I"../../framework" \
 		-I"../../modules/server-util" \
 		-I"../../modules/ssl" \
 		-I"../../modules/threads"
+if HAVE_SSL
+AM_CPPFLAGS +=  \
+				-I"../../modules/client-util/ssl"
+endif
 else
 if MOD_COMPONENT
 AM_CPPFLAGS += \

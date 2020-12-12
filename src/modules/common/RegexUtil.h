@@ -29,7 +29,7 @@
 #ifdef HAVE_REGEX
 #include <regex.h>
 #else
-#include <pcreposix.h>
+#include "onigposix.h"
 #endif
 #include "vector"
 #include "map"

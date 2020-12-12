@@ -1,0 +1,15 @@
+<script src="fizzbuzz.out.js"></script>
+<script>
+  Module.onRuntimeInitialized = _ => {
+    const req = Module.get_http_req();
+    req.meth = "GET";
+    req.path = "/";
+    req.version = 11;
+    req.body = "";
+    req.headers[0].key = "Host";
+    req.headers[0].value = "localhost";
+    const res = Module.handle(req);
+    console.log(res);
+  };
+</script>
+

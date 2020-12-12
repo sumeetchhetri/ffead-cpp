@@ -23,31 +23,40 @@
 #include "HttpClient.h"
 
 void HttpClient::init() {
+#ifdef HAVE_CURLLIB
 	CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
 	if (res != CURLE_OK) {
 		throw std::runtime_error("Unable to initialize CURL");
 	}
+#endif
 }
 
 void HttpClient::cleanup() {
+#ifdef HAVE_CURLLIB
 	curl_global_cleanup();
+#endif
 }
 
 HttpClient::HttpClient(std::string baseUrl) {
+#ifdef HAVE_CURLLIB
 	_h = curl_easy_init();
 	if (!_h) {
 		throw std::runtime_error("Unable to initialize curl handle");
 	}
 	this->baseUrl = baseUrl;
+#endif
 }
 
 HttpClient::~HttpClient() {
+#ifdef HAVE_CURLLIB
 	if (_h) {
 		curl_easy_cleanup(_h);
 	}
+#endif
 }
 
 void HttpClient::execute(HttpRequest* request, HttpResponse* response, propMap& props) {
+#ifdef HAVE_CURLLIB
 	curl_slist* headerList = NULL;
 
 	std::string url = baseUrl + request->url;
@@ -185,6 +194,7 @@ void HttpClient::execute(HttpRequest* request, HttpResponse* response, propMap& 
 	curl_slist_free_all(headerList);
 	// reset curl handle
 	curl_easy_reset(_h);
+#endif
 }
 
 size_t HttpClient::onContent(void *res, size_t len, size_t mb, void *data) {

@@ -61,6 +61,7 @@ bool LibpqDataSourceImpl::init() {
 #else
 			rdTsk = new PgReadTask(this);
 			RequestReaderHandler::getInstance()->addSf(this);
+			RequestReaderHandler::getInstance()->selector.registerRead(this);
 #endif
 		} else {
 			Thread* pthread = new Thread(&handle, this);
@@ -403,18 +404,28 @@ void* LibpqDataSourceImpl::handle(void* inp) {
 void PgReadTask::run() {
 #ifdef HAVE_LIBPQ
 	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)sif;
+
+	bool ritemDone = false;
 	if (!PQconsumeInput(ths->conn)) {
 		fprintf(stderr, "Failed to consume pg input: %s\n", PQerrorMessage(ths->conn));
 		throw std::runtime_error("Invalid connection state");
 	}
 
 	if(PQisBusy(ths->conn)==1) {
-		return;
+		while(true) {
+			errno = 0;
+
+			if (!PQconsumeInput(ths->conn)) {
+				fprintf(stderr, "Failed to consume pg input: %s\n", PQerrorMessage(ths->conn));
+				throw std::runtime_error("Invalid connection state");
+			}
+			if(errno == EAGAIN) return;
+			if(!PQisBusy(ths->conn)) break;
+		}
 	}
 
 	PGresult* res = NULL;
-	bool ritemDone = false;
-	while ((res = PQgetResult(ths->conn))!=NULL) {
+	while((res = PQgetResult(ths->conn))!=NULL) {
 		if(ritemDone) {
 			PQclear(res);
 			continue;
@@ -794,6 +805,7 @@ void* LibpqDataSourceImpl::executeUpdateQueryAsync(const std::string &query, std
 	executeQueryIntAsync(query, std::move(pvals), isPrepared, status, ctx, NULL, NULL, NULL, NULL, cmcb, vitem, false, &areq);
 	return areq;
 #endif
+	return NULL;
 }
 
 void* LibpqDataSourceImpl::executeQueryAsync(const std::string &query, std::vector<LibpqParam>&& pvals, void* ctx, LipqResFunc cb, LipqComplFunc cmcb, void* vitem, bool isPrepared) {
@@ -803,6 +815,7 @@ void* LibpqDataSourceImpl::executeQueryAsync(const std::string &query, std::vect
 	executeQueryIntAsync(query, std::move(pvals), isPrepared, status, ctx, cb, NULL, NULL, NULL, cmcb, vitem, true, &areq);
 	return areq;
 #endif
+	return NULL;
 }
 
 void* LibpqDataSourceImpl::executeQueryAsync(const std::string &query, std::vector<LibpqParam>&& pvals, void* ctx, LipqColResFunc1 cb, LipqComplFunc cmcb, void* vitem, bool isPrepared) {
@@ -812,6 +825,7 @@ void* LibpqDataSourceImpl::executeQueryAsync(const std::string &query, std::vect
 	executeQueryIntAsync(query, std::move(pvals), isPrepared, status, ctx, NULL, cb, NULL, NULL, cmcb, vitem, true, &areq);
 	return areq;
 #endif
+	return NULL;
 }
 
 void* LibpqDataSourceImpl::executeQueryAsync(const std::string &query, std::vector<LibpqParam>&& pvals, void* ctx, LipqColResFunc2 cb, LipqComplFunc cmcb, void* vitem, bool isPrepared) {
@@ -821,6 +835,7 @@ void* LibpqDataSourceImpl::executeQueryAsync(const std::string &query, std::vect
 	executeQueryIntAsync(query, std::move(pvals), isPrepared, status, ctx, NULL, NULL, cb, NULL, cmcb, vitem, true, &areq);
 	return areq;
 #endif
+	return NULL;
 }
 
 void* LibpqDataSourceImpl::executeQueryAsync(const std::string &query, std::vector<LibpqParam>&& pvals, void* ctx, LipqColResFunc3 cb, LipqComplFunc cmcb, void* vitem, bool isPrepared) {
@@ -830,6 +845,7 @@ void* LibpqDataSourceImpl::executeQueryAsync(const std::string &query, std::vect
 	executeQueryIntAsync(query, std::move(pvals), isPrepared, status, ctx, NULL, NULL, NULL, cb, cmcb, vitem, true, &areq);
 	return areq;
 #endif
+	return NULL;
 }
 
 void LibpqDataSourceImpl::executeMultiQuery(const std::string &query, void* ctx, LipqResFunc cb, LipqComplFunc cmcb) {
