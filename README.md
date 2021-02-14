@@ -35,7 +35,7 @@ Build validated for the following Operating systems/Toolchains
 |[Solaris](https://github.com/sumeetchhetri/ffead-cpp/tree/master/vagrant/solaris)|[FreeBSD](https://github.com/sumeetchhetri/ffead-cpp/tree/master/vagrant/freebsd)|[Emscripten](https://github.com/sumeetchhetri/ffead-cpp/tree/master/lang-server-backends/javascript)
 
 
-[Latest Techempower benchmarks](https://www.techempower.com/benchmarks/#section=test&runid=627e33f6-2a02-40f5-b377-a36e65f69e92&hw=ph&test=composite&a=2)
+[Latest Techempower benchmarks](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=composite)
 
 Features
 ==========
