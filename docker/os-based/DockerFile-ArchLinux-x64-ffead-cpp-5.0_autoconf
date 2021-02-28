@@ -1,7 +1,11 @@
-FROM archlinux/base
+FROM archlinux:base-devel-20210214.0.15477
 
-RUN pacman -Sy --noconfirm bash autoconf-archive autoconf automake libtool make clang glibc unixodbc curl postgresql-libs libmemcached cmake openssh wget gnu-netcat tar gzip zlib unzip gawk grep sed core/binutils diffutils procps-ng
-RUN chsh -s /bin/bash
+RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst && \
+    curl -LO "https://repo.archlinuxcn.org/x86_64/$patched_glibc" && \
+    bsdtar -C / -xvf "$patched_glibc"
+RUN echo "IgnorePkg   = glibc" >> /etc/pacman.conf
+
+RUN pacman -Sy --noconfirm autoconf-archive autoconf automake libtool make clang unixodbc curl postgresql-libs libmemcached cmake openssh wget gnu-netcat tar gzip zlib unzip gawk grep sed core/binutils diffutils procps-ng
 
 #Install libcuckoo headers
 WORKDIR /tmp

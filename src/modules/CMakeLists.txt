@@ -24,16 +24,16 @@ if(MOD_MEMCACHED)
 endif(MOD_MEMCACHED)
 
 if(MOD_SDORM_SQL)
-	file(GLOB sql_pq_module_sources
-	    "sdorm/sql/libpq/*.h"
-	    "sdorm/sql/libpq/*.cpp"
-	)
-	install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/modules/sdorm/sql/libpq/ DESTINATION ${PROJECT_NAME}-bin/include FILES_MATCHING PATTERN "*.h")
 	file(GLOB sql_module_sources
 	    "sdorm/sql/*.h"
 	    "sdorm/sql/*.cpp"
 	)
 	install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/modules/sdorm/sql/ DESTINATION ${PROJECT_NAME}-bin/include FILES_MATCHING PATTERN "*.h")
+	file(GLOB sql_pq_module_sources
+	    "sdorm/sql/libpq/*.h"
+	    "sdorm/sql/libpq/*.cpp"
+	)
+	install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/modules/sdorm/sql/libpq/ DESTINATION ${PROJECT_NAME}-bin/include FILES_MATCHING PATTERN "*.h")
 endif(MOD_SDORM_SQL)
 
 if(MOD_SDORM_MONGO)

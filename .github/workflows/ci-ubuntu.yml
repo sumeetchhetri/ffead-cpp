@@ -16,6 +16,11 @@ jobs:
       run: |
         sudo apt update -yqq && sudo apt install --no-install-recommends -yqq ninja-build libpq-dev libcurl4-openssl-dev autoconf-archive unzip uuid-dev odbc-postgresql unixodbc unixodbc-dev apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev zlib1g-dev cmake make clang-format-9 ninja-build libjsoncpp-dev libboost-all-dev
         sudo apt remove -y libsqlite3-dev
+        sudo apt-get install libseccomp-dev
+        git clone https://github.com/opencontainers/runc
+        cd runc
+        make
+        sudo make install
         pushd /tmp
         wget -q https://github.com/efficient/libcuckoo/archive/master.zip
         unzip master.zip
