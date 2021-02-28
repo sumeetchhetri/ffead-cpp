@@ -68,6 +68,7 @@ public:
 	template <typename T>
 	friend Logger& operator<< (Logger& logger, const T& msg)
 	{
+		if(logger.config==NULL) return logger;
 		logger.write(msg, logger.level, false);
 		return logger;
 	}

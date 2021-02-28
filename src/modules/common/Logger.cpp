@@ -168,6 +168,7 @@ void Logger::trace(const std::string& msg)
 
 Logger& operator<< (Logger& logger, std::ostream& (*pf) (std::ostream&))
 {
+	if(logger.config==NULL) return logger;
 	logger.write(pf, logger.level);
 	if(pf == static_cast <std::ostream & (*)(std::ostream &)> (std::endl) || pf == static_cast <std::ostream & (*)(std::ostream &)> (std::flush)) {
 		logger.level = Logger::LEVEL_INFO;

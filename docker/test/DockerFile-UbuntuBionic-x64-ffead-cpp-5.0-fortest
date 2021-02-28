@@ -165,6 +165,21 @@ RUN unzip -qq master.zip
 RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 
+RUN apt remove -yqq libpq-dev
+RUN apt autoremove -yqq
+RUN rm -f /usr/lib/x86_64-linux-gnu/libpq.so*
+RUN apt update && apt install -y bison flex libreadline-dev
+WORKDIR /tmp
+RUN wget -nv https://github.com/postgres/postgres/archive/b787d4ce6d910080065025bcd5f968544997271f.zip
+RUN unzip -q b787d4ce6d910080065025bcd5f968544997271f.zip
+WORKDIR /tmp/postgres-b787d4ce6d910080065025bcd5f968544997271f
+RUN wget -nv https://www.postgresql.org/message-id/attachment/115223/v22-0001-libpq-batch.patch
+RUN git apply ./v22-0001-libpq-batch.patch
+RUN ./configure --prefix=/usr CFLAGS='-O3 -march=native -flto'
+WORKDIR src/interfaces/libpq
+RUN make all install -j4
+RUN cp ../../../src/include/postgres_ext.h ../../../src/include/pg_config_ext.h libpq-fe.h /usr/include
+
 WORKDIR /tmp/ffead-cpp-src
 RUN rm -rf src web rtdcf script
 COPY src /tmp/ffead-cpp-src/src

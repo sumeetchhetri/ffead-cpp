@@ -74,14 +74,14 @@ struct __AsyncReq {
 	void* ctx;
 	LipqComplFunc cmcb;
 	int cnt;
-	std::queue<__AsynQuery*> q;
+	bool multi;
+	std::vector<__AsynQuery*> q;
 };
 
 class PgReadTask : public Task {
 	__AsyncReq* ritem;
 	int counter = 0;
 	__AsynQuery* q;
-	bool hasPrepare;
 	SocketInterface* sif;
 	bool flux;
 	void run();
@@ -91,6 +91,27 @@ public:
 	virtual ~PgReadTask();
 	PgReadTask(SocketInterface* sif);
 };
+
+class LibpqDataSourceImpl;
+
+#ifdef HAVE_LIBPQ_BATCH
+class PgBatchReadTask : public Task {
+	__AsyncReq* ritem;
+	int counter = 0;
+	__AsynQuery* q;
+	SocketInterface* sif;
+	std::atomic<bool> queueEntries;
+	std::queue<__AsyncReq*> lQ;
+	void run();
+	void submit(__AsyncReq* item);
+	friend class LibpqDataSourceImpl;
+	__AsyncReq* getNext();
+	void batchQueries(LibpqDataSourceImpl* ths, __AsyncReq* ritem, int& numQueriesInBatch);
+public:
+	virtual ~PgBatchReadTask();
+	PgBatchReadTask(SocketInterface* sif);
+};
+#endif
 
 class LibpqDataSourceImpl : public DataSourceType, public SocketInterface {
 	std::map<std::string, std::string> prepStmtMap;
@@ -109,8 +130,12 @@ class LibpqDataSourceImpl : public DataSourceType, public SocketInterface {
 			void* ctx, LipqResFunc cb, LipqColResFunc1 cb1, LipqColResFunc2 cb2, LipqColResFunc3 cb3, LipqComplFunc cmcb, void* vitem, bool isSelect, __AsyncReq** areq);
 #endif
 	static void* handle(void* inp);
+#ifdef HAVE_LIBPQ_BATCH
+	static void* handleBatchReminder(void* inp);
+#endif
 	__AsyncReq* getNext();
 	friend class PgReadTask;
+	friend class PgBatchReadTask;
 public:
 	DSType getType();
 	LibpqDataSourceImpl(const std::string&, bool isAsync);
@@ -133,6 +158,7 @@ public:
 	bool rollback();
 
 	void completeAsync(void* vitem, void* ctx = NULL, LipqComplFunc cmcb = NULL);
+	void completeAsync(void* vitem, int numQ);
 
 	void* beginAsync(void* vitem = NULL);
 	void* commitAsync(void* vitem = NULL);
@@ -159,6 +185,10 @@ public:
 	void* executeQueryAsync(const std::string &query, std::vector<LibpqParam>&& pvals, void* ctx, LipqColResFunc1 cb, LipqComplFunc cmcb, void* item, bool isPrepared = true);
 	void* executeQueryAsync(const std::string &query, std::vector<LibpqParam>&& pvals, void* ctx, LipqColResFunc2 cb, LipqComplFunc cmcb, void* item, bool isPrepared = true);
 	void* executeQueryAsync(const std::string &query, std::vector<LibpqParam>&& pvals, void* ctx, LipqColResFunc3 cb, LipqComplFunc cmcb, void* item, bool isPrepared = true);
+	void* executeMultiQueryAsync(const std::string &query, void* ctx, LipqResFunc cb, LipqComplFunc cmcb);
+	void* executeMultiQueryAsync(const std::string &query, void* ctx, LipqColResFunc1 cb, LipqComplFunc cmcb);
+	void* executeMultiQueryAsync(const std::string &query, void* ctx, LipqColResFunc2 cb, LipqComplFunc cmcb);
+	void* executeMultiQueryAsync(const std::string &query, void* ctx, LipqColResFunc3 cb, LipqComplFunc cmcb);
 	void* executeUpdateQueryAsync(const std::string &query, std::vector<LibpqParam>&& pvals, void* ctx, LipqComplFunc cmcb, void* item, bool isPrepared = true);
 };
 

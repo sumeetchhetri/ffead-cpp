@@ -266,7 +266,9 @@ void LoggerFactory::init(const std::string& configFile, const std::string& serve
 		}
 		std::cout << "Done configuring loggers..." << std::endl;
 	}
-	configureDefaultLogger("");
+	if(isLoggingEnabled) {
+		configureDefaultLogger("");
+	}
 }
 
 Logger LoggerFactory::getLogger(const std::string& className) {

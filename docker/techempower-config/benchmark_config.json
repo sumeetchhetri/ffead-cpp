@@ -334,7 +334,7 @@
 			"display_name": "ffead-cpp-nginx",
 			"notes": "",
 			"versus": "",
-			"tags": []
+			"tags": ["broken"]
 		},
 		"seastar": {
 			"json_url": "/te-benchmark-um/json",
@@ -353,7 +353,7 @@
 			"display_name": "ffead-cpp-seastar",
 			"notes": "",
 			"versus": "",
-			"tags": []
+			"tags": ["broken"]
 		},
 		"apache": {
 			"json_url": "/te-benchmark-um/json",

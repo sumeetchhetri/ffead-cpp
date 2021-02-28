@@ -22,12 +22,14 @@
 
 #include "RegexUtil.h"
 
-ThreadLocal RegexUtil::patterns_th;
-ThreadLocal RegexUtil::nlpatterns_th;
+libcuckoo::cuckoohash_map<std::string, regex_t*> RegexUtil::patterns;
+libcuckoo::cuckoohash_map<std::string, regex_t*> RegexUtil::nlpatterns;
+//ThreadLocal RegexUtil::patterns_th;
+//ThreadLocal RegexUtil::nlpatterns_th;
 bool RegexUtil::cacheRegexes = true;
 
 void RegexUtil::flushCache() {
-	/*if(patterns.size()>0) {
+	if(patterns.size()>0) {
 		auto lt = patterns.lock_table();
 		libcuckoo::cuckoohash_map<std::string, regex_t*>::locked_table::iterator it;
 		for(it=lt.begin();it!=lt.end();++it) {
@@ -42,7 +44,7 @@ void RegexUtil::flushCache() {
 			regfree(it->second);
 			delete it->second;
 		}
-	}*/
+	}
 }
 
 bool RegexUtil::isValidRegex(const std::string& pattern) {
@@ -53,7 +55,12 @@ regex_t* RegexUtil::getRegex(const std::string& pattern, const bool& matchNewLin
 	regex_t* regex = NULL;
 	bool found = false;
 	if(cacheRegexes) {
-		if(patterns_th.get()==NULL) {
+		if(!matchNewLine && patterns.contains(pattern)) {
+			return patterns.find(pattern);
+		} else if(nlpatterns.contains(pattern)) {
+			return nlpatterns.find(pattern);
+		}
+		/*if(patterns_th.get()==NULL) {
 			patterns_th.set(new std::map<std::string, regex_t*>);
 			nlpatterns_th.set(new std::map<std::string, regex_t*>);
 		}
@@ -70,7 +77,7 @@ regex_t* RegexUtil::getRegex(const std::string& pattern, const bool& matchNewLin
 
 		if(it!=nlpatterns->end()) {
 			return it->second;
-		}
+		}*/
 	}
 	if(!found) {
 		int cflags = REG_EXTENDED;
@@ -81,12 +88,14 @@ regex_t* RegexUtil::getRegex(const std::string& pattern, const bool& matchNewLin
 		{
 			if(!matchNewLine) {
 				regex = new regex_t;
-				std::map<std::string, regex_t*>* patterns = (std::map<std::string, regex_t*>*)patterns_th.get();
-				patterns->insert({pattern, regex});
+				/*std::map<std::string, regex_t*>* patterns = (std::map<std::string, regex_t*>*)patterns_th.get();
+				patterns->insert({pattern, regex});*/
+				patterns.insert(pattern, regex);
 			} else {
 				regex = new regex_t;
-				std::map<std::string, regex_t*>* nlpatterns = (std::map<std::string, regex_t*>*)nlpatterns_th.get();
-				nlpatterns->insert({pattern, regex});
+				/*std::map<std::string, regex_t*>* nlpatterns = (std::map<std::string, regex_t*>*)nlpatterns_th.get();
+				nlpatterns->insert({pattern, regex});*/
+				nlpatterns.insert(pattern, regex);
 			}
 			int reti = regcomp(regex, pattern.c_str(), cflags);
 			if(reti!=0)

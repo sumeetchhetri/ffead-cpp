@@ -174,6 +174,59 @@ void TeBkUmLpqAsyncRouter::queriesAsyncCh(void* ctx, bool status, const std::str
 }
 
 
+#ifndef HAVE_LIBPQ_BATCH
+void TeBkUmLpqAsyncRouter::queriesMultiAsync(const char* q, int ql, AsyncReq* req) {
+	req->d = new std::vector<TeBkUmLpqAsyncWorld>;
+
+	int queryCount = 0;
+	strToNum(q, ql, queryCount);
+	if(queryCount<1)queryCount=1;
+	else if(queryCount>500)queryCount=500;
+
+	LibpqDataSourceImpl* sqli = getDb();
+
+	try {
+		std::stringstream ss;
+		for (int c = 0; c < queryCount; ++c) {
+			int rid = rand() % 10000 + 1;
+			ss << "select id, randomnumber from world where id = " << rid << ";";
+		}
+		void* areq = sqli->executeMultiQueryAsync(ss.str(), req, &TeBkUmLpqAsyncRouter::queriesMultiAsyncUtil, &TeBkUmLpqAsyncRouter::queriesMultiAsyncCh);
+		sqli->completeAsync(areq, queryCount);
+	} catch(const std::exception& e) {
+		throw e;
+	}
+}
+void TeBkUmLpqAsyncRouter::queriesMultiAsyncUtil(void* ctx, int rn, int cn, char * d, int l) {
+	AsyncReq* req = (AsyncReq*)ctx;
+	std::vector<TeBkUmLpqAsyncWorld>* vec = (std::vector<TeBkUmLpqAsyncWorld>*)req->d;
+	if(cn==0) {
+		vec->push_back(TeBkUmLpqAsyncWorld());
+	}
+	TeBkUmLpqAsyncWorld& w = vec->at(vec->size()-1);
+	int tmp = 0;
+	strToNum(d, l, tmp);
+	if(cn==0)w.setId(tmp);
+	if(cn==1)w.setRandomNumber(tmp);
+}
+void TeBkUmLpqAsyncRouter::queriesMultiAsyncCh(void* ctx, bool status, const std::string& q, int counter) {
+	AsyncReq* req = (AsyncReq*)ctx;
+	std::vector<TeBkUmLpqAsyncWorld>* vec = (std::vector<TeBkUmLpqAsyncWorld>*)req->d;
+	req->r.setHTTPResponseStatus(HTTPResponseStatus::Ok);
+	std::string c;
+	JSONSerialize::serializeUnknown(vec, 100, "std::vector<TeBkUmLpqAsyncWorld>", &c, APP_NAME);
+	std::string d;
+	req->r.generateHeadResponse(d, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, (int)c.length());
+	req->sif->writeDirect(d);
+	req->sif->writeDirect(c);
+	req->sif->unUse();
+	delete vec;
+	delete req;
+}
+#endif
+
+
+
 std::string& TeBkUmLpqAsyncRouter::getUpdQuery(int count) {
 	std::map<int, std::string>::iterator it = _qC.find(count);
 	if(it!=_qC.end()) {
@@ -556,7 +609,18 @@ bool TeBkUmLpqAsyncRouter::route(HttpRequest* req, HttpResponse* res, void* dlib
 		ar->sif = sif;
 		ar->r.update(req);
 		queriesAsync(params[0].val, params[0].val_len, ar);
-	} else if(StringUtil::endsWith(path, "/fortunes")) {
+	}
+#ifndef HAVE_LIBPQ_BATCH
+	else if(StringUtil::endsWith(path, "/queriem")) {
+		struct yuarel_param params[1];
+		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
+		AsyncReq* ar = new AsyncReq;
+		ar->sif = sif;
+		ar->r.update(req);
+		queriesMultiAsync(params[0].val, params[0].val_len, ar);
+	}
+#endif
+	else if(StringUtil::endsWith(path, "/fortunes")) {
 		AsyncReq* ar = new AsyncReq;
 		ar->sif = sif;
 		ar->ddlib = ddlib;

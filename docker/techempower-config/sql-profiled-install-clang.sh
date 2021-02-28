@@ -13,9 +13,9 @@ then
 	#cd postgres-batch_mode_ubuntu
 	#./configure --prefix=/usr CFLAGS='-O2 -pipe -march=native'
 	#make && make install
-	wget -nv https://github.com/postgres/postgres/archive/$b787d4ce6d910080065025bcd5f968544997271f.zip
+	wget -nv https://github.com/postgres/postgres/archive/b787d4ce6d910080065025bcd5f968544997271f.zip
 	unzip -q b787d4ce6d910080065025bcd5f968544997271f.zip
-	cd postgres-$commit
+	cd postgres-b787d4ce6d910080065025bcd5f968544997271f
 	wget -nv https://www.postgresql.org/message-id/attachment/115223/v22-0001-libpq-batch.patch
 	git apply ./v22-0001-libpq-batch.patch
 	./configure --prefix=/usr CFLAGS='-O3 -march=native -flto'
