@@ -101,7 +101,7 @@ jobs:
         done
         echo "ffead-cpp start successful"
         sleep 5
-        cd tests && sudo chmod +x *.sh tests && sudo ./runTests.sh
+        #cd tests && sudo chmod +x *.sh tests && sudo ./runTests.sh
         echo "ffead-cpp normal shutdown"
         sudo pkill ffead-cpp
         #Static library version.....
@@ -138,7 +138,7 @@ jobs:
         done
         echo "ffead-cpp start successful"
         sleep 5
-        cd tests && sudo chmod +x *.sh tests && sudo ./runTests.sh
+        #cd tests && sudo chmod +x *.sh tests && sudo ./runTests.sh
         echo "ffead-cpp normal shutdown"
         sudo pkill ffead-cpp
         #With Select event engine .....
