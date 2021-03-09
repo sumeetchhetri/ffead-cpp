@@ -12,7 +12,7 @@ ENV EM_CONFIG=/installs/emsdk/.emscripten
 ENV EM_CACHE=/installs/emsdk/upstream/emscripten/cache
 ENV EMSDK_NODE=/installs/emsdk/node/12.18.1_64bit/bin/node
 
-RUN git clone https://github.com/madler/zlib && cd zlib && emcmake cmake -DBUILD_SHARED_LIBS=off . && emmake make -j4 install
+#RUN git clone https://github.com/madler/zlib && cd zlib && emcmake cmake -DBUILD_SHARED_LIBS=off . && emmake make -j4 install
 RUN git clone https://github.com/sean-/ossp-uuid && cd ossp-uuid && emconfigure ./configure --disable-shared && emmake make -j4 && cp uuid.h /usr/local/include/ \
 	&& cp .libs/libuuid.a /usr/local/lib
 RUN git clone https://github.com/kkos/oniguruma && cd oniguruma && emcmake cmake -DBUILD_SHARED_LIBS=off -DENABLE_BINARY_COMPATIBLE_POSIX_API=on . && emmake make -j4 install
@@ -24,4 +24,4 @@ RUN cd ${IROOT}/ffead-cpp-src/ && rm -rf CMakeFiles CMakeCache.txt build && mkdi
 WORKDIR ${IROOT}/lang-server-backends/javascript/emscripten
 
 RUN emcc ffead-cpp-glue.cpp ${IROOT}/ffead-cpp-5.0/lib/libffead-framework.a ${IROOT}/ffead-cpp-5.0/lib/libffead-modules.a /usr/local/lib/libz.a -s USE_PTHREADS=1 \
-	-s USE_PTHREADS=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -std=c++11 -o ffead-cpp-glue.js --bind
+	-s USE_ZLIB=1 -s USE_PTHREADS=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -std=c++11 -o ffead-cpp-glue.js --bind
