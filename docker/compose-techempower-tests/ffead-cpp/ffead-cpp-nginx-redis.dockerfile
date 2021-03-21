@@ -5,6 +5,9 @@ ENV FFEAD_CPP_PATH=${IROOT}/ffead-cpp-5.0
 ENV PATH=${FFEAD_CPP_PATH}:${PATH}
 ENV TROOT=/
 
+ENV DEBIAN_FRONTEND noninteractive
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+
 RUN mkdir /installs
 
 WORKDIR /

@@ -5,6 +5,9 @@ ADD mysql/* ./
 ADD mongodb/* ./
 ADD wrk/* ./
 
+ENV DEBIAN_FRONTEND noninteractive
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+
 # prepare PostgreSQL APT repository
 RUN cp pgdg.list /etc/apt/sources.list.d/
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -

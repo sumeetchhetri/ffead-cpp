@@ -23,5 +23,5 @@ RUN cd ${IROOT}/ffead-cpp-src/ && rm -rf CMakeFiles CMakeCache.txt build && mkdi
 
 WORKDIR ${IROOT}/lang-server-backends/javascript/emscripten
 
-RUN emcc ffead-cpp-glue.cpp ${IROOT}/ffead-cpp-5.0/lib/libffead-framework.a ${IROOT}/ffead-cpp-5.0/lib/libffead-modules.a /usr/local/lib/libz.a -s USE_PTHREADS=1 \
+RUN emcc ffead-cpp-glue.cpp ${IROOT}/ffead-cpp-5.0/lib/libffead-framework.a ${IROOT}/ffead-cpp-5.0/lib/libffead-modules.a -s USE_PTHREADS=1 \
 	-s USE_ZLIB=1 -s USE_PTHREADS=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -std=c++11 -o ffead-cpp-glue.js --bind
