@@ -7,18 +7,14 @@ name: "Code Analysis using CodeQL"
 
 on:
   push:
-    branches: [master]
+    branches: [ master ]
   pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [master]
-  #schedule:
-  #  - cron: '0 21 * * 1'
+    branches: [ master ]
 
 jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip_build]')"
     strategy:
       fail-fast: false
       matrix:
@@ -35,7 +31,6 @@ jobs:
         # We must fetch at least the immediate parents so that if this is
         # a pull request then we can checkout the head.
         fetch-depth: 2
-        token: ${{ secrets.PAT }}
 
     # If this run was triggered by a pull request event, then checkout
     # the head of the pull request instead of the merge commit.

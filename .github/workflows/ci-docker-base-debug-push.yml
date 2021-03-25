@@ -2,15 +2,17 @@ name: Build ffead-cpp base debug docker image and push
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    
 env:
   IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-base
   IMG_VERSION: 5.3-debug
 jobs:
   push:
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, '[docker_debug_push]') && github.event_name == 'push'
+    if: contains(github.event.head_commit.message, '[docker_debug_push]')
     steps:
       - uses: actions/checkout@v2
 

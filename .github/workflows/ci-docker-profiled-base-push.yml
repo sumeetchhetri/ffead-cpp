@@ -2,8 +2,10 @@ name: Build ffead-cpp profiled base docker image and push
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    
 env:
   SQL_RAW_PROFILED_IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-sql-raw-profiled-base
   SQL_RAW_CLIBPQB_PROFILED_IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-sql-raw-clibpqb-profiled-base
