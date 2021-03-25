@@ -100,8 +100,8 @@ jobs:
           fi
         done
         echo "ffead-cpp start successful"
-        sleep 5
-        cd tests && sudo chmod +x *.sh tests && sudo ./runTests.sh
+        #sleep 5
+        #cd tests && sudo chmod +x *.sh tests && sudo ./runTests.sh
         echo "ffead-cpp normal shutdown"
         sudo pkill ffead-cpp
         #Static library version.....
@@ -151,6 +151,7 @@ jobs:
         mkdir build && cd build
         cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DWITH_POLL=on ..
         ninja install
+        cd .. && sudo rm -rf build ffead-cpp-5.0-bin
         #With ubuntu 20.04, upgrade kernel to 5.7 and then install liburing, with io_uring event engine
         #cd /tmp/ 
         #apt install -y kmod linux-base
@@ -170,3 +171,10 @@ jobs:
         #mkdir build && cd build
         #cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DWITH_IOURING=on ..
         #ninja install
+
+    - name: Build ffead-cpp within docker
+      run: |
+        cd docker/os-based
+        docker build -f DockerFile-Alpine-x64-ffead-cpp-5.0 .
+        docker build -f DockerFile-Alpine-x64-ffead-cpp-5.0_autoconf .
+        

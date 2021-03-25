@@ -73,8 +73,10 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 		if j == req.num_headers {
 			break
 		}
-		k := tos(req.headers[j].name, req.headers[j].name_len)
-		v := tos(req.headers[j].value, req.headers[j].value_len)
+		unsafe {
+			k := tos(req.headers[j].name, req.headers[j].name_len)
+			v := tos(req.headers[j].value, req.headers[j].value_len)
+		}
 		$if debug {
 			println('${k} ${v}')
 		}
@@ -115,8 +117,8 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 	}
 
 	if scode > 0 {
-		smsg = tos(smsg.str, int(smsg_len))
 		unsafe {
+			smsg = tos(smsg.str, int(smsg_len))
 			res.buf += cpy_str_1(res.buf, "HTTP/1.1 ${scode} ${smsg}\r\n")
 		}
 		res.header_server()
@@ -126,19 +128,23 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 			if j == int(headers_len) {
 				break
 			}
-			k := tos(req.headers[j].name, int(req.headers[j].name_len))
-			v := tos(req.headers[j].value, int(req.headers[j].value_len))
 			unsafe {
+				k := tos(req.headers[j].name, int(req.headers[j].name_len))
+				v := tos(req.headers[j].value, int(req.headers[j].value_len))
 				res.buf += cpy_str_1(res.buf, "${k}: ${v}\r\n")
 			}
 			j = j + 1
 		}
-		out_body = tos(out_body.str, int(out_body_len))
+		unsafe {
+			out_body = tos(out_body.str, int(out_body_len))
+		}
 		res.body(out_body)
 		C.ffead_cpp_resp_cleanup(resp)
 	} else {
-		out_mime = tos(out_mime.str, int(out_mime_len))
-		out_url = tos(out_url.str, int(out_url_len))
+		unsafe {
+			out_mime = tos(out_mime.str, int(out_mime_len))
+			out_url = tos(out_url.str, int(out_url_len))
+		}
 		
 		$if debug {
 			println('res.url = $out_url')

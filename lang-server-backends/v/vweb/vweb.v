@@ -267,14 +267,17 @@ fn (mut vweb FfeadCppContext) handle() {
 	}
 
 	if scode > 0 {
-		vweb.rs_headers = tos(vweb.rs_headers.str, int(headers_len))
-		vweb.rs_body = tos(vweb.rs_body.str, int(body_len))
+		unsafe {
+			vweb.rs_headers = tos(vweb.rs_headers.str, int(headers_len))
+			vweb.rs_body = tos(vweb.rs_body.str, int(body_len))
+		}
 		vweb.send_response()
 		C.ffead_cpp_resp_cleanup(resp)
 	} else {
-		vweb.rs_url = tos(vweb.rs_url.str, int(url_len))
-		vweb.rs_mime = tos(vweb.rs_mime.str, int(mime_len))
-		
+		unsafe {
+			vweb.rs_url = tos(vweb.rs_url.str, int(url_len))
+			vweb.rs_mime = tos(vweb.rs_mime.str, int(mime_len))
+		}
 		$if debug {
 			println('res.url = $vweb.rs_url')
 		}
