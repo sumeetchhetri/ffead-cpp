@@ -64,25 +64,21 @@ fn cpy_str_1(dst byteptr, src string) int {
 }
 
 fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
+	mut j := 0
 	$if debug {
 		println('${req.method} ${req.path} ${req.num_headers}')
+		for {
+			if j == req.num_headers {
+				break
+			}
+			unsafe {
+				k := tos(req.headers[j].name, req.headers[j].name_len)
+				v := tos(req.headers[j].value, req.headers[j].value_len)
+				println('${k} ${v}')
+			}
+			j = j+1
+		}
 	}
-	
-	mut j := 0
-	for {
-		if j == req.num_headers {
-			break
-		}
-		unsafe {
-			k := tos(req.headers[j].name, req.headers[j].name_len)
-			v := tos(req.headers[j].value, req.headers[j].value_len)
-		}
-		$if debug {
-			println('${k} ${v}')
-		}
-		j = j+1
-	}
-	
  	freq := C.ffead_request3{
 		server_str: 'picov'.str
 	    server_str_len: u64(5)

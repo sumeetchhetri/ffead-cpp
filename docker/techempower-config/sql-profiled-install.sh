@@ -6,6 +6,7 @@ if [ "$1" = "batch" ]
 then
 	apt remove -yqq libpq-dev
 	apt autoremove -yqq
+	rm -f /usr/lib/x86_64-linux-gnu/libpq.*
 	apt update && apt install -y bison flex libreadline-dev
 	cd /tmp
 	#wget -q https://github.com/an-tao/postgres/archive/batch_mode_ubuntu.tar.gz
@@ -48,7 +49,7 @@ service postgresql stop
 #For profiling/benchmarking
 
 cd $IROOT/
-#sed -i 's|cmake .|cmake -DCMAKE_EXE_LINKER_FLAGS="-fprofile-dir=/tmp/profile-data -fprofile-generate" -DCMAKE_CXX_FLAGS="-march=native -fprofile-dir=/tmp/profile-data  -fprofile-generate" .|g' $IROOT/ffead-cpp-sql-raw/resources/rundyn-automake.sh
+#sed -i 's|cmake |cmake -DCMAKE_EXE_LINKER_FLAGS="-fprofile-dir=/tmp/profile-data -fprofile-generate" -DCMAKE_CXX_FLAGS="-march=native -fprofile-dir=/tmp/profile-data -fprofile-generate" |g' $IROOT/ffead-cpp-sql-raw/resources/rundyn-automake.sh
 ./install_ffead-cpp-sql-raw-profiled.sh
 rm -rf $IROOT/ffead-cpp-sql-raw
 
@@ -64,7 +65,7 @@ service postgresql stop
 #For profiling/benchmarking
 
 cd $IROOT/
-#sed -i 's|cmake .|CXXFLAGS="-march=native -fprofile-dir=/tmp/profile-data -fprofile-use -fprofile-correction" cmake .|g' $IROOT/ffead-cpp-sql-raw/resources/rundyn-automake.sh
+#sed -i 's|cmake |CXXFLAGS="-march=native -fprofile-dir=/tmp/profile-data -fprofile-use -fprofile-correction" cmake |g' $IROOT/ffead-cpp-sql-raw/resources/rundyn-automake.sh
 ./install_ffead-cpp-sql-raw-profiled.sh
 mv $IROOT/ffead-cpp-sql-raw $IROOT/ffead-cpp-5.0-sql
 

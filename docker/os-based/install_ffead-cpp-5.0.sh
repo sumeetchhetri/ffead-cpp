@@ -48,6 +48,7 @@ done
 echo "ffead-cpp start successful"
 sleep 5
 cd tests && chmod +x *.sh && ./runTests.sh
+cd -
 echo "ffead-cpp normal shutdown"
 rm -f serv.ctrl
 pkill ffead-cpp

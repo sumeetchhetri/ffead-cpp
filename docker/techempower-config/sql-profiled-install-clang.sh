@@ -6,6 +6,7 @@ if [ "$1" = "batch" ]
 then
 	apt remove -yqq libpq-dev
 	apt autoremove -yqq
+	rm -f /usr/lib/x86_64-linux-gnu/libpq.*
 	apt update && apt install -y bison flex libreadline-dev
 	cd /tmp
 	#wget -q https://github.com/an-tao/postgres/archive/batch_mode_ubuntu.tar.gz
@@ -50,7 +51,7 @@ service postgresql stop
 #For profiling/benchmarking
 
 cd $IROOT/
-sed -i 's|cmake .|CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake .|g' $IROOT/ffead-cpp-sql-raw/resources/rundyn-automake.sh
+sed -i 's|cmake |CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake |g' $IROOT/ffead-cpp-sql-raw/resources/rundyn-automake.sh
 #sed -i 's|-fprofile-instr-generate=/tmp/cprof.prof|-fprofile-instr-generate=/tmp/cprofdi.prof|g' $IROOT/ffead-cpp-sql-raw/rtdcf/CMakeLists.txt.template
 ./install_ffead-cpp-sql-raw-profiled.sh
 rm -rf $IROOT/ffead-cpp-sql-raw
@@ -70,7 +71,7 @@ service postgresql stop
 #For profiling/benchmarking
 
 cd $IROOT/
-sed -i 's|cmake .|CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake .|g' $IROOT/ffead-cpp-sql-raw/resources/rundyn-automake.sh
+sed -i 's|cmake |CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake |g' $IROOT/ffead-cpp-sql-raw/resources/rundyn-automake.sh
 #sed -i 's|-fprofile-instr-use=/tmp/cprof.pgo|-fprofile-instr-use=/tmp/cprofdi.pgo|g' $IROOT/ffead-cpp-sql-raw/rtdcf/CMakeLists.txt.template
 ./install_ffead-cpp-sql-raw-profiled.sh
 mv $IROOT/ffead-cpp-sql-raw $IROOT/ffead-cpp-5.0-sql

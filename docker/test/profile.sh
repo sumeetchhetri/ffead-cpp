@@ -39,7 +39,7 @@ if ! nc -z localhost 5432 ; then
   ./run.sh
 fi
 
-sed -i 's|cmake .|cmake -DCMAKE_EXE_LINKER_FLAGS="-fprofile-dir=/tmp/profile-data -fprofile-generate" -DCMAKE_CXX_FLAGS="-march=native -fprofile-dir=/tmp/profile-data  -fprofile-generate" .|g' /tmp/ffead-cpp-sql-raw/resources/rundyn-automake.sh
+sed -i 's|cmake |cmake -DCMAKE_EXE_LINKER_FLAGS="-fprofile-dir=/tmp/profile-data -fprofile-generate" -DCMAKE_CXX_FLAGS="-march=native -fprofile-dir=/tmp/profile-data -fprofile-generate" |g' /tmp/ffead-cpp-sql-raw/resources/rundyn-automake.sh
 chmod +x *.sh && ./install_ffead-cpp-profile.sh
 ls /tmp/profile-data
 rm -rf /tmp/ffead-cpp-sql-raw
@@ -53,7 +53,7 @@ ninja install && \
 
 cd /
 
-sed -i 's|cmake .|cmake -DCMAKE_CXX_FLAGS="-march=native -fprofile-dir=/tmp/profile-data -fprofile-use -fprofile-correction" .|g' /tmp/ffead-cpp-sql-raw/resources/rundyn-automake.sh
+sed -i 's|cmake |cmake -DCMAKE_CXX_FLAGS="-march=native -fprofile-dir=/tmp/profile-data -fprofile-use -fprofile-correction" |g' /tmp/ffead-cpp-sql-raw/resources/rundyn-automake.sh
 ./install_ffead-cpp-profile.sh
 rm -rf /tmp/ffead-cpp-sql-raw
 
@@ -97,6 +97,6 @@ ninja install && \
 
 cd /
 
-sed -i 's|cmake .|cmake -DCMAKE_CXX_FLAGS="-march=native -fprofile-dir=/tmp/profile-data -fprofile-use -fprofile-correction" .|g' /tmp/ffead-cpp-sql-raw/resources/rundyn-automake.sh
+sed -i 's|cmake |cmake -DCMAKE_CXX_FLAGS="-march=native -fprofile-dir=/tmp/profile-data -fprofile-use -fprofile-correction" |g' /tmp/ffead-cpp-sql-raw/resources/rundyn-automake.sh
 ./install_ffead-cpp-profile.sh
 rm -rf /tmp/ffead-cpp-sql-raw

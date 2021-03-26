@@ -20,7 +20,7 @@
 			"webserver": "picov",
 			"os": "Linux",
 			"database_os": "Linux",
-			"display_name": "ffead-cpp-v-picov",
+			"display_name": "52ffead-cpp-v-picov",
 			"notes": "",
 			"versus": "",
 			"tags": []
@@ -44,7 +44,7 @@
 			"webserver": "ffead-cpp",
 			"os": "Linux",
 			"database_os": "Linux",
-			"display_name": "ffead-cpp-postgresql-raw",
+			"display_name": "52ffead-cpp-postgresql-raw",
 			"notes": "memory",
 			"versus": "",
 			"tags": []
@@ -65,7 +65,7 @@
 			"webserver": "ffead-cpp",
 			"os": "Linux",
 			"database_os": "Linux",
-			"display_name": "ffead-cpp-postgresql-raw-async-clibpqb-profiled",
+			"display_name": "52ffead-cpp-postgresql-raw-async-clibpqb-profiled",
 			"notes": "async memory libpq batch patch profiled",
 			"versus": "",
 			"tags": []
@@ -86,7 +86,7 @@
 			"webserver": "ffead-cpp",
 			"os": "Linux",
 			"database_os": "Linux",
-			"display_name": "ffead-cpp-postgresql-raw-async-clibpqb-profiled",
+			"display_name": "52ffead-cpp-postgresql-raw-async-clibpqb-profiled",
 			"notes": "async memory libpq batch patch profiled",
 			"versus": "",
 			"tags": []
