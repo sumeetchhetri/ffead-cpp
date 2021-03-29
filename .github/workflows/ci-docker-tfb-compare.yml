@@ -23,9 +23,18 @@ jobs:
         cp FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw52.dockerfile
         sed -i 's|:5.3|:5.2|g' FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw52.dockerfile
         cp FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw53.dockerfile
+        cp FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-profiled.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-profiled52.dockerfile
+        sed -i 's|:5.3|:5.2|g' FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-profiled52.dockerfile
+        cp FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-profiled.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-profiled53.dockerfile
         cp FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-clibpqb-profiled.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-clibpqb-profiled52.dockerfile
         sed -i 's|:5.3|:5.2|g' FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-clibpqb-profiled52.dockerfile
         cp FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-clibpqb-profiled.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-clibpqb-profiled53.dockerfile
+        cp FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-async.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-async52.dockerfile
+        sed -i 's|:5.3|:5.2|g' FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-async52.dockerfile
+        cp FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-async.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-async53.dockerfile
+        cp FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-async-profiled.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-async-profiled52.dockerfile
+        sed -i 's|:5.3|:5.2|g' FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-async-profiled52.dockerfile
+        cp FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-async-profiled.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-async-profiled53.dockerfile
         cp FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-async-clibpqb-profiled.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-async-clibpqb-profiled52.dockerfile
         sed -i 's|:5.3|:5.2|g' FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-async-clibpqb-profiled52.dockerfile
         cp FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-async-clibpqb-profiled.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-async-clibpqb-profiled53.dockerfile
