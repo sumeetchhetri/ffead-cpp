@@ -63,7 +63,7 @@ cd build
 llvm-profdata-10 merge -output=/tmp/cprof.pgo  /tmp/cprof.prof
 #llvm-profdata-10 merge -output=/tmp/cprofdi.pgo  /tmp/cprofdi.prof
 ls -ltr /tmp/cprof*
-CC=/usr/bin/clang CXX=/usr/bin/clang++ CXXFLAGS="-march=native -flto -fprofile-instr-use=/tmp/cprof.pgo" cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on ..
+CC=/usr/bin/clang CXX=/usr/bin/clang++ CXXFLAGS="-march=native -flto -fprofile-instr-use=/tmp/cprof.pgo" cmake -DSRV_EMB=on -DMOD_REDIS=on ..
 make install && mv $IROOT/ffead-cpp-src/ffead-cpp-5.0-bin $IROOT/ffead-cpp-sql-raw
 
 #Start postgresql

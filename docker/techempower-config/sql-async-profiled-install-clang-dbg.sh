@@ -53,4 +53,5 @@ service postgresql stop
 cd $IROOT/
 sed -i 's|cmake |CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake |g' $IROOT/ffead-cpp-sql-raw/resources/rundyn-automake.sh
 #sed -i 's|-fprofile-instr-generate=/tmp/cprof.prof|-fprofile-instr-generate=/tmp/cprofdi.prof|g' $IROOT/ffead-cpp-sql-raw/rtdcf/CMakeLists.txt.template
+apt update && apt install vim gdb
 ./install_ffead-cpp-sql-raw-profiled.sh async

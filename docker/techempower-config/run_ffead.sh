@@ -107,6 +107,10 @@ then
 	for i in $(seq 0 $(($(nproc --all)-1))); do
 		taskset -c $i ./ffead-cpp $FFEAD_CPP_PATH &
 	done
+	if [ "$3" = "postgresql-raw-async" ]
+	then
+		sleep 10
+	fi
 elif [ "$2" = "lithium" ]
 then
 	./ffead-cpp-lithium $FFEAD_CPP_PATH &
