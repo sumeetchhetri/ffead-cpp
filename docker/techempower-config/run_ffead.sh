@@ -109,7 +109,7 @@ then
 	done
 	if [ "$3" = "postgresql-raw-async" ]
 	then
-		sleep 10
+		sleep 20
 	fi
 elif [ "$2" = "lithium" ]
 then
