@@ -1502,13 +1502,17 @@ void PgBatchReadTask::run() {
 		if(numQueriesInBatch>=40) break;
 	}
 
-	if (numQueriesInBatch>0 && PQbatchSendQueue(ths->conn) == 0)
-	{
-		fprintf(stderr, "PQbatchSendQueue error: %s\n", PQerrorMessage(ths->conn));
-		//PQfinish(ths->conn);
-		//return;
+	if(numQueriesInBatch>0) {
+		if (PQbatchSendQueue(ths->conn) == 0)
+		{
+			fprintf(stderr, "PQbatchSendQueue error: %s\n", PQerrorMessage(ths->conn));
+			//PQfinish(ths->conn);
+			//return;
+		}
+		queueEntries = true;
+	} else {
+		queueEntries = false;
 	}
-	queueEntries = false;
 #endif
 }
 
