@@ -1311,8 +1311,6 @@ void PgBatchReadTask::run() {
 	}
 	//printf("Resultset ready...\n");
 
-
-	queueEntries = true;
 	while(!PQisBusy(ths->conn)) {
 		PGresult* res = PQgetResult(ths->conn);
 		if(res==NULL) {
@@ -1526,8 +1524,8 @@ void PgBatchReadTask::submit(__AsyncReq* ritem) {
 			{
 				fprintf(stderr, "PQbatchSendQueue error: %s\n", PQerrorMessage(ths->conn));
 				//PQfinish(ths->conn);
-				return;
 			}
+			queueEntries = true;
 		} else {
 			lQ.push(ritem);
 		}
