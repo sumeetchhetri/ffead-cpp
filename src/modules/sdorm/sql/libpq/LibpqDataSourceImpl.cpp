@@ -1296,7 +1296,7 @@ void PgBatchReadTask::run() {
 #ifdef HAVE_LIBPQ
 	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)sif;
 
-	//printf("Read Data waiting...\n");
+	//printf("run:Read Data waiting...\n");
 	if (!PQconsumeInput(ths->conn)) {
 		fprintf(stderr, "Failed to consume pg input: %s\n", PQerrorMessage(ths->conn));
 		throw std::runtime_error("Invalid connection state");
@@ -1309,8 +1309,9 @@ void PgBatchReadTask::run() {
 		}
 		if(PQisBusy(ths->conn)==1) return;
 	}
-	//printf("Resultset ready...\n");
+	//printf("run:Resultset ready...\n");
 
+	int readQueries = 0;
 	while(!PQisBusy(ths->conn)) {
 		PGresult* res = PQgetResult(ths->conn);
 		if(res==NULL) {
@@ -1318,16 +1319,18 @@ void PgBatchReadTask::run() {
 				fprintf(stderr, "Failed to consume pg input: %s\n", PQerrorMessage(ths->conn));
 				throw std::runtime_error("Invalid connection state");
 			}
-			//printf("Null Resultset...\n");
+			//printf("run:Null Resultset...\n");
 			continue;
 		}
 
-		//printf("Reading Resultset...\n");
+		//printf("run:Reading Resultset...\n");
 		if(PQresultStatus(res) == PGRES_BATCH_END) {
-			//printf("End batch...\n");
+			//printf("run:End batch...%d\n", readQueries);
 			PQclear(res);
 			break;
 		}
+
+		readQueries++;
 
 		if(ritem==NULL) {
 			ritem = ths->getNext();
@@ -1335,6 +1338,7 @@ void PgBatchReadTask::run() {
 
 		if(ritem==NULL) {
 			PQclear(res);
+			//printf("run:Resultset without query oops...\n");
 			continue;
 		}
 
@@ -1491,7 +1495,7 @@ void PgBatchReadTask::run() {
 			q = NULL;
 		}
 		PQclear(res);
-		//printf("Done Resultset...\n");
+		//printf("run:Done Resultset...\n");
 	}
 
 	int numQueriesInBatch = 0;
@@ -1503,11 +1507,12 @@ void PgBatchReadTask::run() {
 	}
 
 	if(numQueriesInBatch>0) {
-		if (PQbatchSendQueue(ths->conn) == 0)
-		{
-			fprintf(stderr, "PQbatchSendQueue error: %s\n", PQerrorMessage(ths->conn));
+		if (PQbatchSendQueue(ths->conn) == 0) {
+			fprintf(stderr, "run:PQbatchSendQueue error: %s\n", PQerrorMessage(ths->conn));
 			//PQfinish(ths->conn);
 			//return;
+		} else {
+			//printf("run:PQbatchSendQueue from run %d\n", numQueriesInBatch);
 		}
 		queueEntries = true;
 	} else {
@@ -1524,14 +1529,16 @@ void PgBatchReadTask::submit(__AsyncReq* ritem) {
 			ths->Q.push(ritem);
 			int numQueriesInBatch = 0;
 			batchQueries(ths, ritem, numQueriesInBatch);
-			if (PQbatchSendQueue(ths->conn) == 0)
-			{
-				fprintf(stderr, "PQbatchSendQueue error: %s\n", PQerrorMessage(ths->conn));
+			if (PQbatchSendQueue(ths->conn) == 0) {
+				fprintf(stderr, "submit:PQbatchSendQueue error: %s\n", PQerrorMessage(ths->conn));
 				//PQfinish(ths->conn);
+			} else {
+				//printf("submit:PQbatchSendQueue from submit %d\n", numQueriesInBatch);
 			}
 			queueEntries = true;
 		} else {
 			lQ.push(ritem);
+			//printf("submit:Add Query to Pending Queue\n");
 		}
 	}
 #endif
@@ -1544,7 +1551,7 @@ void PgBatchReadTask::batchQueries(LibpqDataSourceImpl* ths, __AsyncReq* ritem, 
 		int psize = (int)q->pvals.size();
 
 		if(q->isPrepared && ths->prepStmtMap.find(q->query)==ths->prepStmtMap.end()) {
-			//fprintf(stdout, "Prepare query....\n");fflush(stdout);
+			//printf("batchQueries:PQsendPrepare\n");
 			ritem->cnt++;
 			ths->prepStmtMap[q->query] = CastUtil::fromNumber(ths->prepStmtMap.size()+1);
 			int qs = PQsendPrepare(ths->conn,ths->prepStmtMap[q->query].c_str(), q->query.c_str(), psize, NULL);
@@ -1596,13 +1603,13 @@ void PgBatchReadTask::batchQueries(LibpqDataSourceImpl* ths, __AsyncReq* ritem, 
 		int qs = -1;
 		if(q->isPrepared) {
 			qs = PQsendQueryPrepared(ths->conn, ths->prepStmtMap[q->query].c_str(), psize, paramValues, paramLengths, paramBinary, 1);
-			//printf("ADD PQsendQueryPrepared to batch\n");
+			//printf("batchQueries:ADD PQsendQueryPrepared to batch\n");
 		} else if(psize>0) {
 			qs = PQsendQueryParams(ths->conn, q->query.c_str(), psize, NULL, paramValues, paramLengths, paramBinary, 1);
-			//printf("ADD PQsendQueryParams to batch\n");
+			//printf("batchQueries:ADD PQsendQueryParams to batch\n");
 		} else {
 			qs = PQsendQueryParams(ths->conn, q->query.c_str(), 0, NULL, NULL, NULL, NULL, 1);
-			//printf("ADD PQsendQueryParams to batch\n");
+			//printf("batchQueries:ADD PQsendQueryParams to batch\n");
 		}
 		numQueriesInBatch++;
 		//fprintf(stdout, "Send query....\n");fflush(stdout);
