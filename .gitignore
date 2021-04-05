@@ -74,3 +74,4 @@ docker/test/web
 **/.swiftpm
 **/.build
 **/app.xcodeproj
+**/.xmake

@@ -28,6 +28,7 @@ fi
 apt update -yqq && apt install -yqq clang
 
 cd $IROOT/ffead-cpp-src/
+rm -rf $IROOT/ffead-cpp-sql-raw
 rm -rf CMakeCache.txt CMakeFiles
 rm -rf web/te-benchmark-um web/te-benchmark-um-mgr web/te-benchmark-um-pq
 

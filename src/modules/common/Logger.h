@@ -73,6 +73,20 @@ public:
 		return logger;
 	}
 	friend Logger& operator<< (Logger& logger, std::ostream& (*pf) (std::ostream&));
+	//https://stackoverflow.com/questions/2342162/stdstring-formatting-like-sprintf/8098080
+	template<typename ... Args>
+	void write(const std::string& format, Args ... args)
+	{
+		if(config==NULL) return;
+		int size_s = snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
+		if( size_s <= 0 ) {
+			write(format, level, false);
+			return;
+		}
+		char buf[size_s];
+		snprintf( buf, size_s, format.c_str(), args ... );
+		write(std::string( &buf[0], size_s - 1 ), level, false);
+	}
 private:
 	static std::map<std::string, int> levelMap;
 	void setClassName(const std::string& className);
