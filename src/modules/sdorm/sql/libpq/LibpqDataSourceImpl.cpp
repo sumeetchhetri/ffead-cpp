@@ -53,7 +53,6 @@ bool LibpqDataSourceImpl::init() {
 	}
 	fd = PQsocket(conn);
 	if(isAsync) {
-		PQsetnonblocking(conn, 1);
 		if(RequestReaderHandler::getInstance()!=NULL) {
 #ifdef USE_IO_URING
 			Thread* pthread = new Thread(&handle, this);
@@ -72,10 +71,12 @@ bool LibpqDataSourceImpl::init() {
 #else
 			rdTsk = new PgReadTask(this);
 #endif
+			PQsetnonblocking(conn, 1);
 			RequestReaderHandler::getInstance()->addSf(this);
-			RequestReaderHandler::getInstance()->selector.registerRead(this);
+			RequestReaderHandler::getInstance()->selector.registerRead(this, false, false, true);
 #endif
 		} else {
+			PQsetnonblocking(conn, 1);
 			Thread* pthread = new Thread(&handle, this);
 			pthread->execute();
 		}
@@ -1282,6 +1283,7 @@ PgBatchReadTask::PgBatchReadTask(SocketInterface* sif) {
 	q = NULL;
 	ritem = NULL;
 	queueEntries = false;
+	sendBatch = true;
 }
 
 __AsyncReq* PgBatchReadTask::getNext() {
@@ -1308,9 +1310,11 @@ void PgBatchReadTask::run() {
 			fprintf(stderr, "Failed to consume pg input: %s\n", PQerrorMessage(ths->conn));
 			throw std::runtime_error("Invalid connection state");
 		}
-		if(PQisBusy(ths->conn)==1) return;
+		if(PQisBusy(ths->conn)==1) {
+			return;
+		}
 	}
-	//ths->logger << ("run:Resultset ready...\n");
+	//ths->logger.write("run:Resultset ready...Q size %d\n", ths->Q.size());
 
 	int readQueries = 0;
 	while(!PQisBusy(ths->conn)) {
@@ -1327,6 +1331,7 @@ void PgBatchReadTask::run() {
 		//ths->logger << ("run:Reading Resultset...\n");
 		if(PQresultStatus(res) == PGRES_BATCH_END) {
 			//ths->logger.write("run:End batch...%d\n", readQueries);
+			sendBatch = true;
 			PQclear(res);
 			break;
 		}
@@ -1339,7 +1344,7 @@ void PgBatchReadTask::run() {
 
 		if(ritem==NULL) {
 			PQclear(res);
-			//ths->logger << ("run:Resultset without query oops...\n");
+			//ths->logger.write("run:Resultset without query oops...Q size %q\n", ths->Q.size());
 			continue;
 		}
 
@@ -1499,61 +1504,76 @@ void PgBatchReadTask::run() {
 		//ths->logger << ("run:Done Resultset...\n");
 	}
 
+	processPending();
+#endif
+}
+
+void PgBatchReadTask::processPending() {
+#ifdef HAVE_LIBPQ
+	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)sif;
 	int numQueriesInBatch = 0;
 	__AsyncReq* nitem = NULL;
-	while((nitem = getNext())!=NULL) {
-		batchQueries(ths, nitem, numQueriesInBatch);
-		ths->Q.push(nitem);
-		if(numQueriesInBatch>=40) break;
-	}
 
-	if(numQueriesInBatch>0) {
-		if (PQbatchSendQueue(ths->conn) == 0) {
-			fprintf(stderr, "run:PQbatchSendQueue error: %s\n", PQerrorMessage(ths->conn));
-			//PQfinish(ths->conn);
-			//return;
-		} else {
-			//ths->logger.write("run:PQbatchSendQueue from run %d\n", numQueriesInBatch);
+	if(sendBatch && lQ.size()>0) {
+		while((nitem = getNext())!=NULL) {
+			ths->Q.push(nitem);
+			batchQueries(nitem, numQueriesInBatch);
+			if(numQueriesInBatch>=20) break;
 		}
-		queueEntries = true;
-	} else {
+
+		if(numQueriesInBatch>0) {
+			if (PQbatchSendQueue(ths->conn) == 0) {
+				fprintf(stderr, "processPending:PQbatchSendQueue error: %s\n", PQerrorMessage(ths->conn));
+				//PQfinish(ths->conn);
+				//return;
+			} else {
+				//ths->logger.write("processPending:PQbatchSendQueue from run %d, Batch Query Q size %d\n", numQueriesInBatch, ths->Q.size());
+			}
+			sendBatch = false;
+		}
+	}
+	if(lQ.size()==0) {
 		queueEntries = false;
+	} else {
+		queueEntries = true;
 	}
 #endif
 }
 
-void PgBatchReadTask::submit(__AsyncReq* ritem) {
+void PgBatchReadTask::submit(__AsyncReq* nitem) {
 #ifdef HAVE_LIBPQ
 	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)sif;
-	if(ritem!=NULL) {
-		if(!queueEntries) {
-			ths->Q.push(ritem);
+	if(nitem!=NULL) {
+		if(!queueEntries && sendBatch) {
+			ths->Q.push(nitem);
 			int numQueriesInBatch = 0;
-			batchQueries(ths, ritem, numQueriesInBatch);
+			batchQueries(nitem, numQueriesInBatch);
 			if (PQbatchSendQueue(ths->conn) == 0) {
 				fprintf(stderr, "submit:PQbatchSendQueue error: %s\n", PQerrorMessage(ths->conn));
 				//PQfinish(ths->conn);
 			} else {
-				//ths->logger.write("submit:PQbatchSendQueue from submit %d\n", numQueriesInBatch);
+				//ths->logger.write("submit:PQbatchSendQueue from submit %d, Batch Query Q size %d\n", numQueriesInBatch, ths->Q.size());
 			}
 			queueEntries = true;
+			sendBatch = false;
 		} else {
-			lQ.push(ritem);
-			//printf("submit:Add Query to Pending Queue\n");
+			lQ.push(nitem);
+			//ths->logger.write("submit:Add Query to Pending Queue...%d\n", lQ.size());
 		}
 	}
 #endif
 }
 
-void PgBatchReadTask::batchQueries(LibpqDataSourceImpl* ths, __AsyncReq* ritem, int& numQueriesInBatch) {
+void PgBatchReadTask::batchQueries(__AsyncReq* nitem, int& numQueriesInBatch) {
 #ifdef HAVE_LIBPQ
-	for (int i = 0; i < ritem->q.size(); ++i) {
-		__AsynQuery* q = ritem->q.at(i);
+	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)sif;
+	for (int i = 0; i < nitem->q.size(); ++i) {
+		__AsynQuery* q = nitem->q.at(i);
 		int psize = (int)q->pvals.size();
 
 		if(q->isPrepared && ths->prepStmtMap.find(q->query)==ths->prepStmtMap.end()) {
 			//ths->logger << ("batchQueries:PQsendPrepare\n");
-			ritem->cnt++;
+			nitem->cnt++;
 			ths->prepStmtMap[q->query] = CastUtil::fromNumber(ths->prepStmtMap.size()+1);
 			int qs = PQsendPrepare(ths->conn,ths->prepStmtMap[q->query].c_str(), q->query.c_str(), psize, NULL);
 			//printf("ADD PQsendPrepare to batch\n");
@@ -1563,18 +1583,18 @@ void PgBatchReadTask::batchQueries(LibpqDataSourceImpl* ths, __AsyncReq* ritem, 
 				fprintf(stderr, "Failed to prepare query %s\n", PQerrorMessage(ths->conn));
 				if(q->cmcb!=NULL) {
 					q->cmcb(q->ctx, false, q->query, i+1);
-				} else if(ritem->cmcb!=NULL) {
-					ritem->cmcb(ritem->ctx, false, q->query, i+1);
+				} else if(nitem->cmcb!=NULL) {
+					nitem->cmcb(nitem->ctx, false, q->query, i+1);
 				}
 				delete q;
 				q = NULL;
-				while(ritem->q.size()>0) {
-					__AsynQuery* qr = ritem->q.front();
-					ritem->q.erase(ritem->q.begin());
+				while(nitem->q.size()>0) {
+					__AsynQuery* qr = nitem->q.front();
+					nitem->q.erase(nitem->q.begin());
 					delete qr;
 				}
-				delete ritem;
-				ritem = NULL;
+				delete nitem;
+				nitem = NULL;
 				return;
 			}
 		} else {
@@ -1619,18 +1639,18 @@ void PgBatchReadTask::batchQueries(LibpqDataSourceImpl* ths, __AsyncReq* ritem, 
 			fprintf(stderr, "Failed to send query %s\n", PQerrorMessage(ths->conn));
 			if(q->cmcb!=NULL) {
 				q->cmcb(q->ctx, false, q->query, i+1);
-			} else if(ritem->cmcb!=NULL) {
-				ritem->cmcb(ritem->ctx, false, q->query, i+1);
+			} else if(nitem->cmcb!=NULL) {
+				nitem->cmcb(nitem->ctx, false, q->query, i+1);
 			}
 			delete q;
 			q = NULL;
-			while(ritem->q.size()>0) {
-				__AsynQuery* qr = ritem->q.front();
-				ritem->q.erase(ritem->q.begin());
+			while(nitem->q.size()>0) {
+				__AsynQuery* qr = nitem->q.front();
+				nitem->q.erase(nitem->q.begin());
 				delete qr;
 			}
-			delete ritem;
-			ritem = NULL;
+			delete nitem;
+			nitem = NULL;
 			return;
 		}
 	}

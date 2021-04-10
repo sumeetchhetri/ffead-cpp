@@ -249,7 +249,7 @@ public:
 	bool isListeningDescriptor(const SOCKET& descriptor);
 	bool registerWrite(SocketInterface* obj);
 	bool unRegisterWrite(SocketInterface* obj);
-	bool registerRead(SocketInterface* obj, const bool& isListeningSock = false, bool epoll_et = true);
+	bool registerRead(SocketInterface* obj, const bool& isListeningSock = false, bool epoll_et = true, bool isNonBlocking = false);
 	bool unRegisterRead(const SOCKET& descriptor);
 	void* getOptData(const int& index);
 	void reRegisterServerSock(void* obj);

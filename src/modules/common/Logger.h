@@ -69,7 +69,7 @@ public:
 	friend Logger& operator<< (Logger& logger, const T& msg)
 	{
 		if(logger.config==NULL) return logger;
-		logger.write(msg, logger.level, false);
+		logger.writeTemplate(msg, logger.level, false);
 		return logger;
 	}
 	friend Logger& operator<< (Logger& logger, std::ostream& (*pf) (std::ostream&));
@@ -80,12 +80,12 @@ public:
 		if(config==NULL) return;
 		int size_s = snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
 		if( size_s <= 0 ) {
-			write(format, level, false);
+			writeInternl(format, level, false);
 			return;
 		}
 		char buf[size_s];
 		snprintf( buf, size_s, format.c_str(), args ... );
-		write(std::string( &buf[0], size_s - 1 ), level, false);
+		writeInternl(std::string( &buf[0], size_s - 1 ), level, false);
 	}
 private:
 	static std::map<std::string, int> levelMap;
@@ -96,9 +96,9 @@ private:
 	Logger(LoggerConfig *config, const std::string& className, const std::string& level);
 	std::string className, level, oldLevel;
 	LoggerConfig *config;
-	void write(const std::string& msg, const std::string& mod, const bool& newline);
+	void writeInternl(const std::string& msg, const std::string& mod, const bool& newline);
 	template <typename T>
-	void write(const T& tmsg, const std::string& mod, const bool& newline)
+	void writeTemplate(const T& tmsg, const std::string& mod, const bool& newline)
 	{
 		if(config==NULL)return;
 		Date dat;
@@ -117,6 +117,6 @@ private:
 		}
 		config->lock->unlock();
 	}
-	void write(std::ostream& (*pf) (std::ostream&), const std::string& mod);
+	void writeToStream(std::ostream& (*pf) (std::ostream&), const std::string& mod);
 };
 #endif /* LOGGER_H_ */

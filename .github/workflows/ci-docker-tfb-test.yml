@@ -19,4 +19,4 @@ jobs:
         cp -rf docker/techempower-config/* FrameworkBenchmarks/frameworks/C++/ffead-cpp/
         cd FrameworkBenchmarks
         #sed -i'' -e 's|apt-get -yqq install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" postgresql postgresql-contrib|apt-get -yqq install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" postgresql-12 postgresql-contrib-12|g' toolset/databases/postgres/postgres.dockerfile
-        ./tfb --mode verify --test ffead-cpp
+        ./tfb --mode verify --test-dir C++/ffead-cpp

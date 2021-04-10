@@ -57,18 +57,6 @@ jobs:
         cd hiredis-1.0.0/
         cmake . && sudo make install
         rm -rf hiredis-1.0.0
-        git clone https://github.com/sumeetchhetri/cinatra.git
-        cd cinatra
-        git checkout sum_master
-        cd /tmp
-        git clone --recurse-submodules https://github.com/sumeetchhetri/drogon
-        cd  drogon
-        mkdir build
-        cd build
-        cmake -DCMAKE_BUILD_TYPE=Release ..
-        make && sudo make install
-        cd /tmp
-        rm -rf drogon
         popd
 
     - name: Install ffead-cpp
@@ -107,6 +95,8 @@ jobs:
         done
         echo "ffead-cpp start successful"
         sleep 5
-        cd tests && chmod +x *.sh && ./runTests.sh
+        cd tests
+        sudo chmod +x *.sh
+        sudo ./runTests.sh
         echo "ffead-cpp normal shutdown"
         sudo pkill ffead-cpp

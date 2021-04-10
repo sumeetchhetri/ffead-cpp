@@ -47,7 +47,7 @@ Map HttpSession::getSessionAttributes()
 
 void HttpSession::setSessionAttributes(const Map& sessionAttributes)
 {
-	std::map<std::string,std::string>::const_iterator it;
+	Map::const_iterator it;
 	for(it=sessionAttributes.begin();it!=sessionAttributes.end();it++)
 	{
 		this->sessionAttributes[it->first] = it->second;

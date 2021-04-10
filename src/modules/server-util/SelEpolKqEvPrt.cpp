@@ -533,16 +533,17 @@ bool SelEpolKqEvPrt::isListeningDescriptor(const SOCKET& descriptor)
 	return false;
 }
 
-bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningSock, bool epoll_et)
+bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningSock, bool epoll_et, bool isNonBlocking)
 {
 	#ifdef USE_IO_URING
 		return true;
 	#endif
 	SOCKET descriptor = obj->fd;
-	#ifdef OS_MINGW
+	if(!isNonBlocking) {
+#ifdef OS_MINGW
 		u_long iMode = 1;
 		ioctlsocket(descriptor, FIONBIO, &iMode);
-	#else
+#else
 #ifndef HAVE_ACCEPT4
 		fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFD, 0) | O_NONBLOCK);
 #else
@@ -559,7 +560,9 @@ bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningS
 		int i = 1;
 		setsockopt(descriptor, IPPROTO_TCP, TCP_NODELAY, (void *)&i, sizeof(i));
 		//setsockopt(descriptor, IPPROTO_TCP, TCP_CORK, (void *)&i, sizeof(i));
-	#endif
+#endif
+	}
+
 
 	#if defined(USE_MINGW_SELECT)
 		FD_SET(descriptor, &master);

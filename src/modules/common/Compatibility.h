@@ -238,6 +238,10 @@ typedef int NUMEVENTS;
 #define SOCKET_ERROR   -1  // basic WinSock error
 #define closesocket(s) close(s);  // Unix uses file descriptors, WinSock doesn't...
 
+#ifdef EMSCRIPTEN
+FILE * popen (const char *command, const char *mode);
+#endif
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>

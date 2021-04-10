@@ -37,6 +37,7 @@ class CacheManager {
 	Logger logger;
 	static std::map<std::string, CacheManager*> caches;
 	static std::map<std::string, std::string> defDsnNames;
+	static std::map<std::string, bool> appInitCompletionStatus;
 	ConnectionProperties props;
 	ConnectionPooler* pool;
 	Reflector* reflector;
@@ -50,6 +51,8 @@ public:
 	virtual ~CacheManager();
 	static CacheInterface* getImpl(std::string name = "", std::string appName = "");
 	static void cleanImpl(CacheInterface*);
+	static void triggerAppInitCompletion(std::string appName = "");
+	static bool isInitCompleted();
 };
 
 #endif /* CACHEMANAGER_H_ */

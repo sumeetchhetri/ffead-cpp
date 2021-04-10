@@ -25,10 +25,35 @@
 std::map<std::string, CacheManager*> CacheManager::caches;
 std::map<std::string, std::string> CacheManager::defDsnNames;
 std::map<std::string, CacheInterface*> CacheManager::sevhCchImpls;
+std::map<std::string, bool> CacheManager::appInitCompletionStatus;
 bool CacheManager::isSinglEVH = false;
 
 void CacheManager::init(bool issevh) {
 	isSinglEVH = issevh;
+}
+
+void CacheManager::triggerAppInitCompletion(std::string appNameN) {
+	std::string appName = appNameN;
+	if(appName=="") {
+		appName = CommonUtils::getAppName();
+	} else {
+		StringUtil::replaceAll(appName, "-", "_");
+		RegexUtil::replace(appName, "[^a-zA-Z0-9_]+", "");
+	}
+	if(appInitCompletionStatus.find(appName)!=appInitCompletionStatus.end()) {
+		appInitCompletionStatus[appName] = true;
+	}
+}
+
+bool CacheManager::isInitCompleted() {
+	bool flag = true;
+	if(appInitCompletionStatus.size()>0) {
+		std::map<std::string, bool>::iterator it = appInitCompletionStatus.begin();
+		for(;it!=appInitCompletionStatus.end();++it) {
+			flag &= it->second;
+		}
+	}
+	return flag;
 }
 
 void CacheManager::initCache(const ConnectionProperties& props, const std::string& appNameN, GetClassBeanIns f) {
@@ -77,6 +102,7 @@ void CacheManager::initCache(const ConnectionProperties& props, const std::strin
 					const Method& meth = cbi.clas->getMethod(v.at(1), argus);
 					if(meth.getMethodName()!="")
 					{
+						appInitCompletionStatus[appName] = false;
 						ref->invokeMethodGVP(_temp, meth, valus);
 					}
 				}

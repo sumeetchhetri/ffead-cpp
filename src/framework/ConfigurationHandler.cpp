@@ -2165,7 +2165,7 @@ void ConfigurationHandler::handleDataSourceEntities(const std::string& appName, 
 					}
 					else
 					{
-						std::map<std::string, Mapping>::iterator it;
+						std::map<std::string, Mapping, std::less<>>::iterator it;
 						for(it=mappings.begin();it!=mappings.end();++it)
 						{
 							if(it->second.appName==appName)
@@ -2581,7 +2581,7 @@ void ConfigurationHandler::initializeDataSources()
 	std::map<std::string, std::map<std::string, Mapping, std::less<> >, std::less<> > sdormEntityMappings = ConfigurationData::getInstance()->sdormEntityMappings;
 	std::map<std::string, bool, std::less<> >::iterator mit;
 	for (mit=mycntxts.begin();mit!=mycntxts.end();++mit) {
-		std::map<std::string, ConnectionProperties>::iterator it;
+		std::map<std::string, ConnectionProperties, std::less<> >::iterator it;
 		if(sdormConnProperties.find(mit->first)!=sdormConnProperties.end())
 		{
 			logger << "app for ds is " << mit->first << std::endl;
@@ -2621,7 +2621,7 @@ void ConfigurationHandler::initializeCaches()
 		if(cacheConnProperties.find(mit->first)!=cacheConnProperties.end())
 		{
 			std::map<std::string, ConnectionProperties, std::less<> > allProps = cacheConnProperties[mit->first];
-			std::map<std::string, ConnectionProperties>::iterator it;
+			std::map<std::string, ConnectionProperties, std::less<>>::iterator it;
 			for (it=allProps.begin();it!=allProps.end();++it) {
 				CacheManager::initCache(allProps[it->first], mit->first, &ConfigurationHandler::populateClassBeanInstanceCb);
 			}

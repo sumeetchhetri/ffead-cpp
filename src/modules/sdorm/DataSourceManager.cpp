@@ -26,10 +26,35 @@ std::map<std::string, DataSourceManager*> DataSourceManager::dsns;
 std::map<std::string, std::string> DataSourceManager::defDsnNames;
 std::map<std::string, DataSourceInterface*> DataSourceManager::sevhDsnImpls;
 std::map<std::string, void*> DataSourceManager::sevhDsnRawImpls;
+std::map<std::string, bool> DataSourceManager::appInitCompletionStatus;
 bool DataSourceManager::isSingleEVH = false;
 
 void DataSourceManager::init(bool issevh) {
 	isSingleEVH = issevh;
+}
+
+void DataSourceManager::triggerAppInitCompletion(std::string appNameN) {
+	std::string appName = appNameN;
+	if(appName=="") {
+		appName = CommonUtils::getAppName();
+	} else {
+		StringUtil::replaceAll(appName, "-", "_");
+		RegexUtil::replace(appName, "[^a-zA-Z0-9_]+", "");
+	}
+	if(appInitCompletionStatus.find(appName)!=appInitCompletionStatus.end()) {
+		appInitCompletionStatus[appName] = true;
+	}
+}
+
+bool DataSourceManager::isInitCompleted() {
+	bool flag = true;
+	if(appInitCompletionStatus.size()>0) {
+		std::map<std::string, bool>::iterator it = appInitCompletionStatus.begin();
+		for(;it!=appInitCompletionStatus.end();++it) {
+			flag &= it->second;
+		}
+	}
+	return flag;
 }
 
 void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping& mapping, GetClassBeanIns f)
@@ -77,6 +102,7 @@ void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping
 					const Method& meth = cbi.clas->getMethod(v.at(1), argus);
 					if(meth.getMethodName()!="")
 					{
+						appInitCompletionStatus[appName] = false;
 						ref->invokeMethodGVP(_temp, meth, valus);
 					}
 				}

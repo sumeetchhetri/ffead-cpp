@@ -88,6 +88,7 @@ std::string TeBkUmLpqAsyncRouter::WORLD = "world";
 std::string TeBkUmLpqAsyncRouter::WORLD_ONE_QUERY = "select id, randomnumber from world where id = $1";
 std::string TeBkUmLpqAsyncRouter::WORLD_ALL_QUERY = "select id, randomnumber from world";
 std::string TeBkUmLpqAsyncRouter::FORTUNE_ALL_QUERY = "select id, message from fortune";
+//Logger TeBkUmLpqAsyncRouter::logger = LoggerFactory::getLogger("TeBkUmLpqAsync");
 std::map<int, std::string> TeBkUmLpqAsyncRouter::_qC;
 
 void TeBkUmLpqAsyncRouter::dbAsync(AsyncReq* req) {
@@ -98,6 +99,7 @@ void TeBkUmLpqAsyncRouter::dbAsync(AsyncReq* req) {
 		std::vector<LibpqParam> pars;
 		LibpqDataSourceImpl::ADD_INT4(pars, rid);
 		void* areq = sqli->executeQueryAsync(WORLD_ONE_QUERY, std::move(pars), req, &TeBkUmLpqAsyncRouter::dbAsyncUtil, &TeBkUmLpqAsyncRouter::dbAsyncCh, NULL);
+		//logger << ("in API /db added to PG\n");
 		sqli->completeAsync(areq);
 	} catch(const std::exception& e) {
 		throw e;
@@ -108,6 +110,7 @@ void TeBkUmLpqAsyncRouter::dbAsyncUtil(void* ctx, int rn, int cn, char * d) {
 	TeBkUmLpqAsyncWorld* w = (TeBkUmLpqAsyncWorld*)req->d;
 	if(cn==0)w->setId(ntohl(*((uint32_t *) d)));
 	if(cn==1)w->setRandomNumber(ntohl(*((uint32_t *) d)));
+	//logger << ("in API /db received row from PG\n");
 }
 void TeBkUmLpqAsyncRouter::dbAsyncCh(void* ctx, bool status, const std::string& q, int counter) {
 	AsyncReq* req = (AsyncReq*)ctx;
@@ -117,8 +120,10 @@ void TeBkUmLpqAsyncRouter::dbAsyncCh(void* ctx, bool status, const std::string& 
 	JSONSerialize::serializeUnknown(w, 0, "TeBkUmLpqAsyncWorld", &c, APP_NAME);
 	std::string d;
 	req->r.generateHeadResponse(d, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, (int)c.length());
-	req->sif->writeDirect(d);
-	req->sif->writeDirect(c);
+	int st = req->sif->writeDirect(d);
+	//logger.write("in API /db completion writeDirect headers to sock %d\n", st);
+	st = req->sif->writeDirect(c);
+	//logger.write("in API /db completion writeDirect data to sock %d\n", st);
 	req->sif->unUse();
 	delete w;
 	delete req;
@@ -462,6 +467,7 @@ void TeBkUmLpqAsyncRouter::updateCacheAsyncCh(void* ctx, bool status, const std:
 		delete wlist;
 		CacheManager::cleanImpl(cchi);
 		delete req;
+		CacheManager::triggerAppInitCompletion("te-benchmark-um-pq-async");
 	} catch(const std::exception& e) {
 		delete wlist;
 		CacheManager::cleanImpl(cchi);

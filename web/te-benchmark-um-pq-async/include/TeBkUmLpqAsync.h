@@ -101,8 +101,6 @@ class TeBkUmLpqAsyncRouter : public Router {
 	static std::string APP_NAME;
 	static std::string TPE_FN_NAME;
 
-	std::atomic<bool> which = { false };
-
 	static bool strToNum(const char* str, int len, int& ret);
 
 	void dbAsync(AsyncReq* req);
@@ -139,13 +137,12 @@ class TeBkUmLpqAsyncRouter : public Router {
 	static std::map<int, std::string> _qC;
 	LibpqDataSourceImpl* sqli;
 	LibpqDataSourceImpl* getDb();
+	//static Logger logger;
 public:
 	TeBkUmLpqAsyncRouter& operator=(const TeBkUmLpqAsyncRouter& a) {
-		which = false;
 		return *this;
 	}
 	TeBkUmLpqAsyncRouter(const TeBkUmLpqAsyncRouter& a) {
-		which = false;
 		sqli = NULL;
 	}
 	TeBkUmLpqAsyncRouter();

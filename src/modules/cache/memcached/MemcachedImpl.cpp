@@ -208,7 +208,7 @@ bool MemcachedImpl::replyStatus(const memcached_return_t& reply) {
 	return memcached_success(reply);
 }
 
-void* MemcachedImpl::executeCommand(const std::string& command, ...) {
+void* MemcachedImpl::executeCommand(const std::string command, ...) {
 	throw std::runtime_error("Not Implemented");
 }
 

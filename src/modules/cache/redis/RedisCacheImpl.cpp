@@ -197,10 +197,9 @@ redisReply* RedisCacheImpl::execute(const char* format, ...) {
 	return reply;
 }
 
-void* RedisCacheImpl::executeCommand(const std::string& command, ...) {
+void* RedisCacheImpl::executeCommand(const std::string command, ...) {
 	va_list vl;
-	std::string c = command;
-	va_start(vl, c);
+	va_start(vl, command);
 	void* reply = execute(command.c_str());
 	va_end(vl);
 	return reply;

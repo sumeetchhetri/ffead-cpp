@@ -79,7 +79,10 @@ ENV accept accept
 
 WORKDIR ${IROOT}
 
+COPY sql-profiled-util.sh ${IROOT}/
+RUN chmod 755 ${IROOT}/sql-profiled-util.sh
+RUN ./sql-profiled-util.sh nobatch noclang async
+
 COPY sql-async-profiled-install.sh install_ffead-cpp-sql-raw-profiled.sh ${IROOT}/
 RUN chmod 755 ${IROOT}/sql-async-profiled-install.sh ${IROOT}/install_ffead-cpp-sql-raw-profiled.sh
-
 RUN ./sql-async-profiled-install.sh

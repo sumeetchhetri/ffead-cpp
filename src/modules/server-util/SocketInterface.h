@@ -62,7 +62,7 @@ public:
 	virtual bool unRegisterWrite(SocketInterface* obj)=0;
 	virtual bool unRegisterRead(const SOCKET& descriptor)=0;
 	virtual bool registerWrite(SocketInterface* obj)=0;
-	virtual bool registerRead(SocketInterface* obj, const bool& isListeningSock = false, bool epoll_et = true)=0;
+	virtual bool registerRead(SocketInterface* obj, const bool& isListeningSock = false, bool epoll_et = true, bool isNonBlocking = false)=0;
 #if defined(USE_IO_URING)
 	virtual void post_write(SocketInterface* sfd, const std::string& data)=0;
 	virtual void post_read(SocketInterface* sfd)=0;

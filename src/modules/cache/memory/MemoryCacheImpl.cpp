@@ -220,7 +220,7 @@ void MemoryCacheImpl::mgetRaw(const std::vector<std::string>& keys, std::vector<
 	p->lock.unlock();
 }
 
-void* MemoryCacheImpl::executeCommand(const std::string& command, ...) {
+void* MemoryCacheImpl::executeCommand(const std::string command, ...) {
 	throw std::runtime_error("Not Implemented");
 }
 

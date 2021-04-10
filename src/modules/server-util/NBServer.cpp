@@ -180,7 +180,7 @@ void* NBServer::servicing(void* arg)
 				else
 				{
 					server->selEpolKqEvPrtHandler.reRegisterServerSock(NULL);
-					server->selEpolKqEvPrtHandler.registerRead(NULL);
+					server->selEpolKqEvPrtHandler.registerRead(NULL, false, false);
 				}
 			}
 			else if (descriptor!=-1)

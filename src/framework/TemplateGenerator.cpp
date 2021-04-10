@@ -227,7 +227,7 @@ std::string TemplateGenerator::generateTempCdAll(const std::string& serverRootDi
 {
 	std::map<std::string, std::string, std::less<> > templateMappingMap = ConfigurationData::getInstance()->templateFilesMap;
 	std::string bodies,headersb="#include \"AfcInclude.h\"",funcdefs;
-	std::map<std::string, std::string>::iterator msssit;
+	std::map<std::string, std::string, std::less<>>::iterator msssit;
 	for (msssit=templateMappingMap.begin();msssit!=templateMappingMap.end();++msssit)
 	{
 		bodies += generateTempCd(msssit->first,headersb,funcdefs,msssit->second);

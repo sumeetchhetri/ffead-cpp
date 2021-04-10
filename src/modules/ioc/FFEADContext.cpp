@@ -392,7 +392,7 @@ void FFEADContext::clearAllSingletonBeans(const std::map<std::string, bool, std:
 {
 	if(cleared)
 		return;
-	std::map<std::string, bool>::const_iterator it;
+	std::map<std::string, bool, std::less<> >::const_iterator it;
 	for (it=servingContexts.begin();it!=servingContexts.end();it++)
 	{
 		clear(it->first);
@@ -403,7 +403,7 @@ void FFEADContext::clearAllSingletonBeans(const std::map<std::string, bool, std:
 void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool, std::less<> >& servingContexts, Reflector* reflector)
 {
 	this->reflector = reflector;
-	std::map<std::string,Bean>::iterator beanIter;
+	beanMap::iterator beanIter;
 	logger << "Initializing singleton beans..." << std::endl;
 	for (beanIter=beans.begin();beanIter!=beans.end();beanIter++)
 	{

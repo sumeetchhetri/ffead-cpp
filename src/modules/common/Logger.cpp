@@ -86,7 +86,7 @@ Logger::~Logger()
 	this->config = NULL;
 }
 
-void Logger::write(const std::string& msg, const std::string& mod, const bool& newline)
+void Logger::writeInternl(const std::string& msg, const std::string& mod, const bool& newline)
 {
 	if(config==NULL)return;
 	Date dat;
@@ -99,7 +99,7 @@ void Logger::write(const std::string& msg, const std::string& mod, const bool& n
 	config->lock->unlock();
 }
 
-void Logger::write(std::ostream& (*pf) (std::ostream&), const std::string& mod)
+void Logger::writeToStream(std::ostream& (*pf) (std::ostream&), const std::string& mod)
 {
 	if(config==NULL)return;
 	Date dat;
@@ -117,7 +117,7 @@ void Logger::fatal(const std::string& msg)
 	if(config==NULL)return;
 	if(levelMap[config->mode]>=4)
 	{
-		write(msg,LEVEL_FATAL,true);
+		writeInternl(msg,LEVEL_FATAL,true);
 	}
 }
 
@@ -126,7 +126,7 @@ void Logger::error(const std::string& msg)
 	if(config==NULL)return;
 	if(levelMap[config->mode]>=4)
 	{
-		write(msg,LEVEL_ERROR,true);
+		writeInternl(msg,LEVEL_ERROR,true);
 	}
 }
 
@@ -135,7 +135,7 @@ void Logger::warn(const std::string& msg)
 	if(config==NULL)return;
 	if(levelMap[config->mode]>=4)
 	{
-		write(msg,LEVEL_WARN,true);
+		writeInternl(msg,LEVEL_WARN,true);
 	}
 }
 
@@ -144,7 +144,7 @@ void Logger::info(const std::string& msg)
 	if(config==NULL)return;
 	if(levelMap[config->mode]>=4)
 	{
-		write(msg,LEVEL_INFO,true);
+		writeInternl(msg,LEVEL_INFO,true);
 	}
 }
 
@@ -153,7 +153,7 @@ void Logger::debug(const std::string& msg)
 	if(config==NULL)return;
 	if(levelMap[config->mode]==2 || levelMap[config->mode]==3)
 	{
-		write(msg,LEVEL_DEBUG,true);
+		writeInternl(msg,LEVEL_DEBUG,true);
 	}
 }
 
@@ -162,14 +162,14 @@ void Logger::trace(const std::string& msg)
 	if(config==NULL)return;
 	if(levelMap[config->mode]==2)
 	{
-		write(msg,LEVEL_TRACE,true);
+		writeInternl(msg,LEVEL_TRACE,true);
 	}
 }
 
 Logger& operator<< (Logger& logger, std::ostream& (*pf) (std::ostream&))
 {
 	if(logger.config==NULL) return logger;
-	logger.write(pf, logger.level);
+	logger.writeToStream(pf, logger.level);
 	if(pf == static_cast <std::ostream & (*)(std::ostream &)> (std::endl) || pf == static_cast <std::ostream & (*)(std::ostream &)> (std::flush)) {
 		logger.level = Logger::LEVEL_INFO;
 	}

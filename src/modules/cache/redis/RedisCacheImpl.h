@@ -66,7 +66,7 @@ public:
 	std::map<std::string, std::string> statistics();
 	bool flushAll();
 
-	void* executeCommand(const std::string& command, ...);
+	void* executeCommand(const std::string command, ...);
 	bool addToQ(const std::string& qname, const std::string& value);
 	std::string getFromQ(const std::string& qname);
 };

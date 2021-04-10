@@ -44,6 +44,7 @@ class DataSourceManager {
 	Logger logger;
 	static std::map<std::string, DataSourceManager*> dsns;
 	static std::map<std::string, std::string> defDsnNames;
+	static std::map<std::string, bool> appInitCompletionStatus;
 	ConnectionProperties props;
 	Mapping mapping;
 	ConnectionPooler* pool;
@@ -58,6 +59,8 @@ public:
 	static void cleanImpl(DataSourceInterface*);
 	static void* getRawImpl(std::string name = "", std::string appName = "");
 	static void cleanRawImpl(DataSourceType*);
+	static void triggerAppInitCompletion(std::string appName = "");
+	static bool isInitCompleted();
 };
 
 #endif /* DATASOURCEMANAGER_H_ */

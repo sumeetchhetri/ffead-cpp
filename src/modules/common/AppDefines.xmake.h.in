@@ -1,0 +1,90 @@
+/*
+	Copyright 2009-2020, Sumeet Chhetri
+
+    Licensed under the Apache License, Version 2.0 (const the& "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+
+${define INC_MEMORYCACHE}
+${define INC_REDISCACHE}
+${define INC_MEMCACHED}
+${define INC_SDORM}
+${define INC_SDORM_SQL}
+${define INC_SDORM_MONGO}
+${define INC_BINSER}
+${define INC_JOBS}
+${define APPLE}
+${define MINGW}
+${define CYGWIN}
+${define EMSCRIPTEN}
+${define DEBUG_MODE}
+
+${define USE_EPOLL}
+${define USE_KQUEUE}
+${define USE_EVPORT}
+${define USE_DEVPOLL}
+${define USE_POLL}
+${define USE_SELECT}
+${define USE_WIN_IOCP}
+${define USE_IO_URING}
+
+${define HAVE_LIBPQ}
+${define HAVE_REGEX}
+${define HAVE_SSLINC}
+${define HAVE_SSLLIB}
+${define HAVE_REDISINC}
+${define HAVE_REDISLIB}
+${define HAVE_MEMCACHEDINC}
+${define HAVE_MEMCACHEDLIB}
+${define HAVE_CURLLIB}
+${define HAVE_EXECINFOINC}
+${define HAVE_UUIDINC}
+${define HAVE_OSSPUUIDINC}
+${define HAVE_BSDUUIDINC}
+${define HAVE_SQLINC}
+${define HAVE_ODBCLIB}
+${define HAVE_MONGOINC}
+${define HAVE_MONGOCLIB}
+${define HAVE_BSONINC}
+${define HAVE_BSONLIB}
+${define INC_JOBS}
+${define OS_BSD}
+${define OS_SOLARIS}
+${define OS_LINUX}
+${define OS_MINGW}
+${define OS_DARWIN}
+${define OS_ANDROID}
+${define SRV_EMB}
+${define SRV_CINATRA}
+${define SRV_LITHIUM}
+${define SRV_DROGON}
+${define HAVE_ACCEPT4}
+${define HAVE_TCP_QUICKACK}
+${define HAVE_TCP_DEFER_ACCEPT}
+${define HAVE_TCP_FASTOPEN}
+${define HAVE_LIBPQ_BATCH}
+
+#ifdef HAVE_ODBCLIB
+#define HAVE_LIBODBC 1
+#endif
+
+#define INC_WEBSVC 1
+#define INC_TPE 1
+#define INC_DVIEW 1
+#define INC_DCP 1
+#define INC_XMLSER 1
+#define IS_SENDFILE 1
+#define BUILD_CMAKE 1
+
+#ifdef APPLE
+#define OS_DARWIN 1
+#endif

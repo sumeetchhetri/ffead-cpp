@@ -25,7 +25,9 @@
 
 #include "CHServer.h"
 
-static std::string servd, serverCntrlFileNm;
+std::string CHServer::serverCntrlFileNm;
+
+static std::string servd;
 static bool isSSLEnabled = false, isThreadprq = false, processforcekilled = false,
 		processgendone = false, isCompileEnabled = false;
 static int preForked = 5;
@@ -314,11 +316,11 @@ void* service(void* arg)
 	return NULL;
 }
 
-void* gracefullShutdown_monitor(void* args)
+void* CHServer::gracefullShutdown_monitor(void* args)
 {
 	std::string* ipaddr = (std::string*)args;
 	struct stat buffer;
-	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
+	while(stat (CHServer::serverCntrlFileNm.c_str(), &buffer) == 0)
 	{
 		Thread::sSleep(1);
 	}
@@ -350,7 +352,7 @@ void* CHServer::dynamic_page_monitor(void* arg)
 	std::map<std::string, std::string, std::less<> > dcspstpes = dcpsss;
 	dcspstpes.insert(tpes.begin(), tpes.end());
 	std::map<std::string,long> statsinf;
-	std::map<std::string, std::string>::iterator it;
+	std::map<std::string, std::string, std::less<>>::iterator it;
 	for(it=dcspstpes.begin();it!=dcspstpes.end();++it)
 	{
 		stat(it->first.c_str(), &statbuf);
@@ -1039,7 +1041,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 										}
 									}
 								}
-								std::map<std::string, bool>::iterator ucit;
+								std::map<std::string, bool, std::less<>>::iterator ucit;
 								for(ucit=updatedcontextNames.begin();ucit!=updatedcontextNames.end();ucit++)
 								{
 									if(ConfigurationData::getInstance()->servingContexts.find(ucit->first)!=
@@ -1157,13 +1159,13 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	{
 		if(vhostNumber==0)
 		{
-			std::map<std::string, bool>::iterator it;
+			std::map<std::string, bool, std::less<>>::iterator it;
 			for (it=ConfigurationData::getInstance()->servingContexts.begin();it!=ConfigurationData::getInstance()->servingContexts.end();++it)
 				logger << ("Server (" +  ipport  + ") serves context (" +  it->first  + ")") << std::endl;
 		}
 		else
 		{
-			std::map<std::string, bool>::iterator it;
+			std::map<std::string, bool, std::less<>>::iterator it;
 			for (it=ConfigurationData::getInstance()->servingContexts.begin();it!=ConfigurationData::getInstance()->servingContexts.end();++it)
 				logger << ("Virtual-Host (" +  ipport  + ") serves context (" +  it->first  + ")") << std::endl;
 		}
@@ -1231,6 +1233,11 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	reader.registerSocketInterfaceFactory(&CHServer::createSocketInterface);
 	reader.startNL(-1);
 
+	std::ofstream serverCntrlFileo;
+	serverCntrlFileo.open(serverCntrlFileNm.c_str());
+	serverCntrlFileo << "Server Running" << std::endl;
+	serverCntrlFileo.close();
+
 #ifdef INC_SDORM
 	logger << ("Initializing DataSources....") << std::endl;
 	ConfigurationHandler::initializeDataSources();
@@ -1241,13 +1248,21 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	ConfigurationHandler::initializeCaches();
 	logger << ("Initializing Caches done....") << std::endl;
 
+	//struct sockaddr_storage their_addr; // connector's address information
+	//socklen_t sin_size;
+	SOCKET sockfd = Server::createListener(ipaddr, CastUtil::toInt(port), true, isSinglEVH);
+	if(sockfd==-1)
+	{
+		logger << "Unable to start the server on the specified ip/port..." << std::endl;
+		return;
+	}
+	reader.addListenerSocket(&doRegisterListenerFunc, sockfd);
+
 #ifdef INC_JOBS
 	if(StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["ENABLE_JOBS"])=="true") {
 		JobScheduler::start();
 	}
 #endif
-
-	std::vector<std::string> files;
 
 #ifdef INC_DCP
 	if(isCompileEnabled)
@@ -1257,28 +1272,8 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	}
 #endif
 
-	SOCKET sockfd;  // listen on sock_fd, new connection on new_fd
-
-	//struct sockaddr_storage their_addr; // connector's address information
-	//socklen_t sin_size;
-
-	sockfd = Server::createListener(ipaddr, CastUtil::toInt(port), true, isSinglEVH);
-
-	if(sockfd==-1)
-	{
-		logger << "Unable to start the server on the specified ip/port..." << std::endl;
-		return;
-	}
-
-	reader.addListenerSocket(sockfd);
-
 	//printf("server: waiting for connections...\n");
-	logger.info("Server: waiting for connections on " + ipport);
-
-	std::ofstream serverCntrlFileo;
-	serverCntrlFileo.open(serverCntrlFileNm.c_str());
-	serverCntrlFileo << "Server Running" << std::endl;
-	serverCntrlFileo.close();
+	logger.write("Server: waiting for connections on %s\n", ipport.c_str());
 
 	//Sleep for some time so as to make sure all the new child processes are set correctly
 	//and all init is complete...
@@ -1398,4 +1393,9 @@ SocketInterface* CHServer::createSocketInterface(SOCKET fd) {
 	return new Http11Handler(fd, NULL, NULL, ConfigurationData::getInstance()->coreServerProperties.webPath,
 		techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
 #endif
+}
+
+bool CHServer::doRegisterListenerFunc() {
+	struct stat buffer;
+	return stat (serverCntrlFileNm.c_str(), &buffer)==0 && CacheManager::isInitCompleted() && DataSourceManager::isInitCompleted();
 }

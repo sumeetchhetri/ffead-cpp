@@ -148,7 +148,7 @@ public:
 			rv.push_back(GenericObject::getObjectFromSerilaizedState<T>(vals.at(i)));
 		}
 	}
-	virtual void* executeCommand(const std::string& command, ...)=0;
+	virtual void* executeCommand(const std::string command, ...)=0;
 };
 
 #endif /* CACHEINTERFACE_H_ */

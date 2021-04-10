@@ -1007,7 +1007,7 @@ std::string HttpResponse::toPluginString() {
 	text += (CastUtil::fromNumber(this->epilogue.length()) + "\n");
 	text += (this->epilogue);
 
-	std::map<std::string,std::string,cicomp>::iterator it;
+	RMap::iterator it;
 	text += (CastUtil::fromNumber(this->headers.size()) + "\n");
 	for(it=this->headers.begin();it!=this->headers.end();++it)
 	{

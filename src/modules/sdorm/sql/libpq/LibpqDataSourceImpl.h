@@ -101,12 +101,14 @@ class PgBatchReadTask : public Task {
 	__AsynQuery* q;
 	SocketInterface* sif;
 	std::atomic<bool> queueEntries;
+	std::atomic<bool> sendBatch;
 	std::queue<__AsyncReq*> lQ;
 	void run();
+	void processPending();
 	void submit(__AsyncReq* item);
 	friend class LibpqDataSourceImpl;
 	__AsyncReq* getNext();
-	void batchQueries(LibpqDataSourceImpl* ths, __AsyncReq* ritem, int& numQueriesInBatch);
+	void batchQueries(__AsyncReq* ritem, int& numQueriesInBatch);
 public:
 	virtual ~PgBatchReadTask();
 	PgBatchReadTask(SocketInterface* sif);

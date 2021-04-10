@@ -42,6 +42,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.342787389" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base">
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.1062586156" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/local/opt/libpq/include"/>
+									<listOptionValue builtIn="false" value="/usr/local/Cellar/vcpkg/2020.11-1/libexec/installed/x64-osx/include/"/>
 									<listOptionValue builtIn="false" value="/usr/local/opt/emsdk/upstream/emscripten/system/include"/>
 									<listOptionValue builtIn="false" value="/Users/sumeetc/Projects/GitHub/fmt/include/"/>
 									<listOptionValue builtIn="false" value="/Users/sumeetc/Projects/GitHub/seastar/include/"/>
@@ -59,6 +60,7 @@
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.228093075" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__cplusplus=201103L"/>
+									<listOptionValue builtIn="false" value="RAPIDJSON_HAS_STDSTRING=1"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.optimization.level.392374030" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option defaultValue="gnu.cpp.compiler.debugging.level.max" id="gnu.cpp.compiler.option.debugging.level.1405958163" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
@@ -167,5 +169,12 @@
 		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.pathentry"/>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/ffead-cpp"/>
+		</configuration>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/ffead-cpp"/>
+		</configuration>
+	</storageModule>
 </cproject>

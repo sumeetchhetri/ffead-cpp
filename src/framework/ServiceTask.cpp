@@ -123,7 +123,7 @@ void ServiceTask::storeSessionAttributes(HttpResponse* res, HttpRequest* req, co
 		//int seconds = sessionTimeout;
 		date.updateSeconds(sessionTimeout);
 		DateFormat dformat("%a, %d %b %Y %H:%M:%S");
-		std::map<std::string,std::string>::iterator it;
+		std::map<std::string,std::string, std::less<>>::iterator it;
 
 		/*if(sessatserv)
 		{
@@ -438,7 +438,7 @@ WebSockHandler* ServiceTask::handleWebsockOpen(WebSocketData* req, WebSocketResp
 	req->cnxtName = hreq->getCntxt_name();
 
 	std::map<std::string, std::string, std::less<> > websockcntMap = ConfigurationData::getInstance()->websocketMappingMap.find(req->getCntxt_name())->second;
-	std::map<std::string, std::string>::iterator it;
+	std::map<std::string, std::string, std::less<>>::iterator it;
 	for (it=websockcntMap.begin();it!=websockcntMap.end();++it) {
 		if(ConfigurationData::urlMatchesPath(req->getCntxt_name(), it->first, hreq->getCurl()))
 		{

@@ -147,6 +147,7 @@ void TeBkRestController::updateCache() {
 		}
 		DataSourceManager::cleanImpl(sqli);
 		CacheManager::cleanImpl(cchi);
+		CacheManager::triggerAppInitCompletion();
 	} catch(const std::exception& e) {
 		DataSourceManager::cleanImpl(sqli);
 		CacheManager::cleanImpl(cchi);

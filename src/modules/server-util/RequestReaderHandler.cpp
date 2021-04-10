@@ -48,21 +48,35 @@ RequestReaderHandler* RequestReaderHandler::getInstance() {
 }
 
 void RequestReaderHandler::startNL(unsigned int cid) {
+	if(run) {
+		return;
+	}
 	if(!run) {
 		selector.initialize(-1);
+		run = true;
+		Thread* pthread = new Thread(&handle, this);
+		pthread->execute(cid);
 	}
 }
 
-void RequestReaderHandler::addListenerSocket(const SOCKET& listenerSock) {
+void RequestReaderHandler::addListenerSocket(doRegisterListener drl, const SOCKET& listenerSock) {
 	if(listenerSock != INVALID_SOCKET) {
 		this->listenerSock = listenerSock;
+	} else {
+		return;
+	}
+	if(drl!=NULL) {
+		int counter = 0;
+		while(!drl()) {
+			Thread::sSleep(1);
+			if(counter++==60) {
+				Logger logger = LoggerFactory::getLogger("RequestReaderHandler");
+				logger << "Cannot wait more than 60 seconds for cache/database to initialize, will forcefully start server now...." << std::endl;
+				break;
+			}
+		}
 	}
 	selector.addListeningSocket(this->listenerSock);
-	if(!run) {
-		run = true;
-		Thread* pthread = new Thread(&handle, this);
-		pthread->execute(-1);
-	}
 }
 
 void RequestReaderHandler::start(unsigned int cid) {
