@@ -282,6 +282,9 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		StringUtil::replaceAll(applibname, "-", "_");
 		RegexUtil::replace(applibname, "[^a-zA-Z0-9_]+", "");
 
+		std::string flibname = name;
+		RegexUtil::replace(flibname, "[^a-zA-Z0-9_\\-]+", "");
+
 		ConfigurationData::getInstance()->securityObjectMap[name];
 		ConfigurationData::getInstance()->filterObjectMap[name];
 		ConfigurationData::getInstance()->controllerObjectMap[name];
@@ -307,7 +310,8 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 				ConfigurationData::getInstance()->appAliases[StringUtil::trimCopy(root.getAttribute("alias"))] = name;
 			}
 			if(root.getAttribute("libname")!="" && StringUtil::trimCopy(root.getAttribute("libname"))!=name) {
-				applibname = StringUtil::trimCopy(root.getAttribute("libname"));
+				flibname = StringUtil::trimCopy(root.getAttribute("libname"));
+				RegexUtil::replace(flibname, "[^a-zA-Z0-9_\-]+", "");
 			}
 			if(root.getAttribute("router")!="" && StringUtil::trimCopy(root.getAttribute("router"))!="") {
 				std::string router = StringUtil::trimCopy(root.getAttribute("router"));
@@ -948,12 +952,12 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		logger << "done reading application.xml " << std::endl;
 
 		#ifdef BUILD_AUTOCONF
-		libs += ("-l"+ applibname+" ");
+		libs += ("-l"+ flibname+" ");
 		#else
 		libs += ("${HAVE_"+StringUtil::toUpperCopy(applibname)+"} ");
-		ilibs += ("FIND_LIBRARY(HAVE_"+StringUtil::toUpperCopy(applibname)+" "+applibname+" HINTS \"${CMAKE_SOURCE_DIR}/../lib\")\n");
+		ilibs += ("FIND_LIBRARY(HAVE_"+StringUtil::toUpperCopy(applibname)+" "+flibname+" HINTS \"${CMAKE_SOURCE_DIR}/../lib\")\n");
 		ilibs += ("if(NOT HAVE_"+StringUtil::toUpperCopy(applibname)+")\n");
-		ilibs += ("\tmessage(FATAL_ERROR \""+applibname+" lib not found\")\n");
+		ilibs += ("\tmessage(FATAL_ERROR \""+name+" lib not found\")\n");
 		ilibs += ("endif()\n");
 		#endif
 
@@ -1269,8 +1273,11 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	std::string cffileloc = rtdcfpath+"/CMakeLists.txt.template";
 	std::string cffileamloc = rtdcfpath+"/CMakeLists.txt";
 #endif
+
+#if defined(BUILD_AUTOCONF) || defined(BUILD_CMAKE)
 	ret = TemplateEngine::evaluate(cffileloc,cntxt);
 	AfcUtil::writeTofile(cffileamloc,ret,true);
+#endif
 
 	/*string configureFilePath = rtdcfpath+"/autotools/configure";
     if (access( configureFilePath.c_str(), F_OK ) == -1 )

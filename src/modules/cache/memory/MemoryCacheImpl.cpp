@@ -163,7 +163,7 @@ void MemoryCacheImpl::clean() {
 bool MemoryCacheImpl::setInternal(const std::string& key, const std::string& value, const int& expireSeconds, const int& setOrAddOrRep) {
 	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
 
-	if(setOrAddOrRep<1 && setOrAddOrRep>3) return false;
+	if(setOrAddOrRep<1 || setOrAddOrRep>3) return false;
 
 	p->lock.lock();
 	auto it = p->internalMap.find(key);

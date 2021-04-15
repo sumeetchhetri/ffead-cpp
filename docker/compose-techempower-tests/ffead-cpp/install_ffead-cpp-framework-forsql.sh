@@ -56,7 +56,7 @@ sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/default/libdefault${LIB_EXT} D
 sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/flexApp/libflexApp${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/oauthApp/liboauthApp${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/markers/libmarkers${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
-sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/peer-server/libpeer_server${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/peer-server/libpeer-server${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 sed -i 's|web/default/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/flexApp/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/oauthApp/src/autotools/Makefile||g' configure.ac

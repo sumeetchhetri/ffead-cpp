@@ -7,10 +7,10 @@ rm -f /usr/local/lib/libdinter.so
 
 export FFEAD_CPP_PATH=${IROOT}/$1
 
-ln -s ${FFEAD_CPP_PATH}/lib/libte_benchmark_um.so /usr/local/lib/libte_benchmark_um.so
-ln -s ${FFEAD_CPP_PATH}/lib/libte_benchmark_um_pq.so /usr/local/lib/libte_benchmark_um_pq.so
-ln -s ${FFEAD_CPP_PATH}/lib/libte_benchmark_um_mgr.so /usr/local/lib/libte_benchmark_um_mgr.so
-ln -s ${FFEAD_CPP_PATH}/lib/libte_benchmark_um_pq_async.so /usr/local/lib/libte_benchmark_um_pq_async.so
+ln -s ${FFEAD_CPP_PATH}/lib/libte-benchmark-um.so /usr/local/lib/libte-benchmark-um.so
+ln -s ${FFEAD_CPP_PATH}/lib/libte-benchmark-um-pq.so /usr/local/lib/libte-benchmark-um-pq.so
+ln -s ${FFEAD_CPP_PATH}/lib/libte-benchmark-um-mgr.so /usr/local/lib/libte-benchmark-um-mgr.so
+ln -s ${FFEAD_CPP_PATH}/lib/libte-benchmark-um-pq-async.so /usr/local/lib/libte-benchmark-um-pq-async.so
 ln -s ${FFEAD_CPP_PATH}/lib/libffead-modules.so /usr/local/lib/libffead-modules.so
 ln -s ${FFEAD_CPP_PATH}/lib/libffead-framework.so /usr/local/lib/libffead-framework.so
 ln -s ${FFEAD_CPP_PATH}/lib/libinter.so /usr/local/lib/libinter.so

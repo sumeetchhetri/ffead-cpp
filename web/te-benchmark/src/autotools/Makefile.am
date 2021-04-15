@@ -8,7 +8,7 @@ distdir=${PACKAGE_NAME}-${PACKAGE_VERSION}-src
 fprefix=../../../../${packageIdentifier}
 prefix=${abs_builddir}
 
-lib_LTLIBRARIES = libte_benchmark.la
+lib_LTLIBRARIES = libte-benchmark.la
 libte_benchmark_la_SOURCES = ../TeBkFortune.cpp \
 				../TeBkFortuneTemplate.cpp \
 				../TeBkMessage.cpp \

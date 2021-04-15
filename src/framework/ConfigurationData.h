@@ -225,6 +225,7 @@ enum SERVER_BACKEND {
 	SWIFT_NIO, //All Swift http server engines [23]
 	D_HUNT, //All D http server engines [24]
 	EMBEDDED_NGHTTP2, C_LSQUICHTTP3, //HTTP2 and HTTP3 server engines [25, 26]
+	JS_NODEJS, JS_DENO
 };
 
 class StaticResponseData {

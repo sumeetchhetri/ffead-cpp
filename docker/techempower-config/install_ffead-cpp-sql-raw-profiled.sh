@@ -52,6 +52,7 @@ service postgresql start
 #For profiling/benchmarking
 
 sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' resources/server.prop
+#sed -i 's|LOGGING_ENABLED=false|LOGGING_ENABLED=true|g' resources/server.prop
 nohup bash -c "./server.sh > ffead.log &"
 sleep 10
 echo "ffead-cpp with sql-raw support launched"

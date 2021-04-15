@@ -35,18 +35,31 @@ JSONSerialize::~JSONSerialize() {
 
 std::string JSONSerialize::serializePrimitive(int serOpt, const std::string& className, void* t, void* serobject)
 {
+#ifdef RAPID_JSON
+	RapiJsonState* str = (RapiJsonState*)serobject;
+#else
 	std::string* str = (std::string*)serobject;
+#endif
 	switch(serOpt) {
 		case 1: {
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				std::string* tt = *(std::string*)t;
+				str->writer.String(tt->data(), tt->size());
+#else
 				str->append("\""+*(std::string*)t+"\"");
+#endif
 				return CommonUtils::BLANK;
 			}
 			return "\""+*(std::string*)t+"\"";
 		}
 		case 2: {
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				str->writer.Uint(((unsigned char*)t)[0]);
+#else
 				str->push_back(((unsigned char*)t)[0]);
+#endif
 				return CommonUtils::BLANK;
 			}
 			std::string s;
@@ -55,7 +68,11 @@ std::string JSONSerialize::serializePrimitive(int serOpt, const std::string& cla
 		}
 		case 3: {
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				str->writer.Uint(((char*)t)[0]);
+#else
 				str->push_back(((char*)t)[0]);
+#endif
 				return CommonUtils::BLANK;
 			}
 			std::string s;
@@ -64,84 +81,132 @@ std::string JSONSerialize::serializePrimitive(int serOpt, const std::string& cla
 		}
 		case 4: {
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				str->writer.Int(*(int*)t);
+#else
 				CastUtil::fromNumber(*(int*)t, str);
+#endif
 				return CommonUtils::BLANK;
 			}
 			return CastUtil::fromNumber(*(int*)t);
 		}
 		case 5: {
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				str->writer.Uint(*(unsigned int*)t);
+#else
 				CastUtil::fromNumber(*(unsigned int*)t, str);
+#endif
 				return CommonUtils::BLANK;
 			}
 			return CastUtil::fromNumber(*(unsigned int*)t);
 		}
 		case 6: {
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				str->writer.Int(*(short*)t);
+#else
 				CastUtil::fromNumber(*(short*)t, str);
+#endif
 				return CommonUtils::BLANK;
 			}
 			return CastUtil::fromNumber(*(short*)t);
 		}
 		case 7: {
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				str->writer.Int(*(unsigned short*)t);
+#else
 				CastUtil::fromNumber(*(unsigned short*)t, str);
+#endif
 				return CommonUtils::BLANK;
 			}
 			return CastUtil::fromNumber(*(unsigned short*)t);
 		}
 		case 8: {
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				str->writer.Int(*(long*)t);
+#else
 				CastUtil::fromNumber(*(long*)t, str);
+#endif
 				return CommonUtils::BLANK;
 			}
 			return CastUtil::fromNumber(*(long*)t);
 		}
 		case 9: {
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				str->writer.Uint(*(unsigned long*)t);
+#else
 				CastUtil::fromNumber(*(unsigned long*)t, str);
+#endif
 				return CommonUtils::BLANK;
 			}
 			return CastUtil::fromNumber(*(unsigned long*)t);
 		}
 		case 10: {
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				str->writer.Int64(*(long long*)t);
+#else
 				CastUtil::fromNumber(*(long long*)t, str);
+#endif
 				return CommonUtils::BLANK;
 			}
 			return CastUtil::fromNumber(*(long long*)t);
 		}
 		case 11: {
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				str->writer.Uint64(*(unsigned long long*)t);
+#else
 				CastUtil::fromNumber(*(unsigned long long*)t, str);
+#endif
 				return CommonUtils::BLANK;
 			}
 			return CastUtil::fromNumber(*(unsigned long long*)t);
 		}
 		case 12: {
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				str->writer.Double(*(float*)t);
+#else
 				CastUtil::fromFloat(*(float*)t, str);
+#endif
 				return CommonUtils::BLANK;
 			}
 			return CastUtil::fromFloat(*(float*)t);
 		}
 		case 13: {
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				str->writer.Double(*(double*)t);
+#else
 				CastUtil::fromDouble(*(double*)t, str);
+#endif
 				return CommonUtils::BLANK;
 			}
 			return CastUtil::fromDouble(*(double*)t);
 		}
 		case 14: {
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				str->writer.Double(*(long double*)t);
+#else
 				CastUtil::fromLongdouble(*(long double*)t, str);
+#endif
 				return CommonUtils::BLANK;
 			}
 			return CastUtil::fromLongdouble(*(long double*)t);
 		}
 		case 15: {
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				str->writer.Bool(*(bool*)t);
+#else
 				CastUtil::fromBool(*(bool*)t, str);
+#endif
 				return CommonUtils::BLANK;
 			}
 			return CastUtil::fromBool(*(bool*)t);
@@ -149,14 +214,24 @@ std::string JSONSerialize::serializePrimitive(int serOpt, const std::string& cla
 		case 16: {
 			DateFormat formt;
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				std::string tt = formt.format(*(Date*)t);
+				str->writer.String(tt.data(), tt.size());
+#else
 				str->append("\""+formt.format(*(Date*)t)+"\"");
+#endif
 				return CommonUtils::BLANK;
 			}
 			return "\""+formt.format(*(Date*)t)+"\"";
 		}
 		case 17: {
 			if(str!=NULL) {
+#ifdef RAPID_JSON
+				std::string tt = BinaryData::serilaize(*(BinaryData*)t);
+				str->writer.String(tt.data(), tt.size());
+#else
 				str->append("\""+BinaryData::serilaize(*(BinaryData*)t)+"\"");
+#endif
 				return CommonUtils::BLANK;
 			}
 			return "\""+BinaryData::serilaize(*(BinaryData*)t)+"\"";
@@ -167,52 +242,88 @@ std::string JSONSerialize::serializePrimitive(int serOpt, const std::string& cla
 
 void* JSONSerialize::getSerializableObject()
 {
+#ifdef RAPID_JSON
+	return new RapiJsonState();
+#else
 	return new std::string;
+#endif
 }
 
 void JSONSerialize::cleanSerializableObject(void* _1)
 {
+#ifdef RAPID_JSON
+	RapiJsonState* object = (RapiJsonState*)_1;
+	delete object;
+#else
 	std::string* object = (std::string*)_1;
 	delete object;
+#endif
 }
 
 void JSONSerialize::startContainerSerialization(void* _1, const std::string& className, const std::string& container)
 {
+#ifdef RAPID_JSON
+	RapiJsonState* object = (RapiJsonState*)_1;
+	object->writer.StartArray();
+#else
 	std::string* object = (std::string*)_1;
 	*object += "[";
+#endif
 }
 
 void JSONSerialize::endContainerSerialization(void* _1, const std::string& className, const std::string& container)
 {
+#ifdef RAPID_JSON
+	RapiJsonState* object = (RapiJsonState*)_1;
+	object->writer.EndArray();
+#else
 	std::string* object = (std::string*)_1;
 	if(object->at(object->length()-1)==',')
 		*object = object->substr(0, object->length()-1);
 	*object += "]";
+#endif
 }
 
 void JSONSerialize::afterAddContainerSerializableElement(void* _1, const int& counter, const int& size)
 {
+#ifndef RAPID_JSON
 	std::string* object = (std::string*)_1;
 	//if(counter!=size)
 		*object += ",";
+#endif
 }
 
 void JSONSerialize::addContainerSerializableElement(void* _1, const std::string& tem)
 {
+#ifdef RAPID_JSON
+	RapiJsonState* object = (RapiJsonState*)_1;
+	object->writer.RawValue(tem.data(), tem.size(), rapidjson::Type::kArrayType);
+#else
 	std::string* object = (std::string*)_1;
 	*object += tem;
+#endif
 }
 
 void JSONSerialize::addContainerSerializableElementMulti(void* _1, const std::string& tem)
 {
+#ifdef RAPID_JSON
+	RapiJsonState* object = (RapiJsonState*)_1;
+	object->writer.RawValue(tem.data(), tem.size(), rapidjson::Type::kArrayType);
+#else
 	std::string* object = (std::string*)_1;
 	*object += tem;
+#endif
 }
 
 std::string JSONSerialize::fromSerializableObjectToString(void* _1)
 {
+#ifdef RAPID_JSON
+	RapiJsonState* object = (RapiJsonState*)_1;
+	return std::string(object->s.GetString(), object->s.GetSize());
+#else
 	std::string* object = (std::string*)_1;
 	return *object;
+#endif
 }
 
 std::string JSONSerialize::elementToSerializedString(void* _1, const int& counter)
@@ -554,124 +665,233 @@ void* JSONSerialize::getObjectProperty(void* _1, const int& counter)
 
 void JSONSerialize::startObjectSerialization(void* _1, const std::string& className)
 {
+#ifdef RAPID_JSON
+	RapiJsonState* object = (RapiJsonState*)_1;
+	object->writer.StartObject();
+#else
 	std::string* object = (std::string*)_1;
 	*object += "{";
+#endif
 }
 
 void JSONSerialize::endObjectSerialization(void* _1, const std::string& className)
 {
+#ifdef RAPID_JSON
+	RapiJsonState* object = (RapiJsonState*)_1;
+	object->writer.EndObject();
+#else
 	std::string* object = (std::string*)_1;
 	if(object->at(object->length()-1)==',')
 		*object = object->substr(0, object->length()-1);
 	*object += "}";
+#endif
 }
 
 void JSONSerialize::afterAddObjectProperty(void* _1, const std::string& propName)
 {
+#ifndef RAPID_JSON
 	std::string* object = (std::string*)_1;
 	*object += ",";
+#endif
 }
 
 void JSONSerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::string& propName, const std::string& className, void* t)
 {
+#ifdef RAPID_JSON
+	RapiJsonState* object = (RapiJsonState*)_1;
+#else
 	std::string* object = (std::string*)_1;
+#endif
 	switch(serOpt) {
 		case 1:
 		{
+#ifdef RAPID_JSON
+			std::string& tt = *(std::string*)t;
+			object->writer.Key(propName.data(), propName.size());
+			object->writer.String(tt.data(), tt.size());
+#else
 			*object += "\"" + propName + "\":\"" + *(std::string*)t + "\"";
+#endif
 			break;
 		}
 		case 2:
 		{
 			std::string s;
 			s.push_back(((char*)t)[0]);
+#ifdef RAPID_JSON
+			object->writer.Key(propName.data(), propName.size());
+			object->writer.String(s.data(), s.size());
+#else
 			*object += "\"" + propName + "\":\"" + s + "\"";
+#endif
 			break;
 		}
 		case 3:
 		{
 			std::string s;
 			s.push_back(((unsigned char*)t)[0]);
+#ifdef RAPID_JSON
+			object->writer.Key(propName.data(), propName.size());
+			object->writer.String(s.data(), s.size());
+#else
 			*object += "\"" + propName + "\":\"" + s + "\"";
+#endif
 			break;
 		}
 		case 4:
 		{
+#ifdef RAPID_JSON
+			object->writer.Key(propName.data(), propName.size());
+			object->writer.Int(*(int*)t);
+#else
 			*object += "\"" + propName + "\":" + CastUtil::fromNumber(*(int*)t);
+#endif
 			break;
 		}
 		case 5:
 		{
+#ifdef RAPID_JSON
+			object->writer.Key(propName.data(), propName.size());
+			object->writer.Uint(*(unsigned int*)t);
+#else
 			*object += "\"" + propName + "\":" + CastUtil::fromNumber(*(unsigned int*)t);
+#endif
 			break;
 		}
 		case 6:
 		{
+#ifdef RAPID_JSON
+			object->writer.Key(propName.data(), propName.size());
+			object->writer.Int(*(short*)t);
+#else
 			*object += "\"" + propName + "\":" + CastUtil::fromNumber(*(short*)t);
+#endif
 			break;
 		}
 		case 7:
 		{
+#ifdef RAPID_JSON
+			object->writer.Key(propName.data(), propName.size());
+			object->writer.Int(*(unsigned short*)t);
+#else
 			*object += "\"" + propName + "\":" + CastUtil::fromNumber(*(unsigned short*)t);
+#endif
 			break;
 		}
 		case 8:
 		{
+#ifdef RAPID_JSON
+			object->writer.Key(propName.data(), propName.size());
+			object->writer.Int(*(long*)t);
+#else
 			*object += "\"" + propName + "\":" + CastUtil::fromNumber(*(long*)t);
+#endif
 			break;
 		}
 		case 9:
 		{
+#ifdef RAPID_JSON
+			object->writer.Key(propName.data(), propName.size());
+			object->writer.Uint(*(unsigned long*)t);
+#else
 			*object += "\"" + propName + "\":" + CastUtil::fromNumber(*(unsigned long*)t);
+#endif
 			break;
 		}
 		case 10:
 		{
+#ifdef RAPID_JSON
+			object->writer.Key(propName.data(), propName.size());
+			object->writer.Int64(*(long long*)t);
+#else
 			*object += "\"" + propName + "\":" + CastUtil::fromNumber(*(long long*)t);
+#endif
 			break;
 		}
 		case 11:
 		{
+#ifdef RAPID_JSON
+			object->writer.Key(propName.data(), propName.size());
+			object->writer.Uint64(*(unsigned long long*)t);
+#else
 			*object += "\"" + propName + "\":" + CastUtil::fromNumber(*(unsigned long long*)t);
+#endif
 			break;
 		}
 		case 12:
 		{
+#ifdef RAPID_JSON
+			object->writer.Key(propName.data(), propName.size());
+			object->writer.Double(*(float*)t);
+#else
 			*object += "\"" + propName + "\":" + CastUtil::fromFloat(*(float*)t);
+#endif
 			break;
 		}
 		case 13:
 		{
+#ifdef RAPID_JSON
+			object->writer.Key(propName.data(), propName.size());
+			object->writer.Double(*(double*)t);
+#else
 			*object += "\"" + propName + "\":" + CastUtil::fromDouble(*(double*)t);
+#endif
 			break;
 		}
 		case 14:
 		{
+#ifdef RAPID_JSON
+			object->writer.Key(propName.data(), propName.size());
+			object->writer.Double(*(long double*)t);
+#else
 			*object += "\"" + propName + "\":" + CastUtil::fromLongdouble(*(long double*)t);
+#endif
 			break;
 		}
 		case 15:
 		{
+#ifdef RAPID_JSON
+			object->writer.Key(propName.data(), propName.size());
+			object->writer.Bool(*(bool*)t);
+#else
 			*object += "\"" + propName + "\":" + CastUtil::fromBool(*(bool*)t);
+#endif
 			break;
 		}
 		case 16:
 		{
 			DateFormat formt;
+#ifdef RAPID_JSON
+			object->writer.Key(propName.data(), propName.size());
+			std::string s = formt.format((Date*)t);
+			object->writer.String(s.data(), s.size());
+#else
 			*object += "\"" + propName + "\":\"" + formt.format((Date*)t) + "\"";
+#endif
 			break;
 		}
 		case 17:
 		{
+#ifdef RAPID_JSON
+			object->writer.Key(propName.data(), propName.size());
+			std::string s = BinaryData::serilaize(*(BinaryData*)t);
+			object->writer.String(s.data(), s.size());
+#else
 			*object += "\"" + propName + "\":\"" + BinaryData::serilaize(*(BinaryData*)t) + "\"";
+#endif
 		}
 	}
 }
 
 void JSONSerialize::addObjectProperty(void* _1, const std::string& propName, std::string className)
 {
+#ifdef RAPID_JSON
+	RapiJsonState* object = (RapiJsonState*)_1;
+	object->writer.Key(propName.data(), propName.size());
+#else
 	std::string* object = (std::string*)_1;
 	*object += "\"" + propName + "\":";
+#endif
 }
 
 void* JSONSerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::string& className, const std::string& propName)

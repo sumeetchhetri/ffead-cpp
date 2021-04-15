@@ -29,8 +29,11 @@
 #ifdef HAVE_UUIDINC
 #include <uuid/uuid.h>
 #endif
-#if defined(HAVE_BSDUUIDINC) || defined(HAVE_OSSPUUIDINC)
+#if defined(HAVE_BSDUUIDINC)
 #include <uuid.h>
+#endif
+#if defined(HAVE_OSSPUUIDINC)
+#include <ossp/uuid.h>
 #endif
 
 class IDGenerator {

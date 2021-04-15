@@ -21,7 +21,7 @@ directives can now be used to drive the entire configuration in ffead-cpp, so yo
 All in all ffead-cpp is the gap in the world of C++ web application or enterprise application development which I have tried to fill
 with my humble/honest effort.
 
-Both **cmake** and **autoconf** builds are supported
+**cmake**, **autoconf**, **meson** and **xmake** builds are supported
 
 Detailed OS specific instructions, instructions for installing the available server backends and docker/docker-compose scripts are located at [docker](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker)
 
@@ -95,6 +95,26 @@ Quickstart (Using cmake/ninja)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 
+Quickstart (Using xmake)
+===========
+- Install xmake >= 2.5 and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
+- xmake f --cxflags="-I/usr/local/include -w" --MOD_SDORM_MONGO=true -v -D -c
+- xmake && xmake install (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
+- Sip some coffee
+- cd ffead-cpp-5.0-bin/ (Navigate to the ffead-cpp binary folder)
+- chmod +x *.sh
+- ./server.sh (Startup ffead-cpp Njoy!!)
+
+Quickstart (Using meson)
+===========
+- Install meson and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
+- meson setup build_meson && cd build_meson
+- ninja (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
+- Sip some coffee
+- cd ffead-cpp-5.0-bin/ (Navigate to the ffead-cpp binary folder)
+- chmod +x *.sh
+- ./server.sh (Startup ffead-cpp Njoy!!)
+
 Quickstart (Using autoconf)
 ===========
 - Install autoconf, automake and libtool [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
@@ -105,13 +125,5 @@ Quickstart (Using autoconf)
 - cd ffead-cpp-5.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
-
-
-Webrtc Example (Uses peerjs)
-===========
-- Follow Quickstart (Using cmake) above
-- Build docker image from [docker-webrtc](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/webrtc-peerjs)
-- Once the server starts, navigate to http://localhost:8080/peer-server/index.html in 2 tabs
-- Enjoy p2p calling using the ffead-cpp webrtc (peerjs compatible) signalling server
 
 For further details checkout the [wiki](https://github.com/sumeetchhetri/ffead-cpp/wiki) page 

@@ -19,13 +19,29 @@
  *  Created on: 12-Jun-2013
  *      Author: sumeetc
  */
-
+//TODO
 #ifndef JSONSERIALIZE_H_
 #define JSONSERIALIZE_H_
 #include "SerializeBase.h"
 #include "JSONUtil.h"
+#ifdef RAPID_JSON
+#define RAPIDJSON_HAS_STDSTRING 1
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+#endif
 
 class JSONSerialize;
+
+#ifdef RAPID_JSON
+class RapiJsonState {
+	rapidjson::StringBuffer s;
+	rapidjson::Writer<rapidjson::StringBuffer> writer;
+	friend class JSONSerialize;
+public:
+	RapiJsonState(): writer(s) {
+	}
+};
+#endif
 
 class JSONSerialize : public SerializeBase {
 	static JSONSerialize _i;

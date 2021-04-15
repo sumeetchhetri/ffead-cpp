@@ -839,7 +839,15 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 #else
 		if(!libpresent)
 		{
-			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory;
+#if defined(BUILD_CMAKE)
+			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " cmake";
+#elif defined(BUILD_XMAKE)
+			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " xmake";
+#elif defined(BUILD_MESON)
+			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " meson";
+#else
+			logger << "Invalid Build Type specified, only cmake, xmake and meson supported...\n" << std::endl;
+#endif
 			std::string output = ScriptHandler::execute(compres, true);
 			logger << "Intermediate code generation task\n\n" << std::endl;
 			logger << output << std::endl;
