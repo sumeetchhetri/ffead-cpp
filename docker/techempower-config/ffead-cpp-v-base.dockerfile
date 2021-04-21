@@ -14,7 +14,8 @@ RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/li
 	ldconfig
 	
 RUN apt update -yqq && apt install -y git make && rm -rf /var/lib/apt/lists/*
-RUN git clone https://github.com/vlang/v && cd v && make && ./v symlink
+#RUN git clone https://github.com/vlang/v && cd v && make && ./v symlink
+RUN wget -q https://github.com/vlang/v/releases/download/0.1.29/v_linux.zip && unzip -q v_linux.zip && cd v && chmod +x v && ./v symlink && cd .. && rm -f v_linux.zip
 
 WORKDIR ${IROOT}/lang-server-backends/v/vweb
 #COPY vweb.v ${IROOT}/lang-server-backends/v/vweb/
