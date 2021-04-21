@@ -5,10 +5,10 @@ MAX_THREADS=$(( 3 * `nproc` / 2 ))
 WRIT_THREADS=$(( $MAX_THREADS / 3 ))
 SERV_THREADS=$(( $MAX_THREADS - $WRIT_THREADS ))
 
-mv /tmp/ffead-cpp-5.0-bin /opt/ffead-cpp-5.0
-chmod +x /opt/ffead-cpp-5.0/*.sh
+mv /tmp/ffead-cpp-6.0-bin /opt/ffead-cpp-6.0
+chmod +x /opt/ffead-cpp-6.0/*.sh
 
-cd /opt/ffead-cpp-5.0
+cd /opt/ffead-cpp-6.0
 sed -i 's|THRD_PSIZ=6|THRD_PSIZ='${SERV_THREADS}'|g' resources/server.prop
 sed -i 's|W_THRD_PSIZ=2|W_THRD_PSIZ='${WRIT_THREADS}'|g' resources/server.prop
 

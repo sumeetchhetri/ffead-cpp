@@ -1,6 +1,6 @@
 mkdir /tmp/profile-data
 
-rm -rf $IROOT/ffead-cpp-5.0-sql
+rm -rf $IROOT/ffead-cpp-6.0-sql
 
 if [ "$1" = "batch" ]
 then

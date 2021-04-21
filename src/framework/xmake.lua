@@ -1,5 +1,5 @@
 
-local bindir = "$(projectdir)/ffead-cpp-5.0-bin"
+local bindir = "$(projectdir)/ffead-cpp-6.0-bin"
 
 target("ffead-framework")
 	set_languages("c++17")

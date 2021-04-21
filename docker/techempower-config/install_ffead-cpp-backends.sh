@@ -2,7 +2,7 @@
 
 cd $IROOT
 
-#git checkout e243bc096cd570cfee1edfecbcd91f4c4056fa1a -b 5.0
+#git checkout e243bc096cd570cfee1edfecbcd91f4c4056fa1a -b 6.0
 git clone https://github.com/sumeetchhetri/ffead-cpp
 cd ffead-cpp
 rm -rf .git

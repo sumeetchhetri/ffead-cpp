@@ -28,8 +28,8 @@ Detailed OS specific instructions, instructions for installing the available ser
 Build validated for the following Operating systems/Toolchains
 |   |   |   |
 |---|---|---|
-|[Ubuntu](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-UbuntuBionic-x64-ffead-cpp-5.0)|[CentOS](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Centos7-x64-ffead-cpp-5.0)|[OpenSUSE](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-OpenSuseTumbleweed-x64-ffead-cpp-5.0)|
-|[Gentoo](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Gentoo-x64-ffead-cpp-5.0)|[ArchLinux](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-ArchLinux-x64-ffead-cpp-5.0)|[Alpine Linux](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Alpine-x64-ffead-cpp-5.0)|
+|[Ubuntu](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-UbuntuBionic-x64-ffead-cpp-6.0)|[CentOS](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Centos7-x64-ffead-cpp)|[OpenSUSE](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-OpenSuseTumbleweed-x64-ffead-cpp)|
+|[Gentoo](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Gentoo-x64-ffead-cpp-6.0)|[ArchLinux](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-ArchLinux-x64-ffead-cpp)|[Alpine Linux](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Alpine-x64-ffead-cpp)|
 |[MacOS](https://github.com/sumeetchhetri/ffead-cpp/tree/master/.github/workflows/ci-macos.yml)|[Windows Cygwin](https://github.com/sumeetchhetri/ffead-cpp/tree/master/.github/workflows/ci-win-cygwin.yml)|[Windows mingw-w64](https://github.com/sumeetchhetri/ffead-cpp/tree/master/.github/workflows/ci-win-mingw.yml)
 |[ArchLinux (mingw-w64 cross compiler)](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/DockerFile-cross-archlinux-mingw64)|[Ubuntu (musl cross compiler)](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/DockerFile-cross-musl)|[Ubuntu (android cross compiler)](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/DockerFile-cross-android)
 |[Solaris](https://github.com/sumeetchhetri/ffead-cpp/tree/master/vagrant/solaris)|[FreeBSD](https://github.com/sumeetchhetri/ffead-cpp/tree/master/vagrant/freebsd)|[Emscripten](https://github.com/sumeetchhetri/ffead-cpp/tree/master/lang-server-backends/javascript)
@@ -80,7 +80,7 @@ Quickstart (Using cmake/make)
 - cmake -DSRV_EMB=on -DMOD_SDORM_MONGO=on ..
 - make install -j4 (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ../ffead-cpp-5.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ../ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 
@@ -91,7 +91,7 @@ Quickstart (Using cmake/ninja)
 - cmake -GNinja -DSRV_EMB=on -DMOD_SDORM_MONGO=on ..
 - ninja install (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ../ffead-cpp-5.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ../ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 
@@ -101,7 +101,7 @@ Quickstart (Using xmake)
 - xmake f --cxflags="-I/usr/local/include -w" --MOD_SDORM_MONGO=true -v -D -c
 - xmake && xmake install (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ffead-cpp-5.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 
@@ -111,7 +111,7 @@ Quickstart (Using meson)
 - meson setup build_meson && cd build_meson
 - ninja (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ffead-cpp-5.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 
@@ -122,7 +122,7 @@ Quickstart (Using autoconf)
 - ./configure --enable-srv_emb=yes --enable-mod_sdormmongo=yes
 - make install -j4 (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ffead-cpp-5.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 

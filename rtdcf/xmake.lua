@@ -2,7 +2,7 @@ set_project("ffead-cpp-inter")
 
 set_xmakever("2.3.2")
 
-set_version("5.4", {build = "%Y%m%d%H%M"})
+set_version("6.0", {build = "%Y%m%d%H%M"})
 
 function setup(target)
 	local outdata = os.iorun("$(projectdir)/meson_lister.sh $(projectdir)/../web")

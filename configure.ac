@@ -3,7 +3,7 @@
 # For verbose logging use refer - https://autotools.io/automake/silent.html
 # ./configure --disable-silent-rules or make V=1
 
-AC_INIT([ffead-cpp], [5.0], [sumeet.chhetri@gmail.com])
+AC_INIT([ffead-cpp], [6.0], [sumeet.chhetri@gmail.com])
 AM_INIT_AUTOMAKE([no-define foreign])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
 AM_SILENT_RULES([yes])
@@ -1069,9 +1069,9 @@ if test "x$mod_sdormsql" = "xyes"; then
 	if test "x$os_flavor" = "xbsd"; then
 		AC_CHECK_HEADER([uuid.h],[AC_DEFINE(HAVE_BSDUUIDINC, [1], [bsd uuid headers])],[AC_MSG_ERROR([uuid.h header not found])])
 	else
-		AC_CHECK_HEADER([ossp/uuid.h],[AC_DEFINE(HAVE_OSSPUUIDINC, [1], [oddp uuid headers])],
+		AC_CHECK_HEADER([uuid/uuid.h],[AC_DEFINE(HAVE_UUIDINC, [1], [libuuid uuid headers])],
 			[
-				AC_CHECK_HEADER([uuid/uuid.h],[AC_DEFINE(HAVE_UUIDINC, [1], [libuuid heades])],[AC_MSG_ERROR([uuid.h header not found])])
+				AC_CHECK_HEADER([ossp/uuid.h],[AC_DEFINE(HAVE_OSSPUUIDINC, [1], [libuuid headers])],[AC_MSG_ERROR([ossp uuid.h header not found])])
 			])
 	fi
 	AC_CHECK_HEADER([sql.h],,[AC_MSG_ERROR([ODBC sql.h header not found])])
@@ -1082,9 +1082,9 @@ if test "x$mod_sdormmongo" = "xyes"; then
 	if test "x$os_flavor" = "xbsd"; then
 		AC_CHECK_HEADER([uuid.h],[AC_DEFINE(HAVE_BSDUUIDINC, [1], [bsd uuid headers])],[AC_MSG_ERROR([uuid.h header not found])])
 	else
-		AC_CHECK_HEADER([ossp/uuid.h],[AC_DEFINE(HAVE_OSSPUUIDINC, [1], [oddp uuid headers])],
+		AC_CHECK_HEADER([uuid/uuid.h],[AC_DEFINE(HAVE_UUIDINC, [1], [libuuid uuid headers])],
 			[
-				AC_CHECK_HEADER([uuid/uuid.h],[AC_DEFINE(HAVE_UUIDINC, [1], [libuuid heades])],[AC_MSG_ERROR([uuid.h header not found])])
+				AC_CHECK_HEADER([ossp/uuid.h],[AC_DEFINE(HAVE_OSSPUUIDINC, [1], [libuuid headers])],[AC_MSG_ERROR([ossp uuid.h header not found])])
 			])
 	fi
 	AC_CHECK_HEADER([mongoc.h],,[AC_MSG_ERROR([mongodb mongoc.h header not found])])

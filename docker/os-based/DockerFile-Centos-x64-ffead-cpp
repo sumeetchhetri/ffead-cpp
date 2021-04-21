@@ -1,8 +1,12 @@
-FROM ubuntu:latest
+FROM centos:latest
 
-ENV DEBIAN_FRONTEND noninteractive
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-RUN apt update -yqq && apt install -yqq autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpcre3-dev zlib1g-dev libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat
+RUN yum install -y --nogpgcheck epel-release 'dnf-command(config-manager)'
+#RUN yum config-manager --set-enabled PowerTools
+RUN dnf install -y https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+RUN dnf config-manager --set-enabled remi
+RUN dnf group install -y "Development Tools"
+RUN dnf install -y libmemcached libmemcached-libs
+RUN yum update -yqq && yum install -y --nogpgcheck --allowerasing unzip tar autoconf automake libtool cmake3 postgresql-devel libcurl libcurl-devel openssl openssl-devel libuuid-devel zlib zlib-devel unixODBC* tar gzip wget nmap-ncat
 
 #Install libcuckoo headers
 WORKDIR /tmp
@@ -37,11 +41,9 @@ RUN unzip -qq master.zip
 RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
-RUN chmod +x autogen.sh
-RUN ./autogen.sh
-RUN ./configure --enable-srv_emb=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes --enable-apachemod=yes --enable-nginxmod=yes
-RUN make install
-RUN mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
+RUN cmake -DSRV_EMB=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
+RUN make install -j4
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src
 
@@ -49,10 +51,10 @@ COPY *.sh  /opt/
 
 WORKDIR /opt
 
-RUN chmod +x install_ffead-cpp-5.0.sh
-RUN ./install_ffead-cpp-5.0.sh
+RUN chmod +x install_ffead-cpp.sh
+RUN ./install_ffead-cpp.sh
 
-WORKDIR /opt/ffead-cpp-5.0
+WORKDIR /opt/ffead-cpp-6.0
 
 RUN chmod +x server.sh
 CMD ./server.sh

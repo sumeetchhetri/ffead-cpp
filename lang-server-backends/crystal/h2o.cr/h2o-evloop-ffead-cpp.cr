@@ -34,7 +34,7 @@ module FfeadCppRespTL
 end
 
 class H2oFfeadCppCry < H2o
-  @ffead_cpp_directory = "/installs/ffead-cpp-5.0"
+  @ffead_cpp_directory = "/installs/ffead-cpp-6.0"
   @port = 8080
   @config = LibH2o::H2oGlobalconfT.new
   @ctx = LibH2o::H2oContextT.new

@@ -64,10 +64,10 @@ rm -rf ninja-1.10.2/ v1.10.2.zip
 mkdir /opt
 cd /opt
 rm -rf ffead-cpp-src
-wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/v5.2.tar.gz
-unzip v4.0.zip
-rm -f v4.0.zip
-mv ffead-cpp-5.0 ffead-cpp-src
+wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
+unzip master.zip
+rm -f master.zip
+mv ffead-cpp-master ffead-cpp-src
 cd ffead-cpp-src
 cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DDEBUG=on .
 ninja install

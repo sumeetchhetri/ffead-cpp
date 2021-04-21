@@ -1,4 +1,4 @@
-project('ffead-cpp-5.0', 'cpp', version : '5.4', license : 'Apache', default_options : ['cpp_std=c++17'])
+project('ffead-cpp', 'cpp', version : '6.0', license : 'Apache', default_options : ['cpp_std=c++17'])
 
 cc = meson.get_compiler('cpp')
 conf_data = configuration_data()
@@ -289,7 +289,7 @@ run_command('chmod', '+x', 'meson_postinstall.sh')
 meson_grabber = meson.source_root() + '/meson_grabber.sh'
 meson_post_install = meson.source_root() + '/meson_postinstall.sh'
 
-bin_dir = meson.current_source_dir()+'/'+meson.project_name()+'-bin/'
+bin_dir = meson.current_source_dir()+'/'+meson.project_name()+'-'+meson.project_version()+'-bin/'
 run_command('rm', '-rf', bin_dir)
 run_command('mkdir', bin_dir)
 
@@ -297,7 +297,7 @@ subdir('src/modules')
 subdir('src/framework')
 subdir('tests')
 
-#Add all web application directories here
+#Add all web application directories herer
 subdir('web/default')
 subdir('web/flexApp')
 subdir('web/markers')

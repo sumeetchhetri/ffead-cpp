@@ -1,7 +1,14 @@
-FROM opensuse/leap
+FROM ubuntu:latest
 
-RUN zypper in -y autoconf-archive autoconf automake libtool perl gcc gcc-c++ make cmake postgresql-devel libcurl-devel openssl openssl-devel libmemcached-devel zlib-devel libuuid-devel unixODBC unixODBC-devel unzip wget netcat-openbsd tar gzip
-
+ENV DEBIAN_FRONTEND noninteractive
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN apt update -yqq && apt install -yqq gcc g++ software-properties-common cmake unzip libpcre3-dev zlib1g-dev libpq-dev \
+	libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat \
+	libreadline-dev ccache git && rm -rf /var/lib/apt/lists/*
+RUN wget https://cdn.jsdelivr.net/gh/xmake-io/xmake@master/scripts/get.sh -O -  | bash
+ENV PATH="/root/.local/bin:${PATH}"
+ENV XMAKE_ROOT=y
+ 
 #Install libcuckoo headers
 WORKDIR /tmp
 RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
@@ -35,9 +42,10 @@ RUN unzip -qq master.zip
 RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
-RUN cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
-RUN make install -j4
-RUN mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
+
+RUN xmake f --cxflags="-I/usr/local/include -w" --MOD_SDORM_MONGO=true -v -D
+RUN xmake && xmake install
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src
 
@@ -45,10 +53,5 @@ COPY *.sh  /opt/
 
 WORKDIR /opt
 
-RUN chmod +x install_ffead-cpp-5.0.sh
-RUN ./install_ffead-cpp-5.0.sh
-
-WORKDIR /opt/ffead-cpp-5.0
-
-RUN chmod +x server.sh
-CMD ./server.sh
+RUN chmod +x install_ffead-cpp.sh
+RUN ./install_ffead-cpp.sh

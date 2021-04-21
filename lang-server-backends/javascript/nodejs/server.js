@@ -49,7 +49,7 @@ var libffeadcpp = ffi.Library('libffead-framework', {
 });
 
 
-var server_dir = "/installs/ffead-cpp-5.0";
+var server_dir = "/installs/ffead-cpp-6.0";
 libffeadcpp.bootstrap(server_dir, server_dir.length, 27);
 libffeadcpp.ffead_cpp_init();
 

@@ -83,12 +83,12 @@ rm -f /usr/local/lib/libte_benc*
 rm -f /usr/local/lib/libinter.so
 rm -f /usr/local/lib/libdinter.so
 
-if [ ! -d "ffead-cpp-5.0-bin" ]
+if [ ! -d "ffead-cpp-6.0-bin" ]
 then
 	exit 1
 fi
 
-cd ffead-cpp-5.0-bin
+cd ffead-cpp-6.0-bin
 #cache related dockerfiles will add the cache.xml accordingly whenever needed
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 ./server.sh &
@@ -123,11 +123,11 @@ echo "ffead-cpp normal shutdown"
 pkill ffead-cpp
 
 cd ${IROOT}/ffead-cpp-src/
-cp -rf ffead-cpp-5.0-bin ${IROOT}/ffead-cpp-5.0
-rm -rf ffead-cpp-5.0-bin
+cp -rf ffead-cpp-6.0-bin ${IROOT}/ffead-cpp-6.0
+rm -rf ffead-cpp-6.0-bin
 mv ${IROOT}/nginxfc ${IROOT}/nginx-ffead-mongo
 
-cd ${IROOT}/ffead-cpp-5.0
+cd ${IROOT}/ffead-cpp-6.0
 
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 chmod 755 *.sh
@@ -142,12 +142,12 @@ cp -f web/te-benchmark-um/sql-src/TeBkUmWorldsql.h web/te-benchmark-um/include/T
 cp -f web/te-benchmark-um/sql-src/TeBkUmWorldsql.cpp web/te-benchmark-um/src/TeBkUmWorld.cpp
 make install -j${MAX_THREADS}
 
-if [ ! -d "ffead-cpp-5.0-bin" ]
+if [ ! -d "ffead-cpp-6.0-bin" ]
 then
 	exit 1
 fi
 
-cd ffead-cpp-5.0-bin
+cd ffead-cpp-6.0-bin
 #cache related dockerfiles will add the cache.xml accordingly whenever needed
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 ./server.sh &
@@ -182,11 +182,11 @@ echo "ffead-cpp normal shutdown"
 pkill ffead-cpp
 
 cd ${IROOT}/ffead-cpp-src/
-cp -rf ffead-cpp-5.0-bin ${IROOT}/ffead-cpp-5.0-sql
-rm -rf ffead-cpp-5.0-bin
+cp -rf ffead-cpp-6.0-bin ${IROOT}/ffead-cpp-6.0-sql
+rm -rf ffead-cpp-6.0-bin
 mv ${IROOT}/nginxfc ${IROOT}/nginx-ffead-sql
 
-cd ${IROOT}/ffead-cpp-5.0-sql
+cd ${IROOT}/ffead-cpp-6.0-sql
 
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 chmod 755 *.sh

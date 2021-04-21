@@ -57,31 +57,73 @@ fn C.ffead_cpp_handle_crystal_picov_1(&C.ffead_request3, &int, &string, &u64, &s
 
 fn C.ffead_cpp_resp_cleanup(voidptr)
 
+const (
+	hdr_sep = ": "
+	hdr_end = "\r\n"
+	cont_len = "Content-Length: "
+	body_start = "\r\n\r\n"
+)
 
 fn cpy_str_1(dst byteptr, src string) int {
 	unsafe {C.memcpy(dst, src.str, src.len)}
 	return src.len
 }
 
+fn write_str1(mut r picohttpparser.Response, src string) {
+	unsafe {
+		C.memcpy(r.buf, src.str, src.len)
+		r.buf += src.len
+	}
+}
+
+fn write_str(mut r picohttpparser.Response, src byteptr, len int) {
+	unsafe {
+		C.memcpy(r.buf, src, len)
+		r.buf += len
+	}
+}
+
+fn write_body(mut r picohttpparser.Response, src byteptr, len int) {
+	unsafe {
+		C.memcpy(r.buf, cont_len.str, cont_len.len)
+		r.buf += cont_len.len
+		r.buf += C.u64toa(r.buf, len)
+		C.memcpy(r.buf, body_start.str, body_start.len)
+		r.buf += body_start.len
+		C.memcpy(r.buf, src, len)
+		r.buf += len
+	}
+}
+
+fn write_hdr(mut r picohttpparser.Response, key byteptr, key_len int, value byteptr, value_len int) {
+	unsafe {
+		C.memcpy(r.buf, key, key_len)
+		r.buf += key_len
+		C.memcpy(r.buf, hdr_sep.str, hdr_sep.len)
+		r.buf += hdr_sep.len
+		C.memcpy(r.buf, value, value_len)
+		r.buf += value_len
+		C.memcpy(r.buf, hdr_end.str, hdr_end.len)
+		r.buf += hdr_end.len
+	}
+}
+
 fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
+	mut j := 0
 	$if debug {
 		println('${req.method} ${req.path} ${req.num_headers}')
-		mut j := 0
 		for {
 			if j == req.num_headers {
 				break
 			}
-			k := tos(req.headers[j].name, req.headers[j].name_len)
-			v := tos(req.headers[j].value, req.headers[j].value_len)
-			$if debug {
-				println('${k} ${v}')
-			}
+			k := unsafe {tos(req.headers[j].name, req.headers[j].name_len)}
+			v := unsafe {tos(req.headers[j].value, req.headers[j].value_len)}
+			println('${k} ${v}')
 			j = j+1
 		}
 	}
-	
  	freq := C.ffead_request3{
-	    server_str: 'picov'.str
+		server_str: 'picov'.str
 	    server_str_len: u64(5)
 	    method: req.method.str
 	    method_len: u64(req.method.len)
@@ -114,10 +156,10 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 	}
 
 	if scode > 0 {
-		smsg = tos(smsg.str, int(smsg_len))
-		unsafe {
-			res.buf += cpy_str_1(res.buf, "HTTP/1.1 ${scode} ${smsg}\r\n")
-		}
+		write_str1(mut res, "HTTP/1.1 ${scode} ")
+		write_str(mut res, smsg.str, int(smsg_len))
+		write_str1(mut res, hdr_end)
+		
 		res.header_server()
 		res.header_date()
 		j = 0
@@ -125,19 +167,16 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 			if j == int(headers_len) {
 				break
 			}
-			k := tos(req.headers[j].name, int(req.headers[j].name_len))
-			v := tos(req.headers[j].value, int(req.headers[j].value_len))
-			unsafe {
-				res.buf += cpy_str_1(res.buf, "${k}: ${v}\r\n")
-			}
+			
+			write_hdr(mut res, req.headers[j].name, int(req.headers[j].name_len), req.headers[j].value, int(req.headers[j].value_len))
 			j = j + 1
 		}
-		out_body = tos(out_body.str, int(out_body_len))
-		res.body(out_body)
+		
+		write_body(mut res, out_body.str, int(out_body_len))
 		C.ffead_cpp_resp_cleanup(resp)
 	} else {
-		out_mime = tos(out_mime.str, int(out_mime_len))
-		out_url = tos(out_url.str, int(out_url_len))
+		out_mime = unsafe {tos(out_mime.str, int(out_mime_len))}
+		out_url = unsafe {tos(out_url.str, int(out_url_len))}
 		
 		$if debug {
 			println('res.url = $out_url')

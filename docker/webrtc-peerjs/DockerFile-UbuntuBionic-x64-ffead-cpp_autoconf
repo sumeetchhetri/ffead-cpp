@@ -61,7 +61,7 @@ RUN chmod +x autogen.sh
 RUN ./autogen.sh
 RUN ./configure --enable-srv_emb=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes CPPFLAGS="$CPPFLAGS -I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0 -I/usr/include/libmongoc-1.0 -I/usr/include/libbson-1.0" LDFLAGS="$LDFLAGS -L/usr/local/lib"
 RUN make install
-RUN mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src
 
@@ -69,10 +69,10 @@ WORKDIR /opt
 
 COPY *.sh  ./
 
-RUN chmod +x install_ffead-cpp-5.0.sh
-RUN ./install_ffead-cpp-5.0.sh
+RUN chmod +x install_ffead-cpp.sh
+RUN ./install_ffead-cpp.sh
 
-WORKDIR /opt/ffead-cpp-5.0
+WORKDIR /opt/ffead-cpp-6.0
 
 RUN chmod +x server.sh
 CMD ./server.sh

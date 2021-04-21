@@ -1,7 +1,7 @@
-FROM alpine:latest
+FROM gentoo/stage3-amd64
 
-RUN apk add autoconf-archive autoconf automake libtool gcc g++ make cmake unzip postgresql-dev openssl openssl-dev psqlodbc unixodbc unixodbc-dev curl-dev libmemcached libmemcached-dev wget netcat-openbsd bash
-RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing ossp-uuid-dev
+RUN emerge-webrsync
+RUN emerge sys-devel/autoconf-archive sys-devel/autoconf sys-devel/automake sys-devel/libtool dev-db/postgresql dev-db/unixODBC curl libmemcached cmake wget netcat tar gzip zlib
 
 #Install libcuckoo headers
 WORKDIR /tmp
@@ -14,20 +14,20 @@ RUN make install
 WORKDIR /tmp
 RUN rm -rf /tmp/libcuckoo-master
 
-#Install mongodb c driver
-RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
-RUN tar xf mongo-c-driver-1.4.2.tar.gz
-RUN rm -f mongo-c-driver-1.4.2.tar.gz
-RUN cd mongo-c-driver-1.4.2/ &&  ./configure --disable-automatic-init-and-cleanup &&  make && make install
-WORKDIR /tmp
-RUN rm -rf mongo-c-driver-1.4.2
-
 RUN wget -q https://github.com/redis/hiredis/archive/v1.0.0.tar.gz
 RUN tar xf v1.0.0.tar.gz
 RUN rm -f v1.0.0.tar.gz
 RUN cd hiredis-1.0.0/ && cmake . && make install
 WORKDIR /tmp
 RUN rm -rf hiredis-1.0.0
+
+#Install mongodb c driver
+RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
+RUN tar xf mongo-c-driver-1.4.2.tar.gz
+RUN rm -f mongo-c-driver-1.4.2.tar.gz
+RUN cd mongo-c-driver-1.4.2/ &&  ./configure --disable-automatic-init-and-cleanup --disable-tests --disable-ssl --disable-sasl && make && make install
+WORKDIR /tmp
+RUN rm -rf mongo-c-driver-1.4.2
 
 #Install ffead-cpp
 WORKDIR /tmp
@@ -40,7 +40,7 @@ RUN chmod +x autogen.sh
 RUN ./autogen.sh
 RUN ./configure --enable-srv_emb=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes
 RUN make install
-RUN mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src
 
@@ -48,10 +48,10 @@ COPY *.sh  /opt/
 
 WORKDIR /opt
 
-RUN chmod +x install_ffead-cpp-5.0.sh
-RUN ./install_ffead-cpp-5.0.sh
+RUN chmod +x install_ffead-cpp.sh
+RUN ./install_ffead-cpp.sh
 
-WORKDIR /opt/ffead-cpp-5.0
+WORKDIR /opt/ffead-cpp-6.0
 
 RUN chmod +x server.sh
 CMD ./server.sh

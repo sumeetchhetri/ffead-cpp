@@ -1,8 +1,8 @@
-set_project("ffead-cpp-5.0")
+set_project("ffead-cpp")
 
 set_xmakever("2.3.2")
 
-set_version("5.4", {build = "%Y%m%d%H%M"})
+set_version("6.0", {build = "%Y%m%d%H%M"})
 
 if is_mode("debug") then
 	set_warnings("all", "error")
@@ -564,7 +564,7 @@ function setIncludes(target)
 	target:add({linkdirs = "/usr/local/lib"})
 end
 
-local bindir = "$(projectdir)/ffead-cpp-5.0-bin"
+local bindir = "$(projectdir)/ffead-cpp-6.0-bin"
 
 includes("src/modules")
 includes("src/framework")

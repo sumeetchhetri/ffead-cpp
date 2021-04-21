@@ -1,6 +1,6 @@
 add_includedirs("include/")
 
-local bindir = "$(projectdir)/ffead-cpp-5.0-bin"
+local bindir = "$(projectdir)/ffead-cpp-6.0-bin"
 
 target("te-benchmark-um-pq-async")
 	set_languages("c++17")

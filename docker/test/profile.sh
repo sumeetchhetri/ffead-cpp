@@ -30,8 +30,8 @@ cd /tmp/ffead-cpp-src/build
 cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DCMAKE_EXE_LINKER_FLAGS="-fprofile-dir=/tmp/profile-data -fprofile-generate" \
 	-DCMAKE_CXX_FLAGS="-flto -march=native -fprofile-dir=/tmp/profile-data  -fprofile-generate" ..
 ninja install && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq-async/config/cachememory.xml /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq-async/config/cache.xml && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/ffead-cpp-sql-raw
+	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async/config/cachememory.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async/config/cache.xml && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw
 
 cd /
 
@@ -48,8 +48,8 @@ cd /tmp/ffead-cpp-src/build
 rm -f CMakeCache.txt
 cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DCMAKE_CXX_FLAGS="-flto -march=native -fprofile-dir=/tmp/profile-data -fprofile-use -fprofile-correction" ..
 ninja install && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq-async/config/cachememory.xml /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq/config/cache.xml && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/ffead-cpp-sql-raw
+	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async/config/cachememory.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq/config/cache.xml && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw
 
 cd /
 
@@ -78,8 +78,8 @@ cd /tmp/ffead-cpp-src/build
 cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DCMAKE_EXE_LINKER_FLAGS="-fprofile-dir=/tmp/profile-data  -fprofile-generate" \
 	-DCMAKE_CXX_FLAGS="-march=native -fprofile-dir=/tmp/profile-data  -fprofile-generate" ..
 ninja install && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq-async/config/cachememory.xml /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq/config/cache.xml && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/ffead-cpp-sql-raw
+	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async/config/cachememory.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq/config/cache.xml && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw
 
 cd /
 
@@ -92,8 +92,8 @@ cd /tmp/ffead-cpp-src/build
 rm -f CMakeCache.txt
 cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DCMAKE_CXX_FLAGS="-march=native -fprofile-dir=/tmp/profile-data -fprofile-use -fprofile-correction" ..
 ninja install && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq-async/config/cachememory.xml /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq/config/cache.xml && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/ffead-cpp-sql-raw
+	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async/config/cachememory.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq/config/cache.xml && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw
 
 cd /
 

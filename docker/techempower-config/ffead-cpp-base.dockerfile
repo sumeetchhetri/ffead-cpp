@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 LABEL maintainer="Sumeet Chhetri"
-LABEL version="5.3"
+LABEL version="6.0"
 LABEL description="Base ffead-cpp docker image with commit id - master"
 
 ENV IROOT=/installs

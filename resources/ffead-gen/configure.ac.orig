@@ -1,8 +1,12 @@
-#                                               -*- Autoconf -*-
+# -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
+# For verbose logging use refer - https://autotools.io/automake/silent.html
+# ./configure --disable-silent-rules or make V=1
 
-AC_INIT([ffead-cpp], [3.0], [sumeet.chhetri@gmail.com])
+AC_INIT([ffead-cpp], [6.0], [sumeet.chhetri@gmail.com])
 AM_INIT_AUTOMAKE([no-define foreign])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
+AM_SILENT_RULES([yes])
 AC_CONFIG_SRCDIR([src/framework/ConfigurationData.h])
 AC_CONFIG_HEADERS([src/modules/common/AppDefines.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -19,10 +23,10 @@ AS_HELP_STRING([--enable-debug],
 )
 if test "x$support_debug" = "xyes"; then
     AC_DEFINE(DEBUG, [], [set DEBUG mode])
-    AM_CXXFLAGS="$AM_CXXFLAGS -g -Wall"
+    AM_CXXFLAGS="$AM_CXXFLAGS -g -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -Wno-deprecated"
 else
     AC_DEFINE(NDEBUG, [], [unset DEBUG mode])
-    AM_CXXFLAGS="$AM_CXXFLAGS -O2"
+    AM_CXXFLAGS="$AM_CXXFLAGS -O2 -w"
     support_debug=no
 fi
 
@@ -40,77 +44,109 @@ AS_HELP_STRING([--enable-nginxmod],
     [generate_nginx_module=$enableval]
 )
 
+AC_ARG_WITH([top_inc_dir],
+		[],
+        [],
+        [with_top_inc_dir="no"])
+if test "x${with_top_inc_dir}" != "xno"; then
+    CPPFLAGS="$CPPFLAGS -I${with_top_inc_dir} -I/usr/local/include"
+else
+	CPPFLAGS="$CPPFLAGS -I/usr/local/include"
+fi
+
+AC_ARG_WITH([cinatra_inc_dir],
+		[],
+        [],
+        [with_cinatra_inc_dir="/cinatra/include"])
+if test "x${with_cinatra_inc_dir}" != "xno"; then
+    CPPFLAGS="-I${with_cinatra_inc_dir} $CPPFLAGS"
+fi
+
 AC_CANONICAL_HOST
 local_os_type="unknown"
+os_flavor="unknown"
 is_librt_available="yes"
-AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include -Wno-unknown-pragmas -Wno-delete-incomplete"
+use_wepoll="no"
+AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
 CPPFLAGS="$CPPFLAGS -I/usr/local/include"
-LDFLAGS="$LDFLAGS -L/usr/local/lib"
+LDFLAGS="$LDFLAGS -L/usr/local/lib -Wl,-undefined,error"
+is_exe="no"
 case "$host" in
 *-cygwin*)
-    AC_DEFINE(OS_CYGWIN, [], [set OS to cygwin])
+    AC_DEFINE(OS_CYGWIN, [1], [set OS to cygwin])
+    AC_DEFINE(CYGWIN, [1], [set OS to cygwin])
     local_os_type="cygwin"
+    is_exe="yes"
     ;;
 *mingw*)
-    AC_DEFINE(OS_MINGW, [], [set OS to mingw])
-    AC_DEFINE(USE_WIN_IOCP, [], [use io completion ports on windows])
+    AC_DEFINE(OS_MINGW, [1], [set OS to mingw])
+    AC_DEFINE(USE_WIN_IOCP, [1], [use io completion ports on windows])
     local_os_type="mingw"
     is_librt_available="no"
-    CPPFLAGS="$CPPFLAGS -I/mingw/include -L/mingw/lib -D__USE_MINGW_ANSI_STDIO=1"
-    AM_CXXFLAGS="$AM_CXXFLAGS -I/mingw/include -L/mingw/lib"
-    LDFLAGS="$LDFLAGS -L/mingw/lib"
+    CPPFLAGS="$CPPFLAGS -D__USE_MINGW_ANSI_STDIO=1 -D_FORTIFY_SOURCE=2"
+    use_wepoll="yes"
+    is_exe="yes"
     ;;
+*android*)
+	AC_DEFINE(OS_ANDROID, [1], [set OS to android])
+	AC_DEFINE(OS_LINUX, [1], [set OS to linux])
+	local_os_type="linux"
+	os_flavor="android"
+	;;
 *-linux*)
-    AC_DEFINE(OS_LINUX, [], [set OS to linux])
+    AC_DEFINE(OS_LINUX, [1], [set OS to linux])
 	#hack for some 64-bit systems
 	#AC_DEFINE(_GNU_SOURCE, [], [set GNU source flag for linux])
     local_os_type="linux"
     ;;
 *-irix*)
-    AC_DEFINE(OS_IRIX, [], [set OS to irix])
+    AC_DEFINE(OS_IRIX, [1], [set OS to irix])
     local_os_type="irix"
     ;;
 *-sunos*)
-    AC_DEFINE(OS_SUNOS, [], [set OS to sunos])
+    AC_DEFINE(OS_SUNOS, [1], [set OS to sunos])
     local_os_type="sunos"
     AM_CXXFLAGS="$AM_CXXFLAGS -pthreads"
     LDFLAGS="$LDFLAGS -lsocket -lnsl -lresolv"
     ;;
 *-solaris*)
-    AC_DEFINE(OS_SOLARIS, [], [set OS to solaris])
+    AC_DEFINE(OS_SOLARIS, [1], [set OS to solaris])
     local_os_type="solaris"
     AM_CXXFLAGS="$AM_CXXFLAGS -pthreads"
     LDFLAGS="$LDFLAGS -lsocket -lnsl"
     ;;
 *-aix*)
-    AC_DEFINE(OS_AIX, [], [set OS to aix])
+    AC_DEFINE(OS_AIX, [1], [set OS to aix])
     local_os_type="aix"
     ;;
 *-hpux*)
-    AC_DEFINE(OS_HPUX, [], [set OS to hp-ux])
+    AC_DEFINE(OS_HPUX, [1], [set OS to hp-ux])
     local_os_type="hpux"
     ;;
 *-freebsd*)
-    AC_DEFINE(OS_BSD, [], [set OS to bsd])
-    AC_DEFINE(OS_FREEBSD, [], [set OS to freebsd])
+    AC_DEFINE(OS_BSD, [1], [set OS to bsd])
+    AC_DEFINE(OS_FREEBSD, [1], [set OS to freebsd])
     local_os_type="freebsd"
+    os_flavor="bsd"
 
     dnl our hack for freebsd system
 
     LDFLAGS="$LDFLAGS -L/usr/local/v6/lib"
     ;;
 *-netbsd*)
-    AC_DEFINE(OS_BSD, [], [set OS to bsd])
-    AC_DEFINE(OS_NETBSD, [], [set OS to netbsd])
+    AC_DEFINE(OS_BSD, [1], [set OS to bsd])
+    AC_DEFINE(OS_NETBSD, [1], [set OS to netbsd])
     local_os_type="netbsd"
+    os_flavor="bsd"
 
     #our hack for netbsd system
     LDFLAGS="$LDFLAGS -L/usr/local/v6/lib"
     ;;
 *-openbsd*)
-    AC_DEFINE(OS_BSD, [], [set OS to bsd])
-    AC_DEFINE(OS_OPENBSD, [], [set OS to openbsd])
+    AC_DEFINE(OS_BSD, [1], [set OS to bsd])
+    AC_DEFINE(OS_OPENBSD, [1], [set OS to openbsd])
     local_os_type="openbsd"
+    os_flavor="bsd"
 
 	#get openbsd release number, remove `.' from release number
 	OBSD_REL=`/usr/bin/uname -r | sed 's/\.//g'`
@@ -120,26 +156,42 @@ case "$host" in
     LIBS="$LIBS -L/usr/local/lib"
     ;;
 *-osf*)
-    AC_DEFINE(OS_OSF, [], [set OS to osf])
+    AC_DEFINE(OS_OSF, [1], [set OS to osf])
     local_os_type="osf"
     ;;
 *-darwin*)
     is_librt_available="no"
-    AC_DEFINE(OS_BSD, [], [set OS to bsd])
-    AC_DEFINE(OS_DARWIN, [], [set OS to darwin])
-    CPPFLAGS="$CPPFLAGS -I/usr/local/opt/openssl/include -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -O2"
-    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/opt/openssl/include -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -O2"
-    LDFLAGS="$LDFLAGS -L/usr/local/opt/openssl/lib -L/usr/local/opt/unixodbc/lib/ -L/usr/local/lib"
+    #AC_DEFINE(OS_BSD, [], [set OS to bsd])
+    AC_DEFINE(OS_DARWIN, [1], [set OS to darwin])
+    CPPFLAGS="$CPPFLAGS -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -O2"
+    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -O2"
+    LDFLAGS="$LDFLAGS -L/usr/local/opt/unixodbc/lib/ -L/usr/local/lib"
     local_os_type="darwin"
+    AC_ARG_WITH([ssl_inc_dir],
+		[],
+        [],
+        [with_ssl_inc_dir="/usr/local/opt/openssl/include"])
+	if test "x${with_ssl_inc_dir}" != "xno"; then
+	    CPPFLAGS="-I${with_ssl_inc_dir} $CPPFLAGS"
+	fi
+	AC_ARG_WITH([ssl_lib_dir],
+		[],
+        [],
+        [with_ssl_lib="/usr/local/opt/openssl/lib"])
+	if test "x${with_ssl_lib}" != "xno"; then
+		LDFLAGS="-L${with_ssl_lib} $LDFLAGS"
+	fi
     ;;
 *-sco*)
-    AC_DEFINE(OS_SCO, [], [set OS to sco])
-    AC_DEFINE(OS_SVR4, [], [set OS to svr4])
+    AC_DEFINE(OS_SCO, [1], [set OS to sco])
+    AC_DEFINE(OS_SVR4, [1], [set OS to svr4])
     local_os_type="sco"
     AC_MSG_ERROR([We do not support SCO's products!])
 esac
 
-AC_DEFINE(BUILD_AUTOCONF, [], [set build system to autoconf/automake])
+AM_CONDITIONAL(IS_EXE, test "x$is_exe" = "xyes")
+AM_CONDITIONAL(USE_WEPOLL, test "x$use_wepoll" = "xyes")
+AC_DEFINE(BUILD_AUTOCONF, [1], [set build system to autoconf/automake])
 
 ########################################################################################################
 ########################## CACHE MODULES, Memory, Redis, Memcached #####################################
@@ -275,10 +327,17 @@ AS_HELP_STRING([--enable-mod_sdormsql],
              no)  mod_sdormsql=no ;;
              *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_sdormsql]) ;;
 esac],
-[mod_sdormsql=no])
+[mod_sdormsql=yes])
 AM_CONDITIONAL(MOD_SDORM_SQL, test "x$mod_sdormsql" = "xyes")
 AM_CONDITIONAL(MOD_SDORM, test "x$mod_sdormsql" = "xyes")
 if test "x$mod_sdormsql" = "xyes"; then
+	if test "x${with_top_inc_dir}" != "xno"; then
+		AM_CXXFLAGS="$AM_CXXFLAGS -I${with_top_inc_dir}/postgresql -I${with_top_inc_dir}/pgsql"
+	    CPPFLAGS="$CPPFLAGS -I${with_top_inc_dir}/postgresql -I${with_top_inc_dir}/pgsql"
+	else
+		AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/include/postgresql -I/usr/include/pgsql -I/usr/local/include/postgresql -I/usr/local/include/pgsql"
+	    CPPFLAGS="$CPPFLAGS -I/usr/include/postgresql -I/usr/include/pgsql -I/usr/local/include/postgresql -I/usr/local/include/pgsql"
+	fi
     AC_DEFINE(INC_SDORM_SQL, [], [enable data-source-orm-sql module])
     AC_DEFINE(INC_SDORM, [], [enable data-source-orm module])
 fi
@@ -295,8 +354,13 @@ esac],
 AM_CONDITIONAL(MOD_SDORM_MONGO, test "x$mod_sdormmongo" = "xyes")
 AM_CONDITIONAL(MOD_SDORM, test "x$mod_sdormmongo" = "xyes")
 if test "x$mod_sdormmongo" = "xyes"; then
-	AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
-    CPPFLAGS="$CPPFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
+	if test "x${with_top_inc_dir}" != "xno"; then
+		AM_CXXFLAGS="$AM_CXXFLAGS -I${with_top_inc_dir}/libmongoc-1.0/ -I${with_top_inc_dir}/libbson-1.0"
+	    CPPFLAGS="$CPPFLAGS -I${with_top_inc_dir}/libmongoc-1.0/ -I${with_top_inc_dir}/libbson-1.0"
+	else
+		AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
+	    CPPFLAGS="$CPPFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
+	fi
     AC_DEFINE(INC_SDORM_MONGO, [], [enable data-source-orm-mongo module])
     AC_DEFINE(INC_SDORM, [], [enable data-source-orm module])
 fi
@@ -363,13 +427,13 @@ fi
 
 AC_ARG_ENABLE(mod_binserialize,
 AS_HELP_STRING([--enable-mod_binserialize],
-               [enable mod_binserialize, default: yes]),
+               [enable mod_binserialize, default: no]),
 [case "${enableval}" in
              yes) mod_binserialize=yes ;;
              no)  mod_binserialize=no ;;
              *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_binserialize]) ;;
 esac],
-[mod_binserialize=yes])
+[mod_binserialize=no])
 AM_CONDITIONAL(MOD_BINSERIALIZE, test "x$mod_binserialize" = "xyes")
 if test "x$mod_binserialize" = "xyes"; then
     AC_DEFINE(INC_BINSER, [], [enable binary serilaization module])
@@ -745,6 +809,126 @@ AM_CONDITIONAL(MOD_ALL, test "x$mod_all" = "xyes")
 ########################################################################################################
 
 
+########################################################################################################
+############################## Server Engines #########################################################
+
+AC_ARG_ENABLE(srv_all,
+AS_HELP_STRING([--enable-srv_all],
+               [enable srv_all, default: no]),
+[case "${enableval}" in
+             yes) srv_all=yes ;;
+             no)  srv_all=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-srv_all]) ;;
+esac],
+[srv_all=no])
+AM_CONDITIONAL(SRV_ALL, test "x$srv_all" = "xyes")
+if test "x$srv_all" = "xyes"; then
+    AC_DEFINE(SRV_ALL, [], [enable all http server engines])
+fi
+
+AC_ARG_ENABLE(srv_emb,
+AS_HELP_STRING([--enable-srv_emb],
+               [enable srv_emb, default: no]),
+[case "${enableval}" in
+             yes) srv_emb=yes ;;
+             no)  srv_emb=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-srv_emb]) ;;
+esac],
+[srv_emb=no])
+AM_CONDITIONAL(SRV_EMB, test "x$srv_emb" = "xyes")
+if test "x$srv_emb" = "xyes"; then
+    AC_DEFINE(SRV_EMB, [], [enable embedded http server engine])
+fi
+
+AC_ARG_ENABLE(srv_cinatra,
+AS_HELP_STRING([--enable-srv_cinatra],
+               [enable srv_cinatra, default: no]),
+[case "${enableval}" in
+             yes) srv_cinatra=yes ;;
+             no)  srv_cinatra=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-srv_cinatra]) ;;
+esac],
+[srv_cinatra=no])
+AM_CONDITIONAL(SRV_CINATRA, test "x$srv_cinatra" = "xyes")
+if test "x$srv_cinatra" = "xyes"; then
+    AC_DEFINE(SRV_CINATRA, [], [enable cinatra http server engine])
+fi
+
+AC_ARG_ENABLE(srv_lithium,
+AS_HELP_STRING([--enable-srv_lithium],
+               [enable srv_lithium, default: no]),
+[case "${enableval}" in
+             yes) srv_lithium=yes ;;
+             no)  srv_lithium=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-srv_lithium]) ;;
+esac],
+[srv_lithium=no])
+AM_CONDITIONAL(SRV_LITHIUM, test "x$srv_lithium" = "xyes")
+if test "x$srv_lithium" = "xyes"; then
+    AC_DEFINE(SRV_LITHIUM, [], [enable lithium http server engine])
+fi
+
+AC_ARG_ENABLE(srv_drogon,
+AS_HELP_STRING([--enable-srv_drogon],
+               [enable srv_drogon, default: no]),
+[case "${enableval}" in
+             yes) srv_drogon=yes ;;
+             no)  srv_drogon=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-srv_drogon]) ;;
+esac],
+[srv_drogon=no])
+AM_CONDITIONAL(SRV_DROGON, test "x$srv_drogon" = "xyes")
+if test "x$srv_drogon" = "xyes"; then
+    AC_DEFINE(SRV_DROGON, [], [enable drogon http server engine])
+fi
+
+AC_ARG_ENABLE(srv_nghttp2,
+AS_HELP_STRING([--enable-srv_nghttp2],
+               [enable srv_nghttp2, default: no]),
+[case "${enableval}" in
+             yes) srv_nghttp2=yes ;;
+             no)  srv_nghttp2=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-srv_nghttp2]) ;;
+esac],
+[srv_nghttp2=no])
+AM_CONDITIONAL(SRV_NGHTTP2, test "x$srv_nghttp2" = "xyes")
+if test "x$srv_nghttp2" = "xyes"; then
+    AC_DEFINE(SRV_NGHTTP2, [], [enable nghttp2 http server engine])
+fi
+
+AC_ARG_ENABLE(srv_mongols,
+AS_HELP_STRING([--enable-srv_mongols],
+               [enable srv_mongols, default: no]),
+[case "${enableval}" in
+             yes) srv_mongols=yes ;;
+             no)  srv_mongols=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-srv_mongols]) ;;
+esac],
+[srv_mongols=no])
+AM_CONDITIONAL(SRV_MONGOLS, test "x$srv_mongols" = "xyes")
+if test "x$srv_mongols" = "xyes"; then
+    AC_DEFINE(SRV_MONGOLS, [], [enable mongols http server engine])
+fi
+
+AC_ARG_ENABLE(srv_uvcpp,
+AS_HELP_STRING([--enable-srv_uvcpp],
+               [enable srv_uvcpp, default: no]),
+[case "${enableval}" in
+             yes) srv_uvcpp=yes ;;
+             no)  srv_uvcpp=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-srv_uvcpp]) ;;
+esac],
+[srv_uvcpp=no])
+AM_CONDITIONAL(SRV_UVCPP, test "x$srv_uvcpp" = "xyes")
+if test "x$srv_uvcpp" = "xyes"; then
+    AC_DEFINE(SRV_UVCPP, [], [enable uv-cpp http server engine])
+fi
+
+########################################################################################################
+########################################################################################################
+
+
+
 # store current user given compiler flags to avoid default setup via AC_PROG_CXX
 OLD_CXXFLAGS=$CXXFLAGS
 
@@ -775,8 +959,6 @@ fi
 AC_LANG_PUSH(C++)
 AC_CHECK_HEADER([libcuckoo/cuckoohash_map.hh],,[AC_MSG_ERROR([libcuckoo header files not found, please install libcuckoo])])
 AC_LANG_POP(C++)
-
-AC_SEARCH_LIBS(curl_easy_init, curl, [],[AC_MSG_ERROR([curl library "libcurl" not found])])
 
 AM_CONDITIONAL(MOD_APACHEMOD, test "x$generate_apache_module" = "xyes")
 if test "x$generate_apache_module" = "xyes"; then
@@ -859,8 +1041,18 @@ AC_CHECK_HEADER([sys/poll.h],
 AC_CHECK_HEADER([sys/select.h],
                      [AC_DEFINE(USE_SELECT, [1], [Define to 1 if you have <sys/select.h>.])],
                      [AC_DEFINE(USE_SELECT, [0], [select support not found])])
-                     
-                     
+AC_CHECK_HEADER([regex.h],
+                     [AC_DEFINE(HAVE_REGEX, [1], [regex.h presence])],
+                     [
+                     	AC_CHECK_HEADER([pcreposix.h], [
+                     		AC_DEFINE(HAVE_PCREREGEX, [1], [pcreposix.h presence])
+                     		AC_CHECK_LIB(pcreposix, regcomp, , [AC_MSG_ERROR([Not found libpcreposix library])])
+                     	], [])
+                     ])
+AC_CHECK_HEADER([execinfo.h],
+                     [AC_DEFINE(HAVE_EXECINFOINC, [1], [execinfo.h presence])],
+                     [])
+
 OLD_CPP=$CPP
 CPP="$CXXCPP $STDCXX_SWITCH"
 AC_CHECK_HEADER([atomic],
@@ -871,15 +1063,30 @@ AC_CHECK_HEADER([cstdatomic],
                      [AC_DEFINE(USE_CSTDATOMIC_H, [0], [cstdatomic support not found])], [-])
 CPP=$OLD_CPP
 
-AC_CHECK_HEADER([openssl/ssl.h],,[AC_MSG_ERROR([ssl header not found])])
+AC_CHECK_HEADER([openssl/ssl.h],AC_DEFINE(HAVE_SSLINC, 1, [Define if ssl is present]),[])
 
 if test "x$mod_sdormsql" = "xyes"; then
-	AC_CHECK_HEADER([uuid/uuid.h],,[AC_MSG_ERROR([uuid.h header not found])])
+	if test "x$os_flavor" = "xbsd"; then
+		AC_CHECK_HEADER([uuid.h],[AC_DEFINE(HAVE_BSDUUIDINC, [1], [bsd uuid headers])],[AC_MSG_ERROR([uuid.h header not found])])
+	else
+		AC_CHECK_HEADER([ossp/uuid.h],[AC_DEFINE(HAVE_OSSPUUIDINC, [1], [oddp uuid headers])],
+			[
+				AC_CHECK_HEADER([uuid/uuid.h],[AC_DEFINE(HAVE_UUIDINC, [1], [libuuid heades])],[AC_MSG_ERROR([uuid.h header not found])])
+			])
+	fi
 	AC_CHECK_HEADER([sql.h],,[AC_MSG_ERROR([ODBC sql.h header not found])])
+	AC_CHECK_HEADER([libpq-fe.h],,[])
 fi
 
 if test "x$mod_sdormmongo" = "xyes"; then
-	AC_CHECK_HEADER([uuid/uuid.h],,[AC_MSG_ERROR([uuid.h header not found])])
+	if test "x$os_flavor" = "xbsd"; then
+		AC_CHECK_HEADER([uuid.h],[AC_DEFINE(HAVE_BSDUUIDINC, [1], [bsd uuid headers])],[AC_MSG_ERROR([uuid.h header not found])])
+	else
+		AC_CHECK_HEADER([ossp/uuid.h],[AC_DEFINE(HAVE_OSSPUUIDINC, [1], [oddp uuid headers])],
+			[
+				AC_CHECK_HEADER([uuid/uuid.h],[AC_DEFINE(HAVE_UUIDINC, [1], [libuuid heades])],[AC_MSG_ERROR([uuid.h header not found])])
+			])
+	fi
 	AC_CHECK_HEADER([mongoc.h],,[AC_MSG_ERROR([mongodb mongoc.h header not found])])
 	AC_CHECK_HEADER([bson.h],,[AC_MSG_ERROR([mongodb bson.h header not found])])
 fi
@@ -904,56 +1111,88 @@ AC_CHECK_TYPES(signed char)
 
 ADD_LIBDL=
 
+AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM([[#include <sys/socket.h>
+						 #include <netinet/in.h>
+						 #include <netinet/tcp.h>]],
+                      [[return TCP_QUICKACK;]])],
+      [AC_DEFINE(HAVE_TCP_QUICKACK, [1], [TCP_QUICKACK])],
+      [])
+AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM([[#include <sys/socket.h>
+						 #include <netinet/in.h>
+						 #include <netinet/tcp.h>]],
+                      [[return TCP_DEFER_ACCEPT;]])],
+      [AC_DEFINE(HAVE_TCP_DEFER_ACCEPT, [1], [TCP_DEFER_ACCEPT])],
+      [])
+AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM([[#include <sys/socket.h>
+						 #include <netinet/in.h>
+						 #include <netinet/tcp.h>]],
+                      [[return TCP_FASTOPEN;]])],
+      [AC_DEFINE(HAVE_TCP_FASTOPEN, [1], [TCP_FASTOPEN])],
+      [])
+
 dnl# Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
 AC_FUNC_FORK
-AC_FUNC_MALLOC
 AC_FUNC_STRTOD
-AC_CHECK_FUNCS([clock_gettime floor gethostbyname memset pow regcomp select socket strcasecmp strtol strtoul])
+AC_CHECK_FUNCS([malloc realloc clock_gettime floor gethostbyname memset pow regcomp select socket strcasecmp strtol strtoul accept4])
 AC_CHECK_LIB(pthreads, pthread_create,[], [AC_CHECK_LIB(pthread, pthread_create)])
-AC_CHECK_LIB(ssl, SSL_read, [], [AC_MSG_ERROR([ssl library not found])])
-AC_CHECK_LIB([crypto], [SHA1_Init], [], [AC_MSG_ERROR([libcrypto not found])])
+AC_CHECK_LIB([crypto], [SHA1_Init], [], [])
+AC_CHECK_LIB(ssl, SSL_read, [], [])
+AM_CONDITIONAL(HAVE_SSL, test "x$ac_cv_lib_ssl_SSL_read" = "xyes")
 AC_CHECK_LIB(z, compress,,AC_MSG_ERROR([no zlib; please install zlib or equivalent]))
 #AC_CHECK_LIB(c, dlopen, LIBDL="", [AC_CHECK_LIB(dl, dlopen, LIBDL="-ldl")])
 AC_CHECK_LIB(c, dlopen, ADD_LIBDL="", [AC_CHECK_LIB(dl, dlopen, ADD_LIBDL="-ldl")])
 AC_CHECK_LIB(rt, clock_nanosleep, [AC_DEFINE(HAVE_CLOCK_NANOSLEEP, 1, [Define if you have clock_nanosleep()])], [])
 
+if test "x$local_os_type" = "xmingw"; then
+	LIBS="-lwsock32 -lws2_32 -lkernel32 -lregex -lssp $LIBS"
+	#AC_CHECK_LIB(wsock32, main, , [AC_MSG_ERROR([Not found libwsock32 library])])
+	#AC_CHECK_LIB(ws2_32, main, , [AC_MSG_ERROR([Not found libws2_32 library])])
+	#AC_CHECK_LIB(kernel32, main, , [AC_MSG_ERROR([Not found libkernel32 library])])
+	#AC_CHECK_LIB(regex, regcomp, , [AC_MSG_ERROR([Not found libregex library])])
+	#AC_CHECK_LIB(ssp, main, , [AC_MSG_ERROR([Not found libssp library])])
+fi
+
 if test "x$mod_sdormsql" = "xyes"; then
-	if test "x$local_os_type" = "xfreebsd"; then
-		AC_DEFINE(HAVE_BSDUUIDINC, [], [set uuid lib to bsd type])
+	if test "x$os_flavor" = "xbsd"; then
 		AC_CHECK_LIB(uuid, uuid_create, [], [AC_MSG_ERROR([uuid library not found])])
 	else
-		AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
+		AC_CHECK_LIB(ossp-uuid, uuid_create, [],
+			[
+				AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
+			])
 	fi
 	AC_CHECK_LIB(odbc, main, , [AC_MSG_ERROR([Not found libodbc library])])
 	AC_SEARCH_LIBS(SQLGetPrivateProfileString, odbcinst, [],[AC_MSG_ERROR([unixODBC library "odbcinst" not found])])
+	AC_DEFINE(HAVE_LIBODBC, [1], [libodbc presence])
+    AC_CHECK_LIB(pq, main, , [])
 fi
 
 if test "x$mod_sdormmongo" = "xyes"; then
-	if test "x$local_os_type" = "xfreebsd"; then
-		AC_DEFINE(HAVE_BSDUUIDINC, [], [set uuid lib to bsd type])
+	if test "x$os_flavor" = "xbsd"; then
 		AC_CHECK_LIB(uuid, uuid_create, [], [AC_MSG_ERROR([uuid library not found])])
 	else
-		AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
+		AC_CHECK_LIB(ossp-uuid, uuid_create, [],
+			[
+				AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
+			])
 	fi
+	AC_CHECK_LIB(bson-1.0, bson_new, , [AC_MSG_ERROR([Not found libbson library])])
     AC_CHECK_LIB(mongoc-1.0, mongoc_init, , [AC_MSG_ERROR([Not found libmongo library])])
-    AC_CHECK_LIB(bson-1.0, bson_new, , [AC_MSG_ERROR([Not found libbson library])])
 fi
 
-if test "x$is_librt_available" = "xyes"; then	
-	AC_CHECK_LIB(rt, clock_gettime,,[AC_MSG_ERROR([librt required but not found])])
-fi
-
-if test "x$local_os_type" = "xmingw"; then
-	AC_CHECK_LIB(wsock32, main, , [AC_MSG_ERROR([Not found libwsock32 library])])
-	AC_CHECK_LIB(ws2_32, main, , [AC_MSG_ERROR([Not found libws2_32 library])])
-	AC_CHECK_LIB(kernel32, main, , [AC_MSG_ERROR([Not found libkernel32 library])])
-	AC_CHECK_LIB(regex, regcomp, , [AC_MSG_ERROR([Not found libregex library])])
-fi
+#if test "x$is_librt_available" = "xyes"; then	
+	#AC_CHECK_LIB(rt, clock_gettime,,[AC_MSG_ERROR([librt required but not found])])
+#fi
 
 if test "x$mod_gtm" = "xyes"; then
     AC_CHECK_LIB(gtmshr, main, , [AC_MSG_ERROR([Not found libgtmshr library])])
 fi
+
+AC_SEARCH_LIBS(curl_easy_init, curl, [],[AC_MSG_ERROR([curl library "libcurl" not found])])
  
 AM_CXXFLAGS="$AM_CXXFLAGS $STDCXX_SWITCH"
 AC_SUBST(STDCXX_SWITCH, [$STDCXX_SWITCH])
@@ -973,6 +1212,15 @@ else
         AC_SUBST(GENERATE_NGINXMOD,[ ])
 fi
 
+NGX_CPP_FLAGS="$CPPFLAGS"
+#CPPFLAGS="$CPPFLAGS -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -Wno-deprecated"
+if test "x$with_top_inc_dir" != "x";then
+	NGX_LD_FLAGS="-L${with_top_inc_dir}/../lib"
+else
+	NGX_LD_FLAGS="-L/usr/local/lib"
+fi
+AC_SUBST(NGX_LD_FLAGS)
+AC_SUBST(NGX_CPP_FLAGS)
 AC_SUBST(BUILD_CPPFLAGS,[$CPPFLAGS])
 AC_SUBST(BUILD_AM_CXXFLAGS,[$AM_CXXFLAGS])
 AC_SUBST(BUILD_LDFLAGS,[$LDFLAGS])
@@ -983,10 +1231,10 @@ AC_CONFIG_FILES([Makefile
                 src/autotools/bins/Makefile
                 tests/autotools/Makefile])
 if test "x$generate_apache_module" = "xyes"; then
-AC_CONFIG_FILES([modules/apache_mod_ffeadcpp/autotools/Makefile])
+	AC_CONFIG_FILES([modules/apache_mod_ffeadcpp/autotools/Makefile])
 fi
 if test "x$generate_nginx_module" = "xyes"; then
-AC_CONFIG_FILES(modules/nginx_mod_ffeadcpp/autotools/Makefile[])
+	AC_CONFIG_FILES(modules/nginx_mod_ffeadcpp/autotools/Makefile[])
 fi
 AC_CONFIG_FILES([
 WEB_APPS
@@ -994,6 +1242,8 @@ WEB_APPS
 AC_OUTPUT
 
 echo "Host: $host"
+echo "LIBS: $LIBS"
+echo "CFLAGS: $CFLAGS"
 echo "CPPFLAGS: $CPPFLAGS"
 echo "AM_CXXFLAGS: $AM_CXXFLAGS"
 echo "LDFLAGS: $LDFLAGS"
@@ -1001,4 +1251,3 @@ echo "STDCXX_SWITCH: $STDCXX_SWITCH"
 echo "Debug mode: $support_debug"
 echo "Make Executable: $MAKE"
 echo "Generate Apache Module: $generate_apache_module"
-

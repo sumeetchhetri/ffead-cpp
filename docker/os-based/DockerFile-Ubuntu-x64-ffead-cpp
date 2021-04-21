@@ -39,7 +39,7 @@ RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
 RUN cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DMOD_NGINX=on .
 RUN make install -j4
-RUN mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src
 
@@ -47,10 +47,10 @@ COPY *.sh  /opt/
 
 WORKDIR /opt
 
-RUN chmod +x install_ffead-cpp-5.0.sh
-RUN ./install_ffead-cpp-5.0.sh
+RUN chmod +x install_ffead-cpp.sh
+RUN ./install_ffead-cpp.sh
 
-WORKDIR /opt/ffead-cpp-5.0
+WORKDIR /opt/ffead-cpp-6.0
 
 RUN chmod +x server.sh
 CMD ./server.sh

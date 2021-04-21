@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-5.0-base:5.3
+FROM sumeetchhetri/ffead-cpp-base:6.0
 
 WORKDIR ${IROOT}
 
@@ -19,9 +19,9 @@ RUN git clone https://github.com/kkos/oniguruma && cd oniguruma && emcmake cmake
 RUN git clone https://github.com/efficient/libcuckoo.git && cd libcuckoo && emcmake cmake . && emmake make install
 
 RUN cd ${IROOT}/ffead-cpp-src/ && rm -rf CMakeFiles CMakeCache.txt build && mkdir build && cd build && emcmake cmake -DBUILD_SHARED_LIBS=off -DMOD_SDORM_SQL=off .. \
-	&& emmake make -j4 install && rm -rf ${IROOT}/ffead-cpp-5.0 && mv ../ffead-cpp-5.0-bin ${IROOT}/ffead-cpp-5.0
+	&& emmake make -j4 install && rm -rf ${IROOT}/ffead-cpp-6.0 && mv ../ffead-cpp-6.0-bin ${IROOT}/ffead-cpp-6.0
 
 WORKDIR ${IROOT}/lang-server-backends/javascript/emscripten
 
-RUN emcc ffead-cpp-glue.cpp ${IROOT}/ffead-cpp-5.0/lib/libffead-framework.a ${IROOT}/ffead-cpp-5.0/lib/libffead-modules.a -s USE_PTHREADS=1 \
+RUN emcc ffead-cpp-glue.cpp ${IROOT}/ffead-cpp-6.0/lib/libffead-framework.a ${IROOT}/ffead-cpp-6.0/lib/libffead-modules.a -s USE_PTHREADS=1 \
 	-s USE_ZLIB=1 -s USE_PTHREADS=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -std=c++11 -o ffead-cpp-glue.js --bind

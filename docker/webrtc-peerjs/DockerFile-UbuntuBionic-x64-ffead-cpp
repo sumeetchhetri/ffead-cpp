@@ -59,7 +59,7 @@ RUN sed -i 's|web/te-benchmark-um-pq-async/src/autotools/Makefile||g' configure.
 
 RUN cmake -DSRV_EMB=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
 RUN make install -j4
-RUN mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src
 
@@ -67,10 +67,10 @@ WORKDIR /opt
 
 COPY *.sh  ./
 
-RUN chmod +x install_ffead-cpp-5.0.sh
-RUN ./install_ffead-cpp-5.0.sh
+RUN chmod +x install_ffead-cpp.sh
+RUN ./install_ffead-cpp.sh
 
-WORKDIR /opt/ffead-cpp-5.0
+WORKDIR /opt/ffead-cpp-6.0
 
 RUN chmod +x server.sh
 CMD ./server.sh

@@ -2,16 +2,8 @@ FROM ubuntu:latest
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-RUN apt update -yqq && apt install -yqq gcc g++ software-properties-common cmake unzip libpcre3-dev zlib1g-dev libpq-dev \
-	libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat \
-	libreadline-dev ccache git python3 python3-pip python3-setuptools python3-wheel ninja-build && rm -rf /var/lib/apt/lists/*
-RUN wget https://cdn.jsdelivr.net/gh/xmake-io/xmake@master/scripts/get.sh -O -  | bash
-ENV PATH="/root/.local/bin:${PATH}"
-ENV XMAKE_ROOT=y
-RUN xmake --version
-RUN pip3 install meson
-RUN meson --version
- 
+RUN apt update -yqq && apt install -yqq autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpcre3-dev zlib1g-dev libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat
+
 #Install libcuckoo headers
 WORKDIR /tmp
 RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
@@ -38,6 +30,13 @@ RUN cd mongo-c-driver-1.4.2/ &&  ./configure --disable-automatic-init-and-cleanu
 WORKDIR /tmp
 RUN rm -rf mongo-c-driver-1.4.2
 
+RUN wget -q https://github.com/axboe/liburing/archive/liburing-0.7.tar.gz
+RUN tar xf liburing-0.7.tar.gz
+RUN rm -f liburing-0.7.tar.gz
+RUN cd liburing-liburing-0.7 && ./configure --prefix=/usr/local && make install
+WORKDIR /tmp
+RUN rm -rf liburing-liburing-0.7
+
 #Install ffead-cpp
 WORKDIR /tmp
 RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
@@ -45,10 +44,9 @@ RUN unzip -qq master.zip
 RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
-
-RUN xmake f --cxflags="-I/usr/local/include -w" --MOD_SDORM_MONGO=true -v -D -c
-RUN xmake && xmake install
-RUN mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
+RUN cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DMOD_NGINX=on .
+RUN make install -j4
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src
 
@@ -56,22 +54,10 @@ COPY *.sh  /opt/
 
 WORKDIR /opt
 
-RUN chmod +x install_ffead-cpp-5.0.sh
-RUN ./install_ffead-cpp-5.0.sh
+RUN chmod +x install_ffead-cpp.sh
+RUN ./install_ffead-cpp.sh
 
-RUN rm -rf /opt/ffead-cpp-5.0
+WORKDIR /opt/ffead-cpp-6.0
 
-WORKDIR /tmp/ffead-cpp-src
-RUN meson setup build_meson
-WORKDIR /tmp/ffead-cpp-src/build_meson
-RUN ninja install
-RUN mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
-WORKDIR /tmp
-RUN rm -rf /tmp/ffead-cpp-src
-
-WORKDIR /opt
-
-RUN chmod +x install_ffead-cpp-5.0.sh
-RUN ./install_ffead-cpp-5.0.sh
-
-RUN rm -rf /opt/ffead-cpp-5.0
+RUN chmod +x server.sh
+CMD ./server.sh

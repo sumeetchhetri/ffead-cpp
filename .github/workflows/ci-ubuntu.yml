@@ -72,7 +72,7 @@ jobs:
         mkdir build && cd build
         cmake -GNinja -DSRV_EMB=on -DMOD_APACHE=on -DMOD_NGINX=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on ..
         sudo ninja install
-        cd ../ffead-cpp-5.0-bin
+        cd ../ffead-cpp-6.0-bin
         sudo chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
         #sudo sed -i'' -e "s|<init>TeBkUmRouter.updateCache</init>||g" web/te-benchmark-um/config/cache.xml
         #sudo sed -i'' -e "s|<init>TeBkRestController.updateCache</init>||g" web/te-benchmark/config/cache.xml
@@ -105,11 +105,11 @@ jobs:
         echo "ffead-cpp normal shutdown"
         sudo pkill ffead-cpp
         #Static library version.....
-        #cd ../.. && sudo rm -rf build ffead-cpp-5.0-bin
+        #cd ../.. && sudo rm -rf build ffead-cpp-6.0-bin
         #mkdir build && cd build
         #cmake -GNinja -DBUILD_SHARED_LIBS=off -DSRV_EMB=on -DMOD_APACHE=on -DMOD_NGINX=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on ..
         #sudo ninja install
-        #cd ../ffead-cpp-5.0-bin
+        #cd ../ffead-cpp-6.0-bin
         #sudo chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
         #sudo sed -i'' -e "s|<init>TeBkUmRouter.updateCache</init>||g" web/te-benchmark-um/config/cache.xml
         #sudo sed -i'' -e "s|<init>TeBkRestController.updateCache</init>||g" web/te-benchmark/config/cache.xml
@@ -142,16 +142,16 @@ jobs:
         #echo "ffead-cpp normal shutdown"
         #sudo pkill ffead-cpp
         #With Select event engine .....
-        cd ../.. && sudo rm -rf build ffead-cpp-5.0-bin
+        cd ../.. && sudo rm -rf build ffead-cpp-6.0-bin
         mkdir build && cd build
         cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DWITH_SELECT=on ..
         ninja install
         #With Poll event engine .....
-        cd .. && sudo rm -rf build ffead-cpp-5.0-bin
+        cd .. && sudo rm -rf build ffead-cpp-6.0-bin
         mkdir build && cd build
         cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DWITH_POLL=on ..
         ninja install
-        cd .. && sudo rm -rf build ffead-cpp-5.0-bin
+        cd .. && sudo rm -rf build ffead-cpp-6.0-bin
         #With ubuntu 20.04, upgrade kernel to 5.7 and then install liburing, with io_uring event engine
         #cd /tmp/ 
         #apt install -y kmod linux-base
@@ -167,7 +167,7 @@ jobs:
         #cd liburing-liburing-0.7 && ./configure --prefix=/usr/local && make install
         #cd /tmp && rm -rf liburing-liburing-0.7
         #cd -
-        #cd .. && sudo rm -rf build ffead-cpp-5.0-bin
+        #cd .. && sudo rm -rf build ffead-cpp-6.0-bin
         #mkdir build && cd build
         #cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DWITH_IOURING=on ..
         #ninja install
@@ -175,6 +175,6 @@ jobs:
     - name: Build ffead-cpp within docker
       run: |
         cd docker/os-based
-        docker build -f DockerFile-Alpine-x64-ffead-cpp-5.0 .
-        docker build -f DockerFile-Alpine-x64-ffead-cpp-5.0_autoconf .
+        docker build -f DockerFile-Alpine-x64-ffead-cpp .
+        docker build -f DockerFile-Alpine-x64-ffead-cpp_autoconf .
         

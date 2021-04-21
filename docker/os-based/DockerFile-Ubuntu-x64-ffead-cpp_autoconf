@@ -1,11 +1,8 @@
-FROM archlinux:base-devel-20210214.0.15477
+FROM ubuntu:latest
 
-RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst && \
-    curl -LO "https://repo.archlinuxcn.org/x86_64/$patched_glibc" && \
-    bsdtar -C / -xvf "$patched_glibc"
-RUN echo "IgnorePkg   = glibc" >> /etc/pacman.conf
-
-RUN pacman -Sy --noconfirm autoconf-archive autoconf automake libtool make clang unixodbc curl postgresql-libs libmemcached cmake openssh wget gnu-netcat tar gzip zlib unzip gawk grep sed core/binutils diffutils procps-ng
+ENV DEBIAN_FRONTEND noninteractive
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN apt update -yqq && apt install -yqq autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpcre3-dev zlib1g-dev libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat
 
 #Install libcuckoo headers
 WORKDIR /tmp
@@ -40,9 +37,11 @@ RUN unzip -qq master.zip
 RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
-RUN cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
-RUN make install -j4
-RUN mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
+RUN chmod +x autogen.sh
+RUN ./autogen.sh
+RUN ./configure --enable-srv_emb=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes --enable-apachemod=yes --enable-nginxmod=yes
+RUN make install
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src
 
@@ -50,10 +49,10 @@ COPY *.sh  /opt/
 
 WORKDIR /opt
 
-RUN chmod +x install_ffead-cpp-5.0.sh
-RUN ./install_ffead-cpp-5.0.sh
+RUN chmod +x install_ffead-cpp.sh
+RUN ./install_ffead-cpp.sh
 
-WORKDIR /opt/ffead-cpp-5.0
+WORKDIR /opt/ffead-cpp-6.0
 
 RUN chmod +x server.sh
 CMD ./server.sh

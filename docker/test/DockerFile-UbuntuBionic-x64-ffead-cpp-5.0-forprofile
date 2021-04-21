@@ -159,10 +159,10 @@ RUN mkdir build
 WORKDIR /tmp/ffead-cpp-src/build
 RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DDEBUG=on ..
 RUN ninja install && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-mgr && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/ffead-cpp-sql-raw-async
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-mgr && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw-async
 
 WORKDIR /
 

@@ -1,1 +1,1 @@
-java -jar build/libs/wizzardo-ffead-cpp-all-1.0.jar /root/ffead-cpp-5.0 8080
+java -jar build/libs/wizzardo-ffead-cpp-all-1.0.jar /root/ffead-cpp-6.0 8080

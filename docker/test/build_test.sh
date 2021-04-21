@@ -4,5 +4,5 @@ cp -rf ../../src .
 cp -rf ../../web .
 cp -rf ../../rtdcf .
 cp -rf ../../script .
-docker build -f DockerFile-UbuntuBionic-x64-ffead-cpp-5.0-fortest -t ffeadcpptest:1.0 .
+docker build -f DockerFile-UbuntuBionic-x64-ffead-cpp-fortest -t ffeadcpptest:1.0 .
 rm -rf src web rtdcf script CMakeLists.txt
