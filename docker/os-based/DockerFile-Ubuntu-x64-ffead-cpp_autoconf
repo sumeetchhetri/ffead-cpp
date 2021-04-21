@@ -1,0 +1,58 @@
+FROM ubuntu:latest
+
+ENV DEBIAN_FRONTEND noninteractive
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN apt update -yqq && apt install -yqq autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpcre3-dev zlib1g-dev libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat
+
+#Install libcuckoo headers
+WORKDIR /tmp
+RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
+RUN unzip -qq master.zip
+RUN rm -f master.zip
+WORKDIR /tmp/libcuckoo-master
+RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ .
+RUN make install
+WORKDIR /tmp
+RUN rm -rf /tmp/libcuckoo-master
+
+RUN wget -q https://github.com/redis/hiredis/archive/v1.0.0.tar.gz
+RUN tar xf v1.0.0.tar.gz
+RUN rm -f v1.0.0.tar.gz
+RUN cd hiredis-1.0.0/ && cmake . && make install
+WORKDIR /tmp
+RUN rm -rf hiredis-1.0.0
+
+#Install mongodb c driver
+RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
+RUN tar xf mongo-c-driver-1.4.2.tar.gz
+RUN rm -f mongo-c-driver-1.4.2.tar.gz
+RUN cd mongo-c-driver-1.4.2/ &&  ./configure --disable-automatic-init-and-cleanup --disable-tests --disable-ssl --disable-sasl && make && make install
+WORKDIR /tmp
+RUN rm -rf mongo-c-driver-1.4.2
+
+#Install ffead-cpp
+WORKDIR /tmp
+RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
+RUN unzip -qq master.zip
+RUN mv ffead-cpp-master ffead-cpp-src
+RUN rm -f master.zip
+WORKDIR /tmp/ffead-cpp-src
+RUN chmod +x autogen.sh
+RUN ./autogen.sh
+RUN ./configure --enable-srv_emb=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes --enable-apachemod=yes --enable-nginxmod=yes
+RUN make install
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
+WORKDIR /tmp
+RUN rm -rf /tmp/ffead-cpp-src
+
+COPY *.sh  /opt/
+
+WORKDIR /opt
+
+RUN chmod +x install_ffead-cpp.sh
+RUN ./install_ffead-cpp.sh
+
+WORKDIR /opt/ffead-cpp-6.0
+
+RUN chmod +x server.sh
+CMD ./server.sh

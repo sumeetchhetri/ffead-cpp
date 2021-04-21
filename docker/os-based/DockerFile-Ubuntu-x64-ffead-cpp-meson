@@ -1,0 +1,57 @@
+FROM ubuntu:latest
+
+ENV DEBIAN_FRONTEND noninteractive
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN apt update -yqq && apt install -yqq gcc g++ software-properties-common cmake unzip libpcre3-dev zlib1g-dev libpq-dev \
+	libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat \
+	python3 python3-pip python3-setuptools python3-wheel ninja-build && rm -rf /var/lib/apt/lists/*
+RUN wget https://cdn.jsdelivr.net/gh/xmake-io/xmake@master/scripts/get.sh -O -  | bash
+RUN pip3 install meson
+ 
+#Install libcuckoo headers
+WORKDIR /tmp
+RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
+RUN unzip -qq master.zip
+RUN rm -f master.zip
+WORKDIR /tmp/libcuckoo-master
+RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ .
+RUN make install
+WORKDIR /tmp
+RUN rm -rf /tmp/libcuckoo-master
+
+RUN wget -q https://github.com/redis/hiredis/archive/v1.0.0.tar.gz
+RUN tar xf v1.0.0.tar.gz
+RUN rm -f v1.0.0.tar.gz
+RUN cd hiredis-1.0.0/ && cmake . && make install
+WORKDIR /tmp
+RUN rm -rf hiredis-1.0.0
+
+#Install mongodb c driver
+RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
+RUN tar xf mongo-c-driver-1.4.2.tar.gz
+RUN rm -f mongo-c-driver-1.4.2.tar.gz
+RUN cd mongo-c-driver-1.4.2/ &&  ./configure --disable-automatic-init-and-cleanup --disable-tests --disable-ssl --disable-sasl && make && make install
+WORKDIR /tmp
+RUN rm -rf mongo-c-driver-1.4.2
+
+#Install ffead-cpp
+WORKDIR /tmp
+RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
+RUN unzip -qq master.zip
+RUN mv ffead-cpp-master ffead-cpp-src
+RUN rm -f master.zip
+WORKDIR /tmp/ffead-cpp-src
+
+RUN meson setup build_meson
+WORKDIR /tmp/ffead-cpp-src/build_meson
+RUN ninja install
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
+WORKDIR /tmp
+RUN rm -rf /tmp/ffead-cpp-src
+
+COPY *.sh  /opt/
+
+WORKDIR /opt
+
+RUN chmod +x install_ffead-cpp.sh
+RUN ./install_ffead-cpp.sh

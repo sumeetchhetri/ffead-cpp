@@ -21,7 +21,7 @@ require "./ffead-cpp-lib"
 class HttpServerFfeadCppCry
     @[ThreadLocal]
     @fresponse: Void*?
-    @ffead_cpp_directory = "/root/ffead-cpp-5.0"
+    @ffead_cpp_directory = "/root/ffead-cpp-6.0"
     @port = 8080
     @server: HTTP::Server
 

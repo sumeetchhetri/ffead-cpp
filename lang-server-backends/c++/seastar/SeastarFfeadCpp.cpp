@@ -144,7 +144,7 @@ int main(int ac, char** av) {
 
 	app.add_options()("address", bpo::value<sstring>()->default_value("0.0.0.0"), "HTTP Server address");
 	app.add_options()("port", bpo::value<uint16_t>()->default_value(10000), "HTTP Server port");
-	app.add_options()("fcpdir", bpo::value<sstring>()->default_value("/installs/ffead-cpp-5.0"), "ffead-cpp directory");
+	app.add_options()("fcpdir", bpo::value<sstring>()->default_value("/installs/ffead-cpp-6.0"), "ffead-cpp directory");
 
 	std::atomic<bool> fcp_init = false;
 

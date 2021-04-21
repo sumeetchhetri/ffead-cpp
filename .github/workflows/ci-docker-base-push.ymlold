@@ -7,12 +7,12 @@ on:
     branches: [ master ]
     
 env:
-  IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-base
-  JAVA_IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-java-base
-  RUST_IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-rust-base
-  RUST_RKT_IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-rust-rocket-base
-  V_IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-v-base
-  IMG_VERSION: 5.3
+  IMAGE_NAME: sumeetchhetri/ffead-cpp-base
+  JAVA_IMAGE_NAME: sumeetchhetri/ffead-cpp-java-base
+  RUST_IMAGE_NAME: sumeetchhetri/ffead-cpp-rust-base
+  RUST_RKT_IMAGE_NAME: sumeetchhetri/ffead-cpp-rust-rocket-base
+  V_IMAGE_NAME: sumeetchhetri/ffead-cpp-v-base
+  IMG_VERSION: 6.0
 jobs:
   push:
     runs-on: ubuntu-latest

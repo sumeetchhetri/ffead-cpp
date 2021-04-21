@@ -59,12 +59,12 @@ lang-server-backends/java/firenio/target
 lang-server-backends/java/rapidoid/target
 lang-server-backends/java/wizzardo-http/target
 **/ffead-cpp-3.0.build
-**/ffead-cpp-5.0.build
+**/ffead-cpp-6.0.build
 **/CMakeScripts
 **/.build
 **/.swiftpm
 /Debug/
-ffead-cpp-5.0-bin/
+ffead-cpp-6.0-bin/
 build/
 nginx-*/
 docker/test/src
@@ -75,3 +75,5 @@ docker/test/web
 **/.build
 **/app.xcodeproj
 **/.xmake
+buildnin
+ffead-cpp-interface-test-lib/\.*

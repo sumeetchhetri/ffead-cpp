@@ -41,22 +41,22 @@ Message::Message(const std::string& xml)
 	{
 		throw InvalidMessageException("Every message should have a headers and body tag\n");
 	}
-	Element* headers = message.getChildElements().at(0);
-	Element* body = message.getChildElements().at(1);
-	if(headers->getTagName()!="headers")
+	Element headers = message.getChildElements().at(0);
+	Element body = message.getChildElements().at(1);
+	if(headers.getTagName()!="headers")
 	{
 		throw InvalidMessageException("No headers Tag\n");
 	}
-	else if(body->getTagName()!="body")
+	else if(body.getTagName()!="body")
 	{
 		throw InvalidMessageException("No body Tag\n");
 	}
-	Element* destination = headers->getElementByName("destination");
-	Element* encoding = headers->getElementByName("encoding");
-	Element* timestamp = headers->getElementByName("timestamp");
-	Element* priority = headers->getElementByName("priority");
-	Element* type = headers->getElementByName("type");
-	Element* userid = headers->getElementByName("userid");
+	Element* destination = headers.getElementByName("destination");
+	Element* encoding = headers.getElementByName("encoding");
+	Element* timestamp = headers.getElementByName("timestamp");
+	Element* priority = headers.getElementByName("priority");
+	Element* type = headers.getElementByName("type");
+	Element* userid = headers.getElementByName("userid");
 	if(destination->getTagName()!="destination")
 	{
 		throw InvalidMessageException("Destination Header is mandatory\n");
@@ -77,7 +77,7 @@ Message::Message(const std::string& xml)
 	des.setName(destination->getAttribute("name"));
 	des.setType(destination->getAttribute("type"));
 	this->destination = des;
-	this->body = body->getText();
+	this->body = body.getText();
 	this->timestamp = timestamp->getText();
 	this->type = type->getText();
 	this->priority = priority->getText();
@@ -96,22 +96,22 @@ Message::Message(Document& doc)
 	{
 		throw InvalidMessageException("Every message should have a headers and body tag\n");
 	}
-	Element* headers = message.getChildElements().at(0);
-	Element* body = message.getChildElements().at(1);
-	if(headers->getTagName()!="headers")
+	Element headers = message.getChildElements().at(0);
+	Element body = message.getChildElements().at(1);
+	if(headers.getTagName()!="headers")
 	{
 		throw InvalidMessageException("No headers Tag\n");
 	}
-	else if(body->getTagName()!="body")
+	else if(body.getTagName()!="body")
 	{
 		throw InvalidMessageException("No body Tag\n");
 	}
-	Element* destination = headers->getElementByName("destination");
-	Element* encoding = headers->getElementByName("encoding");
-	Element* timestamp = headers->getElementByName("timestamp");
-	Element* priority = headers->getElementByName("priority");
-	Element* type = headers->getElementByName("type");
-	Element* userid = headers->getElementByName("userid");
+	Element* destination = headers.getElementByName("destination");
+	Element* encoding = headers.getElementByName("encoding");
+	Element* timestamp = headers.getElementByName("timestamp");
+	Element* priority = headers.getElementByName("priority");
+	Element* type = headers.getElementByName("type");
+	Element* userid = headers.getElementByName("userid");
 	if(destination->getTagName()!="destination")
 	{
 		throw InvalidMessageException("Destination Header is mandatory\n");
@@ -132,7 +132,7 @@ Message::Message(Document& doc)
 	des.setName(destination->getAttribute("name"));
 	des.setType(destination->getAttribute("type"));
 	this->destination = des;
-	this->body = body->getText();
+	this->body = body.getText();
 	this->timestamp = timestamp->getText();
 	this->type = type->getText();
 	this->priority = priority->getText();

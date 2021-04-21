@@ -14,6 +14,8 @@
     limitations under the License.
 */
 
+#define BUILD_XMAKE 1
+
 ${define INC_MEMORYCACHE}
 ${define INC_REDISCACHE}
 ${define INC_MEMCACHED}
@@ -83,7 +85,6 @@ ${define HAVE_LIBPQ_BATCH}
 #define INC_DCP 1
 #define INC_XMLSER 1
 #define IS_SENDFILE 1
-#define BUILD_CMAKE 1
 
 #ifdef APPLE
 #define OS_DARWIN 1

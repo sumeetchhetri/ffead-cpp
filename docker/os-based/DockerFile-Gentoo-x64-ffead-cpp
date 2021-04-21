@@ -1,0 +1,55 @@
+FROM gentoo/stage3-amd64
+
+RUN emerge-webrsync
+RUN emerge sys-devel/autoconf-archive sys-devel/autoconf sys-devel/automake sys-devel/libtool dev-db/postgresql dev-db/unixODBC curl libmemcached cmake wget netcat tar gzip zlib
+
+#Install libcuckoo headers
+WORKDIR /tmp
+RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
+RUN unzip -qq master.zip
+RUN rm -f master.zip
+WORKDIR /tmp/libcuckoo-master
+RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ .
+RUN make install
+WORKDIR /tmp
+RUN rm -rf /tmp/libcuckoo-master
+
+RUN wget -q https://github.com/redis/hiredis/archive/v1.0.0.tar.gz
+RUN tar xf v1.0.0.tar.gz
+RUN rm -f v1.0.0.tar.gz
+RUN cd hiredis-1.0.0/ && cmake . && make install
+WORKDIR /tmp
+RUN rm -rf hiredis-1.0.0
+
+#Install mongodb c driver
+RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
+RUN tar xf mongo-c-driver-1.4.2.tar.gz
+RUN rm -f mongo-c-driver-1.4.2.tar.gz
+RUN cd mongo-c-driver-1.4.2/ &&  ./configure --disable-automatic-init-and-cleanup --disable-tests --disable-ssl --disable-sasl && make && make install
+WORKDIR /tmp
+RUN rm -rf mongo-c-driver-1.4.2
+
+#Install ffead-cpp
+WORKDIR /tmp
+RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
+RUN unzip -qq master.zip
+RUN mv ffead-cpp-master ffead-cpp-src
+RUN rm -f master.zip
+WORKDIR /tmp/ffead-cpp-src
+RUN cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
+RUN make install -j4
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
+WORKDIR /tmp
+RUN rm -rf /tmp/ffead-cpp-src
+
+COPY *.sh  /opt/
+
+WORKDIR /opt
+
+RUN chmod +x install_ffead-cpp.sh
+RUN ./install_ffead-cpp.sh
+
+WORKDIR /opt/ffead-cpp-6.0
+
+RUN chmod +x server.sh
+CMD ./server.sh

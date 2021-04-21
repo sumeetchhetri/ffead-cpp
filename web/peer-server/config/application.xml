@@ -1,4 +1,4 @@
-<app libname="peer_server" router="PeerServerRouter" properties="app.prop">
+<app router="PeerServerRouter" properties="app.prop">
 	<web-socket-handlers>
 		<web-socket-handler class="PeerServerController" path="/peerjs" />
 	</web-socket-handlers>

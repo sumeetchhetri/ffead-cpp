@@ -21,8 +21,8 @@ import ffeadcpp;
 void main(string[] args) {
 	ushort port = 8080;
 	string ip = "0.0.0.0";
-	string sdir = "/root/ffead-cpp-5.0";
-	GetoptResult o = getopt(args, "server-dir|s", "Server Directory (default /root/ffead-cpp-5.0)", &sdir, "ip|h", "IP Address (default 0.0.0.0)", &ip, "port|p", "Port (default 8080)", &port);
+	string sdir = "/root/ffead-cpp-6.0";
+	GetoptResult o = getopt(args, "server-dir|s", "Server Directory (default /root/ffead-cpp-6.0)", &sdir, "ip|h", "IP Address (default 0.0.0.0)", &ip, "port|p", "Port (default 8080)", &port);
 	if (o.helpWanted) {
 		defaultGetoptPrinter("A mini-http server powered by Hunt!", o.options);
 		return;

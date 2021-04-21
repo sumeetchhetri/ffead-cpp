@@ -7,8 +7,8 @@ on:
     branches: [ master ]
     
 env:
-  IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-seastar
-  IMG_VERSION: 5.3
+  IMAGE_NAME: sumeetchhetri/ffead-cpp-seastar
+  IMG_VERSION: 6.0
 jobs:
   build:
     runs-on: ubuntu-latest

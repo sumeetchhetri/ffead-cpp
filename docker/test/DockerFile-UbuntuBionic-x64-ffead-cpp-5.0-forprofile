@@ -151,18 +151,18 @@ RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/default)||g' CMakeLists
 	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/flexApp/libflexApp${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt && \
 	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/oauthApp/liboauthApp${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt && \
 	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/markers/libmarkers${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt && \
-	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/te-benchmark/libte_benchmark${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt && \
-	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/peer-server/libpeer_server${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt && \
+	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/te-benchmark/libte-benchmark${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt && \
+	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/peer-server/libpeer-server${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt && \
 	rm -rf web/default web/oauthApp web/flexApp web/markers web/te-benchmark web/peer-server
 
 RUN mkdir build
 WORKDIR /tmp/ffead-cpp-src/build
 RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DDEBUG=on ..
 RUN ninja install && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-mgr && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/ffead-cpp-sql-raw-async
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-mgr && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw-async
 
 WORKDIR /
 

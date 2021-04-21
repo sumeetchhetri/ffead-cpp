@@ -1,0 +1,78 @@
+FROM ubuntu:latest
+
+RUN apt update -yqq && apt install -yqq autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpcre3-dev zlib1g-dev libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat
+
+#Install libcuckoo headers
+WORKDIR /tmp
+RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
+RUN unzip -qq master.zip
+RUN rm -f master.zip
+WORKDIR /tmp/libcuckoo-master
+RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ .
+RUN make install
+WORKDIR /tmp
+RUN rm -rf /tmp/libcuckoo-master
+
+RUN wget -q https://github.com/redis/hiredis/archive/v1.0.0.tar.gz
+RUN tar xf v1.0.0.tar.gz
+RUN rm -f v1.0.0.tar.gz
+RUN cd hiredis-1.0.0/ && cmake . && make install
+WORKDIR /tmp
+RUN rm -rf hiredis-1.0.0
+
+#Install ffead-cpp
+WORKDIR /tmp
+RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
+RUN unzip -qq master.zip
+RUN mv ffead-cpp-master ffead-cpp-src
+RUN rm -f master.zip
+WORKDIR /tmp/ffead-cpp-src
+
+RUN rm -rf web/default web/oauthApp web/flexApp web/markers web/te-benchmark web/te-benchmark-um web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async
+RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/default)||g' CMakeLists.txt
+RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/flexApp)||g' CMakeLists.txt
+RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/oauthApp)||g' CMakeLists.txt
+RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/markers)||g' CMakeLists.txt
+RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark)||g' CMakeLists.txt
+RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um)||g' CMakeLists.txt
+RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um-mgr)||g' CMakeLists.txt
+RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq)||g' CMakeLists.txt
+RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq-async)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/default/libdefault${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/flexApp/libflexApp${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/oauthApp/liboauthApp${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/markers/libmarkers${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark/libte-benchmark${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um/libte-benchmark-um${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um-mgr/libte-benchmark-um-mgr${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq/libte-benchmark-um-pq${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq-async/libte-benchmark-um-pq-async${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|web/default/src/autotools/Makefile||g' configure.ac
+RUN sed -i 's|web/flexApp/src/autotools/Makefile||g' configure.ac
+RUN sed -i 's|web/oauthApp/src/autotools/Makefile||g' configure.ac
+RUN sed -i 's|web/markers/src/autotools/Makefile||g' configure.ac
+RUN sed -i 's|web/te-benchmark/src/autotools/Makefile||g' configure.ac
+RUN sed -i 's|web/te-benchmark-um/src/autotools/Makefile||g' configure.ac
+RUN sed -i 's|web/te-benchmark-um-mgr/src/autotools/Makefile||g' configure.ac
+RUN sed -i 's|web/te-benchmark-um-pq/src/autotools/Makefile||g' configure.ac
+RUN sed -i 's|web/te-benchmark-um-pq-async/src/autotools/Makefile||g' configure.ac
+
+RUN chmod +x autogen.sh
+RUN ./autogen.sh
+RUN ./configure --enable-srv_emb=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes CPPFLAGS="$CPPFLAGS -I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0 -I/usr/include/libmongoc-1.0 -I/usr/include/libbson-1.0" LDFLAGS="$LDFLAGS -L/usr/local/lib"
+RUN make install
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
+WORKDIR /tmp
+RUN rm -rf /tmp/ffead-cpp-src
+
+WORKDIR /opt
+
+COPY *.sh  ./
+
+RUN chmod +x install_ffead-cpp.sh
+RUN ./install_ffead-cpp.sh
+
+WORKDIR /opt/ffead-cpp-6.0
+
+RUN chmod +x server.sh
+CMD ./server.sh

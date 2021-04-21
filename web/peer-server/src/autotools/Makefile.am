@@ -8,7 +8,7 @@ distdir=${PACKAGE_NAME}-${PACKAGE_VERSION}-src
 fprefix=../../../../${packageIdentifier}
 prefix=${abs_builddir}
 
-lib_LTLIBRARIES = libpeer_server.la
+lib_LTLIBRARIES = libpeer-server.la
 libpeer_server_la_SOURCES = ../PeerServerController.cpp
 libpeer_server_la_LDFLAGS = -no-undefined
 libpeer_server_la_LIBADD = -L"${fprefix}/lib" -lffead-modules -lffead-framework

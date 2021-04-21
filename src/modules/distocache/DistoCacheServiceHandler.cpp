@@ -22,18 +22,22 @@
 
 #include "DistoCacheServiceHandler.h"
 
+#ifdef HAVE_SSLINC
 DistoCacheServiceHandler::DistoCacheServiceHandler(const int& fd, const bool& isSSLEnabled, SSL_CTX *ctx) {
 	this->fd = fd;
 	this->isSSLEnabled = isSSLEnabled;
 	this->ctx = ctx;
 	logger = LoggerFactory::getLogger("DistoCacheServiceHandler");
 }
+#endif
 
 DistoCacheServiceHandler::DistoCacheServiceHandler(const int& fd) {
 	this->fd = fd;
 	this->isSSLEnabled = false;
 	logger = LoggerFactory::getLogger("DistoCacheServiceHandler");
+#ifdef HAVE_SSLINC
 	ctx = NULL;
+#endif
 }
 
 DistoCacheServiceHandler::~DistoCacheServiceHandler() {
@@ -69,10 +73,10 @@ bool DistoCacheServiceHandler::validQuery(const std::vector<std::string>& parts,
 
 void DistoCacheServiceHandler::run()
 {
+#ifdef HAVE_SSLINC
 	SSL *ssl=NULL;
 	BIO *sbio=NULL;
 	BIO *io=NULL,*ssl_bio=NULL;
-#ifdef HAVE_SSLINC
 	if(isSSLEnabled)
 	{
 		sbio=BIO_new_socket(fd,BIO_CLOSE);

@@ -57,7 +57,7 @@ sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/default/libdefault${LIB_EXT} D
 sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/flexApp/libflexApp${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/oauthApp/liboauthApp${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/markers/libmarkers${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
-sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/peer-server/libpeer_server${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/peer-server/libpeer-server${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 sed -i 's|web/default/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/flexApp/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/oauthApp/src/autotools/Makefile||g' configure.ac
@@ -77,7 +77,7 @@ cp -f web/te-benchmark/sql-src/TeBkWorldmongo.cpp web/te-benchmark/src/TeBkWorld
 cp -f web/te-benchmark-um/sql-src/TeBkUmWorldmongo.h web/te-benchmark-um/include/TeBkUmWorld.h
 cp -f web/te-benchmark-um/sql-src/TeBkUmWorldmongo.cpp web/te-benchmark-um/src/TeBkUmWorld.cpp
 make install -j4
-cd ffead-cpp-5.0-bin
+cd ffead-cpp-6.0-bin
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 ./server.sh &
 while [ ! -f lib/libinter.so ]
@@ -91,10 +91,10 @@ done
 pkill ffead-cpp
 
 cd ${IROOT}/ffead-cpp-src/
-cp -rf ffead-cpp-5.0-bin ${IROOT}/ffead-cpp-5.0
-rm -rf ffead-cpp-5.0-bin
+cp -rf ffead-cpp-6.0-bin ${IROOT}/ffead-cpp-6.0
+rm -rf ffead-cpp-6.0-bin
 
-cd ${IROOT}/ffead-cpp-5.0
+cd ${IROOT}/ffead-cpp-6.0
 cp -f ${TROOT}/run_ffead.sh ./
 
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh

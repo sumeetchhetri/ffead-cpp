@@ -34,12 +34,16 @@
 class DistoCacheServiceHandler {
 	int fd;
 	bool isSSLEnabled;
+#ifdef HAVE_SSLINC
 	SSL_CTX *ctx;
+#endif
 	Logger logger;
 	int getLength(const std::string& header, const int& size);
 	bool validQuery(const std::vector<std::string>& parts, const int& size, const std::string& cmd1="", const std::string& cmd2="");
 public:
+#ifdef HAVE_SSLINC
 	DistoCacheServiceHandler(const int& fd, const bool& isSSLEnabled, SSL_CTX *ctx);
+#endif
 	DistoCacheServiceHandler(const int& fd);
 	virtual ~DistoCacheServiceHandler();
 	void run();

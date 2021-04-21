@@ -15,5 +15,5 @@ jobs:
     - name: Build ffead-cpp on alpine
       run: |
         cd docker/os-based
-        docker build -f DockerFile-Alpine-x64-ffead-cpp-5.0 .
-        docker build -f DockerFile-Alpine-x64-ffead-cpp-5.0_autoconf .
+        docker build -f DockerFile-Alpine-x64-ffead-cpp .
+        docker build -f DockerFile-Alpine-x64-ffead-cpp_autoconf .

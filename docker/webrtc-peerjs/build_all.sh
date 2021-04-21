@@ -1,1 +1,1 @@
-docker build -f DockerFile-UbuntuBionic-x64-ffead-cpp-5.0 --tag sumeetchhetri/ffead-cpp-5.0:ffead-cpp-5.0-ubuntubionic-webrtc .
+docker build -f DockerFile-UbuntuBionic-x64-ffead-cpp --tag sumeetchhetri/ffead-cpp:ffead-cpp-ubuntubionic-webrtc .

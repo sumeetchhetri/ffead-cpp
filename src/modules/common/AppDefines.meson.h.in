@@ -1,0 +1,91 @@
+/*
+	Copyright 2009-2020, Sumeet Chhetri
+
+    Licensed under the Apache License, Version 2.0 (const the& "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+
+#define BUILD_MESON 1
+
+#mesondefine INC_MEMORYCACHE
+#mesondefine INC_REDISCACHE
+#mesondefine INC_MEMCACHED
+#mesondefine INC_SDORM
+#mesondefine INC_SDORM_SQL
+#mesondefine INC_SDORM_MONGO
+#mesondefine INC_BINSER
+#mesondefine INC_JOBS
+#mesondefine APPLE
+#mesondefine MINGW
+#mesondefine CYGWIN
+#mesondefine EMSCRIPTEN
+#mesondefine DEBUG_MODE
+
+#mesondefine USE_EPOLL
+#mesondefine USE_KQUEUE
+#mesondefine USE_EVPORT
+#mesondefine USE_DEVPOLL
+#mesondefine USE_POLL
+#mesondefine USE_SELECT
+#mesondefine USE_WIN_IOCP
+#mesondefine USE_IO_URING
+
+#mesondefine HAVE_LIBPQ
+#mesondefine HAVE_REGEX
+#mesondefine HAVE_SSLINC
+#mesondefine HAVE_SSLLIB
+#mesondefine HAVE_REDISINC
+#mesondefine HAVE_REDISLIB
+#mesondefine HAVE_MEMCACHEDINC
+#mesondefine HAVE_MEMCACHEDLIB
+#mesondefine HAVE_CURLLIB
+#mesondefine HAVE_EXECINFOINC
+#mesondefine HAVE_UUIDINC
+#mesondefine HAVE_OSSPUUIDINC
+#mesondefine HAVE_BSDUUIDINC
+#mesondefine HAVE_SQLINC
+#mesondefine HAVE_ODBCLIB
+#mesondefine HAVE_MONGOINC
+#mesondefine HAVE_MONGOCLIB
+#mesondefine HAVE_BSONINC
+#mesondefine HAVE_BSONLIB
+#mesondefine INC_JOBS
+#mesondefine OS_BSD
+#mesondefine OS_SOLARIS
+#mesondefine OS_LINUX
+#mesondefine OS_MINGW
+#mesondefine OS_DARWIN
+#mesondefine OS_ANDROID
+#mesondefine SRV_EMB
+#mesondefine SRV_CINATRA
+#mesondefine SRV_LITHIUM
+#mesondefine SRV_DROGON
+#mesondefine HAVE_ACCEPT4
+#mesondefine HAVE_TCP_QUICKACK
+#mesondefine HAVE_TCP_DEFER_ACCEPT
+#mesondefine HAVE_TCP_FASTOPEN
+#mesondefine HAVE_LIBPQ_BATCH
+
+#ifdef HAVE_ODBCLIB
+#define HAVE_LIBODBC 1
+#endif
+
+#define INC_WEBSVC 1
+#define INC_TPE 1
+#define INC_DVIEW 1
+#define INC_DCP 1
+#define INC_XMLSER 1
+#define IS_SENDFILE 1
+
+#ifdef APPLE
+#define OS_DARWIN 1
+#endif
