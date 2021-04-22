@@ -27,11 +27,14 @@
 #include "JSONUtil.h"
 #include "Router.h"
 #include "CacheManager.h"
-#ifdef HAVE_LIBUUID
+#ifdef HAVE_UUIDINC
 #include <uuid/uuid.h>
 #endif
-#ifdef HAVE_BSDUUIDINC
+#if defined(HAVE_BSDUUIDINC)
 #include <uuid.h>
+#endif
+#if defined(HAVE_OSSPUUIDINC)
+#include <ossp/uuid.h>
 #endif
 #include "yuarel.h"
 #include <libcuckoo/cuckoohash_map.hh>

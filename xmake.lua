@@ -206,17 +206,12 @@ option("UUID")
 	set_default(true)
 	set_description("Check whether uuid is present")
 	on_check(function (option)
-		import("lib.detect.has_cfuncs")
-		local ok = has_cfuncs("uuid_generate", {includes = "uuid/uuid.h"})
-		if not ok then
+		import("lib.detect.find_path")
+		local p = find_path("uuid.h", {"/usr/include", "/usr/local/include", "/usr/include/uuid", "/usr/local/include/uuid"})
+		--import("lib.detect.has_cfuncs")
+		--local ok = has_cfuncs("uuid_generate", {includes = "uuid/uuid.h"})
+		if not p then
 			option:enable(false)
-		else
-			import("lib.detect.find_package")
-			local l = find_package("uuid")
-			if not l then
-				raise('uuid library not found')
-			end
-	        option:add(l)
 		end
     end)
 option_end()
@@ -227,13 +222,11 @@ option("OSSP_UUID")
 	set_description("Check whether ossd-uuid is present")
 	after_check(function (option)
 		if not option:dep("UUID"):enabled() then
-            import("lib.detect.find_package")
-			local l = find_package("ossp-uuid")
-			if not l then
-				option:enable(false)
+            import("lib.detect.find_path")
+			local p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp"})
+			if not p then
+				raise('uuid headers not found')
 			end
-		else
-			option:enable(false)
         end
     end)
 option_end()
@@ -260,7 +253,6 @@ option("MOD_SDORM_SQL")
     end)
 option_end()
 
-local mongo_inc_path = ""
 option("MOD_SDORM_MONGO")
 	add_deps("OSSP_UUID")
 	set_default(false)
@@ -534,18 +526,7 @@ function setIncludes(target)
 	else
 		target:add({includedirs = p})
 	end
-	p = find_path("uuid.h", {"/usr/include/uuid", "/usr/local/include/uuid"})
-	if not p then
-		p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp"})
-		if not p then
-			raise('uuid headers not found')
-		else
-			target:add({includedirs = p})
-		end
-	else
-		target:add({includedirs = p})
-	end
-	p = find_path("libpq-fe.h", {"/usr/include/postgresql", "/usr/local/include/postgresql"})
+	p = find_path("libpq-fe.h", {"/usr/include", "/usr/local/include", "/usr/include/postgresql", "/usr/local/include/postgresql"})
 	if not p then
 		p = find_path("libpq-fe.h", {"/usr/include/pgsql", "/usr/local/include/pgsql"})
 		if not p then
@@ -560,6 +541,16 @@ function setIncludes(target)
 	local l = find_package("dl")
 	if l then
 		target:add({links = "dl"})
+	end
+	l = find_package("uuid")
+	if not l then
+		l = find_package("ossp-uuid")
+		if not l then
+			raise('uuid library not found')
+		end
+		target:add({links = "ossp-uuid"})
+	else
+		target:add({links = "uuid"})
 	end
 	target:add({linkdirs = "/usr/local/lib"})
 end

@@ -1071,7 +1071,9 @@ if test "x$mod_sdormsql" = "xyes"; then
 	else
 		AC_CHECK_HEADER([uuid/uuid.h],[AC_DEFINE(HAVE_UUIDINC, [1], [libuuid uuid headers])],
 			[
-				AC_CHECK_HEADER([ossp/uuid.h],[AC_DEFINE(HAVE_OSSPUUIDINC, [1], [libuuid headers])],[AC_MSG_ERROR([ossp uuid.h header not found])])
+				AC_CHECK_HEADER([ossp/uuid.h],[AC_DEFINE(HAVE_OSSPUUIDINC, [1], [libuuid headers])],[
+					AC_CHECK_HEADER([uuid.h],[AC_DEFINE(HAVE_UUIDINC, [1], [libuuid headers])],[AC_MSG_ERROR([ossp uuid.h header not found])])
+				])
 			])
 	fi
 	AC_CHECK_HEADER([sql.h],,[AC_MSG_ERROR([ODBC sql.h header not found])])
@@ -1084,7 +1086,9 @@ if test "x$mod_sdormmongo" = "xyes"; then
 	else
 		AC_CHECK_HEADER([uuid/uuid.h],[AC_DEFINE(HAVE_UUIDINC, [1], [libuuid uuid headers])],
 			[
-				AC_CHECK_HEADER([ossp/uuid.h],[AC_DEFINE(HAVE_OSSPUUIDINC, [1], [libuuid headers])],[AC_MSG_ERROR([ossp uuid.h header not found])])
+				AC_CHECK_HEADER([ossp/uuid.h],[AC_DEFINE(HAVE_OSSPUUIDINC, [1], [libuuid headers])],[
+					AC_CHECK_HEADER([uuid.h],[AC_DEFINE(HAVE_UUIDINC, [1], [libuuid headers])],[AC_MSG_ERROR([ossp uuid.h header not found])])
+				])
 			])
 	fi
 	AC_CHECK_HEADER([mongoc.h],,[AC_MSG_ERROR([mongodb mongoc.h header not found])])

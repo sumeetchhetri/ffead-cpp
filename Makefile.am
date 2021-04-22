@@ -280,7 +280,8 @@ endif
 			hc=`ls $${webdir}/include/*.h 2>/dev/null|wc -l`; \
 			sc=`ls $${webdir}/src/*.cpp 2>/dev/null|wc -l`; \
 			if [ $$hc != 0 ] && [ $$sc != 0 ] && [ -f "$${webdir}/src/autotools/Makefile" ]; then \
-				weblibname=`echo "$${wdir}" | tr '-' '_'`; \
+				#weblibname=`echo "$${wdir}" | tr '-' '_'`; \
+				weblibname=`echo "$${wdir}"
 				cd $${webdir}/src/autotools && make clean && make; \
 				cd -; \
 				cp -f $${webdir}/src/autotools/.libs/*$${weblibname}* ${prefix}/lib; \
