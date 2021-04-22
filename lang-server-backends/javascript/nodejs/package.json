@@ -1,0 +1,21 @@
+{
+  "name": "ffead-cpp-js-node-http",
+  "version": "6.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "Apache",
+  "dependencies": {
+    "ffi-napi": "^4.0.3",
+    "http": "0.0.1-security",
+    "ref-array-di": "^1.2.2",
+    "ref-napi": "^3.0.2",
+    "ref-struct-di": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.41"
+  }
+}

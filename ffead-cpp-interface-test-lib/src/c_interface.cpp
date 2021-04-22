@@ -108,6 +108,7 @@ void* ffead_cpp_handle_go(const char *server_str, size_t server_str_len,
 	phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 )
 {
+	printf("dummy ffead_cpp_handle_go\n");
 	printStr("Server = ", server_str, server_str_len);
 	printStr("Method = ", method, method_len);
 	printStr("Path = ", path, path_len);
@@ -135,6 +136,7 @@ void* ffead_cpp_handle_go1(const char *server_str, size_t server_str_len,
 	const char **out_body, size_t *out_body_len
 )
 {
+	printf("dummy ffead_cpp_handle_go1\n");
 	printStr("Server = ", server_str, server_str_len);
 	printStr("Method = ", method, method_len);
 	printStr("Path = ", path, path_len);
@@ -159,6 +161,7 @@ void* ffead_cpp_handle_1(const ffead_request *request, int* scode,
     const char **out_body, size_t *out_body_len
 )
 {
+	printf("dummy ffead_cpp_handle_1\n");
 	printStr("Server = ", request->server_str, request->server_str_len);
 	printStr("Method = ", request->method, request->method_len);
 	printStr("Path = ", request->path, request->path_len);
@@ -183,6 +186,7 @@ void* ffead_cpp_handle_1r(const ffead_request *request, int* scode,
 	phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 )
 {
+	printf("dummy ffead_cpp_handle_1r\n");
 	printStr("Server = ", request->server_str, request->server_str_len);
 	printStr("Method = ", request->method, request->method_len);
 	printStr("Path = ", request->path, request->path_len);
@@ -213,6 +217,7 @@ void* ffead_cpp_handle_rust_swift_1(const ffead_request *request, int* scode,
 	phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 )
 {
+	printf("dummy ffead_cpp_handle_rust_swift_1\n");
 	printStr("Server = ", request->server_str, request->server_str_len);
 	printStr("Method = ", request->method, request->method_len);
 	printStr("Path = ", request->path, request->path_len);
@@ -242,6 +247,7 @@ void* ffead_cpp_handle_d_1(const ffead_request *request, int* scode,
 	    const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len,
 		const char **out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len)
 {
+	printf("dummy ffead_cpp_handle_d_1\n");
 	printStr("Server = ", request->server_str, request->server_str_len);
 	printStr("Method = ", request->method, request->method_len);
 	printStr("Path = ", request->path, request->path_len);
@@ -275,6 +281,7 @@ void* ffead_cpp_handle_1j(int *scode, const char **out_url, size_t *out_url_len,
 		int headers_len, ...
 )
 {
+	printf("dummy ffead_cpp_handle_1j\n");
 	printf("%d\n", headers_len);
 	printf("%d\n", headers_len/4);
 	printf("dummy ffead_cpp_handle_1 %d %d %d %d %d %d \n", *scode, server_str_len, method_len, path_len, version, headers_len);
@@ -313,7 +320,7 @@ void* ffead_cpp_handle_1s(const ffead_request *request, int* scode, const char**
     const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
     const char **out_body, size_t *out_body_len)
 {
-	printf("dummy ffead_cpp_handle_1\n");
+	printf("dummy ffead_cpp_handle_1s\n");
 	printStr("Server = ", request->server_str, request->server_str_len);
 	printStr("Method = ", request->method, request->method_len);
 	printStr("Path = ", request->path, request->path_len);
@@ -340,7 +347,7 @@ void* ffead_cpp_handle_crystal_1(const ffead_request3 *request, int* scode, cons
     phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 )
 {
-	printf("dummy ffead_cpp_handle_1\n");
+	printf("dummy ffead_cpp_handle_crystal_1\n");
 	printStr("Server = ", request->server_str, request->server_str_len);
 	printStr("Method = ", request->method, request->method_len);
 	printStr("Path = ", request->path, request->path_len);
@@ -369,7 +376,7 @@ void* ffead_cpp_handle_1c(const ffead_request3 *request, int* scode, const char*
 	const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
     const char **out_body, size_t *out_body_len)
 {
-	printf("dummy ffead_cpp_handle_1\n");
+	printf("dummy ffead_cpp_handle_1c\n");
 	printStr("Server = ", request->server_str, request->server_str_len);
 	printStr("Method = ", request->method, request->method_len);
 	printStr("Path = ", request->path, request->path_len);
@@ -398,7 +405,7 @@ void* ffead_cpp_handle_1t(const ffead_request2 *request, int* scode,
     const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
     const char **out_body, size_t *out_body_len)
 {
-	printf("dummy ffead_cpp_handle_1\n");
+	printf("dummy ffead_cpp_handle_1t\n");
 	printStr("Server = ", request->server_str, request->server_str_len);
 	printStr("Method = ", request->method, request->method_len);
 	printStr("Path = ", request->path, request->path_len);
@@ -446,7 +453,7 @@ void* ffead_cpp_handle_3(const char *server_str, size_t server_str_len,
     const char **out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 )
 {
-	printf("dummy ffead_cpp_handle_1\n");
+	printf("dummy ffead_cpp_handle_3\n");
 	printStr("Server = ", server_str, server_str_len);
 	printStr("HeaderStr = ", in_headers, in_headers_len);
 	printStr("Body = ", in_body, in_body_len);
@@ -476,7 +483,7 @@ void* ffead_cpp_handle_4(const char *server_str, size_t server_str_len,
     const char **out_body, size_t *out_body_len
 )
 {
-	printf("dummy ffead_cpp_handle_1\n");
+	printf("dummy ffead_cpp_handle_4\n");
 	printStr("Server = ", server_str, server_str_len);
 	printStr("HeaderStr = ", in_headers, in_headers_len);
 	printStr("Body = ", in_body, in_body_len);
@@ -495,7 +502,7 @@ void* ffead_cpp_handle_4(const char *server_str, size_t server_str_len,
 void* ffead_cpp_handle_5(const char *in_headers, size_t in_headers_len,
     const char *in_body, size_t in_body_len, int* done, const char **out_url, size_t *out_url_len)
 {
-	printf("dummy ffead_cpp_handle_1\n");
+	printf("dummy ffead_cpp_handle_5\n");
 	printStr("HeaderStr = ", in_headers, in_headers_len);
 	printStr("Body = ", in_body, in_body_len);
 	fflush(stdout);

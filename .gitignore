@@ -77,3 +77,4 @@ docker/test/web
 **/.xmake
 buildnin
 ffead-cpp-interface-test-lib/\.*
+**/node_modules

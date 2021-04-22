@@ -5,7 +5,6 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 RUN apt update -yqq && apt install -yqq gcc g++ software-properties-common cmake unzip libpcre3-dev zlib1g-dev libpq-dev \
 	libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat \
 	python3 python3-pip python3-setuptools python3-wheel ninja-build && rm -rf /var/lib/apt/lists/*
-RUN wget https://cdn.jsdelivr.net/gh/xmake-io/xmake@master/scripts/get.sh -O -  | bash
 RUN pip3 install meson
  
 #Install libcuckoo headers

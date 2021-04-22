@@ -29,7 +29,7 @@ function setup(target)
 	else
 		target:add({includedirs = p})
 	end
-	p = find_path("uuid.h", {"/usr/include/uuid", "/usr/local/include/uuid"})
+	p = find_path("uuid.h", {"/usr/include/uuid", "/usr/local/include/uuid", "/usr/include", "/usr/local/include"})
 	if not p then
 		p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp"})
 		if not p then
@@ -40,7 +40,7 @@ function setup(target)
 	else
 		target:add({includedirs = p})
 	end
-	p = find_path("libpq-fe.h", {"/usr/include/postgresql", "/usr/local/include/postgresql"})
+	p = find_path("libpq-fe.h", {"/usr/include", "/usr/local/include", "/usr/include/postgresql", "/usr/local/include/postgresql"})
 	if not p then
 		p = find_path("libpq-fe.h", {"/usr/include/pgsql", "/usr/local/include/pgsql"})
 		if not p then
@@ -55,6 +55,16 @@ function setup(target)
 	local l = find_package("dl")
 	if l then
 		target:add({links = "dl"})
+	end
+	l = find_package("uuid")
+	if not l then
+		l = find_package("ossp-uuid")
+		if not l then
+			raise('uuid library not found')
+		end
+		target:add({links = "ossp-uuid"})
+	else
+		target:add({links = "uuid"})
 	end
 	target:add({linkdirs = "/usr/local/lib"})
 	target:add({linkdirs = "../lib"})

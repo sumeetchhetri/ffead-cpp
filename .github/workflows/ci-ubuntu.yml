@@ -175,6 +175,6 @@ jobs:
     - name: Build ffead-cpp within docker
       run: |
         cd docker/os-based
-        docker build -f DockerFile-Alpine-x64-ffead-cpp .
-        docker build -f DockerFile-Alpine-x64-ffead-cpp_autoconf .
+        docker build -f DockerFile-Ubuntu-x64-ffead-cpp .
+        docker build -f DockerFile-Ubuntu-x64-ffead-cpp_autoconf .
         

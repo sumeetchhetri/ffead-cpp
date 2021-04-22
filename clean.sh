@@ -5,6 +5,7 @@ rm -f .autotools compile config.guess config.log config.status config.sub config
 rm -f configure.ac.old configure.ac.template-e depcomp ffead-cpp install_manifest.txt install-sh libtool
 rm -f ltmain.sh Makefile Makefile.in mingw-64-toolchain.cmake missing
 rm -rf include src/framework/ffead-cpp-3.0.build tests/ffead-cpp-3.0.build
+rm -rf build_meson build buildnin .xmake
 find . -name "*.lo" -type f -delete
 find . -name "*.o" -type f -delete
 find . -name ".dirstamp" -type f -delete
