@@ -279,13 +279,19 @@ void* PeerServerController::handle(void *inp) {
 }
 
 std::string PeerServerController::generateId() {
-#ifdef HAVE_LIBUUID
+#ifdef HAVE_UUIDINC
 	uuid_t idt;
 	uuid_generate(idt);
 	std::string ids;
 	for(int i=0;i<16;i++){
 		ids.push_back(idt[i]);
 	}
+	return ids;
+#elif defined(HAVE_OSSPUUIDINC) || defined(HAVE_OSSPUUIDINC_2)
+	uuid_t* idt;
+	uuid_rc_t status = uuid_create(&idt);
+	std::string ids((const char *) &idt, sizeof(idt));
+	uuid_destroy(idt);
 	return ids;
 #elif HAVE_BSDUUIDINC
 	uuid_t idt;

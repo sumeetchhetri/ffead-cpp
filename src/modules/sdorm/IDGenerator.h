@@ -28,12 +28,12 @@
 #include "HiloIdGenerator.h"
 #ifdef HAVE_UUIDINC
 #include <uuid/uuid.h>
-#endif
-#if defined(HAVE_BSDUUIDINC)
+#elif defined(HAVE_BSDUUIDINC)
 #include <uuid.h>
-#endif
-#if defined(HAVE_OSSPUUIDINC)
+#elif defined(HAVE_OSSPUUIDINC)
 #include <ossp/uuid.h>
+#elif defined(HAVE_OSSPUUIDINC_2)
+#include <uuid.h>
 #endif
 
 class IDGenerator {

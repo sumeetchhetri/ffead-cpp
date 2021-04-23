@@ -1072,7 +1072,7 @@ if test "x$mod_sdormsql" = "xyes"; then
 		AC_CHECK_HEADER([uuid/uuid.h],[AC_DEFINE(HAVE_UUIDINC, [1], [libuuid uuid headers])],
 			[
 				AC_CHECK_HEADER([ossp/uuid.h],[AC_DEFINE(HAVE_OSSPUUIDINC, [1], [libuuid headers])],[
-					AC_CHECK_HEADER([uuid.h],[AC_DEFINE(HAVE_UUIDINC, [1], [libuuid headers])],[AC_MSG_ERROR([ossp uuid.h header not found])])
+					AC_CHECK_HEADER([uuid.h],[AC_DEFINE(HAVE_OSSPUUIDINC_2, [1], [libuuid headers])],[AC_MSG_ERROR([ossp uuid.h header not found])])
 				])
 			])
 	fi
@@ -1087,7 +1087,7 @@ if test "x$mod_sdormmongo" = "xyes"; then
 		AC_CHECK_HEADER([uuid/uuid.h],[AC_DEFINE(HAVE_UUIDINC, [1], [libuuid uuid headers])],
 			[
 				AC_CHECK_HEADER([ossp/uuid.h],[AC_DEFINE(HAVE_OSSPUUIDINC, [1], [libuuid headers])],[
-					AC_CHECK_HEADER([uuid.h],[AC_DEFINE(HAVE_UUIDINC, [1], [libuuid headers])],[AC_MSG_ERROR([ossp uuid.h header not found])])
+					AC_CHECK_HEADER([uuid.h],[AC_DEFINE(HAVE_OSSPUUIDINC_2, [1], [libuuid headers])],[AC_MSG_ERROR([ossp uuid.h header not found])])
 				])
 			])
 	fi

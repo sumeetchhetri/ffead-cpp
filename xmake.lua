@@ -80,110 +80,111 @@ option("MOD_JOBS")
 	set_description("Enable Jobs module")
 option_end()
 
-option("LIBPQ_BATCH")
-	set_default(true)
-option_end()
-
 option("LIBPQ")
-	add_deps("LIBPQ_BATCH")
 	set_default(true)
 	set_description("Check whether libpq is present")
 	after_check(function (option)
-		if option:dep("LIBPQ_BATCH"):enabled() then
-			import("lib.detect.find_package")
-			local l = find_package("pq")
-			if l then
-				import("lib.detect.has_cfuncs")
-				local ok = has_cfuncs("PQenterBatchMode", {includes = "postgresql/libpq-fe.h"})
+		import("lib.detect.find_package")
+		local l = find_package("pq")
+		if l then
+			import("lib.detect.find_path")
+			local p = find_path("libpq-fe.h", {"/usr/include", "/usr/local/include", 
+												"/usr/include/postgresql", "/usr/local/include/postgresql", 
+												"/usr/include/pgsql", "/usr/local/include/pgsql"})
+			if not p then
+				raise('libpq headers not found')
+			end
+			option:add({includedirs = p})
+			option:set("HAVE_PQHDR", 1)
+			option:set("HAVE_LIBPQ", 1)
+			
+			import("lib.detect.has_cfuncs")
+			local ok = has_cfuncs("PQenterBatchMode", {includes = "libpq-fe.h"})
+			if not ok then
+				ok = has_cfuncs("PQenterBatchMode", {includes = "postgresql/libpq-fe.h"})
 				if not ok then
-					ok = has_cfuncs("PQenterBatchMode", {includes = "pgsql/libpq-fe.h"})
-					if not ok then
-						option:dep("LIBPQ_BATCH"):enable(false)
-					else
-						set_configvar("HAVE_PQHDR", 1)
+					ok = has_cfuncs("PQenterBatchMode", {includes = "pgsql/ibpq-fe.h"})
+					if ok then
+						option:set("HAVE_LIBPQ_BATCH", 1)
 					end
 				else
-					set_configvar("HAVE_PQHDR", 1)
+					option:set("HAVE_LIBPQ_BATCH", 1)
 				end
+			else
+				option:set("HAVE_LIBPQ_BATCH", 1)
 			end
 		end
     end)
 option_end()
 
 option("CURL")
-	set_default(true)
 	set_description("Check whether curl is present")
-	after_check(function (option)
+	on_check(function (option)
 		import("lib.detect.find_package")
 		local l = find_package("curl")
 		if l then
 			option:add(l)
-		else
-			option:enable(false)
+			option:enable(true)
 		end
     end)
 option_end()
 
 option("ZLIB")
-	set_default(true)
 	add_defines("HAVE_ZLIB")
 	set_description("Check whether zlib is present")
-	after_check(function (option)
+	on_check(function (option)
 		import("lib.detect.find_package")
 		local l = find_package("z")
 		if not l then
 			raise('z library not found')
 		end
 		option:add(l)
+		option:enable(true)
     end)
 option_end()
 
 option("SSL")
-	set_default(true)
 	set_description("Check whether ssl is present")
 	after_check(function (option)
 		import("lib.detect.find_package")
 		local l = find_package("ssl")
-		if not l then
-			option:enable(false)
-		else
+		if l then
+			option:enable(true)
 			option:add(l)
 		end
     end)
 option_end()
 
 option("SSL_CRYPTO")
-	set_default(true)
 	set_description("Check whether crypto is present")
 	after_check(function (option)
 		import("lib.detect.find_package")
 		local l = find_package("crypto")
-		if not l then
-			option:enable(false)
-		else
+		if l then
+			option:enable(true)
 			option:add(l)
 		end
     end)
 option_end()
 
 option("REGEX")
-	set_default(true)
+	set_default(false)
+option_end()
+
+option("ONIG_REGEX")
+	set_default(false)
+option_end()
+
+option("CHECK_REGEX")
+	add_deps("REGEX", "ONIG_REGEX")
 	set_description("Check whether regex is present")
 	on_check(function (option)
 		import("lib.detect.has_cfuncs")
 		local ok = has_cfuncs("regcomp", {includes = "regex.h"})
-		if not ok then
-			option:enable(false)
-		end
-    end)
-option_end()
-
-option("ONIG_REGEX")
-	add_deps("REGEX")
-	set_default(true)
-	set_description("Check whether onig-regex is present")
-	after_check(function (option)
-		if not option:dep("REGEX"):enabled() then
+		if ok then
+			option:dep("REGEX"):enable(true)
+			option:add(l)
+		else
 			import("lib.detect.has_cfuncs")
 			local ok = has_cfuncs("regcomp", {includes = "onigposix.h"})
 			if not ok then
@@ -195,54 +196,69 @@ option("ONIG_REGEX")
 					raise('onig library not found')
 				end
 		        option:add(l)
+		        option:dep("ONIG_REGEX"):enable(true)
 			end
-		else
-			option:enable(false)
-        end
+		end
+		option:enable(true)
     end)
 option_end()
 
 option("UUID")
-	set_default(true)
-	set_description("Check whether uuid is present")
-	on_check(function (option)
-		import("lib.detect.find_path")
-		local p = find_path("uuid.h", {"/usr/include", "/usr/local/include", "/usr/include/uuid", "/usr/local/include/uuid"})
-		--import("lib.detect.has_cfuncs")
-		--local ok = has_cfuncs("uuid_generate", {includes = "uuid/uuid.h"})
-		if not p then
-			option:enable(false)
-		end
-    end)
+	set_default(false)
 option_end()
 
 option("OSSP_UUID")
-	add_deps("UUID")
-	set_default(true)
-	set_description("Check whether ossd-uuid is present")
-	after_check(function (option)
-		if not option:dep("UUID"):enabled() then
-            import("lib.detect.find_path")
-			local p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp"})
-			if not p then
+	set_default(false)
+option_end()
+
+option("OSSP_UUID_2")
+	set_default(false)
+option_end()
+
+option("CHECK_UUID")
+	add_deps("UUID", "OSS_UUID", "OSSP_UUID_2")
+	set_description("Check whether uuid is present")
+	on_check(function (option)
+		import("lib.detect.find_package")
+		local l = find_package("uuid")
+		if not l then
+			import("lib.detect.find_package")
+			local l = find_package("ossp-uuid")
+			if not l then
+				raise('uuid library not found')
+			else
+				import("lib.detect.find_path")
+				local p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp"})
+				if not p then
+					p = find_path("uuid.h", {"/usr/include", "/usr/local/include"})
+					if not p then
+						raise('uuid headers not found')
+					end
+					option:dep("OSSP_UUID"):enable(false)
+					option:dep("OSSP_UUID_2"):enable(true)
+				else
+					option:dep("OSSP_UUID"):enable(true)
+				end
+			end
+		else
+			import("lib.detect.has_cfuncs")
+			local ok = has_cfuncs("uuid_generate", {includes = "uuid/uuid.h"})
+			if not ok then
 				raise('uuid headers not found')
 			end
-        end
+			option:dep("UUID"):enable(true)
+		end
+		option:enable(true)
     end)
 option_end()
 
 option("MOD_SDORM_SQL")
-	add_deps("OSSP_UUID")
+	add_deps("CHECK_UUID")
 	set_default(true)
 	set_showmenu(true)
 	set_description("Enable SQL Sdorm module")
 	after_check(function (option)
-		if option:enabled() then
-			if not option:dep("UUID"):enabled() then
-				if not option:dep("OSSP_UUID"):enabled() then
-					raise('uuid library not found')
-				end
-			end
+		if option:enabled() and option:dep("CHECK_UUID"):enabled() then
 			import("lib.detect.find_package")
 			local l = find_package("odbc")
 			if not l then
@@ -254,17 +270,12 @@ option("MOD_SDORM_SQL")
 option_end()
 
 option("MOD_SDORM_MONGO")
-	add_deps("OSSP_UUID")
+	add_deps("CHECK_UUID")
 	set_default(false)
 	set_showmenu(true)
 	set_description("Enable MongoDB Sdorm module")
 	after_check(function (option)
-		if option:enabled() then
-			if not option:dep("UUID"):enabled() then
-				if not option:dep("OSSP_UUID"):enabled() then
-					raise('uuid library not found')
-				end
-			end
+		if option:enabled() and option:dep("CHECK_UUID"):enabled() then
 			--[[ok = has_cincludes("bson.h")
 			if not ok then
 				raise('bson headers not found')
@@ -466,7 +477,7 @@ option_end()
 option("LIBS")
 	set_default(true)
 	set_showmenu(false)
-	add_deps("LIBPQ", "ONIG_REGEX", "SSL", "SSL_CRYPTO", "ZLIB", "CURL", "EXECINFO")
+	add_deps("LIBPQ", "CHECK_REGEX", "SSL", "SSL_CRYPTO", "ZLIB", "CURL", "EXECINFO")
 option_end()
 
 option("ALL")
@@ -517,31 +528,31 @@ function setIncludes(target)
 	local p = find_path("mongoc.h", {"/usr/include/libmongoc-1.0", "/usr/local/include/libmongoc-1.0"})
 	if not p then
 		raise('mongoc headers not found')
-	else
-		target:add({includedirs = p})
 	end
+	target:add({includedirs = p})
+	
 	p = find_path("bson.h", {"/usr/include/libbson-1.0", "/usr/local/include/libbson-1.0"})
 	if not p then
 		raise('bson headers not found')
-	else
-		target:add({includedirs = p})
 	end
+	target:add({includedirs = p})
+	
 	p = find_path("libpq-fe.h", {"/usr/include", "/usr/local/include", "/usr/include/postgresql", "/usr/local/include/postgresql"})
 	if not p then
 		p = find_path("libpq-fe.h", {"/usr/include/pgsql", "/usr/local/include/pgsql"})
 		if not p then
 			raise('libpq headers not found')
-		else
-			target:add({includedirs = p})
 		end
-	else
-		target:add({includedirs = p})
 	end
+	target:add({includedirs = p})
+	
 	import("lib.detect.find_package")
 	local l = find_package("dl")
 	if l then
 		target:add({links = "dl"})
 	end
+	
+	import("lib.detect.find_path")
 	l = find_package("uuid")
 	if not l then
 		l = find_package("ossp-uuid")
@@ -552,7 +563,20 @@ function setIncludes(target)
 	else
 		target:add({links = "uuid"})
 	end
+	
 	target:add({linkdirs = "/usr/local/lib"})
+	
+	if has_config("ONIG_REGEX") then
+		p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp"})
+		if not p then
+			p = find_path("uuid.h", {"/usr/include", "/usr/local/include"})
+			if not p then
+				raise('uuid headers not found')
+			end
+		else
+			target:add({includedirs = p})
+		end
+	end
 end
 
 local bindir = "$(projectdir)/ffead-cpp-6.0-bin"
@@ -604,14 +628,6 @@ target("ffead-cpp")
     if has_config("CURL") then
 		set_configvar("HAVE_CURLLIB", 1)
 	end
-    if has_config("UUID") then
-		set_configvar("HAVE_UUIDINC", 1)
-		set_configvar("HAVE_UUIDLIB", 1)
-	end
-    if has_config("OSSP_UUID") then
-		set_configvar("HAVE_OSSPUUIDINC", 1)
-		set_configvar("HAVE_UUIDLIB", 1)
-	end
     if has_config("MOD_REDIS") then
 		set_configvar("HAVE_REDISINC", 1)
 		set_configvar("HAVE_REDISLIB", 1)
@@ -650,6 +666,18 @@ target("ffead-cpp")
 	end
     if has_config("EXECINFO") then
 		set_configvar("HAVE_EXECINFOINC", 1)
+	end
+    if has_config("UUID") then
+		set_configvar("HAVE_UUIDINC", 1)
+		set_configvar("HAVE_UUIDLIB", 1)
+	end
+    if has_config("OSSP_UUID") then
+		set_configvar("HAVE_OSSPUUIDINC", 1)
+		set_configvar("HAVE_UUIDLIB", 1)
+	end
+    if has_config("OSSP_UUID_2") then
+		set_configvar("HAVE_OSSPUUIDINC_2", 1)
+		set_configvar("HAVE_UUIDLIB", 1)
 	end
     if has_config("KQUEUE") then
 		set_configvar("USE_KQUEUE", 1)

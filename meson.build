@@ -32,7 +32,7 @@ if not cc.has_header('uuid/uuid.h') and cc.has_header('ossp/uuid.h')
 	endif
 	conf_data.set('HAVE_OSSPUUIDINC', 1)
 elif cc.has_header('uuid.h')
-	conf_data.set('HAVE_UUIDINC', 1)
+	conf_data.set('HAVE_OSSPUUIDINC_2', 1)
 endif
 conf_data.set('HAVE_UUIDLIB', 1)
 

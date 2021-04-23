@@ -63,6 +63,15 @@ function setup(target)
 			raise('uuid library not found')
 		end
 		target:add({links = "ossp-uuid"})
+		p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp"})
+		if not p then
+			p = find_path("uuid.h", {"/usr/include", "/usr/local/include"})
+			if not p then
+				raise('uuid headers not found')
+			end
+		else
+			target:add({includedirs = p})
+		end
 	else
 		target:add({links = "uuid"})
 	end

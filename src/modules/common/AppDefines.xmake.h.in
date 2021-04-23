@@ -51,6 +51,7 @@ ${define HAVE_CURLLIB}
 ${define HAVE_EXECINFOINC}
 ${define HAVE_UUIDINC}
 ${define HAVE_OSSPUUIDINC}
+${define HAVE_OSSPUUIDINC_2}
 ${define HAVE_BSDUUIDINC}
 ${define HAVE_SQLINC}
 ${define HAVE_ODBCLIB}

@@ -367,7 +367,7 @@ void FFEADContext::addBean(Bean& bean)
 			ids.push_back(idt[i]);
 		}
 		bean.name = ids;
-#elif HAVE_OSSPUUIDINC
+#elif defined(HAVE_OSSPUUIDINC) || defined(HAVE_OSSPUUIDINC_2)
 		uuid_t* idt;
 		uuid_rc_t status = uuid_create(&idt);
 		std::string ids((const char *) &idt, sizeof(idt));

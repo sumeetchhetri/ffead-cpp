@@ -51,6 +51,7 @@
 #mesondefine HAVE_EXECINFOINC
 #mesondefine HAVE_UUIDINC
 #mesondefine HAVE_OSSPUUIDINC
+#mesondefine HAVE_OSSPUUIDINC_2
 #mesondefine HAVE_BSDUUIDINC
 #mesondefine HAVE_SQLINC
 #mesondefine HAVE_ODBCLIB

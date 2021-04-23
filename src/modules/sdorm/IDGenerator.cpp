@@ -113,7 +113,7 @@ void IDGenerator::next(DataSourceEntityMapping& dsemp, GenericObject& id) {
 		}
 		id.set(ids);
 	}
-#elif HAVE_OSSPUUIDINC
+#elif defined(HAVE_OSSPUUIDINC) || defined(HAVE_OSSPUUIDINC_2)
 	else if(dsemp.getIdgendbEntityType()=="uuid")
 	{
 		uuid_t* idt;
