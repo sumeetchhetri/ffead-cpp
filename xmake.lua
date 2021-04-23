@@ -22,13 +22,22 @@ option("SRV_EMB")
 	set_default(true)
 	set_showmenu(true)
 	set_description("Embedded Http Server Engine")
+	after_check(function (option)
+		if option:enabled() then
+			option:set("configvar", "SRV_EMB", 1)
+		end
+	end)
 option_end()
 
 option("MOD_MEMORY")
 	set_default(true)
 	set_showmenu(true)
 	set_description("Enable Memory Cache module")
-	add_defines("INC_MEMORYCACHE")
+	after_check(function (option)
+		if option:enabled() then
+			option:set("configvar", "INC_MEMORYCACHE", 1)
+		end
+	end)
 option_end()
 
 option("MOD_MEMCACHED")
@@ -48,6 +57,9 @@ option("MOD_MEMCACHED")
 				raise('memcachedutil library not found')
 			end
 	        option:add(l)
+	        option:set("configvar", "HAVE_MEMCACHEDINC", 1)
+			option:set("configvar", "HAVE_MEMCACHEDLIB", 1)
+			option:set("configvar", "INC_MEMCACHED", 1)
 	    end
     end)
 option_end()
@@ -64,6 +76,9 @@ option("MOD_REDIS")
 				raise('hiredis library not found')
 			end
 	        option:add(l)
+	        option:set("configvar", "HAVE_REDISINC", 1)
+			option:set("configvar", "HAVE_REDISLIB", 1)
+			option:set("configvar", "INC_REDISCACHE", 1)
 	    end
     end)
 option_end()
@@ -72,12 +87,22 @@ option("MOD_SER_BIN")
 	set_default(false)
 	set_showmenu(true)
 	set_description("Enable Binary Serialization module")
+	after_check(function (option)
+		if option:enabled() then
+			option:set("configvar", "INC_BINSER", 1)
+		end
+	end)
 option_end()
 
 option("MOD_JOBS")
 	set_default(true)
 	set_showmenu(true)
 	set_description("Enable Jobs module")
+	after_check(function (option)
+		if option:enabled() then
+			option:set("configvar", "INC_JOBS", 1)
+		end
+	end)
 option_end()
 
 option("LIBPQ")
@@ -95,8 +120,19 @@ option("LIBPQ")
 				raise('libpq headers not found')
 			end
 			option:add({includedirs = p})
-			option:set("HAVE_PQHDR", 1)
-			option:set("HAVE_LIBPQ", 1)
+	        option:set("configvar", "HAVE_PQHDR", 1)
+	        option:set("configvar", "HAVE_LIBPQ", 1)
+	        option:add(l)
+	        
+	        import("lib.detect.find_path")
+			local p = find_path("libpq-fe.h", {"/usr/include", "/usr/local/include", "/usr/include/postgresql", "/usr/local/include/postgresql"})
+			if not p then
+				p = find_path("libpq-fe.h", {"/usr/include/pgsql", "/usr/local/include/pgsql"})
+				if not p then
+					raise('libpq headers not found')
+				end
+			end
+			option:add({includedirs = p})
 			
 			import("lib.detect.has_cfuncs")
 			local ok = has_cfuncs("PQenterBatchMode", {includes = "libpq-fe.h"})
@@ -105,13 +141,13 @@ option("LIBPQ")
 				if not ok then
 					ok = has_cfuncs("PQenterBatchMode", {includes = "pgsql/ibpq-fe.h"})
 					if ok then
-						option:set("HAVE_LIBPQ_BATCH", 1)
+						option:set("configvar", "HAVE_LIBPQ_BATCH", 1)
 					end
 				else
-					option:set("HAVE_LIBPQ_BATCH", 1)
+					option:set("configvar", "HAVE_LIBPQ_BATCH", 1)
 				end
 			else
-				option:set("HAVE_LIBPQ_BATCH", 1)
+				option:set("configvar", "HAVE_LIBPQ_BATCH", 1)
 			end
 		end
     end)
@@ -125,12 +161,12 @@ option("CURL")
 		if l then
 			option:add(l)
 			option:enable(true)
+			option:set("configvar", "HAVE_CURLLIB", 1)
 		end
     end)
 option_end()
 
 option("ZLIB")
-	add_defines("HAVE_ZLIB")
 	set_description("Check whether zlib is present")
 	on_check(function (option)
 		import("lib.detect.find_package")
@@ -148,42 +184,26 @@ option("SSL")
 	after_check(function (option)
 		import("lib.detect.find_package")
 		local l = find_package("ssl")
-		if l then
-			option:enable(true)
+		local l1 = find_package("crypto")
+		if l and l1 then
+			option:set("configvar", "HAVE_SSLINC", 1)
+			option:set("configvar", "HAVE_SSLLIB", 1)
+			option:set("configvar", "HAVE_CRYPTOLIB", 1)
 			option:add(l)
+			option:add(l1)
+			option:enable(true)
 		end
     end)
-option_end()
-
-option("SSL_CRYPTO")
-	set_description("Check whether crypto is present")
-	after_check(function (option)
-		import("lib.detect.find_package")
-		local l = find_package("crypto")
-		if l then
-			option:enable(true)
-			option:add(l)
-		end
-    end)
-option_end()
-
-option("REGEX")
-	set_default(false)
-option_end()
-
-option("ONIG_REGEX")
-	set_default(false)
 option_end()
 
 option("CHECK_REGEX")
-	add_deps("REGEX", "ONIG_REGEX")
 	set_description("Check whether regex is present")
 	on_check(function (option)
 		import("lib.detect.has_cfuncs")
 		local ok = has_cfuncs("regcomp", {includes = "regex.h"})
 		if ok then
-			option:dep("REGEX"):enable(true)
 			option:add(l)
+			option:set("configvar", "HAVE_REGEX", 1)
 		else
 			import("lib.detect.has_cfuncs")
 			local ok = has_cfuncs("regcomp", {includes = "onigposix.h"})
@@ -196,27 +216,25 @@ option("CHECK_REGEX")
 					raise('onig library not found')
 				end
 		        option:add(l)
-		        option:dep("ONIG_REGEX"):enable(true)
+		        option:set("configvar", "HAVE_ONIG_REGEX", 1)
+		        option:set("configvar", "HAVE_ONIG_REGEX_LIB", 1)
+		        
+		        import("lib.detect.find_path")
+				local p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp"})
+				if not p then
+					p = find_path("uuid.h", {"/usr/include", "/usr/local/include"})
+					if not p then
+						raise('uuid headers not found')
+					end
+				end
+				option:add({includedirs = p})
 			end
 		end
 		option:enable(true)
     end)
 option_end()
 
-option("UUID")
-	set_default(false)
-option_end()
-
-option("OSSP_UUID")
-	set_default(false)
-option_end()
-
-option("OSSP_UUID_2")
-	set_default(false)
-option_end()
-
 option("CHECK_UUID")
-	add_deps("UUID", "OSS_UUID", "OSSP_UUID_2")
 	set_description("Check whether uuid is present")
 	on_check(function (option)
 		import("lib.detect.find_package")
@@ -234,19 +252,22 @@ option("CHECK_UUID")
 					if not p then
 						raise('uuid headers not found')
 					end
-					option:dep("OSSP_UUID"):enable(false)
-					option:dep("OSSP_UUID_2"):enable(true)
+					option:set("configvar", "HAVE_OSSPUUIDINC_2", 1)
 				else
-					option:dep("OSSP_UUID"):enable(true)
+					option:set("configvar", "HAVE_OSSPUUIDINC", 1)
 				end
 			end
+			option:set("configvar", "HAVE_UUIDLIB", 1)
+			option:add(l)
 		else
 			import("lib.detect.has_cfuncs")
 			local ok = has_cfuncs("uuid_generate", {includes = "uuid/uuid.h"})
 			if not ok then
 				raise('uuid headers not found')
 			end
-			option:dep("UUID"):enable(true)
+			option:set("configvar", "HAVE_UUIDINC", 1)
+			option:set("configvar", "HAVE_UUIDLIB", 1)
+			option:add(l)
 		end
 		option:enable(true)
     end)
@@ -265,6 +286,10 @@ option("MOD_SDORM_SQL")
 				raise('odbc library not found')
 			end
 	        option:add(l)
+	        option:set("configvar", "HAVE_SQLINC", 1)
+			option:set("configvar", "HAVE_ODBCLIB", 1)
+			option:set("configvar", "INC_SDORM", 1)
+			option:set("configvar", "INC_SDORM_SQL", 1)
 	    end
     end)
 option_end()
@@ -276,10 +301,6 @@ option("MOD_SDORM_MONGO")
 	set_description("Enable MongoDB Sdorm module")
 	after_check(function (option)
 		if option:enabled() and option:dep("CHECK_UUID"):enabled() then
-			--[[ok = has_cincludes("bson.h")
-			if not ok then
-				raise('bson headers not found')
-			end--]]
 			import("lib.detect.find_package")
 			local l = find_package("mongoc-1.0")
 			if not l then
@@ -291,6 +312,25 @@ option("MOD_SDORM_MONGO")
 				raise('bson-1.0 library not found')
 			end
 	        option:add(l)
+	        option:set("configvar", "HAVE_MONGOINC", 1)
+			option:set("configvar", "HAVE_MONGOCLIB", 1)
+			option:set("configvar", "HAVE_BSONINC", 1)
+			option:set("configvar", "HAVE_BSONLIB", 1)
+			option:set("configvar", "INC_SDORM", 1)
+			option:set("configvar", "INC_SDORM_MONGO", 1)
+			
+			import("lib.detect.find_path")
+			local p = find_path("mongoc.h", {"/usr/include/libmongoc-1.0", "/usr/local/include/libmongoc-1.0"})
+			if not p then
+				raise('mongoc headers not found')
+			end
+			option:add("includedirs", p)
+			
+			p = find_path("bson.h", {"/usr/include/libbson-1.0", "/usr/local/include/libbson-1.0"})
+			if not p then
+				raise('bson headers not found')
+			end
+			option:add("includedirs", p)
 	    end
     end)
 option_end()
@@ -304,6 +344,7 @@ option("LIBCUCKOO")
 		if not ok then
 			raise('libcuckoo includes not found')
 		end
+		option:set("configvar", "HAVE_CKOHMINC", 1)
 	end)
 option_end()
 
@@ -313,8 +354,8 @@ option("EXECINFO")
 	after_check(function (option)
 		import("lib.detect.has_cincludes")
 		ok = has_cincludes({"execinfo.h"})
-		if not ok then
-			option:enable(false)
+		if ok then
+			option:set("configvar", "HAVE_EXECINFOINC", 1)
 		end
 	end)
 option_end()
@@ -325,7 +366,9 @@ option("SELECT")
 	after_check(function (option)
 		import("lib.detect.has_cincludes")
 		ok = has_cincludes("sys/select.h")
-		if not ok then
+		if ok then
+			option:set("configvar", "USE_SELECT", 1)
+		else
 			option:enable(false)
 		end
 	end)
@@ -337,7 +380,9 @@ option("POLL")
 	after_check(function (option)
 		import("lib.detect.has_cincludes")
 		ok = has_cincludes("sys/poll.h")
-		if not ok then
+		if ok then
+			option:set("configvar", "USE_POLL", 1)
+		else
 			option:enable(false)
 		end
 	end)
@@ -349,7 +394,9 @@ option("DEVPOLL")
 	after_check(function (option)
 		import("lib.detect.has_cincludes")
 		ok = has_cincludes("sys/devpoll.h")
-		if not ok then
+		if ok then
+			option:set("configvar", "USE_DEVPOLL", 1)
+		else
 			option:enable(false)
 		end
 	end)
@@ -361,8 +408,10 @@ option("EPOLL")
 	after_check(function (option)
 		if is_plat("linux") then
 			import("lib.detect.has_cincludes")
-			ok = has_cincludes("sys/epoll.h")
-			if not ok then
+			local ok = has_cincludes("sys/epoll.h")
+			if ok then
+				option:set("configvar", "USE_EPOLL", 1)
+			else
 				option:enable(false)
 			end
 		else
@@ -377,8 +426,10 @@ option("KQUEUE")
 	after_check(function (option)
 		if is_plat("macosx") then
 			import("lib.detect.has_cincludes")
-			ok = has_cincludes("sys/event.h")
-			if not ok then
+			local ok = has_cincludes("sys/event.h")
+			if ok then
+				option:set("configvar", "USE_KQUEUE", 1)
+			else
 				option:enable(false)
 			end
 		else
@@ -393,8 +444,10 @@ option("EVPORT")
 	after_check(function (option)
 		if is_plat("solaris") then
 			import("lib.detect.has_cincludes")
-			ok = has_cincludes("port.h")
-			if not ok then
+			local ok = has_cincludes("port.h")
+			if ok then
+				option:set("configvar", "USE_EVPORT", 1)
+			else
 				option:enable(false)
 			end
 		else
@@ -409,8 +462,10 @@ option("IOURING")
 	after_check(function (option)
 		if is_plat("linux") then
 			import("lib.detect.has_cincludes")
-			ok = has_cincludes("liburing.h")
-			if not ok then
+			local ok = has_cincludes("liburing.h")
+			if ok then
+				option:set("configvar", "USE_IO_URING", 1)
+			else
 				option:enable(false)
 			end
 		else
@@ -425,7 +480,9 @@ option("ACCEPT4")
 	after_check(function (option)
 		import("lib.detect.has_cfuncs")
 		local ok = has_cfuncs("accept4", {includes = "sys/socket.h"})
-		if not ok then
+		if ok then
+			option:set("configvar", "HAVE_ACCEPT4", 1)
+		else
 			option:enable(false)
 		end
 	end)
@@ -437,7 +494,9 @@ option("TCP_QUICKACK")
 	after_check(function (option)
 		import("lib.detect.check_cxsnippets")
 		local ok = check_cxsnippets({"#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\nint test() { return TCP_QUICKACK; }"})
-		if not ok then
+		if ok then
+			option:set("configvar", "HAVE_TCP_QUICKACK", 1)
+		else
 			option:enable(false)
 		end
 	end)
@@ -449,7 +508,9 @@ option("TCP_DEFER_ACCEPT")
 	after_check(function (option)
 		import("lib.detect.check_cxsnippets")
 		local ok = check_cxsnippets({"#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\nint test() { return TCP_DEFER_ACCEPT; }"})
-		if not ok then
+		if ok then
+			option:set("configvar", "HAVE_TCP_DEFER_ACCEPT", 1)
+		else
 			option:enable(false)
 		end
 	end)
@@ -461,29 +522,12 @@ option("TCP_FASTOPEN")
 	after_check(function (option)
 		import("lib.detect.check_cxsnippets")
 		local ok = check_cxsnippets({"#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\nint test() { return TCP_FASTOPEN; }"})
-		if not ok then
+		if ok then
+			option:set("configvar", "HAVE_TCP_FASTOPEN", 1)
+		else
 			option:enable(false)
 		end
 	end)
-option_end()
-
-option("NETWORK_LIBS")
-	set_default(true)
-	set_showmenu(false)
-	add_deps("SELECT", "POLL", "DEVPOLL", "IOURING", "EPOLL", "KQUEUE", "EVPORT", "ACCEPT4", "TCP_QUICKACK", "TCP_DEFER_ACCEPT", "TCP_FASTOPEN")
-	
-option_end()
-
-option("LIBS")
-	set_default(true)
-	set_showmenu(false)
-	add_deps("LIBPQ", "CHECK_REGEX", "SSL", "SSL_CRYPTO", "ZLIB", "CURL", "EXECINFO")
-option_end()
-
-option("ALL")
-	set_default(true)
-	set_showmenu(false)
-	add_deps("MOD_MEMORY","MOD_MEMCACHED", "MOD_REDIS", "MOD_SDORM_SQL", "MOD_SDORM_MONGO", "SRV_EMB", "LIBS", "NETWORK_LIBS")
 option_end()
 
 add_includedirs("/usr/local/include")
@@ -515,71 +559,48 @@ add_includedirs("$(projectdir)/src/modules/threads")
 add_includedirs("$(projectdir)/src/framework")
 
 local libext = ".so"
-if is_plat("macosx") then
+
+if is_plat("linux") then
+	set_configvar("OS_LINUX", 1)
+elseif is_plat("macosx") then
+	set_configvar("APPLE", 1)
+	set_configvar("OS_DARWIN", 1)
 	add_includedirs("/usr/local/opt/openssl/include")
 	add_linkdirs("/usr/local/opt/openssl/lib/")
 	libext = ".dylib"
+elseif is_plat("solaris") then
+	set_configvar("OS_SOLARIS", 1)
+elseif is_plat("bsd") then
+	set_configvar("OS_BSD", 1)
+elseif is_plat("android") then
+	set_configvar("OS_ANDROID", 1)
+elseif is_plat("mingw") then
+	set_configvar("OS_MINGW", 1)
+	set_configvar("MINGW", 1)
+	set_configvar("USE_WIN_IOCP", 1)
+elseif is_plat("cygwin") then
+	set_configvar("CYGWIN", 1)
 end
 
 add_cflags("-w")
 
 function setIncludes(target)
-	import("lib.detect.find_path")
-	local p = find_path("mongoc.h", {"/usr/include/libmongoc-1.0", "/usr/local/include/libmongoc-1.0"})
-	if not p then
-		raise('mongoc headers not found')
-	end
-	target:add({includedirs = p})
-	
-	p = find_path("bson.h", {"/usr/include/libbson-1.0", "/usr/local/include/libbson-1.0"})
-	if not p then
-		raise('bson headers not found')
-	end
-	target:add({includedirs = p})
-	
-	p = find_path("libpq-fe.h", {"/usr/include", "/usr/local/include", "/usr/include/postgresql", "/usr/local/include/postgresql"})
-	if not p then
-		p = find_path("libpq-fe.h", {"/usr/include/pgsql", "/usr/local/include/pgsql"})
-		if not p then
-			raise('libpq headers not found')
-		end
-	end
-	target:add({includedirs = p})
-	
 	import("lib.detect.find_package")
 	local l = find_package("dl")
 	if l then
 		target:add({links = "dl"})
 	end
-	
-	import("lib.detect.find_path")
-	l = find_package("uuid")
-	if not l then
-		l = find_package("ossp-uuid")
-		if not l then
-			raise('uuid library not found')
-		end
-		target:add({links = "ossp-uuid"})
-	else
-		target:add({links = "uuid"})
-	end
-	
 	target:add({linkdirs = "/usr/local/lib"})
-	
-	if has_config("ONIG_REGEX") then
-		p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp"})
-		if not p then
-			p = find_path("uuid.h", {"/usr/include", "/usr/local/include"})
-			if not p then
-				raise('uuid headers not found')
-			end
-		else
-			target:add({includedirs = p})
-		end
-	end
 end
 
 local bindir = "$(projectdir)/ffead-cpp-6.0-bin"
+
+function getOptions()
+	return {"CHECK_UUID", "LIBPQ", "CHECK_REGEX", "SSL", "ZLIB", "CURL", "EXECINFO", "LIBCUCKOO", 
+			 "SELECT", "POLL", "DEVPOLL", "IOURING", "EPOLL", "KQUEUE", "EVPORT", "ACCEPT4", "TCP_QUICKACK", 
+			 "TCP_DEFER_ACCEPT", "TCP_FASTOPEN", "MOD_MEMORY","MOD_MEMCACHED", "MOD_REDIS", "MOD_SDORM_SQL", 
+			 "MOD_SDORM_MONGO", "MOD_SER_BIN", "MOD_JOBS", "SRV_EMB"}
+end
 
 includes("src/modules")
 includes("src/framework")
@@ -600,125 +621,15 @@ includes("web/te-benchmark-um-pq-async")
 target("ffead-cpp")
 	set_languages("c++17")
 	add_deps("tests")
-	add_options("ALL")
-    set_kind("binary")
+	add_options(getOptions())
+	set_kind("binary")
 	on_load(setIncludes)
-    add_files("$(projectdir)/src/server/embedded/*.cpp")
-    if has_config("LIBPQ") then
-		set_configvar("HAVE_PQHDR", 1)
-		set_configvar("HAVE_LIBPQ", 1)
-	end
-    if has_config("LIBPQ_BATCH") then
-		set_configvar("HAVE_LIBPQ_BATCH", 1)
-	end
-    if has_config("REGEX") then
-		set_configvar("HAVE_REGEX", 1)
-	end
-    if has_config("ONIG_REGEX") then
-		set_configvar("HAVE_ONIG_REGEX", 1)
-		set_configvar("HAVE_ONIG_REGEX_LIB", 1)
-	end
-    if has_config("SSL") then
-		set_configvar("HAVE_SSLINC", 1)
-		set_configvar("HAVE_SSLLIB", 1)
-	end
-    if has_config("SSL_CRYPTO") then
-		set_configvar("HAVE_CRYPTOLIB", 1)
-	end
-    if has_config("CURL") then
-		set_configvar("HAVE_CURLLIB", 1)
-	end
-    if has_config("MOD_REDIS") then
-		set_configvar("HAVE_REDISINC", 1)
-		set_configvar("HAVE_REDISLIB", 1)
-		set_configvar("INC_REDISCACHE", 1)
-	end
-    if has_config("MOD_MEMCACHED") then
-		set_configvar("HAVE_MEMCACHEDINC", 1)
-		set_configvar("HAVE_MEMCACHEDLIB", 1)
-		set_configvar("INC_MEMCACHED", 1)
-	end
-    if has_config("MOD_SDORM_SQL") then
-		set_configvar("HAVE_SQLINC", 1)
-		set_configvar("HAVE_ODBCLIB", 1)
-		set_configvar("INC_SDORM", 1)
-		set_configvar("INC_SDORM_SQL", 1)
-	end
-    if has_config("MOD_SDORM_MONGO") then
-		set_configvar("HAVE_MONGOINC", 1)
-		set_configvar("HAVE_MONGOCLIB", 1)
-		set_configvar("HAVE_BSONINC", 1)
-		set_configvar("HAVE_BSONLIB", 1)
-		set_configvar("INC_SDORM", 1)
-		set_configvar("INC_SDORM_MONGO", 1)
-	end
-    if has_config("MOD_SER_BIN") then
-		set_configvar("INC_BINSER", 1)
-	end
-    if has_config("MOD_JOBS") then
-		set_configvar("INC_JOBS", 1)
-	end
-    if has_config("SRV_EMB") then
-		set_configvar("SRV_EMB", 1)
-	end
-    if has_config("LIBCUCKOO") then
-    	set_configvar("HAVE_CKOHMINC", 1)
-	end
-    if has_config("EXECINFO") then
-		set_configvar("HAVE_EXECINFOINC", 1)
-	end
-    if has_config("UUID") then
-		set_configvar("HAVE_UUIDINC", 1)
-		set_configvar("HAVE_UUIDLIB", 1)
-	end
-    if has_config("OSSP_UUID") then
-		set_configvar("HAVE_OSSPUUIDINC", 1)
-		set_configvar("HAVE_UUIDLIB", 1)
-	end
-    if has_config("OSSP_UUID_2") then
-		set_configvar("HAVE_OSSPUUIDINC_2", 1)
-		set_configvar("HAVE_UUIDLIB", 1)
-	end
-    if has_config("KQUEUE") then
-		set_configvar("USE_KQUEUE", 1)
-	elseif has_config("IOURING") then
-		set_configvar("USE_IO_URING", 1)
-	elseif has_config("EVPORT") then
-		set_configvar("USE_EVPORT", 1)
-	elseif has_config("EPOLL") then
-		set_configvar("USE_EPOLL", 1)
-	elseif has_config("DEVPOLL") then
-		set_configvar("USE_DEVPOLL", 1)
-	elseif has_config("POLL") then
-		set_configvar("USE_POLL", 1)
-	elseif has_config("SELECT") then
-		set_configvar("USE_SELECT", 1)
-	end
-    if has_config("ACCEPT4") then
-		set_configvar("HAVE_ACCEPT4", 1)
-	end
-	if is_plat("linux") then
-		set_configvar("OS_LINUX", 1)
-	elseif is_plat("macosx") then
-		set_configvar("APPLE", 1)
-		set_configvar("OS_DARWIN", 1)
-	elseif is_plat("solaris") then
-		set_configvar("OS_SOLARIS", 1)
-	elseif is_plat("bsd") then
-		set_configvar("OS_BSD", 1)
-	elseif is_plat("android") then
-		set_configvar("OS_ANDROID", 1)
-	elseif is_plat("mingw") then
-		set_configvar("OS_MINGW", 1)
-		set_configvar("MINGW", 1)
-		set_configvar("USE_WIN_IOCP", 1)
-	elseif is_plat("cygwin") then
-		set_configvar("CYGWIN", 1)
-	end
-    set_configdir("src/modules/common")
-    add_configfiles("src/modules/common/AppDefines.xmake.h.in", {filename = "AppDefines.h"})
+	add_files("$(projectdir)/src/server/embedded/*.cpp")
+
+	set_configdir("src/modules/common")
+	add_configfiles("src/modules/common/AppDefines.xmake.h.in", {filename = "AppDefines.h"})
     
-    set_installdir(bindir)
+	set_installdir(bindir)
     add_installfiles("src/modules/common/*.h", {prefixdir = "include"})
 	add_installfiles("src/modules/cache/*.h", {prefixdir = "include"})
 	add_installfiles("src/modules/cache/memory/*.h", {prefixdir = "include"})

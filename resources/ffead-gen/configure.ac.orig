@@ -991,9 +991,9 @@ if test "x$generate_apache_module" = "xyes"; then
 		AC_SUBST(LIB_TYPE,[-l])
 		AC_SUBST(LIBRARY_EXTENSION,[so])
 		AC_SUBST(APACHE_HTTPD_LIB,[ ])
-		AC_CHECK_PROG(APXS, apxs2, [apxs2], [apxs2 not found],[])
+		AC_CHECK_PROG(APXS, apxs2, [apxs2], [no],[])
 		if test "x$APXS" = "xno" ; then
-			AC_CHECK_PROG(APXS, apxs, [apxs], [apxs not found],[])
+			AC_CHECK_PROG(APXS, apxs, [apxs], [no],[])
 			if test "x$APXS" = "xno" ; then
 			    AC_MSG_ERROR([Please install apache development tools (apxs/apxs2) to continue.])
 			fi

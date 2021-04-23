@@ -39,7 +39,7 @@ RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
 RUN chmod +x autogen.sh
 RUN ./autogen.sh
-RUN ./configure --enable-srv_emb=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes --enable-apachemod=yes --enable-nginxmod=yes
+RUN ./configure --enable-srv_emb=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes --enable-nginxmod=yes
 RUN make install
 RUN mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
 WORKDIR /tmp

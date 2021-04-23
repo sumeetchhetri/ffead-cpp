@@ -3,9 +3,8 @@ local bindir = "$(projectdir)/ffead-cpp-6.0-bin"
 
 target("ffead-modules")
 	set_languages("c++17")
-	add_options("ALL")
 	set_kind("shared")
-	add_options("ALL")
+	add_options(getOptions())
 	on_load(setIncludes)
 	add_files("$(projectdir)/src/modules/common/*.cpp")
 	add_files("$(projectdir)/src/modules/client-util/*.cpp")
@@ -16,16 +15,6 @@ target("ffead-modules")
 	add_files("$(projectdir)/src/modules/ioc/*.cpp")
 	add_files("$(projectdir)/src/modules/reflection/*.cpp")
 	add_files("$(projectdir)/src/modules/threads/*.cpp")
-	if has_config("SSL") then
-		if is_plat("macosx") then
-			add_linkdirs("/usr/local/opt/openssl/lib/")
-			add_linkdirs("/usr/local/lib")
-		else
-			add_linkdirs("/usr/local/lib")
-		end
-	else
-		add_linkdirs("/usr/local/lib")
-	end
 	if has_config("CURL") then
 		add_links("curl")
 	end
@@ -42,7 +31,7 @@ target("ffead-modules")
 	end
     if has_config("MOD_MEMCACHED") then
 		add_files("$(projectdir)/src/modules/cache/memcached/*.cpp")
-		add_links("memcached","memcahedutil")
+		add_links("memcached","memcachedutil")
 	end
 	add_files("$(projectdir)/src/modules/sdorm/*.cpp")
     if has_config("MOD_SDORM_SQL") then
