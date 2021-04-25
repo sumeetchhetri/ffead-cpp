@@ -24,6 +24,7 @@
 #define WEB_TE_BENCHMARK_UM_INCLUDE_TeBkUmLpq_H_
 #include "TemplateHandler.h"
 #include "vector"
+#include "list"
 #ifndef OS_MINGW
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -32,7 +33,6 @@
 #include <stdlib.h>
 #include <algorithm>
 #include "CryptoHandler.h"
-#include "vector"
 #include "CastUtil.h"
 #include <stdlib.h>
 #include "CacheManager.h"
@@ -43,12 +43,11 @@
 #include "yuarel.h"
 #include "Router.h"
 
-typedef void (*TeBkUmLpqTemplatePtr) (Context*, std::string&);
-
 class TeBkUmLpqWorld {
 	int id;
 	int randomNumber;
 public:
+	TeBkUmLpqWorld(int id, int randomNumber);
 	TeBkUmLpqWorld();
 	virtual ~TeBkUmLpqWorld();
 	int getId() const;
@@ -58,7 +57,7 @@ public:
 };
 
 struct UpdQrData {
-	std::vector<TeBkUmLpqWorld>* wlist;
+	std::list<TeBkUmLpqWorld>* wlist;
 	std::stringstream* ss;
 	bool status;
 	int queryCount;
@@ -66,20 +65,23 @@ struct UpdQrData {
 
 class TeBkUmLpqFortune {
 	int id;
-	std::string message;
 public:
+	std::string message_i;
+	std::string_view message;
+	bool allocd;
+	TeBkUmLpqFortune(int id, std::string message);
 	TeBkUmLpqFortune();
 	virtual ~TeBkUmLpqFortune();
 	int getId() const;
 	void setId(int id);
-	const std::string& getMessage() const;
-	void setMessage(const std::string& message);
 	bool operator < (const TeBkUmLpqFortune& other) const;
 };
 
 class TeBkUmLpqMessage {
 	std::string message;
 public:
+	TeBkUmLpqMessage();
+	TeBkUmLpqMessage(std::string message);
 	virtual ~TeBkUmLpqMessage();
 	const std::string& getMessage() const;
 	void setMessage(const std::string& message);
@@ -94,22 +96,23 @@ class TeBkUmLpqRouter : public Router {
 
 	static std::string APP_NAME;
 	static std::string TPE_FN_NAME;
+	static std::map<std::string, TemplatePtr> tmplFuncMap;
 
 	static bool strToNum(const char* str, int len, int& ret);
 
 	void db(TeBkUmLpqWorld&);
-	void queries(const char*, int, std::vector<TeBkUmLpqWorld>&);
-	void queriesMulti(const char*, int, std::vector<TeBkUmLpqWorld>&);
+	void queries(const char*, int, std::list<TeBkUmLpqWorld>&);
+	void queriesMulti(const char*, int, std::list<TeBkUmLpqWorld>&);
 	static void dbUtil(void* ctx, int, int, char *);
 	static void queriesMultiUtil(void* ctx, int, int, char *, int);
 
-	void updates(const char*, int, std::vector<TeBkUmLpqWorld>&);
+	void updates(const char*, int, std::list<TeBkUmLpqWorld>&);
 	static void updatesUtil(void* ctx, int, int, char *);
-	void updatesMulti(const char*, int, std::vector<TeBkUmLpqWorld>&);
+	void updatesMulti(const char*, int, std::list<TeBkUmLpqWorld>&);
 	static void updatesMultiUtil(void* ctx, int, int, char *, int);
 	static void updatesMultiUtilCh(void* ctx, bool status, const std::string& query, int counter);
 	
-	void cachedWorlds(const char*, int, std::vector<TeBkUmLpqWorld>&);
+	void cachedWorlds(const char*, int, std::list<TeBkUmLpqWorld>&);
 	static void updateCacheUtil(void* ctx, int rn, std::vector<LibpqRes>& data);
 
 	void getContext(HttpRequest* request, Context* context);

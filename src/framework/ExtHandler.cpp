@@ -34,6 +34,8 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 	{
 		if(ddlib != NULL)
 		{
+			fcpstream tstream;
+			bool done = false;
 			std::string tpefilename = tmplMap->find(req->getCurl())->second.substr(tmplMap->find(req->getCurl())->second.find(";")+1);
 			std::string tpeclasname = tmplMap->find(req->getCurl())->second.substr(0, tmplMap->find(req->getCurl())->second.find(";"));
 			cntrlit = true;
@@ -59,7 +61,8 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 						if(mkr!=NULL)
 						{
 							TemplatePtr f =  (TemplatePtr)mkr;
-							f(&cnt, content);
+							f(&cnt, tstream);
+							done = true;
 						}
 						else
 						{
@@ -78,11 +81,11 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 				}
 				ConfigurationData::getInstance()->ffeadContext.release(_temp, tpeclasname, req->getCntxt_name());
 			}
-			if(content.length()>0)
+			if(done)
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 				res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
-				res->setContent(content);
+				res->setContent(tstream.str());
 			}
 		}
 		if(cntrlit && res->getStatusCode()!="404") {

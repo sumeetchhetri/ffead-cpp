@@ -120,7 +120,7 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 		}
 		res.header_server()
 		res.header_date()
-		j = 0
+		mut j := 0
 		for {
 			if j == int(headers_len) {
 				break

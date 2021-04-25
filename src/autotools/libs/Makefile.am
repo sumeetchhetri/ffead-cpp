@@ -40,7 +40,8 @@ libffead_modules_la_SOURCES =  ../../modules/common/Bigdecimal.cpp \
 						../../modules/common/CastUtil.cpp \
 						../../modules/common/ReusableInstanceHolder.cpp \
 						../../modules/common/picohttpparser_fcp.cpp \
-						../../modules/common/yuarel.cpp
+						../../modules/common/yuarel.cpp \
+						../../modules/common/hescape.cpp
 
 if MOD_ALL
 lib_LTLIBRARIES +=  libffead-framework.la

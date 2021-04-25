@@ -37,6 +37,11 @@ void TeBkUmLpqAsyncWorld::setRandomNumber(int randomNumber) {
 	this->randomNumber = randomNumber;
 }
 
+TeBkUmLpqAsyncWorld::TeBkUmLpqAsyncWorld(int id, int randomNumber) {
+	this->id = id;
+	this->randomNumber = randomNumber;
+}
+
 TeBkUmLpqAsyncWorld::TeBkUmLpqAsyncWorld() {
 	id = 0;
 	randomNumber = 0;
@@ -53,23 +58,33 @@ void TeBkUmLpqAsyncFortune::setId(int id) {
 	this->id = id;
 }
 
-const std::string& TeBkUmLpqAsyncFortune::getMessage() const {
-	return message;
-}
-
-void TeBkUmLpqAsyncFortune::setMessage(const std::string& message) {
-	this->message = message;
+TeBkUmLpqAsyncFortune::TeBkUmLpqAsyncFortune(int id, std::string message) {
+	this->id = id;
+	this->message_i = message;
+	this->message = std::string_view(this->message_i);
+	allocd = false;
 }
 
 TeBkUmLpqAsyncFortune::TeBkUmLpqAsyncFortune() {
 	id = 0;
+	allocd = false;
 }
 
 TeBkUmLpqAsyncFortune::~TeBkUmLpqAsyncFortune() {
+	if(allocd && message.size()>0) {
+		free((void *)message.data());
+	}
 }
 
 bool TeBkUmLpqAsyncFortune::operator < (const TeBkUmLpqAsyncFortune& other) const {
 	return message.compare(other.message)<0;
+}
+
+TeBkUmLpqAsyncMessage::TeBkUmLpqAsyncMessage() {
+}
+
+TeBkUmLpqAsyncMessage::TeBkUmLpqAsyncMessage(std::string message) {
+	this->message = message;
 }
 
 TeBkUmLpqAsyncMessage::~TeBkUmLpqAsyncMessage() {
@@ -131,7 +146,7 @@ void TeBkUmLpqAsyncRouter::dbAsyncCh(void* ctx, bool status, const std::string& 
 
 
 void TeBkUmLpqAsyncRouter::queriesAsync(const char* q, int ql, AsyncReq* req) {
-	req->d = new std::vector<TeBkUmLpqAsyncWorld>;
+	req->d = new std::list<TeBkUmLpqAsyncWorld>;
 
 	int queryCount = 0;
 	strToNum(q, ql, queryCount);
@@ -155,20 +170,20 @@ void TeBkUmLpqAsyncRouter::queriesAsync(const char* q, int ql, AsyncReq* req) {
 }
 void TeBkUmLpqAsyncRouter::queriesAsyncUtil(void* ctx, int rn, int cn, char * d) {
 	AsyncReq* req = (AsyncReq*)ctx;
-	std::vector<TeBkUmLpqAsyncWorld>* vec = (std::vector<TeBkUmLpqAsyncWorld>*)req->d;
+	std::list<TeBkUmLpqAsyncWorld>* vec = (std::list<TeBkUmLpqAsyncWorld>*)req->d;
 	if(cn==0) {
-		vec->push_back(TeBkUmLpqAsyncWorld());
+		vec->emplace_back();
 	}
-	TeBkUmLpqAsyncWorld& w = vec->at(vec->size()-1);
+	TeBkUmLpqAsyncWorld& w = vec->back();
 	if(cn==0)w.setId(ntohl(*((uint32_t *) d)));
 	if(cn==1)w.setRandomNumber(ntohl(*((uint32_t *) d)));
 }
 void TeBkUmLpqAsyncRouter::queriesAsyncCh(void* ctx, bool status, const std::string& q, int counter) {
 	AsyncReq* req = (AsyncReq*)ctx;
-	std::vector<TeBkUmLpqAsyncWorld>* vec = (std::vector<TeBkUmLpqAsyncWorld>*)req->d;
+	std::list<TeBkUmLpqAsyncWorld>* vec = (std::list<TeBkUmLpqAsyncWorld>*)req->d;
 	req->r.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	std::string c;
-	JSONSerialize::serializeUnknown(vec, 100, "std::vector<TeBkUmLpqAsyncWorld>", &c, APP_NAME);
+	JSONSerialize::serializeUnknown(vec, 200, "std::list<TeBkUmLpqAsyncWorld>", &c, APP_NAME);
 	std::string d;
 	req->r.generateHeadResponse(d, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, (int)c.length());
 	req->sif->writeDirect(d);
@@ -181,7 +196,7 @@ void TeBkUmLpqAsyncRouter::queriesAsyncCh(void* ctx, bool status, const std::str
 
 #ifndef HAVE_LIBPQ_BATCH
 void TeBkUmLpqAsyncRouter::queriesMultiAsync(const char* q, int ql, AsyncReq* req) {
-	req->d = new std::vector<TeBkUmLpqAsyncWorld>;
+	req->d = new std::list<TeBkUmLpqAsyncWorld>;
 
 	int queryCount = 0;
 	strToNum(q, ql, queryCount);
@@ -204,11 +219,11 @@ void TeBkUmLpqAsyncRouter::queriesMultiAsync(const char* q, int ql, AsyncReq* re
 }
 void TeBkUmLpqAsyncRouter::queriesMultiAsyncUtil(void* ctx, int rn, int cn, char * d, int l) {
 	AsyncReq* req = (AsyncReq*)ctx;
-	std::vector<TeBkUmLpqAsyncWorld>* vec = (std::vector<TeBkUmLpqAsyncWorld>*)req->d;
+	std::list<TeBkUmLpqAsyncWorld>* vec = (std::list<TeBkUmLpqAsyncWorld>*)req->d;
 	if(cn==0) {
-		vec->push_back(TeBkUmLpqAsyncWorld());
+		vec->emplace_back();
 	}
-	TeBkUmLpqAsyncWorld& w = vec->at(vec->size()-1);
+	TeBkUmLpqAsyncWorld& w = vec->back();
 	int tmp = 0;
 	strToNum(d, l, tmp);
 	if(cn==0)w.setId(tmp);
@@ -216,10 +231,10 @@ void TeBkUmLpqAsyncRouter::queriesMultiAsyncUtil(void* ctx, int rn, int cn, char
 }
 void TeBkUmLpqAsyncRouter::queriesMultiAsyncCh(void* ctx, bool status, const std::string& q, int counter) {
 	AsyncReq* req = (AsyncReq*)ctx;
-	std::vector<TeBkUmLpqAsyncWorld>* vec = (std::vector<TeBkUmLpqAsyncWorld>*)req->d;
+	std::list<TeBkUmLpqAsyncWorld>* vec = (std::list<TeBkUmLpqAsyncWorld>*)req->d;
 	req->r.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	std::string c;
-	JSONSerialize::serializeUnknown(vec, 100, "std::vector<TeBkUmLpqAsyncWorld>", &c, APP_NAME);
+	JSONSerialize::serializeUnknown(vec, 200, "std::list<TeBkUmLpqAsyncWorld>", &c, APP_NAME);
 	std::string d;
 	req->r.generateHeadResponse(d, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, (int)c.length());
 	req->sif->writeDirect(d);
@@ -260,7 +275,7 @@ std::string& TeBkUmLpqAsyncRouter::getUpdQuery(int count) {
 }
 
 void TeBkUmLpqAsyncRouter::updatesAsyncb(const char* q, int ql, AsyncReq* req) {
-	req->d = new std::vector<TeBkUmLpqAsyncWorld>;
+	req->d = new std::list<TeBkUmLpqAsyncWorld>;
 
 	int queryCount = 0;
 	strToNum(q, ql, queryCount);
@@ -285,28 +300,28 @@ void TeBkUmLpqAsyncRouter::updatesAsyncb(const char* q, int ql, AsyncReq* req) {
 }
 void TeBkUmLpqAsyncRouter::updatesAsyncbChQ(void* ctx, bool status, const std::string& q, int counter) {
 	AsyncReq* req = (AsyncReq*)ctx;
-	std::vector<TeBkUmLpqAsyncWorld>* vec = (std::vector<TeBkUmLpqAsyncWorld>*)req->d;
+	std::list<TeBkUmLpqAsyncWorld>* vec = (std::list<TeBkUmLpqAsyncWorld>*)req->d;
 
 	LibpqDataSourceImpl* sqli = req->sqli;
 
 	int queryCount = (int)vec->size();
 	std::vector<LibpqParam> pars;
 
-	for (int c = 0; c < queryCount; ++c) {
-		LibpqDataSourceImpl::ADD_INT4(pars, vec->at(c).getId());
+	for(std::list<TeBkUmLpqAsyncWorld>::iterator it=vec->begin(); it != vec->end(); ++it) {
+		LibpqDataSourceImpl::ADD_INT4(pars, (*it).getId());
 
 		int newRandomNumber = rand() % 10000 + 1;
-		if(vec->at(c).getRandomNumber() == newRandomNumber) {
+		if((*it).getRandomNumber() == newRandomNumber) {
 			newRandomNumber += 1;
 			if(newRandomNumber>=10000) {
 				newRandomNumber = 1;
 			}
 		}
 		LibpqDataSourceImpl::ADD_INT4(pars, newRandomNumber);
-		vec->at(c).setRandomNumber(newRandomNumber);
+		(*it).setRandomNumber(newRandomNumber);
 	}
-	for (int c = 0; c < queryCount; ++c) {
-		LibpqDataSourceImpl::ADD_INT4(pars, vec->at(c).getId());
+	for(std::list<TeBkUmLpqAsyncWorld>::iterator it=vec->begin(); it != vec->end(); ++it) {
+		LibpqDataSourceImpl::ADD_INT4(pars, (*it).getId());
 	}
 
 	void* areq = sqli->beginAsync(NULL);
@@ -328,10 +343,10 @@ void TeBkUmLpqAsyncRouter::updatesAsyncbChQ(void* ctx, bool status, const std::s
 }
 void TeBkUmLpqAsyncRouter::updatesAsyncbChU(void* ctx, bool status, const std::string& q, int counter) {
 	AsyncReq* req = (AsyncReq*)ctx;
-	std::vector<TeBkUmLpqAsyncWorld>* vec = (std::vector<TeBkUmLpqAsyncWorld>*)req->d;
+	std::list<TeBkUmLpqAsyncWorld>* vec = (std::list<TeBkUmLpqAsyncWorld>*)req->d;
 	req->r.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	std::string c;
-	JSONSerialize::serializeUnknown(vec, 100, "std::vector<TeBkUmLpqAsyncWorld>", &c, APP_NAME);
+	JSONSerialize::serializeUnknown(vec, 200, "std::list<TeBkUmLpqAsyncWorld>", &c, APP_NAME);
 	std::string d;
 	req->r.generateHeadResponse(d, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, (int)c.length());
 	req->sif->writeDirect(d);
@@ -342,7 +357,7 @@ void TeBkUmLpqAsyncRouter::updatesAsyncbChU(void* ctx, bool status, const std::s
 }
 
 void TeBkUmLpqAsyncRouter::updatesAsync(const char* q, int ql, AsyncReq* req) {
-	req->d = new std::vector<TeBkUmLpqAsyncWorld>;
+	req->d = new std::list<TeBkUmLpqAsyncWorld>;
 
 	int queryCount = 0;
 	strToNum(q, ql, queryCount);
@@ -367,7 +382,7 @@ void TeBkUmLpqAsyncRouter::updatesAsync(const char* q, int ql, AsyncReq* req) {
 }
 void TeBkUmLpqAsyncRouter::updatesAsyncChQ(void* ctx, bool status, const std::string& q, int counter) {
 	AsyncReq* req = (AsyncReq*)ctx;
-	std::vector<TeBkUmLpqAsyncWorld>* vec = (std::vector<TeBkUmLpqAsyncWorld>*)req->d;
+	std::list<TeBkUmLpqAsyncWorld>* vec = (std::list<TeBkUmLpqAsyncWorld>*)req->d;
 
 	std::stringstream ss;
 	//ss << "update world as t set randomnumber = c.randomnumber from (values";
@@ -375,16 +390,15 @@ void TeBkUmLpqAsyncRouter::updatesAsyncChQ(void* ctx, bool status, const std::st
 	LibpqDataSourceImpl* sqli = req->sqli;
 
 	void* areq = NULL;
-	int queryCount = (int)vec->size();
-	for (int c = 0; c < queryCount; ++c) {
+	for(std::list<TeBkUmLpqAsyncWorld>::iterator it=vec->begin(); it != vec->end(); ++it) {
 		int newRandomNumber = rand() % 10000 + 1;
-		if(vec->at(c).getRandomNumber() == newRandomNumber) {
+		if((*it).getRandomNumber() == newRandomNumber) {
 			newRandomNumber += 1;
 			if(newRandomNumber>=10000) {
 				newRandomNumber = 1;
 			}
 		}
-		vec->at(c).setRandomNumber(newRandomNumber);
+		(*it).setRandomNumber(newRandomNumber);
 		if(areq==NULL) {
 			areq = sqli->beginAsync(areq);
 		} else {
@@ -392,7 +406,7 @@ void TeBkUmLpqAsyncRouter::updatesAsyncChQ(void* ctx, bool status, const std::st
 		}
 		ss.str(std::string());
 		std::vector<LibpqParam> pars;
-		ss << "update world set randomnumber = " << newRandomNumber << " where id = " << vec->at(c).getId();
+		ss << "update world set randomnumber = " << newRandomNumber << " where id = " << (*it).getId();
 		sqli->executeUpdateQueryAsync(ss.str(), std::move(pars), NULL, NULL, areq, false);
 		sqli->commitAsync(areq);
 		/*if(c!=queryCount-1) {
@@ -416,10 +430,10 @@ void TeBkUmLpqAsyncRouter::updatesAsyncChQ(void* ctx, bool status, const std::st
 }
 void TeBkUmLpqAsyncRouter::updatesAsyncChU(void* ctx, bool status, const std::string& q, int counter) {
 	AsyncReq* req = (AsyncReq*)ctx;
-	std::vector<TeBkUmLpqAsyncWorld>* vec = (std::vector<TeBkUmLpqAsyncWorld>*)req->d;
+	std::list<TeBkUmLpqAsyncWorld>* vec = (std::list<TeBkUmLpqAsyncWorld>*)req->d;
 	req->r.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	std::string c;
-	JSONSerialize::serializeUnknown(vec, 100, "std::vector<TeBkUmLpqAsyncWorld>", &c, APP_NAME);
+	JSONSerialize::serializeUnknown(vec, 200, "std::list<TeBkUmLpqAsyncWorld>", &c, APP_NAME);
 	std::string d;
 	req->r.generateHeadResponse(d, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, (int)c.length());
 	req->sif->writeDirect(d);
@@ -433,7 +447,7 @@ void TeBkUmLpqAsyncRouter::updateCache() {
 	LibpqDataSourceImpl* sqli = getDb();
 
 	CacheReq* req = new CacheReq;
-	req->d = new std::vector<TeBkUmLpqAsyncWorld>;
+	req->d = new std::list<TeBkUmLpqAsyncWorld>;
 	req->cchi = CacheManager::getImpl();
 
 	try {
@@ -446,23 +460,22 @@ void TeBkUmLpqAsyncRouter::updateCache() {
 }
 void TeBkUmLpqAsyncRouter::updateCacheAsyncUtil(void* ctx, int rn, std::vector<LibpqRes>& data) {
 	CacheReq* req = (CacheReq*)ctx;
-	std::vector<TeBkUmLpqAsyncWorld>* wlist = (std::vector<TeBkUmLpqAsyncWorld>*)req->d;
-	TeBkUmLpqAsyncWorld w;
+	std::list<TeBkUmLpqAsyncWorld>* wlist = (std::list<TeBkUmLpqAsyncWorld>*)req->d;
+	/*TeBkUmLpqAsyncWorld w;
 	w.setId(ntohl(*((uint32_t *) data.at(0).d)));
-	w.setRandomNumber(ntohl(*((uint32_t *) data.at(1).d)));
-	wlist->push_back(w);
+	w.setRandomNumber(ntohl(*((uint32_t *) data.at(1).d)));*/
+	wlist->emplace_back(ntohl(*((uint32_t *) data.at(0).d)), ntohl(*((uint32_t *) data.at(1).d)));
 }
 void TeBkUmLpqAsyncRouter::updateCacheAsyncCh(void* ctx, bool status, const std::string& q, int counter) {
 	CacheReq* req = (CacheReq*)ctx;
-	std::vector<TeBkUmLpqAsyncWorld>* wlist = (std::vector<TeBkUmLpqAsyncWorld>*)req->d;
+	std::list<TeBkUmLpqAsyncWorld>* wlist = (std::list<TeBkUmLpqAsyncWorld>*)req->d;
 	CacheInterface* cchi = req->cchi;
 
 	try {
-		for (int c = 0; c < (int)wlist->size(); ++c) {
-			TeBkUmLpqAsyncWorld& w = wlist->at(c);
+		for(std::list<TeBkUmLpqAsyncWorld>::iterator it=wlist->begin(); it != wlist->end(); ++it) {
 			char str[12];
-			sprintf(str, "%d;%d", w.getId(), w.getRandomNumber());
-			cchi->setRaw(CastUtil::fromNumber(w.getId()), str);
+			sprintf(str, "%d;%d", (*it).getId(), (*it).getRandomNumber());
+			cchi->setRaw(CastUtil::fromNumber((*it).getId()), str);
 		}
 		delete wlist;
 		CacheManager::cleanImpl(cchi);
@@ -476,7 +489,7 @@ void TeBkUmLpqAsyncRouter::updateCacheAsyncCh(void* ctx, bool status, const std:
 	}
 }
 
-void TeBkUmLpqAsyncRouter::cachedWorlds(const char* q, int ql, std::vector<TeBkUmLpqAsyncWorld>& wlst) {
+void TeBkUmLpqAsyncRouter::cachedWorlds(const char* q, int ql, std::list<TeBkUmLpqAsyncWorld>& wlst) {
 	int queryCount = 0;
 	strToNum(q, ql, queryCount);
 	if(queryCount<1)queryCount=1;
@@ -488,16 +501,16 @@ void TeBkUmLpqAsyncRouter::cachedWorlds(const char* q, int ql, std::vector<TeBkU
 		std::vector<std::string> keys;
 		for (int c = 0; c < queryCount; ++c) {
 			int rid = rand() % 10000 + 1;
-			TeBkUmLpqAsyncWorld w;
+			//TeBkUmLpqAsyncWorld w;
 			std::string v = cchi->getValue(CastUtil::fromNumber(rid));
 			size_t fn = v.find(";");
 			int tmp = 0;
 			strToNum(v.substr(0, fn).c_str(), fn, tmp);
-			w.setId(tmp);
-			tmp = 0;
-			strToNum(v.substr(fn+1).c_str(), v.length()-fn-1, tmp);
-			w.setRandomNumber(tmp);
-			wlst.push_back(w);
+			//w.setId(tmp);
+			int tmp1 = 0;
+			strToNum(v.substr(fn+1).c_str(), v.length()-fn-1, tmp1);
+			//w.setRandomNumber(tmp1);
+			wlst.emplace_back(tmp, tmp1);
 		}
 		CacheManager::cleanImpl(cchi);
 	} catch(const std::exception& e) {
@@ -508,7 +521,7 @@ void TeBkUmLpqAsyncRouter::cachedWorlds(const char* q, int ql, std::vector<TeBkU
 
 
 void TeBkUmLpqAsyncRouter::getContextAsync(AsyncReq* req) {
-	req->d = new std::vector<TeBkUmLpqAsyncFortune>;
+	req->d = new std::list<TeBkUmLpqAsyncFortune>;
 
 	LibpqDataSourceImpl* sqli = getDb();
 
@@ -522,44 +535,53 @@ void TeBkUmLpqAsyncRouter::getContextAsync(AsyncReq* req) {
 }
 void TeBkUmLpqAsyncRouter::getContextAsyncUtil(void* ctx, int rn, int cn, char * d, int l) {
 	AsyncReq* req = (AsyncReq*)ctx;
-	std::vector<TeBkUmLpqAsyncFortune>* flst = (std::vector<TeBkUmLpqAsyncFortune>*)req->d;
+	std::list<TeBkUmLpqAsyncFortune>* flst = (std::list<TeBkUmLpqAsyncFortune>*)req->d;
 	if(cn==0) {
-		flst->push_back(TeBkUmLpqAsyncFortune());
+		flst->emplace_back();
 	}
-	TeBkUmLpqAsyncFortune& w = flst->at(flst->size()-1);
+	TeBkUmLpqAsyncFortune& w = flst->back();
 	if(cn==0)w.setId(ntohl(*((uint32_t *) d)));
 	else {
-		std::string nm = std::string(d, l);
-		CryptoHandler::sanitizeHtml(nm);
-		w.setMessage(nm);
+		w.message_i.append(d, l);
+		w.message = CryptoHandler::sanitizeHtmlFast(w.message_i, w.allocd);
 	}
 }
+
+std::map<std::string, TemplatePtr> TeBkUmLpqAsyncRouter::tmplFuncMap;
 void TeBkUmLpqAsyncRouter::getContextAsyncCh(void* ctx, bool status, const std::string& q, int counter) {
 	AsyncReq* req = (AsyncReq*)ctx;
-	std::vector<TeBkUmLpqAsyncFortune>* flst = (std::vector<TeBkUmLpqAsyncFortune>*)req->d;
+	std::list<TeBkUmLpqAsyncFortune>* flst = (std::list<TeBkUmLpqAsyncFortune>*)req->d;
 
 	Context context;
 
-	TeBkUmLpqAsyncFortune nf;
+	/*TeBkUmLpqAsyncFortune nf;
 	nf.setId(0);
-	nf.setMessage("Additional fortune added at request time.");
-	flst->push_back(nf);
-	std::sort (flst->begin(), flst->end());
+	nf.setMessage("Additional fortune added at request time.");*/
+	flst->emplace_back(0, "Additional fortune added at request time.");
+	flst->sort();
 
 	context.insert(std::pair<std::string, void*>("fortunes", flst));
 
-	void* mkr = dlsym(req->ddlib, TPE_FN_NAME.c_str());
+	std::map<std::string, TemplatePtr>::iterator it = tmplFuncMap.find(TPE_FN_NAME);
+
+	TemplatePtr mkr = NULL;
+	if(it==tmplFuncMap.end()) {
+		mkr = (TemplatePtr)dlsym(req->ddlib, TPE_FN_NAME.c_str());
+		tmplFuncMap[TPE_FN_NAME] = mkr;
+	} else {
+		mkr = it->second;
+	}
+
 	if(mkr!=NULL)
 	{
-		TeBkUmLpqAsyncTemplatePtr f =  (TeBkUmLpqAsyncTemplatePtr)mkr;
-		std::string msg;
-		f(&context, msg);
-		req->r.setContent(msg);
+		fcpstream str;
+		mkr(&context, str);
+		//req->r.setContent(msg);
 		req->r.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		std::string d;
-		req->r.generateHeadResponse(d, ContentTypes::CONTENT_TYPE_TEXT_SHTML, (int)msg.length());
+		req->r.generateHeadResponse(d, ContentTypes::CONTENT_TYPE_TEXT_SHTML, (int)str.str().length());
 		req->sif->writeDirect(d);
-		req->sif->writeDirect(msg);
+		req->sif->writeDirect(str.str());
 		req->sif->unUse();
 	}
 	else
@@ -649,11 +671,11 @@ bool TeBkUmLpqAsyncRouter::route(HttpRequest* req, HttpResponse* res, void* dlib
 	} else if(StringUtil::endsWith(path, "/cached-worlds")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
-		std::vector<TeBkUmLpqAsyncWorld> msg;
+		std::list<TeBkUmLpqAsyncWorld> msg;
 		cachedWorlds(params[0].val, params[0].val_len, msg);
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		std::string c;
-		JSONSerialize::serializeUnknown(&msg, 100, "std::vector<TeBkUmLpqAsyncWorld>", &c, APP_NAME);
+		JSONSerialize::serializeUnknown(&msg, 200, "std::list<TeBkUmLpqAsyncWorld>", &c, APP_NAME);
 		std::string d;
 		res->generateHeadResponse(d, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, (int)c.length());
 		sif->writeDirect(d);

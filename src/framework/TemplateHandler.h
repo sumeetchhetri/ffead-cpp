@@ -28,10 +28,7 @@
 #include "GenericObject.h"
 #include "HttpRequest.h"
 #include <fstream>
-
 #include "TemplateEngine.h"
-
-typedef std::map<std::string, void*> Context;
 
 class TemplateHandler {
 public:

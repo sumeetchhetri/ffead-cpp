@@ -408,6 +408,11 @@ std::string CryptoHandler::sha1(const std::string& data)
 #endif
 }
 
+
+std::string_view CryptoHandler::sanitizeHtmlFast(std::string& data, bool& allocd) {
+	return hesc_escape_html(data, allocd);
+}
+
 void CryptoHandler::sanitizeHtml(std::string& data) {
     std::string buffer;
     buffer.reserve(data.size());

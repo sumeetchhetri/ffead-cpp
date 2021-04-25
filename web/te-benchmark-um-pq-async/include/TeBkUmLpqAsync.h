@@ -43,13 +43,12 @@
 #include "yuarel.h"
 #include "Router.h"
 
-typedef void (*TeBkUmLpqAsyncTemplatePtr) (Context*, std::string&);
-
 class TeBkUmLpqAsyncWorld {
 	int id;
 	int randomNumber;
 public:
 	TeBkUmLpqAsyncWorld();
+	TeBkUmLpqAsyncWorld(int id, int randomNumber);
 	virtual ~TeBkUmLpqAsyncWorld();
 	int getId() const;
 	void setId(int id);
@@ -59,20 +58,23 @@ public:
 
 class TeBkUmLpqAsyncFortune {
 	int id;
-	std::string message;
 public:
+	std::string message_i;
+	std::string_view message;
+	bool allocd;
+	TeBkUmLpqAsyncFortune(int id, std::string message);
 	TeBkUmLpqAsyncFortune();
 	virtual ~TeBkUmLpqAsyncFortune();
 	int getId() const;
 	void setId(int id);
-	const std::string& getMessage() const;
-	void setMessage(const std::string& message);
 	bool operator < (const TeBkUmLpqAsyncFortune& other) const;
 };
 
 class TeBkUmLpqAsyncMessage {
 	std::string message;
 public:
+	TeBkUmLpqAsyncMessage();
+	TeBkUmLpqAsyncMessage(std::string message);
 	virtual ~TeBkUmLpqAsyncMessage();
 	const std::string& getMessage() const;
 	void setMessage(const std::string& message);
@@ -100,6 +102,7 @@ class TeBkUmLpqAsyncRouter : public Router {
 
 	static std::string APP_NAME;
 	static std::string TPE_FN_NAME;
+	static std::map<std::string, TemplatePtr> tmplFuncMap;
 
 	static bool strToNum(const char* str, int len, int& ret);
 
@@ -126,7 +129,7 @@ class TeBkUmLpqAsyncRouter : public Router {
 	static void updatesAsyncbChQ(void* ctx, bool status, const std::string& q, int counter);
 	static void updatesAsyncbChU(void* ctx, bool status, const std::string& q, int counter);
 	
-	void cachedWorlds(const char*, int, std::vector<TeBkUmLpqAsyncWorld>&);
+	void cachedWorlds(const char*, int, std::list<TeBkUmLpqAsyncWorld>&);
 	static void updateCacheAsyncUtil(void* ctx, int rn, std::vector<LibpqRes>& data);
 	static void updateCacheAsyncCh(void* ctx, bool status, const std::string& q, int counter);
 

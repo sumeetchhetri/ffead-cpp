@@ -311,7 +311,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 			}
 			if(root.getAttribute("libname")!="" && StringUtil::trimCopy(root.getAttribute("libname"))!=name) {
 				flibname = StringUtil::trimCopy(root.getAttribute("libname"));
-				RegexUtil::replace(flibname, "[^a-zA-Z0-9_\-]+", "");
+				RegexUtil::replace(flibname, "[^a-zA-Z0-9_\\-]+", "");
 			}
 			if(root.getAttribute("router")!="" && StringUtil::trimCopy(root.getAttribute("router"))!="") {
 				std::string router = StringUtil::trimCopy(root.getAttribute("router"));

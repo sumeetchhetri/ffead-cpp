@@ -40,8 +40,6 @@
 #include "yuarel.h"
 #include "Router.h"
 
-typedef void (*TeBkUmTemplatePtr) (Context*, std::string&);
-
 #pragma @Entity
 #pragma @Table name="fortune"
 class TeBkUmFortune {

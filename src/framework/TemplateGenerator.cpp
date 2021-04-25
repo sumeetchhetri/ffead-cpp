@@ -23,12 +23,9 @@
 #include "TemplateGenerator.h"
 
 TemplateGenerator::TemplateGenerator() {
-	
-
 }
 
 TemplateGenerator::~TemplateGenerator() {
-	
 }
 
 std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::string &headersb, std::string &funcdefs, const std::string& app)
@@ -55,8 +52,8 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 		}
 	}
 	std::string header,bodies,funcs,declars;
-	funcdefs.append("void _"+file+"emittTemplateHTML(std::map<std::string, void*>* _args_i__, std::string& _screen_i__);\n");
-	declars.append("void _"+file+"emittTemplateHTML(std::map<std::string, void*>* _args_i__, std::string& _screen_i__)\n{\n");
+	funcdefs.append("void _"+file+"emittTemplateHTML(std::map<std::string, void*>* _args_i__, fcpstream& _screen_i__);\n");
+	declars.append("void _"+file+"emittTemplateHTML(std::map<std::string, void*>* _args_i__, fcpstream& _screen_i__)\n{\n");
 	std::string tempo;
 	std::string destruct;
 	std::map<std::string,std::string> uselocVars;
@@ -85,8 +82,13 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 				{
 					declars.append(tvec.at(1)+" = ("+tvec.at(0)+"*)_args_i__[\""+tvec.at(1)+"\"];\n");
 				}*/
-				declars.append(tvec.at(1) + "= *(" + tvec.at(0) + "*)");
-				destruct.append("delete (" + tvec.at(0) + "*)_args_i__->find(\""+tvec.at(1)+"\")->second;\n");
+				if(temp.find("*")==std::string::npos) {
+					declars.append(tvec.at(1) + "= *(" + tvec.at(0) + "*)");
+					destruct.append("delete (" + tvec.at(0) + "*)_args_i__->find(\""+tvec.at(1)+"\")->second;\n");
+				} else {
+					declars.append(tvec.at(1) + "= (" + tvec.at(0) + ")");
+					destruct.append("delete (" + tvec.at(0) + ")_args_i__->find(\""+tvec.at(1)+"\")->second;\n");
+				}
 				declars.append("_args_i__->find(\""+tvec.at(1)+"\")->second;\n");
 				declars.append("}\n");
 			}
@@ -150,12 +152,12 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 				if(temp.find(rep)!=std::string::npos)
 				{
 					std::string repVal = inplaceVarValues.at(var1);
-					StringUtil::replaceAll(temp,rep,"\" + " + repVal + " + \"");
+					StringUtil::replaceAll(temp, rep, "\" << " + repVal + " << \"");
 				}
 				else if(temp.find(strrep)!=std::string::npos)
 				{
 					std::string repVal = inplaceVarValues.at(var1);
-					StringUtil::replaceAll(temp,strrep,"\" + CastUtil::lexical_cast<std::string>(" + repVal + ") + \"");
+					StringUtil::replaceAll(temp,strrep,"\" << CastUtil::lexical_cast<std::string>(" + repVal + ") << \"");
 				}
 				else if(temp.find("$_S{")!=std::string::npos && temp.find("}")!=std::string::npos
 							&& temp.find("$_S{"+inplaceVarValues.at(var1))!=std::string::npos)
@@ -170,7 +172,7 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 							std::string repst = reps.substr(0, reps.find("."));
 							if(repst==inplaceVarValues.at(var1))
 							{
-								StringUtil::replaceAll(temp, oreps, "\" + CastUtil::lexical_cast<std::string>(" + reps + ") + \"");
+								StringUtil::replaceAll(temp, oreps, "\" << CastUtil::lexical_cast<std::string>(" + reps + ") << \"");
 							}
 						}
 					}
@@ -187,7 +189,7 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 							std::string repst = reps.substr(0, reps.find("."));
 							if(repst==inplaceVarValues.at(var1))
 							{
-								StringUtil::replaceAll(temp, oreps, "\" + " + reps + " + \"");
+								StringUtil::replaceAll(temp, oreps, "\" << " + reps + " << \"");
 							}
 						}
 					}
@@ -200,7 +202,7 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 				//if(reps.find(".")!=std::string::npos)
 				{
 					//string repst = reps.substr(0, reps.find("."));
-					StringUtil::replaceAll(temp, oreps, "\" + CastUtil::lexical_cast<std::string>(" + reps + ") + \"");
+					StringUtil::replaceAll(temp, oreps, "\" << CastUtil::lexical_cast<std::string>(" + reps + ") << \"");
 				}
 			}
 			while(temp.find("${")!=std::string::npos && temp.find("}")!=std::string::npos)
@@ -210,10 +212,10 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 				//if(reps.find(".")!=std::string::npos)
 				{
 					//string repst = reps.substr(0, reps.find("."));
-					StringUtil::replaceAll(temp, oreps, "\" + " + reps + " + \"");
+					StringUtil::replaceAll(temp, oreps, "\" << " + reps + " << \"");
 				}
 			}
-			tempo.append("_screen_i__ += \"" + temp + "\";\n");
+			tempo.append("_screen_i__ << \"" + temp + "\";\n");
 		}
 	}
 	bodies.append(tempo);

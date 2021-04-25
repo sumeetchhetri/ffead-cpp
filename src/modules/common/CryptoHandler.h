@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include "StringUtil.h"
 #include <iomanip>
+#include "hescape.h"
 
 class CryptoHandler {
 #ifndef HAVE_SSLINC
@@ -51,6 +52,7 @@ public:
 	static std::string sha1(const std::string&);
 	static std::string urlEncode(const std::string& str);
 	static std::string urlDecode(const std::string& str);
+	static std::string_view sanitizeHtmlFast(std::string& data, bool& allocd);
 	static void sanitizeHtml(std::string& data);
 	static void deSanitizeHtml(std::string& strret);
 	static std::string base64encodeStr(const std::string& input);

@@ -394,10 +394,10 @@ bool TeBkUmMgrRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, voi
 		void* mkr = dlsym(ddlib, TPE_FN_NAME.c_str());
 		if(mkr!=NULL)
 		{
-			TeBkUmMgrTemplatePtr f =  (TeBkUmMgrTemplatePtr)mkr;
-			std::string msg;
-			f(&ctx, msg);
-			res->setContent(msg);
+			TemplatePtr f =  (TemplatePtr)mkr;
+			fcpstream str;
+			f(&ctx, str);
+			res->setContent(str.str());
 			res->setContentType(ContentTypes::CONTENT_TYPE_TEXT_SHTML);
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		}

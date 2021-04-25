@@ -6,6 +6,14 @@ MAX_THREADS=$(( 3 * `nproc` / 2 ))
 WRIT_THREADS=$(( $MAX_THREADS / 3 ))
 SERV_THREADS=$(( $MAX_THREADS - $WRIT_THREADS ))
 
+#git checkout e243bc096cd570cfee1edfecbcd91f4c4056fa1a -b 6.0
+git clone https://github.com/sumeetchhetri/ffead-cpp
+cd ffead-cpp
+rm -rf .git
+cd ..
+mv ffead-cpp ffead-cpp-src
+mv ffead-cpp-src/lang-server-backends ${IROOT}/
+
 cd $IROOT/ffead-cpp-src/
 
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh

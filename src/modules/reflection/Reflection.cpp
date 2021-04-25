@@ -1044,11 +1044,17 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 				}
 				else
 				{
+					meth = pubdecl;
+					StringUtil::replaceFirst(meth,";","");
+					if(RegexUtil::find(meth, "[ \t]*=[ \t]*delete")!=-1 || RegexUtil::find(meth, "[ \t]*=[ \t]*default")!=-1)
+					{
+						continue;
+					}
+
 					refDef += ("ctor.clear();\nme.clear();\n");
 					testStr += ("ctor.clear();\nme.clear();\n");
 					publm += pubdecl;
-					meth = pubdecl;
-					StringUtil::replaceFirst(meth,";","");
+
 
 					std::string argts = meth.substr(meth.find("("),meth.find(")")-meth.find("("));
 					StringUtil::replaceFirst(argts,"(","");

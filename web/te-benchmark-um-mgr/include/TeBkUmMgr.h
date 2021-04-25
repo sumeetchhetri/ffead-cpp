@@ -43,8 +43,6 @@
 #include "yuarel.h"
 #include "Router.h"
 
-typedef void (*TeBkUmMgrTemplatePtr) (Context*, std::string&);
-
 class TeBkUmMgrWorld {
 	int id;
 	int randomNumber;

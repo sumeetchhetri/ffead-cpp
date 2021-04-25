@@ -32,6 +32,9 @@
 #include "ThreadLocal.h"
 #include "map"
 
+typedef std::basic_ostringstream<char> fcpstream;
+typedef std::map<std::string, void*> Context;
+typedef void (*TemplatePtr) (Context*, fcpstream&);
 
 class CastUtil {
 	static ThreadLocal _mcMap;

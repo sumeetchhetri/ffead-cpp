@@ -1,3 +1,7 @@
+docker rmi -f sumeetchhetri/ffead-cpp-deps:6.0
+docker build --progress plain -f ffead-cpp-deps.dockerfile -t sumeetchhetri/ffead-cpp-deps:6.0 .
+docker push sumeetchhetri/ffead-cpp-deps:6.0
+
 docker rmi -f sumeetchhetri/ffead-cpp-base:6.0
 docker build --progress plain -f ffead-cpp-base.dockerfile -t sumeetchhetri/ffead-cpp-base:6.0 .
 docker push sumeetchhetri/ffead-cpp-base:6.0

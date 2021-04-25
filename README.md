@@ -109,9 +109,9 @@ Quickstart (Using meson)
 ===========
 - Install meson and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
 - meson setup build_meson && cd build_meson
-- ninja (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
+- ninja install (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ../ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 
