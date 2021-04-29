@@ -1,4 +1,4 @@
-name: Build ffead-cpp on centos
+name: Centos
 
 on:
   push:

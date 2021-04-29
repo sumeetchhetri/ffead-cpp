@@ -1,4 +1,4 @@
-name: Build ffead-cpp profiled base docker image and push
+name: Build/Push docker image [profiled sql libpq raw]
 
 on:
   push:

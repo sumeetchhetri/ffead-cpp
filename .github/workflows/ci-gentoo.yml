@@ -1,4 +1,4 @@
-name: Build ffead-cpp on gentoo
+name: Gentoo
 
 on:
   push:

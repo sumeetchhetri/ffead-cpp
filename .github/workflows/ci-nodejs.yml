@@ -1,0 +1,19 @@
+name: Nodejs + ffead-cpp
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: "contains(github.event.head_commit.message, '[build_only_nodejs]')"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build ffead-cpp with nodejs backend
+      run: |
+        cd lang-server-backends/javascript/nodejs
+        docker build -f ffead-cpp-nodejs-http.dockerfile .
+        

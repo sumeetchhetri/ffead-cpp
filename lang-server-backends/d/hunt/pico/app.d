@@ -29,7 +29,7 @@ void main(string[] args) {
 	}
 
 	writefln("Bootstrapping ffead-cpp start...");
-	ffead_cpp_bootstrap(cast(char*)sdir, sdir.length, 7);
+	ffead_cpp_bootstrap(cast(char*)sdir, sdir.length, 24);
 	writefln("Bootstrapping ffead-cpp end...");
 
 	writefln("Initializing ffead-cpp start...");

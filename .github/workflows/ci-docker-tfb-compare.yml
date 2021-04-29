@@ -1,4 +1,4 @@
-name: Compare benchmark ffead-cpp versions 5.3 and 6.0
+name: TE benchmark comparison (5.3 vs 6.0)
 
 on:
   push:

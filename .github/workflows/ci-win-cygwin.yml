@@ -1,4 +1,4 @@
-name: Build ffead-cpp on windows cygwin
+name: Windows Cygwin
 
 on:
   push:

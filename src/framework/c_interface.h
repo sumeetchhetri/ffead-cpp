@@ -251,4 +251,10 @@ extern "C" void ffead_cpp_get_resp_get_body(void* ptr, const char **out_body, si
 */
 extern "C" void ffead_cpp_resp_cleanup(void* ptr);
 
+extern "C" void* ffead_cpp_handle_js_1(const ffead_request *request, int* scode, size_t *out_url_len, size_t *out_headers_len, size_t *out_body_len);
+extern "C" const char* ffead_cpp_handle_js_out_url(void* res);
+extern "C" const char* ffead_cpp_handle_js_out_body(void* res);
+extern "C" const char* ffead_cpp_handle_js_out_hdr_name(void* res, int pos, size_t* name_len);
+extern "C" const char* ffead_cpp_handle_js_out_hdr_value(void* res, int pos, size_t* value_len);
+
 #endif

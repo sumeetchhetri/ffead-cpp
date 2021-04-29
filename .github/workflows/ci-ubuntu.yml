@@ -1,4 +1,4 @@
-name: Build ffead-cpp on ubuntu with select, poll, epoll and io_uring
+name: Ubuntu
 
 on:
   push:

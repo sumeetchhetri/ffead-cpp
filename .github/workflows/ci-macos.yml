@@ -1,4 +1,4 @@
-name: Build ffead-cpp on macos
+name: Macos
 
 on:
   push:

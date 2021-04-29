@@ -49,7 +49,7 @@ Features
     |h2o\.cr (crystal)|crystal-http (crystal)|fasthttp (golang)|gnet (golang)|
     |firenio (java)|rapidoid (java)|wizzardo-http (java)|hunt (d)|
     |swift-nio (swift)|http.jl (julia)|mongols \(c\)|uv-cpp (c++)|
-    |CppServer (c++)|nginx|openlitespeed (experimental)||
+    |CppServer (c++)|nginx|nodejs (javascript)|openlitespeed (WIP)|
 - Support for multiple I/O event notification engines,
 	- io_uring - Linux kernel >= 5.6
 	- epoll - Linux

@@ -1,4 +1,4 @@
-name: Build docker image for ffead-cpp with seastar backend
+name: Build/Push seastar+ffead-cpp docker image
 
 on:
   push:

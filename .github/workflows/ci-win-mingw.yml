@@ -1,4 +1,4 @@
-name: Build ffead-cpp on windows mingw
+name: Windows Mingw-w64
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: Build ffead-cpp base debug docker image and push
+name: Build/Push docker image (debug)
 
 on:
   push:

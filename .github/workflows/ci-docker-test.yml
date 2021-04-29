@@ -1,4 +1,4 @@
-name: Build docker image with wrk tests for ffead-cpp
+name: Build docker image for TE (test)
 
 on:
   push:

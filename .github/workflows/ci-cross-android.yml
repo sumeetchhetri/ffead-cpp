@@ -1,4 +1,4 @@
-name: Cross compile ffead-cpp for android
+name: Android Cross Compile
 
 on:
   push:

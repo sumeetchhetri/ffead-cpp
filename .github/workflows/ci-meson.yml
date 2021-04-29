@@ -1,4 +1,4 @@
-name: Build ffead-cpp with meson
+name: Meson build
 
 on:
   push:

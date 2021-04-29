@@ -143,8 +143,6 @@ void* ffead_cpp_handle_c_1(const ffead_request *request, int* scode, const char*
         *out_body_len = cnt.length();
         if(cnt.length()>0) {
             respo->addHeader(HttpResponse::ContentLength, CastUtil::fromNumber((int)cnt.length()));
-        } else {
-            *scode = 204;
         }
     }
     if(req.isClose() || req.getHttpVers()<=1.0) {
@@ -446,8 +444,6 @@ void* ffead_cpp_handle_1t(const ffead_request2 *request, int* scode,
         *out_body_len = cnt.length();
         if(cnt.length()>0) {
             respo->addHeader(HttpResponse::ContentLength, CastUtil::fromNumber((int)cnt.length()));
-        } else {
-            *scode = 204;
         }
     }
     *out_headers_len = 0;
@@ -596,4 +592,63 @@ void ffead_cpp_get_resp_get_body(void* ptr, const char **body, size_t *body_len)
 void ffead_cpp_resp_cleanup(void* ptr) {
     HttpResponse* respo = (HttpResponse*)ptr;
     delete respo;
+}
+
+void* ffead_cpp_handle_js_1(const ffead_request *request, int* scode, size_t *out_url_len, size_t *out_headers_len, size_t *out_body_len) {
+    HttpRequest req((void*)request->headers, request->headers_len, std::string_view{request->path, request->path_len},
+    		std::string_view{request->method, request->method_len}, request->version, std::string_view{request->body, request->body_len});
+    HttpResponse* respo = new HttpResponse();
+    ServiceTask task;
+    task.handle(&req, respo);
+    if(!respo->isDone()) {
+    	respo->setUrl(req.getUrl());
+		const std::string& resUrl = respo->getUrl();
+		*out_url_len = resUrl.length();
+		*scode = 0;
+        *out_body_len = 0;
+        respo->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(req.getExt()));
+    } else {
+        *out_url_len = 0;
+    	*scode = respo->getCode();
+        const std::string& cnt = respo->generateNginxApacheResponse();
+        *out_body_len = cnt.length();
+        if(cnt.length()>0) {
+            respo->addHeader(HttpResponse::ContentLength, CastUtil::fromNumber((int)cnt.length()));
+        }
+    }
+    *out_headers_len = respo->getHeaders().size();
+    return respo;
+}
+const char* ffead_cpp_handle_js_out_url(void* res) {
+	HttpResponse* respo = (HttpResponse*)res;
+	return respo->getUrl().c_str();
+}
+const char* ffead_cpp_handle_js_out_body(void* res) {
+	HttpResponse* respo = (HttpResponse*)res;
+	const std::string& cnt = respo->generateNginxApacheResponse();
+	return cnt.c_str();
+}
+const char* ffead_cpp_handle_js_out_hdr_name(void* res, int pos, size_t* name_len) {
+	HttpResponse* respo = (HttpResponse*)res;
+	RMap::const_iterator it = respo->getCHeaders().cbegin();
+	*name_len = 0;
+	for(int i=0;it!=respo->getCHeaders().cend();++it,i++) {
+		if(i==pos) {
+			*name_len = it->first.length();
+			return it->first.c_str();
+		}
+	}
+	return NULL;
+}
+const char* ffead_cpp_handle_js_out_hdr_value(void* res, int pos, size_t* value_len) {
+	HttpResponse* respo = (HttpResponse*)res;
+	RMap::const_iterator it = respo->getCHeaders().cbegin();
+	*value_len = 0;
+	for(int i=0;it!=respo->getCHeaders().cend();++it,i++) {
+		if(i==pos) {
+			*value_len = it->second.length();
+			return it->second.c_str();
+		}
+	}
+	return NULL;
 }

@@ -1,4 +1,4 @@
-name: Cross compile ffead-cpp for musl
+name: Musl Cross Compile
 
 on:
   push:

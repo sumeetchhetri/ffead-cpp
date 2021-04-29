@@ -1,4 +1,4 @@
-name: Build ffead-cpp base docker image and push
+name: Build/Push docker image
 
 on:
   push:

@@ -552,3 +552,49 @@ void ffead_cpp_resp_cleanup(void* ptr) {
     ffead_response* respo = (ffead_response*)ptr;
     delete respo;
 }
+
+void* ffead_cpp_handle_js_1(const ffead_request *request, int* scode, size_t *out_url_len, size_t *out_headers_len, size_t *out_body_len) {
+	printf("dummy ffead_cpp_handle_js_1\n");
+	printStr("Server = ", request->server_str, request->server_str_len);
+	printStr("Method = ", request->method, request->method_len);
+	printStr("Path = ", request->path, request->path_len);
+	printf("Version = %d\n", request->version);
+	for (int i = 0; i < (int)request->headers_len; ++i) {
+		printHdr(request->headers[i]);
+	}
+	printStr("Body = ", request->body, request->body_len);
+	fflush(stdout);
+	ffead_response* resp = get_resp(*scode, NULL);
+	resp->headers[0].name = "Content-Type";
+	resp->headers[0].name_len = strlen(resp->headers[0].name);
+	resp->headers[0].value = "application/json";
+	resp->headers[0].value_len = strlen(resp->headers[0].value);
+	resp->headers[1].name = "Content-Length";
+	resp->headers[1].name_len = strlen(resp->headers[1].name);
+	resp->headers[1].value = "27";
+	resp->headers[1].value_len = strlen(resp->headers[1].value);
+	*scode = resp->scode;
+	*out_headers_len = 2;
+	*out_body_len = resp->body_len;
+	*out_url_len = resp->out_url_len;
+	return resp;
+}
+const char* ffead_cpp_handle_js_out_url(void* res) {
+	return ((ffead_response*)res)->out_url;
+}
+const char* ffead_cpp_handle_js_out_mime(void* res) {
+	return ((ffead_response*)res)->out_mime;
+}
+const char* ffead_cpp_handle_js_out_body(void* res) {
+	return ((ffead_response*)res)->body;
+}
+const char* ffead_cpp_handle_js_out_hdr_name(void* res, int pos, size_t* name_len) {
+	ffead_response* resp = (ffead_response*)res;
+	*name_len = resp->headers[pos].name_len;
+	return resp->headers[pos].name;
+}
+const char* ffead_cpp_handle_js_out_hdr_value(void* res, int pos, size_t* value_len) {
+	ffead_response* resp = (ffead_response*)res;
+	*value_len = resp->headers[pos].value_len;
+	return resp->headers[pos].value;
+}

@@ -1157,10 +1157,11 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	if(ConfigurationData::getInstance()->servingContexts.size()==0)
 	{
-		if(vhostNumber==0)
+		if(vhostNumber==0) {
 			logger << ("No context to be served by Server (" +  ipport  + ")") << std::endl;
-		else
+		} else {
 			logger << ("No context to be served by Virtual-Host (" +  ipport  + ")") << std::endl;
+		}
 		return;
 	}
 	else

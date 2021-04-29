@@ -698,7 +698,7 @@ int main(int argc, char *argv[]) {
     }
 
     printf("Bootstrapping ffead-cpp start...\n");
-	ffead_cpp_bootstrap(argv[3], strlen(argv[3]), 7);
+	ffead_cpp_bootstrap(argv[3], strlen(argv[3]), 29);
 	printf("Bootstrapping ffead-cpp end...\n");
 
 	printf("Initializing ffead-cpp start...\n");

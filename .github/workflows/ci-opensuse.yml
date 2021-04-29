@@ -1,4 +1,4 @@
-name: Build ffead-cpp on opensuse
+name: Opensuse
 
 on:
   push:

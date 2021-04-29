@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
 	if(sslEnabled=="true" || sslEnabled=="TRUE")
 		isSSLEnabled = true;
 
-	ServerInitUtil::bootstrap(serverRootDirectory, logger, SERVER_BACKEND::EMBEDDED_NGHTTP2);
+	ServerInitUtil::bootstrap(serverRootDirectory, logger, SERVER_BACKEND::MONGOLS);
 	ServerInitUtil::init(logger);
 
 	MongolsServer::runServer(ipaddr, CastUtil::toInt(port), servedAppNames, serverRootDirectory, isSSLEnabled);

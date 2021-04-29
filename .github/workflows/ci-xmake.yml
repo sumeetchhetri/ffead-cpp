@@ -1,4 +1,4 @@
-name: Build ffead-cpp with xmake
+name: Xmake build
 
 on:
   push:

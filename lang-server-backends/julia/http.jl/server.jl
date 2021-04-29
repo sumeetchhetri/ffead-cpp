@@ -23,7 +23,7 @@ struct ffead_request
 end
 
 println("Bootstrapping ffead-cpp start...")
-ccall((:ffead_cpp_bootstrap, "ffead-framework"), Cvoid, (Cstring, Csize_t, Cint), ARGS[1], length(ARGS[1]), 10)
+ccall((:ffead_cpp_bootstrap, "ffead-framework"), Cvoid, (Cstring, Csize_t, Cint), ARGS[1], length(ARGS[1]), 31)
 println("Bootstrapping ffead-cpp end...")
 
 println("Initializing ffead-cpp start...");

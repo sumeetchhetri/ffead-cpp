@@ -1,4 +1,4 @@
-name: Build ffead-cpp deps base docker image and push
+name: Base Dependencies build (ffead-cpp-deps)
 
 on:
   push:

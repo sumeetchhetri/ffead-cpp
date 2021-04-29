@@ -1,4 +1,4 @@
-name: Build and benchmark ffead-cpp base docker image
+name: Benchmark docker image for TE
 
 on:
   push:

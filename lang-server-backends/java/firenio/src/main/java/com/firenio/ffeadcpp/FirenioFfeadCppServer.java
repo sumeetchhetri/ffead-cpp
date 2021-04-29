@@ -128,9 +128,10 @@ public class FirenioFfeadCppServer {
 				}
             	
             	//System.out.println(String.format("%s %s %s", freq.getMethod(), freq.getPath(), freq.getBody()));
-            	
             	//System.out.println(freq);
+            	
             	FfeadResponse fres = ffead_cpp_handle(freq);
+            	
             	//System.out.println(fres);
             	
             	byte[] date_line = HttpDateUtil.getDateLine();

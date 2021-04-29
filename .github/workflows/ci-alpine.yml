@@ -1,4 +1,4 @@
-name: Build ffead-cpp on alpine
+name: Alpine
 
 on:
   push:

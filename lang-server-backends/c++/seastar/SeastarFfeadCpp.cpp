@@ -157,7 +157,7 @@ int main(int ac, char** av) {
 				fcp_init = true;
 
 				printf("Bootstrapping ffead-cpp start...\n");
-				ffead_cpp_bootstrap(config["fcpdir"].as<sstring>().c_str(), config["fcpdir"].as<sstring>().length(), 7);
+				ffead_cpp_bootstrap(config["fcpdir"].as<sstring>().c_str(), config["fcpdir"].as<sstring>().length(), 30);
 				printf("Bootstrapping ffead-cpp end...\n");
 
 				printf("Initializing ffead-cpp start...\n");

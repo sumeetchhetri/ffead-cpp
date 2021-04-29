@@ -1,4 +1,4 @@
-name: Build ffead-cpp on archlinux
+name: Archlinux
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: Build and test ffead-cpp base docker image
+name: Verify for TE
 
 on:
   push:

@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
 	if(sslEnabled=="true" || sslEnabled=="TRUE")
 		isSSLEnabled = true;
 
-	ServerInitUtil::bootstrap(serverRootDirectory, logger, SERVER_BACKEND::EMBEDDED_NGHTTP2);
+	ServerInitUtil::bootstrap(serverRootDirectory, logger, SERVER_BACKEND::CPPSERVER);
 	ServerInitUtil::init(logger);
 
 	CppServerServer::runServer(ipaddr, CastUtil::toInt(port), servedAppNames, serverRootDirectory, isSSLEnabled);

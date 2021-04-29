@@ -1,4 +1,4 @@
-name: Cross compile ffead-cpp for mingw-w64
+name: Mingw-w64 Cross Compile
 
 on:
   push:
