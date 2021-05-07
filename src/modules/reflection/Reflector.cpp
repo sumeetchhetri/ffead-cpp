@@ -17,6 +17,7 @@
 
 ThreadLocal Reflector::_ciMap;
 ClassInfo Reflector::nullclass;
+void* TemplateUtil::ddlib = NULL;
 
 Reflector::Reflector()
 {
@@ -700,4 +701,13 @@ void Reflector::destroy(int serOpt, void* instance, std::string className, std::
 		case 615: destroyNestedContainer<bool>("std::deque", instance); break;
 		case 616: destroyNestedContainer<Date>("std::deque", instance); break;
 	}
+}
+
+void TemplateUtil::init(void *ddlibr) {
+	ddlib = ddlibr;
+}
+
+TemplatePtr TemplateUtil::getTemplateFunc(const std::string& appName, const std::string& tpe) {
+	std::string tpeFname = CommonUtils::getTpeFnName(tpe, appName);
+	return (TemplatePtr)dlsym(ddlib, tpeFname.c_str());
 }

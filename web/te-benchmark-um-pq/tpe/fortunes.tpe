@@ -1,4 +1,4 @@
-#declare std::list<TeBkUmLpqFortune>* fortunes#
+#declareref std::list<TeBkUmLpqFortune>* fortunes#
 <!DOCTYPE html>
 <html>
 <head><title>Fortunes</title></head>

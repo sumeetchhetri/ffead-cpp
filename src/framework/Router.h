@@ -29,7 +29,7 @@
 
 class Router {
 public:
-	virtual bool route(HttpRequest* req, HttpResponse* res, void* dlib, void* ddlib, SocketInterface* sif)=0;
+	virtual bool route(HttpRequest* req, HttpResponse* res, SocketInterface* sif)=0;
 	virtual ~Router(){}
 };
 

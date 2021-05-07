@@ -18,6 +18,6 @@
  *
  * @return size of dest. If it's larger than len, dest is required to be freed.
  */
-extern std::string_view hesc_escape_html(std::string& data, bool& allocd);
+extern std::string_view hesc_escape_html(const uint8_t *buf, size_t size, std::string& data, bool& allocd);
 
 #endif

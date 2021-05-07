@@ -117,10 +117,10 @@ append_escaped_buf(uint8_t *rbuf, size_t rbuf_i, size_t esc_i, size_t *esize)
   return rbuf_i + ESC_LEN(esc_i);
 }
 
-std::string_view hesc_escape_html(std::string& data, bool& allocd)
+std::string_view hesc_escape_html(const uint8_t *buf, size_t size, std::string& data, bool& allocd)
 {
-  const uint8_t *buf = (uint8_t *)data.data();
-  size_t size = data.size();
+  //const uint8_t *buf = (uint8_t *)data.data();
+  //size_t size = data.size();
   size_t asize = 0, esc_i, esize = 0, i = 0, rbuf_i = 0;
   //const uint8_t *esc;
   uint8_t *rbuf = NULL;
@@ -156,6 +156,7 @@ std::string_view hesc_escape_html(std::string& data, bool& allocd)
 
   if (rbuf_i == 0) {
 	allocd = false;
+	data.append((char*)buf, size);
     // Return given buf and size if there are no escaped characters.
     return std::string_view(data);
   } else {

@@ -186,16 +186,36 @@ typedef std::string (*Ser) (void*, SerializeBase*, void* serobject);
 typedef void* (*UnSerCont) (void*, SerializeBase*, const std::string&);
 typedef void* (*UnSer) (void*, SerializeBase*);
 
-
-class SerializeBase {
+class Serializer {
+	Serializer();
 	static void* dlib;
 	static ThreadLocal _serFMap;
 	static ThreadLocal _serCFMap;
 	static ThreadLocal _unserFMap;
 	static ThreadLocal _unserCFMap;
+	friend class SerializeBase;
+public:
+	static Ser getSerFuncForObject(const std::string& appName, std::string className, bool ext = true);
+	static UnSer getUnSerFuncForObject(const std::string& appName, std::string className, bool ext = true);
+	static SerCont getSerFuncForObjectCont(const std::string& appName, std::string className, const std::string& container, bool ext = true);
+	static UnSerCont getUnSerFuncForObjectCont(const std::string& appName, std::string className, const std::string& container, bool ext = true);
+
+	static std::string toJson(const std::string& appName, std::string className, void* object, void* serOutput);
+	static std::string toJson(const std::string& appName, std::string className, const std::string& container, void* object, void* serOutput);
+	static void* fromJson(const std::string& appName, std::string className, void* serObject);
+	static void* fromJson(const std::string& appName, std::string className, const std::string& container, void* serObject);
+
+	static std::string toXml(const std::string& appName, std::string className, void* object, void* serOutput);
+	static std::string toXml(const std::string& appName, std::string className, const std::string& container, void* object, void* serOutput);
+	static void* fromXml(const std::string& appName, std::string className, void* serObject);
+	static void* fromXml(const std::string& appName, std::string className, const std::string& container, void* serObject);
+};
+
+class SerializeBase {
 	static void init(void* dlib);
 	friend class CHServer;
 	friend class ConfigurationData;
+	friend class Serializer;
 protected:
 	static void processClassName(std::string& className);
 	static void processClassAndContainerNames(std::string& className, std::string& container);
@@ -529,6 +549,7 @@ public:
 	static void* _unserContainer(void* unserableObject, const std::string& className, const std::string& app, const std::string& type, SerializeBase* base);
 	static void* _unser(void* unserableObject, const std::string& className, const std::string& app, SerializeBase* base);
 	static std::string getSerializationMethodName(const std::string& className, const std::string& app, const bool& which, const std::string& type= "");
+	static std::string getSerializationMethodNameExt(std::string className, const std::string& app, const bool& which, std::string type= "");
 
 	//Base Methods for serialization, implementation in Serilaize, XMLSerialize and JSONSerialize
 	virtual void* getSerializableObject() = 0;

@@ -22,14 +22,14 @@
 
 #include "SerializeBase.h"
 
-ThreadLocal SerializeBase::_serFMap;
-ThreadLocal SerializeBase::_serCFMap;
-ThreadLocal SerializeBase::_unserFMap;
-ThreadLocal SerializeBase::_unserCFMap;
-void* SerializeBase::dlib = NULL;
+ThreadLocal Serializer::Serializer::_serFMap;
+ThreadLocal Serializer::Serializer::_serCFMap;
+ThreadLocal Serializer::Serializer::_unserFMap;
+ThreadLocal Serializer::Serializer::_unserCFMap;
+void* Serializer::Serializer::dlib = NULL;
 
 void SerializeBase::init(void* dl) {
-	dlib = dl;
+	Serializer::Serializer::dlib = dl;
 }
 
 SerializeBase::~SerializeBase() {
@@ -919,36 +919,10 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 	}
 }
 
-SerCont SerializeBase::serContFunc(std::string& className, const std::string& appName, const std::string& type)
-{
-	StringUtil::replaceAll(className, "::", "_");
-	std::string methodname = getSerializationMethodName(className,appName,true,type);
-	return (SerCont)dlsym(dlib, methodname.c_str());
-}
-
-Ser SerializeBase::serFunc(std::string& className, const std::string& appName)
-{
-	StringUtil::replaceAll(className, "::", "_");
-	std::string methodname = getSerializationMethodName(className,appName,true);
-	return (Ser)dlsym(dlib, methodname.c_str());
-}
-
 std::string SerializeBase::_serContainer(void* t, const std::string& className, const std::string& appName, const std::string& type, SerializeBase* base, void* serobject)
 {
 	std::string serVal;
-	std::string methodname = base->getSerializationMethodName(className,appName,true,type);
-	SerCont f;
-	if(_serCFMap.get()==NULL) {
-		_serCFMap.set(new std::map<std::string, SerCont>);
-	}
-	std::map<std::string, SerCont>* serCFMap = (std::map<std::string, SerCont>*)_serCFMap.get();
-	std::map<std::string, SerCont>::iterator it = serCFMap->find(methodname);
-	if(it!=serCFMap->end()) {
-		f = (SerCont)it->second;
-	} else {
-		f = (SerCont)dlsym(dlib, methodname.c_str());
-		serCFMap->insert({methodname, f});
-	}
+	SerCont f = Serializer::getSerFuncForObjectCont(className, appName, type, false);
 	if(f!=NULL)
 		serVal = f(t, base, type, serobject);
 	return serVal;
@@ -957,19 +931,7 @@ std::string SerializeBase::_serContainer(void* t, const std::string& className, 
 std::string SerializeBase::_ser(void* t, const std::string& className, const std::string& appName, SerializeBase* base, void* serobject)
 {
 	std::string serVal;
-	std::string methodname = base->getSerializationMethodName(className,appName,true);
-	Ser f;
-	if(_serFMap.get()==NULL) {
-		_serFMap.set(new std::map<std::string, Ser>);
-	}
-	std::map<std::string, Ser>* serCFMap = (std::map<std::string, Ser>*)_serFMap.get();
-	std::map<std::string, Ser>::iterator it = serCFMap->find(methodname);
-	if(it!=serCFMap->end()) {
-		f = (Ser)it->second;
-	} else {
-		f = (Ser)dlsym(dlib, methodname.c_str());
-		serCFMap->insert({methodname, f});
-	}
+	Ser f = Serializer::getSerFuncForObject(className, appName, false);
 	if(f!=NULL)
 		serVal = f(t, base, serobject);
 	return serVal;
@@ -978,15 +940,15 @@ std::string SerializeBase::_ser(void* t, const std::string& className, const std
 void SerializeBase::_ser(void* t, const std::string& methodname, SerializeBase* base, void* serobject)
 {
 	Ser f;
-	if(_serFMap.get()==NULL) {
-		_serFMap.set(new std::map<std::string, Ser>);
+	if(Serializer::_serFMap.get()==NULL) {
+		Serializer::_serFMap.set(new std::map<std::string, Ser>);
 	}
-	std::map<std::string, Ser>* serCFMap = (std::map<std::string, Ser>*)_serFMap.get();
+	std::map<std::string, Ser>* serCFMap = (std::map<std::string, Ser>*)Serializer::_serFMap.get();
 	std::map<std::string, Ser>::iterator it = serCFMap->find(methodname);
 	if(it!=serCFMap->end()) {
 		f = (Ser)it->second;
 	} else {
-		f = (Ser)dlsym(dlib, methodname.c_str());
+		f = (Ser)dlsym(Serializer::dlib, methodname.c_str());
 		serCFMap->insert({methodname, f});
 	}
 	if(f!=NULL)
@@ -1754,36 +1716,10 @@ void* SerializeBase::unserializemultiset(void* unserableObject, int serOpt, cons
 }
 
 
-UnSerCont SerializeBase::unSerContFunc(std::string& className, const std::string& appName, const std::string& type)
-{
-	StringUtil::replaceAll(className, "::", "_");
-	std::string methodname = getSerializationMethodName(className,appName,false,type);
-	return (UnSerCont)dlsym(dlib, methodname.c_str());
-}
-
-UnSer SerializeBase::unSerFunc(std::string& className, const std::string& appName)
-{
-	StringUtil::replaceAll(className, "::", "_");
-	std::string methodname = getSerializationMethodName(className,appName,false);
-	return (UnSer)dlsym(dlib, methodname.c_str());
-}
-
 void* SerializeBase::_unserContainer(void* unserableObject, const std::string& className, const std::string& appName, const std::string& type, SerializeBase* base)
 {
 	void* obj = NULL;
-	std::string methodname = base->getSerializationMethodName(className,appName,false,type);
-	UnSerCont f;
-	if(_unserCFMap.get()==NULL) {
-		_unserCFMap.set(new std::map<std::string, UnSerCont>);
-	}
-	std::map<std::string, UnSerCont>* serCFMap = (std::map<std::string, UnSerCont>*)_unserCFMap.get();
-	std::map<std::string, UnSerCont>::iterator it = serCFMap->find(methodname);
-	if(it!=serCFMap->end()) {
-		f = (UnSerCont)it->second;
-	} else {
-		f = (UnSerCont)dlsym(dlib, methodname.c_str());
-		serCFMap->insert({methodname, f});
-	}
+	UnSerCont f = Serializer::getUnSerFuncForObjectCont(className, appName, type, false);
 	if(f!=NULL)
 	{
 		obj = f(unserableObject, base, type);
@@ -1794,19 +1730,7 @@ void* SerializeBase::_unserContainer(void* unserableObject, const std::string& c
 void* SerializeBase::_unser(void* unserableObject, const std::string& className, const std::string& appName, SerializeBase* base)
 {
 	void* obj = NULL;
-	std::string methodname = base->getSerializationMethodName(className,appName,false);
-	UnSer f;
-	if(_unserFMap.get()==NULL) {
-		_unserFMap.set(new std::map<std::string, UnSer>);
-	}
-	std::map<std::string, UnSer>* serCFMap = (std::map<std::string, UnSer>*)_unserFMap.get();
-	std::map<std::string, UnSer>::iterator it = serCFMap->find(methodname);
-	if(it!=serCFMap->end()) {
-		f = (UnSer)it->second;
-	} else {
-		f = (UnSer)dlsym(dlib, methodname.c_str());
-		serCFMap->insert({methodname, f});
-	}
+	UnSer f = Serializer::getUnSerFuncForObject(className, appName, false);
 	if(f!=NULL)
 	{
 		obj = f(unserableObject, base);
@@ -1850,7 +1774,26 @@ std::string SerializeBase::getSerializationMethodName(const std::string& classNa
 		methodname = appName + "unSerialize" + className + (type==""?"":"Container");
 	}
 	if(type!=CommonUtils::BLANK) {
-		if(type=="set" || type=="std::set" || type=="multiset" || type=="std::multiset") {
+		if(type=="set" || type=="multiset") {
+			methodname += "SV";
+		}
+	}
+	return methodname;
+}
+
+std::string SerializeBase::getSerializationMethodNameExt(std::string className, const std::string& app, const bool& which, std::string type)
+{
+	StringUtil::replaceAll(className, "::", "_");
+	std::string appName = CommonUtils::getAppName(app);
+	std::string methodname;
+	if(which) {
+		methodname = appName + "serialize" + className + (type==""?"":"Container");
+	}  else {
+		methodname = appName + "unSerialize" + className + (type==""?"":"Container");
+	}
+	if(type!=CommonUtils::BLANK) {
+		StringUtil::replaceFirst(type,"std::","");
+		if(type=="set" || type=="multiset") {
 			methodname += "SV";
 		}
 	}
@@ -1950,4 +1893,103 @@ void SerializeBase::trySerialize(void* t, int serOpt, std::string& className, st
 			break;
 		}
 	}
+}
+
+/*SerCont SerializeBase::serContFunc(std::string& className, const std::string& appName, const std::string& type)
+{
+	StringUtil::replaceAll(className, "::", "_");
+	std::string methodname = getSerializationMethodName(className,appName,true,type);
+	return (SerCont)dlsym(Serializer::dlib, methodname.c_str());
+}
+
+Ser SerializeBase::serFunc(std::string& className, const std::string& appName)
+{
+	StringUtil::replaceAll(className, "::", "_");
+	std::string methodname = getSerializationMethodName(className,appName,true);
+	return (Ser)dlsym(Serializer::dlib, methodname.c_str());
+}
+
+UnSerCont SerializeBase::unSerContFunc(std::string& className, const std::string& appName, const std::string& type)
+{
+	StringUtil::replaceAll(className, "::", "_");
+	std::string methodname = getSerializationMethodName(className,appName,false,type);
+	return (UnSerCont)dlsym(Serializer::dlib, methodname.c_str());
+}
+
+UnSer SerializeBase::unSerFunc(std::string& className, const std::string& appName)
+{
+	StringUtil::replaceAll(className, "::", "_");
+	std::string methodname = getSerializationMethodName(className,appName,false);
+	return (UnSer)dlsym(Serializer::dlib, methodname.c_str());
+}*/
+
+Ser Serializer::getSerFuncForObject(const std::string& appName, std::string className, bool ext) {
+	std::string methodname = ext?SerializeBase::getSerializationMethodNameExt(className,appName,true):SerializeBase::getSerializationMethodName(className,appName,true);
+	Ser f;
+	if(Serializer::_serFMap.get()==NULL) {
+		Serializer::_serFMap.set(new std::map<std::string, Ser>);
+	}
+	std::map<std::string, Ser>* serCFMap = (std::map<std::string, Ser>*)Serializer::_serFMap.get();
+	std::map<std::string, Ser>::iterator it = serCFMap->find(methodname);
+	if(it!=serCFMap->end()) {
+		f = (Ser)it->second;
+	} else {
+		f = (Ser)dlsym(Serializer::dlib, methodname.c_str());
+		serCFMap->insert({methodname, f});
+	}
+	return f;
+}
+
+UnSer Serializer::getUnSerFuncForObject(const std::string& appName, std::string className, bool ext) {
+	std::string methodname = ext?SerializeBase::getSerializationMethodNameExt(className,appName,true):SerializeBase::getSerializationMethodName(className,appName,true);
+	UnSer f;
+	if(Serializer::_unserFMap.get()==NULL) {
+		Serializer::_unserFMap.set(new std::map<std::string, UnSer>);
+	}
+	std::map<std::string, UnSer>* serCFMap = (std::map<std::string, UnSer>*)Serializer::_unserFMap.get();
+	std::map<std::string, UnSer>::iterator it = serCFMap->find(methodname);
+	if(it!=serCFMap->end()) {
+		f = (UnSer)it->second;
+	} else {
+		f = (UnSer)dlsym(Serializer::dlib, methodname.c_str());
+		serCFMap->insert({methodname, f});
+	}
+	return f;
+}
+
+SerCont Serializer::getSerFuncForObjectCont(const std::string& appName, std::string className, const std::string& container, bool ext) {
+	std::string methodname = ext?SerializeBase::getSerializationMethodNameExt(className,appName,true,container):SerializeBase::getSerializationMethodName(className,appName,true,container);
+	SerCont f;
+	if(Serializer::_serCFMap.get()==NULL) {
+		Serializer::_serCFMap.set(new std::map<std::string, SerCont>);
+	}
+	std::map<std::string, SerCont>* serCFMap = (std::map<std::string, SerCont>*)Serializer::_serCFMap.get();
+	std::map<std::string, SerCont>::iterator it = serCFMap->find(methodname);
+	if(it!=serCFMap->end()) {
+		f = (SerCont)it->second;
+	} else {
+		f = (SerCont)dlsym(Serializer::dlib, methodname.c_str());
+		serCFMap->insert({methodname, f});
+	}
+	return f;
+}
+
+Serializer::Serializer() {
+}
+
+UnSerCont Serializer::getUnSerFuncForObjectCont(const std::string& appName, std::string className, const std::string& container, bool ext) {
+	std::string methodname = ext?SerializeBase::getSerializationMethodNameExt(className,appName,true,container):SerializeBase::getSerializationMethodName(className,appName,true,container);
+	UnSerCont f;
+	if(Serializer::_unserCFMap.get()==NULL) {
+		Serializer::_unserCFMap.set(new std::map<std::string, UnSerCont>);
+	}
+	std::map<std::string, UnSerCont>* serCFMap = (std::map<std::string, UnSerCont>*)Serializer::_unserCFMap.get();
+	std::map<std::string, UnSerCont>::iterator it = serCFMap->find(methodname);
+	if(it!=serCFMap->end()) {
+		f = (UnSerCont)it->second;
+	} else {
+		f = (UnSerCont)dlsym(Serializer::dlib, methodname.c_str());
+		serCFMap->insert({methodname, f});
+	}
+	return f;
 }

@@ -64,7 +64,7 @@ fn cpy_str_1(dst byteptr, src string) int {
 }
 
 fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
-	$if debug {
+	/*$if debug {
 		println('${req.method} ${req.path} ${req.num_headers}')
 		mut j := 0
 		for {
@@ -78,7 +78,7 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 			}
 			j = j+1
 		}
-	}
+	}*/
 	
  	freq := C.ffead_request3{
 	    server_str: 'picov'.str
@@ -109,9 +109,9 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 	
 	resp := C.ffead_cpp_handle_crystal_picov_1(&freq, &scode, &smsg, &smsg_len, &out_mime, &out_mime_len, &out_url, &out_url_len, &req.headers[0], &headers_len, &out_body, &out_body_len)
 
-	$if debug {
+	/*$if debug {
 		println('ffead-cpp.scode = $scode')
-	}
+	}*/
 
 	if scode > 0 {
 		smsg = tos(smsg.str, int(smsg_len))
@@ -139,10 +139,10 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 		out_mime = tos(out_mime.str, int(out_mime_len))
 		out_url = tos(out_url.str, int(out_url_len))
 		
-		$if debug {
+		/*$if debug {
 			println('res.url = $out_url')
 			println('res.mime_type = $out_mime')
-		}
+		}*/
 
 		if out_url != '' && out_mime != '' {
 			data := os.read_file(out_url) or {
@@ -163,9 +163,9 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 			return
 		}
 
-		$if debug {
+		/*$if debug {
 			println('file not found')
-		}
+		}*/
 
 		res.http_404()
 		C.ffead_cpp_resp_cleanup(resp)

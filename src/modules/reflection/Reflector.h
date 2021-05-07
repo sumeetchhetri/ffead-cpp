@@ -50,6 +50,13 @@ typedef int* (*GetContSize) (void*,void*,int,std::string,int);
 typedef void (*AddToCont) (void*,void*,int,std::string,int);
 typedef void* (*GetContEleAt) (void*,void*,int,std::string,int);
 
+class TemplateUtil {
+	static void* ddlib;
+public:
+	static void init(void* ddlib);
+	static TemplatePtr getTemplateFunc(const std::string& appName, const std::string& tpe);
+};
+
 class Reflector
 {
 	static ClassInfo nullclass;

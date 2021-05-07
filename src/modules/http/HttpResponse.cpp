@@ -353,7 +353,118 @@ void HttpResponse::generateHeadResponse(std::string& resp, std::string& contentT
 	resp.append(HDR_END);
 }
 
+void HttpResponse::generateHeadResponse(std::string& resp, std::string& contentType, float httpVers, bool conn_clos, int content_length)
+{
+	bool isTE = isHeaderValue(TransferEncoding, "chunked");
+	status->getResponseLine(httpVers, resp);
+	//resp.append(HDR_SRV);
+	resp.append(ContentType);
+	resp.append(HDR_SEP);
+	resp.append(contentType);
+	resp.append(HDR_END);
+	if(conn_clos) {
+		resp.append(CONN_CLOSE);
+	} else {
+		resp.append(CONN_KAL);
+	}
+	CommonUtils::getDateStr(resp);
+	content_length = content_length==-1?(int)content.length():content_length;
+	if(!isTE && !hasHeader(ContentLength) && content_length>0)
+	{
+		resp.append(ContentLength);
+		resp.append(HDR_SEP);
+		CastUtil::fromNumber(content_length, &resp);
+		resp.append(HDR_END);
+	}
+	RMap::iterator it;
+	for(it=headers.begin();it!=headers.end();++it)
+	{
+		resp.append(it->first);
+		resp.append(HDR_SEP);
+		resp.append(it->second);
+		resp.append(HDR_END);
+	}
+	for (int var = 0; var < (int)this->cookies.size(); var++)
+	{
+		resp.append(SetCookie);
+		resp.append(HDR_SEP);
+		resp.append(this->cookies.at(var));
+		resp.append(HDR_END);
+	}
+	resp.append(HDR_END);
+}
+
 void HttpResponse::generateHeadResponse(std::string& resp)
+{
+	bool isTE = isHeaderValue(TransferEncoding, "chunked");
+	if(this->contentList.size()>0)
+	{
+		std::string boundary;
+		content.clear();
+		boundary = "FFEAD_SERVER_";
+		boundary.append(CastUtil::fromNumber(Timer::getCurrentTime()));
+		for (int var = 0; var < (int)contentList.size(); ++var) {
+			content.append("--");
+			content.append(boundary);
+			content.append(HDR_END);
+			RMap headers = contentList.at(var).getHeaders();
+			RMap::iterator it;
+			for(it=headers.begin();it!=headers.end();++it)
+			{
+				content.append(it->first);
+				content.append(HDR_SEP);
+				content.append(it->second);
+				content.append(HDR_END);
+			}
+			content.append(HDR_END);
+			content.append(contentList.at(var).getContent());
+			content.append(HDR_END);
+		}
+		content.append("--");
+		content.append(boundary);
+		content.append("--");
+		content.append(HDR_END);
+
+		if(!hasHeader(ContentType) && this->contentList.size()>0)
+		{
+			this->addHeader(ContentType, "multipart/mixed");
+		}
+		if(hasHeader(ContentType) && boundary!="")
+		{
+			headers[ContentType].append("; boundary=\"");
+			headers[ContentType].append(boundary);
+			headers[ContentType].append("\"");
+		}
+	}
+	status->getResponseLine(httpVers, resp);
+	//resp.append(HDR_SRV);
+	CommonUtils::getDateStr(resp);
+	if(!isTE && !hasHeader(ContentLength) && content.length()>0)
+	{
+		resp.append(ContentLength);
+		resp.append(HDR_SEP);
+		CastUtil::fromNumber((int)content.length(), &resp);
+		resp.append(HDR_END);
+	}
+	RMap::iterator it;
+	for(it=headers.begin();it!=headers.end();++it)
+	{
+		resp.append(it->first);
+		resp.append(HDR_SEP);
+		resp.append(it->second);
+		resp.append(HDR_END);
+	}
+	for (int var = 0; var < (int)this->cookies.size(); var++)
+	{
+		resp.append(SetCookie);
+		resp.append(HDR_SEP);
+		resp.append(this->cookies.at(var));
+		resp.append(HDR_END);
+	}
+	resp.append(HDR_END);
+}
+
+void HttpResponse::generateHeadResponse(std::string& resp, float httpVers, bool conn_clos)
 {
 	bool isTE = isHeaderValue(TransferEncoding, "chunked");
 	if(this->contentList.size()>0)
@@ -540,6 +651,10 @@ const std::string& HttpResponse::getContent()
 std::string* HttpResponse::getContentP()
 {
 	return &content;
+}
+
+fcpstream* HttpResponse::getStreamP() {
+	return &content_stream;
 }
 
 void HttpResponse::setContent(const std::string& content)

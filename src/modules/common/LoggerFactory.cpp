@@ -115,11 +115,13 @@ void LoggerFactory::init(const std::string& configFile, const std::string& serve
 	isLoggingEnabled = isLoggingEnabledT;
 	SimpleXmlParser parser("Parser");
 	Document doc;
-	parser.readDocument(configFile, doc);
+	std::string configFileEd = configFile;
+	StringUtil::replaceAll(configFileEd,"//","/");
+	parser.readDocument(configFileEd, doc);
 	Element& root = doc.getRootElement();
 	if(isLoggingEnabled && root.getTagName()=="loggers" && root.getChildElements().size()>0)
 	{
-		std::cout << "Reading " << configFile<< " file to configure loggers..." << std::endl;
+		std::cout << "Reading " << configFileEd << " file to configure loggers..." << std::endl;
 		ElementList eles = root.getChildElements();
 		for (unsigned int apps = 0; apps < eles.size(); apps++)
 		{

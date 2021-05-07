@@ -501,7 +501,7 @@ bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, SocketInterface* s
 			Router* router = ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())->second;
 			if(router!=NULL) {
 				req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
-				return router->route(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, sif);
+				return router->route(req, res, sif);
 				//t1.end();
 				//CommonUtils::tsServicePre += t1.timerNanoSeconds();
 			}
@@ -513,7 +513,7 @@ bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, SocketInterface* s
 				Router* router = ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())->second;
 				if(router!=NULL) {
 					req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
-					return router->route(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, sif);
+					return router->route(req, res, sif);
 					//t1.end();
 					//CommonUtils::tsServicePre += t1.timerNanoSeconds();
 				}

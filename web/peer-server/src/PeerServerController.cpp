@@ -355,7 +355,7 @@ bool PeerServerRouter::isValidUser(const std::string &id, const std::string &tok
 	}
 }
 
-bool PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, void* ddlib, SocketInterface* sif) {
+bool PeerServerRouter::route(HttpRequest* req, HttpResponse* res, SocketInterface* sif) {
 	req->normalizeUrl();
 	res->setDone(true);
 	std::string_view path = req->getPath();

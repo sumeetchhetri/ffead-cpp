@@ -636,9 +636,9 @@ std::string JSONSerialize::serializeUnknown(void* t, int serOpt, const std::stri
 	return _handleAllSerialization(serOpt,className,t,appName,&_i, NULL, NULL, NULL, serobject);
 }
 
-void* JSONSerialize::unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName)
+void* JSONSerialize::unSerializeUnknown(const std::string& objJson, int serOpt, const std::string& className, const std::string& appName)
 {
-	return _handleAllUnSerialization(objXml,serOpt,className,appName,&_i,true,NULL);
+	return _handleAllUnSerialization(objJson,serOpt,className,appName,&_i,true,NULL);
 }
 
 bool JSONSerialize::isValidClassNamespace(void* _1, const std::string& classname, const std::string& namespc, const bool& iscontainer)
@@ -1012,4 +1012,34 @@ void* JSONSerialize::unSerializeUnknownBase(void* unserObj, int serOpt, const st
 void* JSONSerialize::unSerializeUnknownBase(const std::string& serVal, int serOpt, const std::string& className, const std::string& appName)
 {
 	return _handleAllUnSerialization(serVal,serOpt,className,appName,this,true,NULL);
+}
+
+std::string Serializer::toJson(const std::string &appName, std::string className, void *object, void *serOutput) {
+	return SerializeBase::_ser(object, className, appName, &JSONSerialize::_i, serOutput);
+}
+
+std::string Serializer::toJson(const std::string &appName, std::string className, const std::string &container, void *object, void *serOutput) {
+	return SerializeBase::_serContainer(object, className, appName, container, &JSONSerialize::_i, serOutput);
+}
+
+void* Serializer::fromJson(const std::string &appName, std::string className, void *serObject) {
+	return SerializeBase::_unser(serObject, className, appName, &JSONSerialize::_i);
+}
+
+void* Serializer::fromJson(const std::string &appName, std::string className, const std::string &container, void *serObject) {
+	return SerializeBase::_unserContainer(serObject, className, appName, container, &JSONSerialize::_i);
+}
+
+std::string JSONSerialize::serializeObject(void* t, Ser f, void* serobject) {
+	std::string serVal;
+	if(f!=NULL)
+		serVal = f(t, &JSONSerialize::_i, serobject);
+	return serVal;
+}
+
+std::string JSONSerialize::serializeObjectCont(void* t, SerCont f, const std::string &container, void* serobject) {
+	std::string serVal;
+	if(f!=NULL)
+		serVal = f(t, &JSONSerialize::_i, container, serobject);
+	return serVal;
 }

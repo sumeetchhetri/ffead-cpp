@@ -64,6 +64,7 @@ class JSONSerialize : public SerializeBase {
 	int getContainerSize(void* _1);
 	std::string getUnserializableClassName(void* _1, const std::string& className);
 	void* getPrimitiveValue(void* _1, int serOpt, const std::string& className);
+	friend class Serializer;
 public:
 	JSONSerialize();
 	JSONSerialize(void*);
@@ -86,6 +87,8 @@ public:
 	}
 	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, void* serobject, const std::string& appName = "");
 	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, Ser f1, SerCont f2, SerCont f3, void* serobject, const std::string& appName);
+	static std::string serializeObject(void* t, Ser f1, void* serobject);
+	static std::string serializeObjectCont(void* t, SerCont f, const std::string &container, void* serobject);
 
 	/*template <class K,class V> static std::string serialize(const std::map<K,V>& mp, const std::string& appName = "")
 	{
@@ -130,12 +133,12 @@ public:
 		}
 		return enc.encodeB(&object, false);
 	}*/
-	template <class T> static T unserialize(const std::string& objXml, int serOpt, const std::string& appName = "")
+	template <class T> static T unserialize(const std::string& objJson, int serOpt, const std::string& appName = "")
 	{
 		T t;
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		T* tp = (T*)_handleAllUnSerialization(objXml,serOpt,className,appName,&_i,true,NULL);
+		T* tp = (T*)_handleAllUnSerialization(objJson,serOpt,className,appName,&_i,true,NULL);
 		if(tp!=NULL)
 		{
 			t = *(T*)tp;
@@ -156,12 +159,12 @@ public:
 		}
 		return t;
 	}
-	template <class T> static T* unserializeToPointer(const std::string& objXml, int serOpt, const std::string& appName = "")
+	template <class T> static T* unserializeToPointer(const std::string& objJson, int serOpt, const std::string& appName = "")
 	{
 		T* t;
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return (T*)_handleAllUnSerialization(objXml,serOpt,className,appName,&_i,true,NULL);
+		return (T*)_handleAllUnSerialization(objJson,serOpt,className,appName,&_i,true,NULL);
 	}
 	template <class T> static T* unserializeToPointer(JSONElement* element, int serOpt, const std::string& appName = "")
 	{
@@ -180,7 +183,7 @@ public:
 	void addObjectPrimitiveProperty(void* _1, int serOpt, const std::string& propName, const std::string& className, void* t);
 	void addObjectProperty(void* _1, const std::string& propName, std::string className);
 	void* getObjectPrimitiveValue(void* _1, int serOpt, const std::string& className, const std::string& propName);
-	static void* unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName = "");
+	static void* unSerializeUnknown(const std::string& objJson, int serOpt, const std::string& className, const std::string& appName = "");
 	std::string serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName, void* serobject);
 	void* unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName = "");
 	void* unSerializeUnknownBase(const std::string& serVal, int serOpt, const std::string& className, const std::string& appName = "");

@@ -42,11 +42,13 @@
 #include "string"
 #include "yuarel.h"
 #include "Router.h"
+#include "Reflector.h"
 
 class TeBkUmLpqWorld {
 	int id;
 	int randomNumber;
 public:
+	TeBkUmLpqWorld(int id);
 	TeBkUmLpqWorld(int id, int randomNumber);
 	TeBkUmLpqWorld();
 	virtual ~TeBkUmLpqWorld();
@@ -57,7 +59,7 @@ public:
 };
 
 struct UpdQrData {
-	std::list<TeBkUmLpqWorld>* wlist;
+	std::vector<TeBkUmLpqWorld>* wlist;
 	std::stringstream* ss;
 	bool status;
 	int queryCount;
@@ -69,6 +71,7 @@ public:
 	std::string message_i;
 	std::string_view message;
 	bool allocd;
+	TeBkUmLpqFortune(int id);
 	TeBkUmLpqFortune(int id, std::string message);
 	TeBkUmLpqFortune();
 	virtual ~TeBkUmLpqFortune();
@@ -94,28 +97,30 @@ class TeBkUmLpqRouter : public Router {
 	static std::string WORLD_ALL_QUERY;
 	static std::string FORTUNE_ALL_QUERY;
 
-	static std::string APP_NAME;
-	static std::string TPE_FN_NAME;
-	static std::map<std::string, TemplatePtr> tmplFuncMap;
+	static TemplatePtr tmplFunc;
+
+	static Ser m_ser;
+	static Ser w_ser;
+	static SerCont wcont_ser;
 
 	static bool strToNum(const char* str, int len, int& ret);
 
 	void db(TeBkUmLpqWorld&);
-	void queries(const char*, int, std::list<TeBkUmLpqWorld>&);
-	void queriesMulti(const char*, int, std::list<TeBkUmLpqWorld>&);
+	void queries(const char*, int, std::vector<TeBkUmLpqWorld>&);
+	void queriesMulti(const char*, int, std::vector<TeBkUmLpqWorld>&);
 	static void dbUtil(void* ctx, int, int, char *);
 	static void queriesMultiUtil(void* ctx, int, int, char *, int);
 
-	void updates(const char*, int, std::list<TeBkUmLpqWorld>&);
+	void updates(const char*, int, std::vector<TeBkUmLpqWorld>&);
 	static void updatesUtil(void* ctx, int, int, char *);
-	void updatesMulti(const char*, int, std::list<TeBkUmLpqWorld>&);
+	void updatesMulti(const char*, int, std::vector<TeBkUmLpqWorld>&);
 	static void updatesMultiUtil(void* ctx, int, int, char *, int);
 	static void updatesMultiUtilCh(void* ctx, bool status, const std::string& query, int counter);
 	
-	void cachedWorlds(const char*, int, std::list<TeBkUmLpqWorld>&);
+	void cachedWorlds(const char*, int, std::vector<TeBkUmLpqWorld>&);
 	static void updateCacheUtil(void* ctx, int rn, std::vector<LibpqRes>& data);
 
-	void getContext(HttpRequest* request, Context* context);
+	void handleTemplate(HttpResponse* res);
 	static void getContextUtil(void* ctx, int, int, char *, int);
 
 	std::map<int, std::string> _qC;
@@ -127,7 +132,7 @@ public:
 	TeBkUmLpqRouter();
 	virtual ~TeBkUmLpqRouter();
 	void updateCache();
-	bool route(HttpRequest* req, HttpResponse* res, void* dlib, void* ddlib, SocketInterface* sif);
+	bool route(HttpRequest* req, HttpResponse* res, SocketInterface* sif);
 };
 
 #endif /* WEB_TE_BENCHMARK_UM_INCLUDE_TeBkUmLpq_H_ */

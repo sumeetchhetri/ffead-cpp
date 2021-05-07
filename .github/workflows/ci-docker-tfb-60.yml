@@ -1,0 +1,26 @@
+name: TE benchmark comparison (6.0)
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: "contains(github.event.head_commit.message, '[docker_compare]')"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Compare benchmark ffead-cpp 6.0
+      run: |
+        git clone https://github.com/TechEmpower/FrameworkBenchmarks
+        cp docker/benchmark_60.json FrameworkBenchmarks/frameworks/C++/ffead-cpp/benchmark_config.json
+        cp docker/techempower-config/ffead-cpp-v-picov.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-v-picov60.dockerfile
+        cp docker/techempower-config/ffead-cpp-v-picov-raw-profiled.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-v-picov-profiled60.dockerfile
+        cp docker/techempower-config/ffead-cpp-v-picov-raw-clibpqb-profiled.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-v-picov-clibpqb-profiled60.dockerfile
+        cp docker/techempower-config/ffead-cpp-postgresql-raw-clibpqb-profiled.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-clibpqb-profiled60.dockerfile
+        cp docker/techempower-config/ffead-cpp-postgresql-raw-async-clibpqb-profiled.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-postgresql-raw-async-clibpqb-profiled60.dockerfile
+        cd FrameworkBenchmarks
+        ./tfb --mode benchmark --test-dir C++/ffead-cpp
+        cd results/20* && cat results.json

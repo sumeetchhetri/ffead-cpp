@@ -30,10 +30,7 @@ void ServerInitUtil::bootstrapIB(std::string serverRootDirectory, SERVER_BACKEND
 
 void ServerInitUtil::bootstrap(std::string serverRootDirectory, Logger& logger, SERVER_BACKEND type) {
 	serverRootDirectory += "/";
-	if(serverRootDirectory.find("//")==0)
-	{
-		RegexUtil::replace(serverRootDirectory,"[/]+","/");
-	}
+	RegexUtil::replace(serverRootDirectory,"[/]+","/");
 
 	std::string incpath = serverRootDirectory + "include/";
 	std::string rtdcfpath = serverRootDirectory + "rtdcf/";

@@ -55,6 +55,7 @@ public:
     int getCode() const;
     const std::string& getStatusMsg();
     std::string* getContentP();
+    fcpstream* getStreamP();
     const std::string& getContent();
 	//void setContent(const Cont& content);
 	void setContent(const std::string& content);
@@ -84,7 +85,9 @@ public:
 	const std::string& getUrl();
 	void addHeader(std::string header, const std::string& value);
 	void generateHeadResponse(std::string& resp);
+	void generateHeadResponse(std::string& resp, float httpVers, bool conn_clos);
 	void generateHeadResponse(std::string& resp, std::string& contentType, int content_length = -1);
+	void generateHeadResponse(std::string& resp, std::string& contentType, float httpVers, bool conn_clos, int content_length = -1);
 	void update(HttpRequest* req);
 private:
 	static RiMap HDRS_SW_CODES;
@@ -104,6 +107,7 @@ private:
 	FMap multipartFormData;
 	std::vector<MultipartContent> contentList;
 	std::string content;
+	fcpstream content_stream;
 	std::string outFileName;
 	std::vector<std::string> cookies;
 	RMap headers;

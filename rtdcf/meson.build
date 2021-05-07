@@ -5,11 +5,12 @@ cc = meson.get_compiler('cpp')
 meson_lister = meson.source_root() + '/meson_lister.sh'
 
 libdir = meson.source_root() + '/../lib'
+webdir = meson.source_root() + '/../web'
 
 wd_libs = []
 wd_includes = []
 
-c = run_command(meson_lister, '../web')
+c = run_command(meson_lister, webdir)
 webdirs = c.stdout().strip().split('\n')
 
 foreach wd: webdirs

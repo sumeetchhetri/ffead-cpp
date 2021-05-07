@@ -122,6 +122,8 @@ void ConfigurationData::initializeAllSingletonBeans() {
 		std::cout << "Could not load dynamic Library" << std::endl;
 		exit(0);
 	}
+	TemplateUtil::init(getInstance()->ddlib);
+	SerializeBase::init(ConfigurationData::getInstance()->dlib);
 
 	std::map<std::string, std::string, std::less<> >::iterator it = ConfigurationData::getInstance()->servingContextRouterNames.begin();
 	for(;it!=ConfigurationData::getInstance()->servingContextRouterNames.end();++it) {
@@ -151,7 +153,7 @@ void ConfigurationData::initializeAllSingletonBeans() {
 		}
 	}
 
-	SerializeBase::init(ConfigurationData::getInstance()->dlib);
+
 	std::map<std::string, std::map<std::string, std::vector<RestFunction>, std::less<> >, std::less<> >& rstCntMap = ConfigurationData::getInstance()->rstCntMap;
 	std::map<std::string, std::map<std::string, std::vector<RestFunction>, std::less<> >, std::less<> >::iterator rsit = rstCntMap.begin();
 	for(;rsit!=rstCntMap.end();++rsit) {
@@ -219,12 +221,12 @@ void ConfigurationData::initializeAllSingletonBeans() {
 					std::string appn = rsit->first;
 					StringUtil::replaceAll(appn, "-", "_");
 					RegexUtil::replace(appn, "[^a-zA-Z0-9_]+", "");
-					rf.s = SerializeBase::serFunc(vtyp, appn);
-					rf.sc = SerializeBase::serContFunc(vtyp, appn, "vector");
-					rf.scm = SerializeBase::serContFunc(vtyp, appn, "set");
-					rf.us = SerializeBase::unSerFunc(vtyp, appn);
-					rf.usc = SerializeBase::unSerContFunc(vtyp, appn, "vector");
-					rf.uscm = SerializeBase::unSerContFunc(vtyp, appn, "set");
+					rf.s = Serializer::getSerFuncForObject(vtyp, appn);
+					rf.sc = Serializer::getSerFuncForObjectCont(vtyp, appn, "vector");
+					rf.scm = Serializer::getSerFuncForObjectCont(vtyp, appn, "set");
+					rf.us = Serializer::getUnSerFuncForObject(vtyp, appn);
+					rf.usc = Serializer::getUnSerFuncForObjectCont(vtyp, appn, "vector");
+					rf.uscm = Serializer::getUnSerFuncForObjectCont(vtyp, appn, "set");
 				}
 				for (int var1 = 0; var1 < (int)rf.params.size(); ++var1) {
 					RestFunctionParams& rfp = rf.params.at(var1);
@@ -283,12 +285,12 @@ void ConfigurationData::initializeAllSingletonBeans() {
 						std::string appn = rsit->first;
 						StringUtil::replaceAll(appn, "-", "_");
 						RegexUtil::replace(appn, "[^a-zA-Z0-9_]+", "");
-						rfp.s = SerializeBase::serFunc(vtyp, appn);
-						rfp.sc = SerializeBase::serContFunc(vtyp, appn, "vector");
-						rfp.scm = SerializeBase::serContFunc(vtyp, appn, "set");
-						rfp.us = SerializeBase::unSerFunc(vtyp, appn);
-						rfp.usc = SerializeBase::unSerContFunc(vtyp, appn, "vector");
-						rfp.uscm = SerializeBase::unSerContFunc(vtyp, appn, "set");
+						rf.s = Serializer::getSerFuncForObject(vtyp, appn);
+						rf.sc = Serializer::getSerFuncForObjectCont(vtyp, appn, "vector");
+						rf.scm = Serializer::getSerFuncForObjectCont(vtyp, appn, "set");
+						rf.us = Serializer::getUnSerFuncForObject(vtyp, appn);
+						rf.usc = Serializer::getUnSerFuncForObjectCont(vtyp, appn, "vector");
+						rf.uscm = Serializer::getUnSerFuncForObjectCont(vtyp, appn, "set");
 					}
 				}
 			}

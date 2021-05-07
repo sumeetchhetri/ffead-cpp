@@ -38,7 +38,7 @@
 #include "IDGenerator.h"
 
 enum DSType {
-	SD_ORM_MONGO, SD_ORM_SQL, SD_RAW_MONGO, SD_RAW_SQLPG
+	SD_ORM_MONGO, SD_ORM_SQL, SD_RAW_MONGO, SD_RAW_SQLPG, SD_RAW_CASS
 };
 
 class DataSourceType {

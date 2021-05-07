@@ -46,6 +46,7 @@ class XMLSerialize : public SerializeBase {
 	int getContainerSize(void* _1);
 	std::string getUnserializableClassName(void* _1, const std::string& className);
 	void* getPrimitiveValue(void* _1, int serOpt, const std::string& className);
+	friend class Serializer;
 public:
 	XMLSerialize();
 	XMLSerialize(void*);

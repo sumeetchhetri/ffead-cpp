@@ -149,10 +149,10 @@ if get_option('MOD_SDORM_SQL') == true
 				pqincpath = '/usr/include/postgresql'
 			endif
 			global_includes += [pqincpath]
-			conf_data.set('HAVE_PQHDR', 1)
-			conf_data.set('HAVE_LIBPQ', 1)
-			global_libs += [libpq]
 		endif
+		conf_data.set('HAVE_PQHDR', 1)
+		conf_data.set('HAVE_LIBPQ', 1)
+		global_libs += [libpq]
 	endif
 	if libpq.found() and cc.has_function('PQenterBatchMode', prefix: '#include <libpq-fe.h>', args: '-I'+pqincpath)
 		# regcomp in libc, everything is fine, no lib needed

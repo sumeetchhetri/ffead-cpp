@@ -847,3 +847,19 @@ void* XMLSerialize::unSerializeUnknownBase(const std::string& serVal, int serOpt
 {
 	return _handleAllUnSerialization(serVal,serOpt,className,appName,this,false,NULL);
 }
+
+std::string Serializer::toXml(const std::string &appName, std::string className, void *object, void *serOutput) {
+	return SerializeBase::_ser(object, className, appName, &XMLSerialize::_i, serOutput);
+}
+
+std::string Serializer::toXml(const std::string &appName, std::string className, const std::string &container, void *object, void *serOutput) {
+	return SerializeBase::_serContainer(object, className, appName, container, &XMLSerialize::_i, serOutput);
+}
+
+void* Serializer::fromXml(const std::string &appName, std::string className, void *serObject) {
+	return SerializeBase::_unser(serObject, className, appName, &XMLSerialize::_i);
+}
+
+void* Serializer::fromXml(const std::string &appName, std::string className, const std::string &container, void *serObject) {
+	return SerializeBase::_unserContainer(serObject, className, appName, container, &XMLSerialize::_i);
+}

@@ -65,7 +65,12 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 		StringUtil::replaceAll(temp,"\"","\\\"");
 		if(temp.find("#declare")==0 && temp.at(temp.length()-1)=='#')
 		{
-			StringUtil::replaceAll(temp,"#declare ","");
+			bool noDelete = temp.find("#declareref ")==0;
+			if(noDelete) {
+				StringUtil::replaceAll(temp,"#declareref ","");
+			} else {
+				StringUtil::replaceAll(temp,"#declare ","");
+			}
 			StringUtil::replaceAll(temp,"#","");
 			std::vector<std::string> tvec;
 			StringUtil::split(tvec, temp, (" "));
@@ -84,10 +89,14 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 				}*/
 				if(temp.find("*")==std::string::npos) {
 					declars.append(tvec.at(1) + "= *(" + tvec.at(0) + "*)");
-					destruct.append("delete (" + tvec.at(0) + "*)_args_i__->find(\""+tvec.at(1)+"\")->second;\n");
+					if(!noDelete) {
+						destruct.append("delete (" + tvec.at(0) + "*)_args_i__->find(\""+tvec.at(1)+"\")->second;\n");
+					}
 				} else {
 					declars.append(tvec.at(1) + "= (" + tvec.at(0) + ")");
-					destruct.append("delete (" + tvec.at(0) + ")_args_i__->find(\""+tvec.at(1)+"\")->second;\n");
+					if(!noDelete) {
+						destruct.append("delete (" + tvec.at(0) + ")_args_i__->find(\""+tvec.at(1)+"\")->second;\n");
+					}
 				}
 				declars.append("_args_i__->find(\""+tvec.at(1)+"\")->second;\n");
 				declars.append("}\n");

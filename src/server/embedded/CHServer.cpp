@@ -468,10 +468,7 @@ int main(int argc, char* argv[])
 
 	std::string serverRootDirectory = argv[1];
 	serverRootDirectory += "/";
-	if(serverRootDirectory.find("//")==0)
-	{
-		RegexUtil::replace(serverRootDirectory,"[/]+","/");
-	}
+	RegexUtil::replace(serverRootDirectory,"[/]+","/");
 
 	std::string port = "";
 	std::string ipaddr = "";
@@ -565,10 +562,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
     //int nfds;
 
     serverRootDirectory += "/";
-	if(serverRootDirectory.find("//")==0)
-	{
-		RegexUtil::replace(serverRootDirectory,"[/]+","/");
-	}
+    RegexUtil::replace(serverRootDirectory,"[/]+","/");
 
 	std::string incpath = serverRootDirectory + "include/";
 	std::string rtdcfpath = serverRootDirectory + "rtdcf/";
@@ -582,7 +576,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	propMap srprps = pread.getProperties(respath+"server.prop");
 
 	servd = serverRootDirectory;
-	std::string logp = respath+"/logging.xml";
+	std::string logp = respath+"logging.xml";
 	LoggerFactory::init(logp, serverRootDirectory, "", StringUtil::toLowerCopy(srprps["LOGGING_ENABLED"])=="true");
 
 	std::string name;

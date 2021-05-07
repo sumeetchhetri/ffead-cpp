@@ -28,11 +28,11 @@ Detailed OS specific instructions, instructions for installing the available ser
 Build validated for the following Operating systems/Toolchains
 |   |   |   |
 |---|---|---|
-|[Ubuntu](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-UbuntuBionic-x64-ffead-cpp-6.0)|[CentOS](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Centos7-x64-ffead-cpp)|[OpenSUSE](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-OpenSuseTumbleweed-x64-ffead-cpp)|
-|[Gentoo](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Gentoo-x64-ffead-cpp-6.0)|[ArchLinux](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-ArchLinux-x64-ffead-cpp)|[Alpine Linux](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Alpine-x64-ffead-cpp)|
+|[Ubuntu](https://github.com/sumeetchhetri/ffead-cpp/blob/master/docker/os-based/DockerFile-Ubuntu-x64-ffead-cpp)|[CentOS](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Centos-x64-ffead-cpp)|[OpenSUSE](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-OpenSuse-x64-ffead-cpp)|
+|[Gentoo](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Gentoo-x64-ffead-cpp)|[ArchLinux](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-ArchLinux-x64-ffead-cpp)|[Alpine Linux](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Alpine-x64-ffead-cpp)|
 |[MacOS](https://github.com/sumeetchhetri/ffead-cpp/tree/master/.github/workflows/ci-macos.yml)|[Windows Cygwin](https://github.com/sumeetchhetri/ffead-cpp/tree/master/.github/workflows/ci-win-cygwin.yml)|[Windows mingw-w64](https://github.com/sumeetchhetri/ffead-cpp/tree/master/.github/workflows/ci-win-mingw.yml)
 |[ArchLinux (mingw-w64 cross compiler)](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/DockerFile-cross-archlinux-mingw64)|[Ubuntu (musl cross compiler)](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/DockerFile-cross-musl)|[Ubuntu (android cross compiler)](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/DockerFile-cross-android)
-|[Solaris](https://github.com/sumeetchhetri/ffead-cpp/tree/master/vagrant/solaris)|[FreeBSD](https://github.com/sumeetchhetri/ffead-cpp/tree/master/vagrant/freebsd)|[Emscripten](https://github.com/sumeetchhetri/ffead-cpp/tree/master/lang-server-backends/javascript)
+|[Solaris](https://github.com/sumeetchhetri/ffead-cpp/tree/master/vagrant/solaris)|[FreeBSD](https://github.com/sumeetchhetri/ffead-cpp/tree/master/vagrant/freebsd)|[Emscripten](https://github.com/sumeetchhetri/ffead-cpp/tree/master/lang-server-backends/javascript/emscripten)
 
 
 [Latest Techempower benchmarks](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=composite)
@@ -48,7 +48,7 @@ Features
     |actix (rust)|hyper (rust)|thruster (rust)|rocket (rust)|
     |h2o\.cr (crystal)|crystal-http (crystal)|fasthttp (golang)|gnet (golang)|
     |firenio (java)|rapidoid (java)|wizzardo-http (java)|hunt (d)|
-    |swift-nio (swift)|http.jl (julia)|mongols \(c\)|uv-cpp (c++)|
+    |swift-nio (swift)|http.jl (julia)|mongols (c++)|uv-cpp (c++)|
     |CppServer (c++)|nginx|nodejs (javascript)|openlitespeed (WIP)|
 - Support for multiple I/O event notification engines,
 	- io_uring - Linux kernel >= 5.6
