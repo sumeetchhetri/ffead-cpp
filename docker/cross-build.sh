@@ -71,7 +71,7 @@ build_ffeadcpp_autoconf() {
 			CFLAGS="-I${STAGE_DIR}/include" CXXFLAGS="-I${STAGE_DIR}/include -std=c++17" LDFLAGS="-L${STAGE_DIR}/lib" ./configure --host="${TARGET}" --enable-srv_emb=yes --enable-mod_sdormmongo=yes \
 			--enable-mod_sdormsql=yes --enable-mod_rediscache=yes --with-top_inc_dir=${STAGE_DIR}/include
 	fi
-	make -j4 install
+	make install
 }
 
 install_cmake_musl_cross_file() {

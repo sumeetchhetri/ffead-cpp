@@ -28,6 +28,7 @@
 class Client : public ClientInterface {
 	bool connected;
 	SOCKET sockfd;
+	std::string buffer;
 	//Logger logger;
 public:
 	Client();
@@ -40,6 +41,7 @@ public:
 	std::string getBinaryData(const int&, const bool&);
 	void closeConnection();
 	bool isConnected();
+	bool isReady(int mode);
 	int receive(std::string& buf, const int& flag);
 	int receivelen(std::string& buf, const int& len, const int& flag);
 	std::string getData();

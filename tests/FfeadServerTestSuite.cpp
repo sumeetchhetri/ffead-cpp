@@ -26,8 +26,10 @@
 #include "SimpleCsvFileReader.h"
 #include "PropFileReader.h"
 #include "Timer.h"
+#include "Thread.h"
 #include "sstream"
 #include "Client.h"
+#include <chrono>
 #ifdef HAVE_SSLINC
 #include "SSLClient.h"
 #endif
@@ -204,13 +206,23 @@ int main()
 				std::cout << "HTTP Request Is=>\n" << data << "\n\n" << std::endl;
 			}
 
-			if(!client->connection(ip,port)) {
+			if(!client->connectionNB(ip,port)) {
 				std::cout << "Unable to connect to server at " << ip << ":" << port << std::endl;
 				delete client;
 				return 0;
 			}
 			client->sendData(data);
-			std::string tot = client->getTextData("\r\n","content-length");
+			int c = 0;
+			while(!client->isReady(0)) {
+				//std::this_thread::sleep_for (std::chrono::milliseconds(100));
+				Thread::mSleep(100);
+				c += 100;
+				if(c>5000) {
+					std::cout << "Timedout waiting for response after 5 seconds" << std::endl;
+					exit(0);
+				}
+			}
+			std::string tot = client->getTextData("\r\n\r\n","content-length");
 			long long millis = timer.elapsedMilliSeconds();
 
 			if(isDebug) {

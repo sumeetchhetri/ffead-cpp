@@ -54,6 +54,7 @@ public:
 	std::string getData(int cntlen);
 	void closeConnection();
 	bool isConnected();
+	bool isReady(int mode);
 	std::string getBinaryData(const int&, const bool&);
 	std::string getTextData(const std::string& hdrdelm, const std::string& cntlnhdr);
 };

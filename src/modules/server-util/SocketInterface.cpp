@@ -50,8 +50,8 @@ SocketInterface::SocketInterface(const SOCKET& fd, void* ssl, void* io) {
 	this->ssl = (SSL*)ssl;
 	this->io = (BIO*)io;
 #else
-	ssl = NULL;
-	io = NULL;
+	this->ssl = NULL;
+	this->io = NULL;
 #endif
 	eh = NULL;
 	reqPos = 0;

@@ -922,7 +922,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 std::string SerializeBase::_serContainer(void* t, const std::string& className, const std::string& appName, const std::string& type, SerializeBase* base, void* serobject)
 {
 	std::string serVal;
-	SerCont f = Serializer::getSerFuncForObjectCont(className, appName, type, false);
+	SerCont f = Serializer::getSerFuncForObjectCont(appName, className, type, false);
 	if(f!=NULL)
 		serVal = f(t, base, type, serobject);
 	return serVal;
@@ -931,7 +931,7 @@ std::string SerializeBase::_serContainer(void* t, const std::string& className, 
 std::string SerializeBase::_ser(void* t, const std::string& className, const std::string& appName, SerializeBase* base, void* serobject)
 {
 	std::string serVal;
-	Ser f = Serializer::getSerFuncForObject(className, appName, false);
+	Ser f = Serializer::getSerFuncForObject(appName, className, false);
 	if(f!=NULL)
 		serVal = f(t, base, serobject);
 	return serVal;
@@ -1719,7 +1719,7 @@ void* SerializeBase::unserializemultiset(void* unserableObject, int serOpt, cons
 void* SerializeBase::_unserContainer(void* unserableObject, const std::string& className, const std::string& appName, const std::string& type, SerializeBase* base)
 {
 	void* obj = NULL;
-	UnSerCont f = Serializer::getUnSerFuncForObjectCont(className, appName, type, false);
+	UnSerCont f = Serializer::getUnSerFuncForObjectCont(appName, className, type, false);
 	if(f!=NULL)
 	{
 		obj = f(unserableObject, base, type);
@@ -1730,7 +1730,7 @@ void* SerializeBase::_unserContainer(void* unserableObject, const std::string& c
 void* SerializeBase::_unser(void* unserableObject, const std::string& className, const std::string& appName, SerializeBase* base)
 {
 	void* obj = NULL;
-	UnSer f = Serializer::getUnSerFuncForObject(className, appName, false);
+	UnSer f = Serializer::getUnSerFuncForObject(appName, className, false);
 	if(f!=NULL)
 	{
 		obj = f(unserableObject, base);
@@ -1941,7 +1941,7 @@ Ser Serializer::getSerFuncForObject(const std::string& appName, std::string clas
 }
 
 UnSer Serializer::getUnSerFuncForObject(const std::string& appName, std::string className, bool ext) {
-	std::string methodname = ext?SerializeBase::getSerializationMethodNameExt(className,appName,true):SerializeBase::getSerializationMethodName(className,appName,true);
+	std::string methodname = ext?SerializeBase::getSerializationMethodNameExt(className,appName,false):SerializeBase::getSerializationMethodName(className,appName,false);
 	UnSer f;
 	if(Serializer::_unserFMap.get()==NULL) {
 		Serializer::_unserFMap.set(new std::map<std::string, UnSer>);
@@ -1978,7 +1978,7 @@ Serializer::Serializer() {
 }
 
 UnSerCont Serializer::getUnSerFuncForObjectCont(const std::string& appName, std::string className, const std::string& container, bool ext) {
-	std::string methodname = ext?SerializeBase::getSerializationMethodNameExt(className,appName,true,container):SerializeBase::getSerializationMethodName(className,appName,true,container);
+	std::string methodname = ext?SerializeBase::getSerializationMethodNameExt(className,appName,false,container):SerializeBase::getSerializationMethodName(className,appName,false,container);
 	UnSerCont f;
 	if(Serializer::_unserCFMap.get()==NULL) {
 		Serializer::_unserCFMap.set(new std::map<std::string, UnSerCont>);

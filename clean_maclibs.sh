@@ -1,0 +1,9 @@
+rm -f /usr/local/lib/libffead-*
+rm -f /usr/local/lib/libinter.dylib
+rm -f /usr/local/lib/libdinter.dylib
+rm -f /usr/local/lib/libte-benchmark*
+rm -f /usr/local/lib/libdefault.dylib
+rm -f /usr/local/lib/libflexApp.dylib
+rm -f /usr/local/lib/liboauthApp.dylib
+rm -f /usr/local/lib/libpeer-server.dylib
+rm -f /usr/local/lib/libmarkers.dylib

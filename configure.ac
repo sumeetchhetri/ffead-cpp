@@ -26,7 +26,7 @@ if test "x$support_debug" = "xyes"; then
     AM_CXXFLAGS="$AM_CXXFLAGS -g -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -Wno-deprecated"
 else
     AC_DEFINE(NDEBUG, [], [unset DEBUG mode])
-    AM_CXXFLAGS="$AM_CXXFLAGS -O2 -w"
+    AM_CXXFLAGS="$AM_CXXFLAGS -O3 -w"
     support_debug=no
 fi
 
@@ -163,8 +163,8 @@ case "$host" in
     is_librt_available="no"
     #AC_DEFINE(OS_BSD, [], [set OS to bsd])
     AC_DEFINE(OS_DARWIN, [1], [set OS to darwin])
-    CPPFLAGS="$CPPFLAGS -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -O2"
-    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -O2"
+    CPPFLAGS="$CPPFLAGS -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -O3"
+    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -O3"
     LDFLAGS="$LDFLAGS -L/usr/local/opt/unixodbc/lib/ -L/usr/local/lib"
     local_os_type="darwin"
     AC_ARG_WITH([ssl_inc_dir],
@@ -1223,6 +1223,16 @@ if test "x$with_top_inc_dir" != "x";then
 else
 	NGX_LD_FLAGS="-L/usr/local/lib"
 fi
+
+case "$host" in
+*-cygwin*)
+    CPPFLAGS="$CPPFLAGS -Wa,-mbig-obj"
+    ;;
+*mingw*)
+    CPPFLAGS="$CPPFLAGS -Wa,-mbig-obj"
+    ;;
+esac
+
 AC_SUBST(NGX_LD_FLAGS)
 AC_SUBST(NGX_CPP_FLAGS)
 AC_SUBST(BUILD_CPPFLAGS,[$CPPFLAGS])

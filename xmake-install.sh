@@ -7,7 +7,7 @@
 
 cp -rf resources public rtdcf web $1/
 cp $1/bin/ffead-cpp $1/
-mkdir $1/tests
+mkdir $1/tests $1/logs
 cp -f $2/tests/*.sh $2/tests/*.pem $2/tests/*.prop $2/tests/*.prop $2/tests/*.csv $1/bin/tests $1/tests/
 cp -f $2/script/*.sh $2/script/*.pem $2/script/*.crt $2/script/*.key $1/
 rm -rf $1/bin

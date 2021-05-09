@@ -73,18 +73,18 @@ char* ClientInterface::get_ip(char *host)
 	return ip;
 }
 
-bool ClientInterface::isConnected(const SOCKET& fd) {
+bool ClientInterface::isReady(const SOCKET& fd, int mode) {
 	/*char c;
 	if (recv(fd, &c, 1, MSG_DONTWAIT | MSG_PEEK) == 0) {
 		return false;
 	}
 	return true;*/
-	#ifdef OS_MINGW
+	/*#ifdef OS_MINGW
 		u_long iMode = 1;
 		ioctlsocket(fd, FIONBIO, &iMode);
 	#else
 		fcntl(fd, F_SETFL, fcntl(fd, F_GETFD, 0) | O_NONBLOCK);
-	#endif
+	#endif*/
 
 	fd_set rset, wset;
 	struct timeval tv = {0, 100};
@@ -101,9 +101,8 @@ bool ClientInterface::isConnected(const SOCKET& fd) {
 	FD_SET(fd, &rset);
 	wset = rset;
 
-	int writing = 0;
 	/* See if the socket is ready */
-	switch (writing)
+	switch (mode)
 	{
 		case 0:
 			rc = select(fd+1, &rset, NULL, NULL, &tv);
@@ -116,13 +115,6 @@ bool ClientInterface::isConnected(const SOCKET& fd) {
 			break;
 	}
 	FD_CLR(fd, &rset);
-
-	#ifdef OS_MINGW
-		u_long bMode = 0;
-		ioctlsocket(fd, FIONBIO, &bMode);
-	#else
-		fcntl(fd, F_SETFL, O_SYNC);
-	#endif	
 
 	FD_ZERO(&rset);
 	FD_ZERO(&wset);

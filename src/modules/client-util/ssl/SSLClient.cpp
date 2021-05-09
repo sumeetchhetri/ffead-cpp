@@ -160,21 +160,74 @@ bool SSLClient::connection(const std::string& host, const int& port)
 		}
 		remote->sin_addr.s_addr = inet_addr(ip);
 		free(ip);
+
+		if(connect(sockfd, (struct sockaddr *)remote, sizeof(struct sockaddr)) < 0 && (errno != EINPROGRESS)) {
+			perror("Could not connect");
+			connected = false;
+		} else {
+			connected = true;
+		}
+
+		free(remote);
 	} else {
-		remote->sin_addr.s_addr = INADDR_ANY;
+		struct addrinfo hints, *servinfo, *p;
+		int rv;
+
+		memset(&hints, 0, sizeof hints);
+		hints.ai_family = AF_UNSPEC;
+		hints.ai_socktype = SOCK_STREAM;
+
+		std::string ports = CastUtil::lexical_cast<std::string>(port);
+
+		if ((rv = getaddrinfo(host.c_str(), ports.c_str(), &hints, &servinfo)) != 0) {
+			fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+			return 1;
+		}
+
+		// loop through all the results and connect to the first we can
+		for(p = servinfo; p != NULL; p = p->ai_next) {
+			if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+				perror("client: socket");
+				continue;
+			}
+
+			if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+				close(sockfd);
+				//perror("client: connect");
+				continue;
+			}
+
+			break;
+		}
+
+		if (p == NULL) {
+			perror("client: failed to connect\n");
+			return false;
+		}
+
+		freeaddrinfo(servinfo);
 	}
 
-	remote->sin_port = htons(port);
+	connected = true;
 
-	if(connect(sockfd, (struct sockaddr *)remote, sizeof(struct sockaddr)) < 0 && (errno != EINPROGRESS)){
-		perror("Could not connect");
+	int error = 0;
+	socklen_t len = sizeof (error);
+#if defined(OS_MINGW)
+	int retval = getsockopt (sockfd, SOL_SOCKET, SO_ERROR, (char*)&error, &len);
+#else
+	int retval = getsockopt (sockfd, SOL_SOCKET, SO_ERROR, &error, &len);
+#endif
+	if (retval != 0) {
+		/* there was a problem getting the error code */
+		fprintf(stderr, "error getting socket error code: %s\n", strerror(retval));
 		connected = false;
-	} else {
-		connected = true;
 	}
-	free(remote);
 
-	connected = ClientInterface::isConnected(sockfd);
+	if (error != 0) {
+		/* socket has a non zero error status */
+		fprintf(stderr, "socket error: %s\n", strerror(error));
+		connected = false;
+	}
 
 	/* Build our SSL context*/
 	init();
@@ -200,79 +253,15 @@ bool SSLClient::connection(const std::string& host, const int& port)
 
 bool SSLClient::connectionNB(const std::string& host, const int& port)
 {
-	sockfd = create_tcp_socket();
-
-	struct sockaddr_in *remote;
-	remote = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in *));
-	remote->sin_family = AF_INET;
-
-	fd_set fdset;
-	struct timeval tv;
-
-	if(host!="localhost" && host!="0.0.0.0" && host!="127.0.0.1") {
-		char* ip = get_ip((char*)host.c_str());
-		fprintf(stderr, "IP is %s\n", ip);
-		int tmpres = inet_pton(AF_INET, ip, (void *)(&(remote->sin_addr.s_addr)));
-		if( tmpres < 0)
-		{
-			free(remote);
-			perror("Can't set remote->sin_addr.s_addr");
-			return false;
-		}
-		else if(tmpres == 0)
-		{
-			free(remote);
-			fprintf(stderr, "%s is not a valid IP address\n", ip);
-			return false;
-		}
-		remote->sin_addr.s_addr = inet_addr(ip);
-		free(ip);
-	} else {
-		remote->sin_addr.s_addr = INADDR_ANY;
-	}
-
-	remote->sin_port = htons(port);
+	connection(host, port);
 
 	setSocketNonBlocking(sockfd);
-	if(connect(sockfd, (struct sockaddr *)remote, sizeof(struct sockaddr)) < 0 && (errno != EINPROGRESS)){
-		perror("Could not connect");
-		connected = false;
-	} else {
-		connected = true;
-	}
-	free(remote);
 
-	FD_ZERO(&fdset);
-	FD_SET(sockfd, &fdset);
-	tv.tv_sec = 2;
-	tv.tv_usec = 0;
+	return connected;
+}
 
-	int rc = select(sockfd + 1, NULL, &fdset, NULL, &tv);
-	if(rc==0) {
-		connected = false;
-	}
-	setSocketBlocking(sockfd);
-
-	/* Build our SSL context*/
-	init();
-
-	/* Connect the SSL socket */
-	ssl=SSL_new(ctx);
-	sbio=BIO_new_socket(sockfd,BIO_CLOSE);
-	SSL_set_bio(ssl,sbio,sbio);
-	io=BIO_new(BIO_f_buffer());
-	ssl_bio=BIO_new(BIO_f_ssl());
-	BIO_set_ssl(ssl_bio,ssl,BIO_NOCLOSE);
-	BIO_push(io,ssl_bio);
-
-	if(SSL_connect(ssl)<=0)
-	{
-		logger << "SSL connect error";
-		return false;
-	}
-	ERR_clear_error();
-	connected = true;
-	return true;
+bool SSLClient::isReady(int mode) {
+	return ClientInterface::isReady(sockfd, mode);
 }
 
 /*bool SSLClient::connectionUnresolv(const std::string& host, const int& port)
@@ -499,5 +488,5 @@ void SSLClient::closeConnection()
 
 bool SSLClient::isConnected()
 {
-	return connected && ClientInterface::isConnected(sockfd);
+	return connected && ClientInterface::isReady(sockfd, 2);
 }

@@ -61,43 +61,32 @@ void Thread::join() {
 }
 
 void Thread::nSleep(const long& nanos) {
-/*#ifdef HAVE_CLOCK_NANOSLEEP
-	struct timespec deadline;
-	clock_gettime(CLOCK_MONOTONIC, &deadline);
-
-	// Add the time you want to sleep
-	deadline.tv_nsec += nanos;
-
-	// Normalize the time to account for the second boundary
-	if(deadline.tv_nsec >= 1000000000) {
-		deadline.tv_nsec -= 1000000000;
-		deadline.tv_sec++;
-	}
-	clock_nanosleep(CLOCK_REALTIME, 0, &deadline, NULL);
-#else*/
 	struct timespec deadline = {0};
 	deadline.tv_sec  = 0;
 	deadline.tv_nsec = nanos;
 	nanosleep(&deadline , (struct timespec *)NULL);
-//#endif
 }
 
 void Thread::uSleep(const long& micros) {
-	long rem = 0;
-	if(micros>1000000) {
-		sleep(micros/1000000);
-		rem = micros%1000000;
+	struct timespec deadline = {0};
+	if(micros>=1000000) {
+		deadline.tv_sec  = micros/1000000;
+		deadline.tv_nsec = micros%1000000 * 1000;
+	} else {
+		deadline.tv_nsec = micros * 1000;
 	}
-	nSleep(rem*1000);
+	nanosleep(&deadline, NULL);
 }
 
 void Thread::mSleep(const long& milis) {
-	long rem = 0;
-	if(milis>1000) {
-		sleep(milis/1000);
-		rem = milis%1000;
+	struct timespec deadline = {0};
+	if(milis>=1000) {
+		deadline.tv_sec  = milis/1000;
+		deadline.tv_nsec = milis%1000 * 1000000;
+	} else {
+		deadline.tv_nsec = milis * 1000000;
 	}
-	nSleep(rem*1000*1000);
+	nanosleep(&deadline, NULL);
 }
 
 void Thread::sSleep(const long& seconds) {

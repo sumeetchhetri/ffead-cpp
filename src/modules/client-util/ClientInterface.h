@@ -54,22 +54,24 @@
 
 
 
-#define MAXBUFLE 32768
+#define MAXBUFLE 8192
 class ClientInterface
 {
 public:
 	virtual bool connection(const std::string&, const int&)=0;
+	virtual bool connectionNB(const std::string&, const int&)=0;
 	virtual void closeConnection()=0;
 	//virtual bool connectionUnresolv(const std::string& host, const int& port)=0;
 	virtual bool isConnected()=0;
 	virtual int sendData(std::string)=0;
 	virtual std::string getBinaryData(const int&, const bool&)=0;
 	virtual std::string getTextData(const std::string& hdrdelm, const std::string& cntlnhdr)=0;
+	virtual bool isReady(int mode)=0;
 	int getLengthCl(const std::string& header, const int& size);
 	void *get_in_addr(struct sockaddr *sa);
 	SOCKET create_tcp_socket();
 	static char* get_ip(char *host);
-	static bool isConnected(const SOCKET& fd);
+	static bool isReady(const SOCKET& fd, int mode);
 	virtual ~ClientInterface(){}
 	void setSocketBlocking(const SOCKET& sockfd);
 	void setSocketNonBlocking(const SOCKET& sockfd);

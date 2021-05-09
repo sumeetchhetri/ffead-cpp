@@ -132,58 +132,9 @@ bool Client::connection(const std::string& host, const int& port)
 
 bool Client::connectionNB(const std::string& host, const int& port)
 {
-	sockfd = create_tcp_socket();
-
-	struct sockaddr_in *remote;
-	remote = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in *));
-	remote->sin_family = AF_INET;
-
-	fd_set fdset;
-	struct timeval tv;
-
-	if(host!="localhost" && host!="0.0.0.0" && host!="127.0.0.1") {
-		char* ip = get_ip((char*)host.c_str());
-		fprintf(stderr, "IP is %s\n", ip);
-		int tmpres = inet_pton(AF_INET, ip, (void *)(&(remote->sin_addr.s_addr)));
-		if( tmpres < 0)
-		{
-			free(remote);
-			perror("Can't set remote->sin_addr.s_addr");
-			return false;
-		}
-		else if(tmpres == 0)
-		{
-			free(remote);
-			fprintf(stderr, "%s is not a valid IP address\n", ip);
-			return false;
-		}
-		remote->sin_addr.s_addr = inet_addr(ip);
-		free(ip);
-	} else {
-		remote->sin_addr.s_addr = INADDR_ANY;
-	}
-
-	remote->sin_port = htons(port);
+	connection(host, port);
 
 	setSocketNonBlocking(sockfd);
-	if(connect(sockfd, (struct sockaddr *)remote, sizeof(struct sockaddr)) < 0 && (errno != EINPROGRESS)){
-		perror("Could not connect");
-		connected = false;
-	} else {
-		connected = true;
-	}
-	free(remote);
-
-	FD_ZERO(&fdset);
-	FD_SET(sockfd, &fdset);
-	tv.tv_sec = 2;
-	tv.tv_usec = 0;
-
-	int rc = select(sockfd + 1, NULL, &fdset, NULL, &tv);
-	if(rc==0) {
-		connected = false;
-	}
-	setSocketBlocking(sockfd);
 
 	return connected;
 }
@@ -254,39 +205,20 @@ int Client::sendData(std::string data)
 
 std::string Client::getTextData(const std::string& hdrdelm, const std::string& cntlnhdr)
 {
-#ifdef HAVE_SSLINC
-	int er=-1;
-	bool flag = true;
-	std::string alldat;
+	getData();
 	int cntlen = 0;
-	char buf[MAXBUFLE];
-	memset(buf, 0, MAXBUFLE);
-	BIO* sbio=BIO_new_socket(sockfd,BIO_NOCLOSE);
-	BIO* io=BIO_new(BIO_f_buffer());
-	BIO_push(io,sbio);
+	std::string alldat;
 	bool isTE = false;
 	std::string tehdr = "transfer-encoding";
-	while(flag)
-	{
-		er = BIO_gets(io,buf,MAXBUFLE-1);
-		if(er==0)
-		{
-			if(io!=NULL)BIO_free_all(io);
-			//logger << "\nsocket closed before being serviced" <<std::flush;
-			return alldat;
+	if(connected) {
+		if(buffer.find(hdrdelm)!=std::string::npos) {
+			alldat = buffer.substr(0, buffer.find(hdrdelm)+4);
+			buffer = buffer.substr(buffer.find(hdrdelm)+4);
 		}
-		if(!strcmp(buf,hdrdelm.c_str()))
-		{
-			std::string tt(buf, er);
-			alldat += tt;
-			break;
-		}
-		std::string temp(buf, er);
-		alldat += temp;
-		std::string ltemp = StringUtil::toLowerCopy(temp);
+		std::string ltemp = StringUtil::toLowerCopy(alldat);
 		if(ltemp.find(cntlnhdr)!=std::string::npos)
 		{
-			std::string cntle = temp.substr(temp.find(": ")+2);
+			std::string cntle = alldat.substr(alldat.find(": ")+2);
 			StringUtil::trim(cntle);
 			try
 			{
@@ -305,68 +237,31 @@ std::string Client::getTextData(const std::string& hdrdelm, const std::string& c
 				isTE = true;
 			}
 		}
-		memset(&buf[0], 0, sizeof(buf));
+	} else {
+		return alldat;
 	}
-	memset(&buf[0], 0, sizeof(buf));
-	while(isTE)
+	while(isTE && buffer.find("\r\n")!=std::string::npos)
 	{
-		er = BIO_gets(io,buf,MAXBUFLE-1);
-		if(er==0)
-		{
-			if(io!=NULL)BIO_free_all(io);
-			//logger << "\nsocket closed before being serviced" <<std::flush;
-			return alldat;
-		}
-		std::string bytesstr(buf, er);
-		StringUtil::replaceFirst(bytesstr,"\r\n","");
-		int bytesToRead = (int)StringUtil::fromHEX(bytesstr);
+		std::string len = buffer.substr(0, buffer.find("\r\n"));
+		buffer = buffer.substr(buffer.find("\r\n")+2);
+		int bytesToRead = (int)StringUtil::fromHEX(len);
 		if(bytesToRead==0)
 		{
-			er = BIO_read(io,buf,2);
-			if(io!=NULL)BIO_free_all(io);
-			//logger << "\nsocket closed before being serviced" <<std::flush;
 			return alldat;
 		}
-		memset(&buf[0], 0, sizeof(buf));
-		er = BIO_read(io,buf,bytesToRead);
-		if(er==0)
-		{
-			if(io!=NULL)BIO_free_all(io);
-			//logger << "\nsocket closed before being serviced" <<std::flush;
-			return alldat;
-		}
-		std::string temp(buf, er);
-		alldat += temp;
-		er = BIO_read(io,buf,2);
-		if(er==0)
-		{
-			if(io!=NULL)BIO_free_all(io);
-			//logger << "\nsocket closed before being serviced" <<std::flush;
-			return alldat;
-		}
+		alldat += buffer.substr(0, bytesToRead);
+		buffer = buffer.substr(bytesToRead);
 	}
-	while(cntlen>0)
+	if(cntlen>0)
 	{
-		//logger << "reading conetnt " << cntlen;
-		int toRead = cntlen;
-		if(cntlen>MAXBUFLE)
-			toRead = MAXBUFLE - 1;
-		er = BIO_read(io,buf,toRead);
-		if(er==0)
-		{
-			if(io!=NULL)BIO_free_all(io);
-			//logger << "\nsocket closed before being serviced" <<std::flush;
-			return alldat;
-		}
-		std::string temp(buf, er);
-		alldat += temp;
-		cntlen -= er;
-		memset(&buf[0], 0, sizeof(buf));
+		alldat += buffer.substr(0, cntlen);
+		buffer = buffer.substr(cntlen);
 	}
 	return alldat;
-#else
-	return "";
-#endif
+}
+
+bool Client::isReady(int mode) {
+	return ClientInterface::isReady(sockfd, mode);
 }
 
 int Client::receive(std::string& buf, const int& flag)
@@ -428,7 +323,7 @@ void Client::closeConnection()
 
 bool Client::isConnected()
 {
-	return connected && ClientInterface::isConnected(sockfd);
+	return connected && ClientInterface::isReady(sockfd, 2);
 }
 
 std::string Client::getData()
@@ -436,20 +331,15 @@ std::string Client::getData()
 	int numbytes;
 	char buf[MAXBUFLE];
 	memset(buf, 0, sizeof(buf));
-	while ((numbytes = recv(sockfd, buf, MAXBUFLE-1, 0)) == -1)
+	while ((numbytes = recv(sockfd, buf, MAXBUFLE, 0)) > 0)
 	{
-		//perror("recv");
-		if(errno!=EAGAIN)
-			return "";
-		//exit(1);
+		buffer.append(buf, numbytes);
+		memset(buf, 0, sizeof(buf));
 	}
 	if(numbytes==0)
 	{
 		connected = false;
 		closesocket(sockfd);
-		return "";
 	}
-	std::string data(buf,buf+numbytes);
-	memset(&buf[0], 0, sizeof(buf));
-	return data;
+	return buffer;
 }

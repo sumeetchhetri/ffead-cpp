@@ -94,7 +94,7 @@ jobs:
           fi
         done
         echo "ffead-cpp start successful"
-        sleep 5
+        sleep 15
         cd tests
         sudo chmod +x *.sh
         sudo ./runTests.sh
