@@ -94,13 +94,15 @@ void SecurityHandler::populateAuthDetails(HttpRequest* req)
 std::string SecurityHandler::isLoginPage(std::string_view cntxtName, const std::string& actUrl)
 {
 	std::map<std::string, std::map<std::string, Security, std::less<> >, std::less<> >& securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
-	std::map<std::string, Security, std::less<> > securityProv = securityObjectMap.find(cntxtName)->second;
-	std::map<std::string, Security, std::less<> >::iterator it;
-	for (it=securityProv.begin();it!=securityProv.end();++it) {
-		Security provider = it->second;
-		if(provider.isLoginPage(std::string_view(), actUrl))
-		{
-			return it->first;
+	if(hasSecurity(cntxtName)) {
+		std::map<std::string, Security, std::less<> > securityProv = securityObjectMap.find(cntxtName)->second;
+		std::map<std::string, Security, std::less<> >::iterator it;
+		for (it=securityProv.begin();it!=securityProv.end();++it) {
+			Security provider = it->second;
+			if(provider.isLoginPage(std::string_view(), actUrl))
+			{
+				return it->first;
+			}
 		}
 	}
 	return "";

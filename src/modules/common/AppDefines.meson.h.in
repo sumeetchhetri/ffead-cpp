@@ -75,6 +75,7 @@
 #mesondefine HAVE_TCP_DEFER_ACCEPT
 #mesondefine HAVE_TCP_FASTOPEN
 #mesondefine HAVE_LIBPQ_BATCH
+#mesondefine IS_SENDFILE
 
 #ifdef HAVE_ODBCLIB
 #define HAVE_LIBODBC 1
@@ -85,7 +86,6 @@
 #define INC_DVIEW 1
 #define INC_DCP 1
 #define INC_XMLSER 1
-#define IS_SENDFILE 1
 
 #ifdef APPLE
 #define OS_DARWIN 1

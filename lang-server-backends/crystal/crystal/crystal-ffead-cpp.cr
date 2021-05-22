@@ -20,18 +20,18 @@ require "./ffead-cpp-lib"
 
 class HttpServerFfeadCppCry
     @[ThreadLocal]
-    @fresponse: Void*?
+    @fresponse: Pointer(Void)
     @ffead_cpp_directory = "/root/ffead-cpp-6.0"
     @port = 8080
     @server: HTTP::Server
 
     def initialize
-        @fresponse = nil
+        @fresponse = Pointer(Void).null
         @server = HTTP::Server.new do |context|
             #puts "#{@fresponse}"
-            if !@fresponse.nil?
+            if !@fresponse.null?
                 #puts "cleaning up"
-                LibFfeadCpp.ffead_cpp_resp_cleanup(@fresponse)
+                LibFfeadCpp.ffead_cpp_resp_cleanup(@fresponse.as(Pointer(Void)))
             end
 
             req = context.request

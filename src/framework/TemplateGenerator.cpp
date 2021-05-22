@@ -48,7 +48,7 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 	{
 		while(getline(infile, data))
 		{
-			allcontent.push_back(data+"\n");
+			allcontent.push_back(data);
 		}
 	}
 	std::string header,bodies,funcs,declars;
@@ -58,20 +58,36 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 	std::string destruct;
 	std::map<std::string,std::string> uselocVars;
 	std::vector<std::string> inplaceVarValues;
+	std::string notmpl;
 	//bool startedFor = false, startedIf = false, startedWhile = false;
 	for (int var = 0; var < (int)allcontent.size(); ++var) {
 		std::string temp = allcontent.at(var);
 		StringUtil::trim(temp);
 		StringUtil::replaceAll(temp,"\"","\\\"");
-		if(temp.find("#declare")==0 && temp.at(temp.length()-1)=='#')
+		if(temp.find("#")!=0 && temp.find("${")==std::string::npos)
+		{
+			notmpl += temp;
+			continue;
+		}
+		else
+		{
+			if(notmpl.length()>0) {
+				tempo.append("_screen_i__ << \"" + notmpl + "\";\n");
+				notmpl = "";
+			}
+		}
+
+		if(temp.find("#declare")==0)
 		{
 			bool noDelete = temp.find("#declareref ")==0;
 			if(noDelete) {
-				StringUtil::replaceAll(temp,"#declareref ","");
+				StringUtil::replaceFirst(temp,"#declareref ","");
 			} else {
-				StringUtil::replaceAll(temp,"#declare ","");
+				StringUtil::replaceFirst(temp,"#declare ","");
 			}
-			StringUtil::replaceAll(temp,"#","");
+			if(temp.at(temp.length()-1)=='#') {
+				temp = temp.substr(0, temp.length()-1);
+			}
 			std::vector<std::string> tvec;
 			StringUtil::split(tvec, temp, (" "));
 			if(tvec.size()==2)
@@ -102,52 +118,75 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 				declars.append("}\n");
 			}
 		}
-		else if(temp.find("#define")==0 && temp.at(temp.length()-1)=='#')
+		else if(temp.find("#define")==0)
 		{
-			StringUtil::replaceAll(temp,"#","");
+			StringUtil::replaceFirst(temp, "#define ","");
+			if(temp.at(temp.length()-1)=='#') {
+				temp = temp.substr(0, temp.length()-1);
+			}
 			tempo.append(temp + "\n");
 		}
-		else if(temp.find("#for(")==0 && temp.at(temp.length()-1)=='#')
+		else if(temp.find("#for(")==0)
 		{
-			StringUtil::replaceAll(temp,"#","");
+			StringUtil::replaceFirst(temp, "#for", "for");
+			if(temp.at(temp.length()-1)=='#') {
+				temp = temp.substr(0, temp.length()-1);
+			}
 			tempo.append(temp + "\n{\n");
 			//startedFor = true;
 		}
-		else if(temp.find("#while(")==0 && temp.at(temp.length()-1)=='#')
+		else if(temp.find("#while(")==0)
 		{
-			StringUtil::replaceAll(temp,"#","");
+			StringUtil::replaceFirst(temp, "#while", "while");
+			if(temp.at(temp.length()-1)=='#') {
+				temp = temp.substr(0, temp.length()-1);
+			}
 			tempo.append(temp + "\n{\n");
 			//startedWhile = true;
 		}
-		else if(temp.find("#if(")==0 && temp.at(temp.length()-1)=='#')
+		else if(temp.find("#if(")==0)
 		{
-			StringUtil::replaceAll(temp,"#","");
+			StringUtil::replaceFirst(temp, "#if", "if");
+			if(temp.at(temp.length()-1)=='#') {
+				temp = temp.substr(0, temp.length()-1);
+			}
 			tempo.append(temp + "\n{\n");
 			//startedIf = true;
 		}
-		else if(temp.find("#elseif(")==0 && temp.at(temp.length()-1)=='#')
+		else if(temp.find("#elseif(")==0)
 		{
-			StringUtil::replaceAll(temp,"#","");
+			StringUtil::replaceFirst(temp, "elseif", "else if");
+			if(temp.at(temp.length()-1)=='#') {
+				temp = temp.substr(0, temp.length()-1);
+			}
 			tempo.append("}\n" + temp + "\n{\n");
 			//startedIf = true;
 		}
-		else if(temp.find("#else")==0 && temp.at(temp.length()-1)=='#')
+		else if(temp.find("#else")==0)
 		{
-			StringUtil::replaceAll(temp,"#","");
+			StringUtil::replaceFirst(temp, "#else", "else");
+			if(temp.at(temp.length()-1)=='#') {
+				temp = temp.substr(0, temp.length()-1);
+			}
 			tempo.append("}\n" + temp + "\n{\n");
 			//startedIf = true;
 		}
-		else if(temp.find("#rof")==0 && temp.at(temp.length()-1)=='#')
+		else if(temp.find("#rof")==0)
 		{
 			//startedFor = false;
 			tempo.append("}\n");
 		}
-		else if(temp.find("#fi")==0 && temp.at(temp.length()-1)=='#')
+		else if(temp.find("#fi")==0)
 		{
 			//startedIf = false;
 			tempo.append("}\n");
 		}
-		else if(temp.find("#elihw")==0 && temp.at(temp.length()-1)=='#')
+		else if(temp.find("#elihw")==0)
+		{
+			//startedWhile = false;
+			tempo.append("}\n");
+		}
+		else if(temp.find("#end")==0)
 		{
 			//startedWhile = false;
 			tempo.append("}\n");
@@ -208,24 +247,19 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 			{
 				std::string reps = temp.substr(temp.find("$_S{")+4, temp.find("}")-(temp.find("$_S{")+4));
 				std::string oreps = temp.substr(temp.find("$_S{"), temp.find("}")+1-(temp.find("$_S{")));
-				//if(reps.find(".")!=std::string::npos)
-				{
-					//string repst = reps.substr(0, reps.find("."));
-					StringUtil::replaceAll(temp, oreps, "\" << CastUtil::lexical_cast<std::string>(" + reps + ") << \"");
-				}
+				StringUtil::replaceAll(temp, oreps, "\" << CastUtil::lexical_cast<std::string>(" + reps + ") << \"");
 			}
 			while(temp.find("${")!=std::string::npos && temp.find("}")!=std::string::npos)
 			{
 				std::string reps = temp.substr(temp.find("${")+2, temp.find("}")-(temp.find("${")+2));
 				std::string oreps = temp.substr(temp.find("${"), temp.find("}")+1-(temp.find("${")));
-				//if(reps.find(".")!=std::string::npos)
-				{
-					//string repst = reps.substr(0, reps.find("."));
-					StringUtil::replaceAll(temp, oreps, "\" << " + reps + " << \"");
-				}
+				StringUtil::replaceAll(temp, oreps, "\" << " + reps + " << \"");
 			}
 			tempo.append("_screen_i__ << \"" + temp + "\";\n");
 		}
+	}
+	if(notmpl.length()>0) {
+		tempo.append("_screen_i__ << \"" + notmpl + "\";\n");
 	}
 	bodies.append(tempo);
 	bodies.append(destruct);
@@ -246,5 +280,3 @@ std::string TemplateGenerator::generateTempCdAll(const std::string& serverRootDi
 	bodies = (headersb+"\nextern \"C\"\n{\n"+funcdefs+bodies+"}\n");
 	return bodies;
 }
-
-

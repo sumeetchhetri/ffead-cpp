@@ -535,6 +535,10 @@ bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, SocketInterface* s
 			}
 		}
 
+		if(!ConfigurationData::isServingContext(req->getCntxt_name())) {
+			return true;
+		}
+
 		CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames.find(req->getCntxt_name())->second);
 		req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
 

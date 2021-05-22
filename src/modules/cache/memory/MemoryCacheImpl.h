@@ -34,8 +34,12 @@ class MemoryCacheConnectionPool: public ConnectionPooler {
 	Logger logger;
 	Mutex lock;
 	int size;
+	//For string based keys
 	std::list<std::pair<std::string, std::string>> lrul;
 	std::unordered_map<std::string, decltype(lrul.begin())> internalMap;
+	//For number based keys
+	std::list<std::pair<unsigned long long, std::string>> lruln;
+	std::unordered_map<unsigned long long, decltype(lruln.begin())> internalMapN;
 	Mutex qlock;
 	std::map<std::string, std::queue<std::string>> internalQMap;
 	void initEnv();
@@ -51,11 +55,19 @@ public:
 class MemoryCacheImpl : public CacheInterface {
 	ConnectionProperties properties;
 	bool setInternal(const std::string& key, const std::string& value, const int& expireSeconds, const int& setOrAddOrRep);
+	bool setInternalN(const unsigned long long& key, const std::string& value, const int& expireSeconds, const int& setOrAddOrRep);
 	void clean();
 public:
 	MemoryCacheImpl(ConnectionPooler* pool);
 	~MemoryCacheImpl();
 	void init();
+
+	bool setRaw(const unsigned long long& key, const std::string_view& value, int expireSeconds = -1);
+	bool addRaw(const unsigned long long& key, const std::string_view& value, int expireSeconds = -1);
+	bool replaceRaw(const unsigned long long& key, const std::string_view& value, int expireSeconds = -1);
+	std::string getValue(const unsigned long long& key);
+	void getValues(const std::vector<unsigned long long>& keys, std::vector<std::string>& values);
+	bool remove(const unsigned long long& key);
 
 	bool set(const std::string& key, GenericObject& value, int expireSeconds);
 	bool add(const std::string& key, GenericObject& value, int expireSeconds);

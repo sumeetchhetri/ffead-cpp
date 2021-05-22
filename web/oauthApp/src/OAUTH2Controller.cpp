@@ -84,7 +84,7 @@ bool OAUTH2Controller::service(HttpRequest* req, HttpResponse* res)
 			ofs.close();
 
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
+			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_HTML);
 			std::string conte = "<html><head><script type='text/javascript' src='public/json2.js'></script><script type='text/javascript' src='public/prototype.js'></script><script type='text/javascript' src='public/oauth2.js'></script></head>";
 			conte += "Resource: <input id='resource' type='text'/><input type='submit' onclick='getResource(\"resource\",\""+req->getRequestParams()["tusername"]+"\")'/></body>";
 			conte += "</html>";

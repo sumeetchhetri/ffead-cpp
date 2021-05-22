@@ -134,6 +134,7 @@ public:
 	void writeTo(const std::string& d, int reqPos);
 	int writeTo(ResponseData* d);
 	int writeDirect(const std::string& d, int off = 0);
+	int writeDirect(const std::string& h, const std::string& d);
 	int writeWsData(void* d);
 	bool writeFile(int fdes, int remain_data);
 	bool isClosed();

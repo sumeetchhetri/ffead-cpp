@@ -1,7 +1,4 @@
-FROM gentoo/stage3-amd64
-
-RUN emerge-webrsync
-RUN emerge sys-devel/autoconf-archive sys-devel/autoconf sys-devel/automake sys-devel/libtool dev-db/postgresql dev-db/unixODBC curl libmemcached cmake wget netcat tar gzip zlib
+FROM sumeetchhetri/gentoo-stage3-amd64:1.0
 
 #Install libcuckoo headers
 WORKDIR /tmp

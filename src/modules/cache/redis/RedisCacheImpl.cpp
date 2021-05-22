@@ -144,6 +144,47 @@ std::vector<std::string> RedisCacheImpl::getValues(const std::vector<std::string
 	return rv;
 }
 
+bool RedisCacheImpl::setRaw(const unsigned long long& key, const std::string_view& value, int expireSeconds) {
+	redisReply* reply = execute("SET %llu %s EX %d", key, value.data(), expireSeconds<=0?defaultExpireSeconds:expireSeconds);
+	return replyStatus(reply);
+}
+bool RedisCacheImpl::addRaw(const unsigned long long& key, const std::string_view& value, int expireSeconds) {
+	redisReply* reply = execute("SET %llu %s EX %d NX", key, value.data(), expireSeconds<=0?defaultExpireSeconds:expireSeconds);
+	return replyStatus(reply);
+}
+bool RedisCacheImpl::replaceRaw(const unsigned long long& key, const std::string_view& value, int expireSeconds) {
+	redisReply* reply = execute("SET %llu %s EX %d XX", key, value.data(), expireSeconds<=0?defaultExpireSeconds:expireSeconds);
+	return replyStatus(reply);
+}
+std::string RedisCacheImpl::getValue(const unsigned long long& key) {
+	redisReply* reply = execute("GET %llu", key);
+	return replyValue(reply);
+}
+void RedisCacheImpl::getValues(const std::vector<unsigned long long>& keys, std::vector<std::string>& values) {
+	fcpstream cmd;
+	cmd << "MGET ";
+	for(int i=0;i<(int)keys.size();++i) {
+		cmd << keys.at(i);
+		if(i!=(int)keys.size()-1) {
+			cmd << " ";
+		}
+	}
+	Connection* connection = pool->checkout();
+	redisContext* c = (redisContext*) connection->getConn();
+	redisReply* reply = (redisReply*) redisCommand(c, cmd.str().c_str());
+	if (reply->type == REDIS_REPLY_ARRAY) {
+		for (int i=0; i<(int)reply->elements; ++i) {
+			values.push_back(std::string(reply->element[i]->str, reply->element[i]->len));
+		}
+	}
+	freeReplyObject(reply);
+	pool->release(connection);
+}
+bool RedisCacheImpl::remove(const unsigned long long& key) {
+	redisReply* reply = execute("DEL %llu", key);
+	return replyStatus(reply);
+}
+
 void RedisCacheImpl::mgetRaw(const std::vector<std::string>& keys, std::vector<std::string>& values) {
 	std::string cmd = "MGET ";
 	for(int i=0;i<(int)keys.size();++i) {

@@ -194,6 +194,9 @@ void* ffead_cpp_handle_crystal_picov_1(const ffead_request3 *request, int* scode
         const std::string& cnt = respo->getContent();
         *out_body = cnt.c_str();
         *out_body_len = cnt.length();
+        if(cnt.length()>0) {
+            respo->addHeader(HttpResponse::ContentLength, CastUtil::fromNumber((int)cnt.length()));
+        }
     }
     *out_headers_len = 0;
     RMap::const_iterator it = respo->getCHeaders().cbegin();

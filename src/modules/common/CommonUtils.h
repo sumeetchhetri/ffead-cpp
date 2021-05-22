@@ -57,6 +57,7 @@
 struct ClassBeanIns {
 	ClassInfo* clas;
 	void* instance;
+	bool cleanUp;
 };
 
 typedef void (*GetClassBeanIns) (std::string& clsn, std::string appn, ClassBeanIns* cbi);
@@ -73,6 +74,7 @@ class CommonUtils {
 	friend class CHServer;
 	friend class ServiceHandler;
 	static void addContext(std::string appName);
+	static int g_seed;
 public:
 	static const std::string BLANK;
 	static std::string getDateStr();
@@ -139,6 +141,25 @@ public:
 	static void printStats();
 	static std::string normalizeAppName(const std::string& appName);
 	static std::string getTpeFnName(const std::string& tpe, const std::string& appName);
+	//Copied from https://stackoverflow.com/questions/1640258/need-a-fast-random-generator-for-c
+	static inline int fastrand() {
+		g_seed = (214013*g_seed+2531011);
+		return (g_seed>>16)&0x7FFF;
+	}
+	static inline int fastrand(int& g_seed) {
+		g_seed = (214013*g_seed+2531011);
+		return (g_seed>>16)&0x7FFF;
+	}
+	//https://stackoverflow.com/questions/9631225/convert-strings-specified-by-length-not-nul-terminated-to-int-float
+	static inline bool fastStrToNum(const char* str, int len, int& ret) {
+	    ret = 0;
+	    for(int i = 0; i < len; ++i)
+	    {
+	    	if(!isdigit(str[i])) return false;
+	        ret = ret * 10 + (str[i] - '0');
+	    }
+	    return true;
+	}
 };
 
 #endif /* COMMONUTILS_H_ */

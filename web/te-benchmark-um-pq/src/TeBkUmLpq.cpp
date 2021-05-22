@@ -19,6 +19,7 @@
  *  Created on: 03-Feb-2020
  *      Author: sumeetc
  */
+
 #include "TeBkUmLpq.h"
 
 int TeBkUmLpqWorld::getId() const {
@@ -109,21 +110,19 @@ void TeBkUmLpqMessage::setMessage(const std::string& message) {
 }
 
 const std::string TeBkUmLpqRouter::HELLO_WORLD = "Hello, World!";
-std::string TeBkUmLpqRouter::WORLD = "world";
-std::string TeBkUmLpqRouter::WORLD_ONE_QUERY = "select id, randomnumber from world where id = $1";
-std::string TeBkUmLpqRouter::WORLD_ALL_QUERY = "select id, randomnumber from world";
-std::string TeBkUmLpqRouter::FORTUNE_ALL_QUERY = "select id, message from fortune";
+const std::string TeBkUmLpqRouter::WORLD = "world";
+const std::string TeBkUmLpqRouter::WORLD_ONE_QUERY = "select id, randomnumber from world where id = $1";
+const std::string TeBkUmLpqRouter::WORLD_ALL_QUERY = "select id, randomnumber from world";
+const std::string TeBkUmLpqRouter::FORTUNE_ALL_QUERY = "select id, message from fortune";
+int TeBkUmLpqRouter::g_seed = 0;
 
 void TeBkUmLpqRouter::db(TeBkUmLpqWorld& w) {
 	LibpqDataSourceImpl* sqli = getDb();
-	int rid = rand() % 10000 + 1;
-	try {
-		LibpqParams<1> pars;
-		pars.int4(rid);
-		sqli->executeQuery(WORLD_ONE_QUERY, &pars, &w, &TeBkUmLpqRouter::dbUtil);
-	} catch(const std::exception& e) {
-		throw e;
-	}
+	int rid = CommonUtils::fastrand(g_seed) % 10000 + 1;
+	LibpqQuery* q = sqli->getQuery();
+	q->withParamInt4(rid);
+	q->withSelectQuery(WORLD_ONE_QUERY).withContext(&w).withCb(&TeBkUmLpqRouter::dbUtil);
+	sqli->executeQuery();
 }
 void TeBkUmLpqRouter::dbUtil(void* ctx, int rn, int cn, char * d) {
 	TeBkUmLpqWorld* w = (TeBkUmLpqWorld*)ctx;
@@ -133,36 +132,30 @@ void TeBkUmLpqRouter::dbUtil(void* ctx, int rn, int cn, char * d) {
 
 void TeBkUmLpqRouter::queries(const char* q, int ql, std::vector<TeBkUmLpqWorld>& wlst) {
 	int queryCount = 0;
-	strToNum(q, ql, queryCount);
-	if(queryCount<1)queryCount=1;
-	else if(queryCount>500)queryCount=500;
+	CommonUtils::fastStrToNum(q, ql, queryCount);
+	queryCount = std::max(1, std::min(queryCount, 500));
 
 	wlst.reserve(queryCount);
 
 	LibpqDataSourceImpl* sqli = getDb();
 
-	LibpqParamsBase* pars = sqli->getParams(queryCount);
-	try {
-		for (int c = 0; c < queryCount; ++c) {
-			int rid = rand() % 10000 + 1;
-			pars->int4(rid);
-			wlst.emplace_back();
-			TeBkUmLpqWorld& w = wlst.back();
-			sqli->executeQuery(WORLD_ONE_QUERY, pars, &w, &TeBkUmLpqRouter::dbUtil);
-		}
-		delete pars;
-	} catch(const std::exception& e) {
-		delete pars;
-		throw e;
+	for (int c = 0; c < queryCount; ++c) {
+		int rid = CommonUtils::fastrand(g_seed) % 10000 + 1;
+		wlst.emplace_back();
+		TeBkUmLpqWorld& w = wlst.back();
+
+		LibpqQuery* q = sqli->getQuery();
+		q->withParamInt4(rid);
+		q->withSelectQuery(WORLD_ONE_QUERY).withContext(&w).withCb(&TeBkUmLpqRouter::dbUtil);
+		sqli->executeQuery();
 	}
 }
 
 
 void TeBkUmLpqRouter::queriesMulti(const char* q, int ql, std::vector<TeBkUmLpqWorld>& wlst) {
 	int queryCount = 0;
-	strToNum(q, ql, queryCount);
-	if(queryCount<1)queryCount=1;
-	else if(queryCount>500)queryCount=500;
+	CommonUtils::fastStrToNum(q, ql, queryCount);
+	queryCount = std::max(1, std::min(queryCount, 500));
 
 	wlst.reserve(queryCount);
 
@@ -172,26 +165,20 @@ void TeBkUmLpqRouter::queriesMulti(const char* q, int ql, std::vector<TeBkUmLpqW
 	updt.wlist = &wlst;
 	updt.status = true;
 
-	try {
-		std::stringstream ss;
-		for (int c = 0; c < queryCount; ++c) {
-			int rid = rand() % 10000 + 1;
-			ss << "select id, randomnumber from world where id = " << rid << ";";
-		}
-		sqli->executeMultiQuery(ss.str(), &wlst, &TeBkUmLpqRouter::queriesMultiUtil, &TeBkUmLpqRouter::updatesMultiUtilCh);
-
-		if(!updt.status) {
-			wlst.clear();
-		}
-
-	} catch(const std::exception& e) {
-		throw e;
+	std::stringstream ss;
+	for (int c = 0; c < queryCount; ++c) {
+		int rid = CommonUtils::fastrand(g_seed) % 10000 + 1;
+		ss << "select id, randomnumber from world where id = " << rid << ";";
 	}
+
+	LibpqQuery* qu = sqli->getQuery();
+	qu->withSelectQuery(ss.str()).withContext(&wlst).withCb(&TeBkUmLpqRouter::queriesMultiUtil);
+	sqli->executeMultiQuery(&TeBkUmLpqRouter::updatesMultiUtilCh);
 }
 void TeBkUmLpqRouter::queriesMultiUtil(void* ctx, int rn, int cn, char * d, int l) {
 	std::vector<TeBkUmLpqWorld>* wlst = (std::vector<TeBkUmLpqWorld>*)ctx;
 	int tmp = 0;
-	strToNum(d, l, tmp);
+	CommonUtils::fastStrToNum(d, l, tmp);
 	if(cn==0) {
 		wlst->emplace_back(tmp);
 	} else {
@@ -200,7 +187,7 @@ void TeBkUmLpqRouter::queriesMultiUtil(void* ctx, int rn, int cn, char * d, int 
 }
 
 std::string& TeBkUmLpqRouter::getUpdQuery(int count) {
-	std::map<int, std::string>::iterator it = _qC.find(count);
+	std::unordered_map<int, std::string>::iterator it = _qC.find(count);
 	if(it!=_qC.end()) {
 		return it->second;
 	}
@@ -222,111 +209,110 @@ std::string& TeBkUmLpqRouter::getUpdQuery(int count) {
 	std::string q = ss.str();
 	q = q.substr(0, q.length()-1);
 	q += ")";
+
 	_qC[count] = std::move(q);
 	return _qC[count];
 }
 
 void TeBkUmLpqRouter::updates(const char* q, int ql, std::vector<TeBkUmLpqWorld>& wlst) {
 	int queryCount = 0;
-	strToNum(q, ql, queryCount);
-	if(queryCount<1)queryCount=1;
-	else if(queryCount>500)queryCount=500;
+	CommonUtils::fastStrToNum(q, ql, queryCount);
+	queryCount = std::max(1, std::min(queryCount, 500));
 
 	wlst.reserve(queryCount);
 
 	LibpqDataSourceImpl* sqli = getDb();
 
-	LibpqParamsBase* pars = sqli->getParams(queryCount*3);
-	try {
-		std::string& query = getUpdQuery(queryCount);
+	std::string& query = getUpdQuery(queryCount);
 
-		for (int c = 0; c < queryCount; ++c) {
-			int rid = rand() % 10000 + 1;
-			LibpqParams<1> qp;
-			qp.int4(rid);
-			wlst.emplace_back();
-			TeBkUmLpqWorld& w = wlst.back();
-			sqli->executeQuery(WORLD_ONE_QUERY, &qp, &w, &TeBkUmLpqRouter::dbUtil);
+	for (int c = 0; c < queryCount; ++c) {
+		int rid = CommonUtils::fastrand(g_seed) % 10000 + 1;
+		wlst.emplace_back();
+		TeBkUmLpqWorld& w = wlst.back();
 
-			pars->int4(w.getId());
+		LibpqQuery* q = sqli->getQuery();
+		q->withParamInt4(rid);
+		q->withSelectQuery(WORLD_ONE_QUERY).withContext(&w).withCb(&TeBkUmLpqRouter::dbUtil);
+		sqli->executeQuery();
 
-			int newRandomNumber = rand() % 10000 + 1;
-			if(w.getRandomNumber() == newRandomNumber) {
-				newRandomNumber += 1;
-				if(newRandomNumber>=10000) {
-					newRandomNumber = 1;
-				}
+		int newRandomNumber = CommonUtils::fastrand(g_seed) % 10000 + 1;
+		if(w.getRandomNumber() == newRandomNumber) {
+			newRandomNumber += 1;
+			if(newRandomNumber>=10000) {
+				newRandomNumber = 1;
 			}
-			pars->int4(newRandomNumber);
-			w.setRandomNumber(newRandomNumber);
 		}
-		for(std::vector<TeBkUmLpqWorld>::iterator it=wlst.begin(); it != wlst.end(); ++it) {
-			pars->int4((*it).getId());
-		}
-		
-		sqli->begin();
-		sqli->executeUpdateQuery(query, pars);
-		sqli->commit();
-		delete pars;
-	} catch(const std::exception& e) {
-		delete pars;
-		sqli->rollback();
-		throw e;
+		w.setRandomNumber(newRandomNumber);
 	}
+
+	LibpqQuery* qu = sqli->getQuery();
+	qu->withUpdateQuery(query);
+	for(std::vector<TeBkUmLpqWorld>::iterator it=wlst.begin(); it != wlst.end(); ++it) {
+		qu->withParamInt4((*it).getId());
+		qu->withParamInt4((*it).getRandomNumber());
+	}
+	for(std::vector<TeBkUmLpqWorld>::iterator it=wlst.begin(); it != wlst.end(); ++it) {
+		qu->withParamInt4((*it).getId());
+	}
+
+	sqli->begin();
+	sqli->executeUpdateQuery();
+	sqli->commit();
 }
 
 void TeBkUmLpqRouter::updatesMulti(const char* q, int ql, std::vector<TeBkUmLpqWorld>& wlst) {
 	int queryCount = 0;
-	strToNum(q, ql, queryCount);
-	if(queryCount<1)queryCount=1;
-	else if(queryCount>500)queryCount=500;
+	CommonUtils::fastStrToNum(q, ql, queryCount);
+	queryCount = std::max(1, std::min(queryCount, 500));
 
 	wlst.reserve(queryCount);
 
 	LibpqDataSourceImpl* sqli = getDb();
 
-	try {
-		std::stringstream ss, ssq;
-		//ss << "begin;update world as t set randomnumber = c.randomnumber from (values";
+	std::stringstream ssq;
+	UpdQrData updt;
+	updt.wlist = &wlst;
+	updt.status = true;
+	updt.queryCount = queryCount;
 
-		UpdQrData updt;
-		updt.wlist = &wlst;
-		updt.ss = &ss;
-		updt.status = true;
-		updt.queryCount = queryCount;
+	updt.ss << "begin;update world as t set randomnumber = case id ";
+	//ss << "begin;";//this creates a deadlock issue (like, DETAIL:  Process 16 waits for ShareLock on transaction 995; blocked by process 19.)
 
-		for (int c = 0; c < queryCount; ++c) {
-			int rid = rand() % 10000 + 1;
-			ssq << "select id, randomnumber from world where id = " << rid << ";";
-		}
-
-		sqli->executeMultiQuery(ssq.str(), &updt, &TeBkUmLpqRouter::updatesMultiUtil, &TeBkUmLpqRouter::updatesMultiUtilCh);
-		//ss << ") as c(id, randomnumber) where c.id = t.id;commit";
-
-		if(!updt.status) {
-			return;
-		}
-
-		sqli->executeUpdateMultiQuery(ss.str(), &updt, &TeBkUmLpqRouter::updatesMultiUtilCh);
-
-		if(!updt.status) {
-			wlst.clear();
-		}
-	} catch(const std::exception& e) {
-		sqli->rollback();
-		throw e;
+	for (int c = 0; c < queryCount; ++c) {
+		int rid = CommonUtils::fastrand(g_seed) % 10000 + 1;
+		ssq << "select id, randomnumber from world where id = " << rid << ";";
 	}
+
+	LibpqQuery* qu = sqli->getQuery();
+	qu->withSelectQuery(ssq.str()).withContext(&updt).withCb(&TeBkUmLpqRouter::updatesMultiUtil);
+	sqli->executeMultiQuery(&TeBkUmLpqRouter::updatesMultiUtilCh);
+
+	if(!updt.status) {
+		return;
+	}
+
+	updt.ss << "else randomnumber end where id in (";
+	for (int c = 0; c < queryCount; ++c) {
+		updt.ss << wlst.at(c).getId();
+		if(c<queryCount-1) {
+			updt.ss << ",";
+		}
+	}
+	updt.ss << ");commit;";
+
+	qu = sqli->getQuery();
+	qu->withUpdateQuery(updt.ss.str()).withContext(&updt);
+	sqli->executeUpdateMultiQuery(&TeBkUmLpqRouter::updatesMultiUtilCh);
 }
 void TeBkUmLpqRouter::updatesMultiUtil(void* ctx, int rn, int cn, char * d, int l) {
 	UpdQrData* updt = (UpdQrData*)ctx;
-	std::stringstream* ss = updt->ss;
 	int tmp = 0;
-	strToNum(d, l, tmp);
+	CommonUtils::fastStrToNum(d, l, tmp);
 	if(cn==0) {
 		updt->wlist->emplace_back(tmp);
 	} else {
 		TeBkUmLpqWorld& w = updt->wlist->back();
-		int newRandomNumber = rand() % 10000 + 1;
+		int newRandomNumber = CommonUtils::fastrand(g_seed) % 10000 + 1;
 		if(tmp == newRandomNumber) {
 			newRandomNumber += 1;
 			if(newRandomNumber>=10000) {
@@ -334,35 +320,34 @@ void TeBkUmLpqRouter::updatesMultiUtil(void* ctx, int rn, int cn, char * d, int 
 			}
 		}
 		w.setRandomNumber(newRandomNumber);
-		*ss << "begin;update world set randomnumber = " << newRandomNumber << " where id = " << w.getId() << ";commit;";
+		updt->ss << "when ";
+		updt->ss << w.getId();
+		updt->ss << " then ";
+		updt->ss << newRandomNumber;
 	}
 }
 void TeBkUmLpqRouter::updatesMultiUtilCh(void* ctx, bool status, const std::string& query, int counter) {
 	UpdQrData* updt = (UpdQrData*)ctx;
-	if(!status) {
-		updt->status = status;
-	}
+	updt->status = status;
 }
 
 void TeBkUmLpqRouter::updateCache() {
 	CacheInterface* cchi = CacheManager::getImpl();
 	LibpqDataSourceImpl* sqli = getDb();
 
-	try {
-		std::vector<TeBkUmLpqWorld> wlist;
-		sqli->executeQuery(WORLD_ALL_QUERY, NULL, &wlist, &TeBkUmLpqRouter::updateCacheUtil);
+	std::vector<TeBkUmLpqWorld> wlist;
 
-		for(std::vector<TeBkUmLpqWorld>::iterator it=wlist.begin(); it != wlist.end(); ++it) {
-			char str[12];
-			sprintf(str, "%d;%d", (*it).getId(), (*it).getRandomNumber());
-			cchi->setRaw(CastUtil::fromNumber((*it).getId()), str);
-		}
-		CacheManager::cleanImpl(cchi);
-		CacheManager::triggerAppInitCompletion();
-	} catch(const std::exception& e) {
-		CacheManager::cleanImpl(cchi);
-		throw e;
+	LibpqQuery* q = sqli->getQuery();
+	q->withSelectQuery(WORLD_ALL_QUERY, false).withContext(&wlist).withCb(&TeBkUmLpqRouter::updateCacheUtil);
+	sqli->executeQuery();
+
+	for(std::vector<TeBkUmLpqWorld>::iterator it=wlist.begin(); it != wlist.end(); ++it) {
+		char str[12];
+		sprintf(str, "%d;%d", (*it).getId(), (*it).getRandomNumber());
+		cchi->setRaw((*it).getId(), str);
 	}
+	CacheManager::cleanImpl(cchi);
+	CacheManager::triggerAppInitCompletion();
 }
 void TeBkUmLpqRouter::updateCacheUtil(void* ctx, int rn, std::vector<LibpqRes>& data) {
 	std::vector<TeBkUmLpqWorld>* wlist = (std::vector<TeBkUmLpqWorld>*)ctx;
@@ -371,58 +356,53 @@ void TeBkUmLpqRouter::updateCacheUtil(void* ctx, int rn, std::vector<LibpqRes>& 
 
 void TeBkUmLpqRouter::cachedWorlds(const char* q, int ql, std::vector<TeBkUmLpqWorld>& wlst) {
 	int queryCount = 0;
-	strToNum(q, ql, queryCount);
-	if(queryCount<1)queryCount=1;
-	else if(queryCount>500)queryCount=500;
+	CommonUtils::fastStrToNum(q, ql, queryCount);
+	queryCount = std::max(1, std::min(queryCount, 500));
 
 	wlst.reserve(queryCount);
 
 	CacheInterface* cchi = CacheManager::getImpl();
 
-	try {
-		std::vector<std::string> keys, values;
-		for (int c = 0; c < queryCount; ++c) {
-			int rid = rand() % 10000 + 1;
-			keys.emplace_back(CastUtil::fromNumber(rid));
-		}
-		cchi->mgetRaw(keys, values);
-		for (int c = 0; c < queryCount; ++c) {
-			std::string& v = values.at(c);
-			size_t fn = v.find(";");
-			int tmp = 0;
-			strToNum(v.substr(0, fn).c_str(), fn, tmp);
-			int tmp1 = 0;
-			strToNum(v.substr(fn+1).c_str(), v.length()-fn-1, tmp1);
-			wlst.emplace_back(tmp, tmp1);
-		}
-		CacheManager::cleanImpl(cchi);
-	} catch(const std::exception& e) {
-		CacheManager::cleanImpl(cchi);
-		throw e;
+	std::vector<unsigned long long> keys;
+	for (int c = 0; c < queryCount; ++c) {
+		keys.emplace_back(CommonUtils::fastrand(g_seed) % 10000 + 1);
 	}
+	std::vector<std::string> values;
+	cchi->getValues(keys, values);
+	for (int c = 0; c < queryCount; ++c) {
+		std::string& v = values.at(c);
+		size_t fn = v.find(";");
+		int tmp = 0;
+		CommonUtils::fastStrToNum(v.substr(0, fn).c_str(), fn, tmp);
+		int tmp1 = 0;
+		CommonUtils::fastStrToNum(v.substr(fn+1).c_str(), v.length()-fn-1, tmp1);
+		wlst.emplace_back(tmp, tmp1);
+	}
+	CacheManager::cleanImpl(cchi);
 }
 
-void TeBkUmLpqRouter::handleTemplate(HttpResponse* res) {
+void TeBkUmLpqRouter::handleTemplate(HttpRequest* req, HttpResponse* res, SocketInterface* sif) {
 	LibpqDataSourceImpl* sqli = getDb();
 
-	try {
-		Context ctx;
-		std::list<TeBkUmLpqFortune> flst;
-		sqli->executeQuery(FORTUNE_ALL_QUERY, NULL, &flst, &TeBkUmLpqRouter::getContextUtil);
+	Context ctx;
+	std::list<TeBkUmLpqFortune> flst;
 
-		flst.emplace_back(0, "Additional fortune added at request time.");
-		flst.sort();
+	LibpqQuery* q = sqli->getQuery();
+	q->withSelectQuery(FORTUNE_ALL_QUERY).withContext(&flst).withCb(&TeBkUmLpqRouter::getContextUtil);
+	sqli->executeQuery();
 
-		ctx.insert(std::pair<std::string, void*>("fortunes", &flst));
 
-		fcpstream str;
-		tmplFunc(&ctx, str);
-		res->setContent(str.str());
-		res->setContentType(ContentTypes::CONTENT_TYPE_TEXT_SHTML);
-		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-	} catch(...) {
-		throw;
-	}
+	flst.emplace_back(0, "Additional fortune added at request time.");
+	flst.sort();
+
+	ctx.emplace("fortunes", &flst);
+
+	fcpstream str;
+	tmplFunc(&ctx, str);
+	std::string out = str.str();
+	std::string h;
+	res->httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_TEXT_HTML, req->getHttpVers(), req->isClose(), out.length());
+	sif->writeDirect(h, out);
 }
 void TeBkUmLpqRouter::getContextUtil(void* ctx, int rn, int cn, char * d, int l) {
 	std::list<TeBkUmLpqFortune>* flst = (std::list<TeBkUmLpqFortune>*)ctx;
@@ -434,81 +414,72 @@ void TeBkUmLpqRouter::getContextUtil(void* ctx, int rn, int cn, char * d, int l)
 	}
 }
 
-//https://stackoverflow.com/questions/9631225/convert-strings-specified-by-length-not-nul-terminated-to-int-float
-bool TeBkUmLpqRouter::strToNum(const char* str, int len, int& ret) {
-    ret = 0;
-    for(int i = 0; i < len; ++i)
-    {
-    	if(!isdigit(str[i])) return false;
-        ret = ret * 10 + (str[i] - '0');
-    }
-    return true;
-}
-
+//Do not use this class with non-embedded servers as it needs access to the underlying socket
+//and writes the response directly to the socket, use TeBkUmLpqRouterPicoV for all lang-server implementations
 bool TeBkUmLpqRouter::route(HttpRequest* req, HttpResponse* res, SocketInterface* sif) {
+	std::string h;
 	if(StringUtil::endsWith(req->getPath(), "/plaintext")) {
-		res->setContent(HELLO_WORLD);
-		res->setContentType(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+		res->httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_TEXT_PLAIN, (int)HELLO_WORLD.length());
+		sif->writeDirect(h, HELLO_WORLD);
 	} else if(StringUtil::endsWith(req->getPath(), "/json")) {
 		TeBkUmLpqMessage msg;
 		msg.setMessage(HELLO_WORLD);
 		JSONSerialize::serializeObject(&msg, m_ser, res->getContentP());
-		res->setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
-		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+		res->httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+		sif->writeDirect(h, res->getContent());
 	} else if(StringUtil::endsWith(req->getPath(), "/db")) {
 		TeBkUmLpqWorld msg;
 		db(msg);
 		JSONSerialize::serializeObject(&msg, w_ser, res->getContentP());
-		res->setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
-		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-	} else if(StringUtil::endsWith(req->getPath(), "/queries_old")) {
+		res->httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->getHttpVers(), req->isClose());
+		sif->writeDirect(h, res->getContent());
+	} else if(StringUtil::endsWith(req->getPath(), "/querie_")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;
 		queries(params[0].val, params[0].val_len, msg);
 		JSONSerialize::serializeObjectCont(&msg, wcont_ser, "vector", res->getContentP());
-		res->setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
-		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+		res->httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->getHttpVers(), req->isClose());
+		sif->writeDirect(h, res->getContent());
 	} else if(StringUtil::endsWith(req->getPath(), "/queries")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;
 		queriesMulti(params[0].val, params[0].val_len, msg);
 		JSONSerialize::serializeObjectCont(&msg, wcont_ser, "vector", res->getContentP());
-		res->setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
-		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+		res->httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->getHttpVers(), req->isClose());
+		sif->writeDirect(h, res->getContent());
 	} else if(StringUtil::endsWith(req->getPath(), "/fortunes")) {
-		handleTemplate(res);
-	} else if(StringUtil::endsWith(req->getPath(), "/bupdates")) {
+		handleTemplate(req, res, sif);
+	} else if(StringUtil::endsWith(req->getPath(), "/update_")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;
 		updates(params[0].val, params[0].val_len, msg);
 		JSONSerialize::serializeObjectCont(&msg, wcont_ser, "vector", res->getContentP());
-		res->setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
-		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+		res->httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->getHttpVers(), req->isClose());
+		sif->writeDirect(h, res->getContent());
 	} else if(StringUtil::endsWith(req->getPath(), "/updates")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;
 		updatesMulti(params[0].val, params[0].val_len, msg);
 		JSONSerialize::serializeObjectCont(&msg, wcont_ser, "vector", res->getContentP());
-		res->setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
-		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+		res->httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->getHttpVers(), req->isClose());
+		sif->writeDirect(h, res->getContent());
 	} else if(StringUtil::endsWith(req->getPath(), "/cached-worlds")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;
 		cachedWorlds(params[0].val, params[0].val_len, msg);
 		JSONSerialize::serializeObjectCont(&msg, wcont_ser, "vector", res->getContentP());
-		res->setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
-		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+		res->httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->getHttpVers(), req->isClose());
+		sif->writeDirect(h, res->getContent());
 	} else {
-		res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
+		res->httpStatus(HTTPResponseStatus::NotFound).generateHeadResponse(h, req->getHttpVers(), true);
+		sif->writeDirect(h);
 	}
-	res->setDone(true);
-	return true;
+	return false;
 }
 
 TemplatePtr TeBkUmLpqRouter::tmplFunc;
@@ -532,4 +503,88 @@ LibpqDataSourceImpl* TeBkUmLpqRouter::getDb() {
 		sqli = static_cast<LibpqDataSourceImpl*>(DataSourceManager::getRawImpl("PostgreSQL-DSN", "te-benchmark-um-pq"));
 	}
 	return sqli;
+}
+
+TeBkUmLpqRouterPicoV::TeBkUmLpqRouterPicoV() {
+}
+
+TeBkUmLpqRouterPicoV::~TeBkUmLpqRouterPicoV() {
+}
+
+void TeBkUmLpqRouterPicoV::handleTemplate(HttpResponse* res) {
+	LibpqDataSourceImpl* sqli = getDb();
+
+	Context ctx;
+	std::list<TeBkUmLpqFortune> flst;
+
+	LibpqQuery* q = sqli->getQuery();
+	q->withSelectQuery(FORTUNE_ALL_QUERY).withContext(&flst).withCb(&TeBkUmLpqRouter::getContextUtil);
+	sqli->executeQuery();
+
+
+	flst.emplace_back(0, "Additional fortune added at request time.");
+	flst.sort();
+
+	ctx.emplace("fortunes", &flst);
+
+	fcpstream str;
+	tmplFunc(&ctx, str);
+	res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_TEXT_HTML).setContent(str.str());
+}
+
+bool TeBkUmLpqRouterPicoV::route(HttpRequest *req, HttpResponse *res, SocketInterface *sif) {
+	if(StringUtil::endsWith(req->getPath(), "/plaintext")) {
+		res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_TEXT_PLAIN).setContent(HELLO_WORLD);
+	} else if(StringUtil::endsWith(req->getPath(), "/json")) {
+		TeBkUmLpqMessage msg;
+		msg.setMessage(HELLO_WORLD);
+		JSONSerialize::serializeObject(&msg, m_ser, res->getContentP());
+		res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+	} else if(StringUtil::endsWith(req->getPath(), "/db")) {
+		TeBkUmLpqWorld msg;
+		db(msg);
+		JSONSerialize::serializeObject(&msg, w_ser, res->getContentP());
+		res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+	} else if(StringUtil::endsWith(req->getPath(), "/querie_")) {
+		struct yuarel_param params[1];
+		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
+		std::vector<TeBkUmLpqWorld> msg;
+		queries(params[0].val, params[0].val_len, msg);
+		JSONSerialize::serializeObjectCont(&msg, wcont_ser, "vector", res->getContentP());
+		res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+	} else if(StringUtil::endsWith(req->getPath(), "/queries")) {
+		struct yuarel_param params[1];
+		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
+		std::vector<TeBkUmLpqWorld> msg;
+		queriesMulti(params[0].val, params[0].val_len, msg);
+		JSONSerialize::serializeObjectCont(&msg, wcont_ser, "vector", res->getContentP());
+		res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+	} else if(StringUtil::endsWith(req->getPath(), "/fortunes")) {
+		handleTemplate(res);
+	} else if(StringUtil::endsWith(req->getPath(), "/update_")) {
+		struct yuarel_param params[1];
+		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
+		std::vector<TeBkUmLpqWorld> msg;
+		updates(params[0].val, params[0].val_len, msg);
+		JSONSerialize::serializeObjectCont(&msg, wcont_ser, "vector", res->getContentP());
+		res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+	} else if(StringUtil::endsWith(req->getPath(), "/updates")) {
+		struct yuarel_param params[1];
+		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
+		std::vector<TeBkUmLpqWorld> msg;
+		updatesMulti(params[0].val, params[0].val_len, msg);
+		JSONSerialize::serializeObjectCont(&msg, wcont_ser, "vector", res->getContentP());
+		res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+	} else if(StringUtil::endsWith(req->getPath(), "/cached-worlds")) {
+		struct yuarel_param params[1];
+		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
+		std::vector<TeBkUmLpqWorld> msg;
+		cachedWorlds(params[0].val, params[0].val_len, msg);
+		JSONSerialize::serializeObjectCont(&msg, wcont_ser, "vector", res->getContentP());
+		res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+	} else {
+		res->httpStatus(HTTPResponseStatus::NotFound);
+	}
+	res->setDone(true);
+	return true;
 }

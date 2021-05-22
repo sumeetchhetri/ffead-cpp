@@ -109,7 +109,9 @@ void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping
 			} catch(const std::exception& e) {
 				logger.info("Error during init call for Datasource " + mapping.getAppName() + "@" + props.getName() + " " + std::string(e.what()));
 			}
-			ref->destroy(_temp, v.at(0), appName);
+			if(cbi.cleanUp) {
+				ref->destroy(_temp, v.at(0), appName);
+			}
 		}
 	}
 }

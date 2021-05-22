@@ -267,6 +267,15 @@ bool SocketInterface::isCurrentRequest(int reqp) {
 	return reqp == (current + 1);
 }
 
+int SocketInterface::writeDirect(const std::string& h, const std::string& d) {
+	int res = writeDirect(h);
+	if(res>0) {
+		res = writeDirect(d);
+		return 1;
+	}
+	return res;
+}
+
 int SocketInterface::writeDirect(const std::string& d, int off) {
 	if(ssl==NULL) {
 		int er = send(fd, &d[off] , d.length()-off, 0);
@@ -389,7 +398,7 @@ bool SocketInterface::writeFile(int fdes, int remain_data)
 			return false;
 		}
 
-		void *p = buffer;
+		char *p = buffer;
 		while (bytes_read > 0) {
 			int bytes_written = write(fd, p, bytes_read);
 			if (bytes_read == 0) {

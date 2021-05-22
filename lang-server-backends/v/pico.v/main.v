@@ -20,6 +20,7 @@ import picohttpparser
 import flag
 
 #flag -I ./
+//#flag ffead-cpp-util.o
 #include "ffead-cpp.h"
 #flag -lffead-framework
 
@@ -29,6 +30,8 @@ fn C.ffead_cpp_bootstrap(byteptr, u64, int)
 fn C.ffead_cpp_init()
 //no args
 fn C.ffead_cpp_cleanup()
+
+fn C.fc_memcpy(voidptr, byteptr, u64) byteptr
 
 struct C.ffead_request3 {
 pub mut:
@@ -58,10 +61,19 @@ fn C.ffead_cpp_handle_crystal_picov_1(&C.ffead_request3, &int, &string, &u64, &s
 fn C.ffead_cpp_resp_cleanup(voidptr)
 
 
-fn cpy_str_1(dst byteptr, src string) int {
-	unsafe {C.memcpy(dst, src.str, src.len)}
-	return src.len
+fn cpy_str_1(dst byteptr, src string) byteptr {
+	/*unsafe {
+		C.memcpy(dst, src.str, src.len)
+		dst += src.len
+	}*/
+	return C.fc_memcpy(dst, src.str, src.len)
 }
+
+const (
+	hdr_sep = ': '
+	hdr_del = '\r\n'
+	hdr_end = '\r\n\r\n'
+)
 
 fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 	/*$if debug {
@@ -81,8 +93,8 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 	}*/
 	
  	freq := C.ffead_request3{
-	    server_str: 'picov'.str
-	    server_str_len: u64(5)
+	    //server_str: 'picov'.str
+	    //server_str_len: u64(5)
 	    method: req.method.str
 	    method_len: u64(req.method.len)
 	    path: req.path.str
@@ -114,9 +126,11 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 	}*/
 
 	if scode > 0 {
-		smsg = tos(smsg.str, int(smsg_len))
-		unsafe {
-			res.buf += cpy_str_1(res.buf, "HTTP/1.1 ${scode} ${smsg}\r\n")
+		if scode == 200 {
+			res.http_ok()
+		} else {
+			smsg = tos(smsg.str, int(smsg_len))
+			res.buf = cpy_str_1(res.buf, "HTTP/1.1 ${scode} ${smsg}\r\n")
 		}
 		res.header_server()
 		res.header_date()
@@ -125,15 +139,24 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 			if j == int(headers_len) {
 				break
 			}
-			k := tos(req.headers[j].name, int(req.headers[j].name_len))
-			v := tos(req.headers[j].value, int(req.headers[j].value_len))
-			unsafe {
-				res.buf += cpy_str_1(res.buf, "${k}: ${v}\r\n")
-			}
+			
+			res.buf = C.fc_memcpy(res.buf, req.headers[j].name, req.headers[j].name_len)
+			res.buf = C.fc_memcpy(res.buf, hdr_sep.str, hdr_sep.len)
+			res.buf = C.fc_memcpy(res.buf, req.headers[j].value, req.headers[j].value_len)
+			res.buf = C.fc_memcpy(res.buf, hdr_del.str, hdr_del.len)
+			
+			//k := tos(req.headers[j].name, int(req.headers[j].name_len))
+			//v := tos(req.headers[j].value, int(req.headers[j].value_len))
+			//res.buf = cpy_str_1(res.buf, "${k}: ${v}\r\n")
 			j = j + 1
 		}
-		out_body = tos(out_body.str, int(out_body_len))
-		res.body(out_body)
+		
+		res.buf = C.fc_memcpy(res.buf, hdr_end.str, hdr_end.len)
+		res.buf = C.fc_memcpy(res.buf, out_body.str, out_body_len)
+		
+		//out_body = tos(out_body.str, int(out_body_len))
+		//res.body(out_body)
+		
 		C.ffead_cpp_resp_cleanup(resp)
 	} else {
 		out_mime = tos(out_mime.str, int(out_mime_len))

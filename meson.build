@@ -279,6 +279,10 @@ if cc.has_header('execinfo.h')
 	conf_data.set('HAVE_EXECINFOINC', 1)
 endif
 
+if cc.has_header('sys/sendfile.h')
+	conf_data.set('IS_SENDFILE', 1)
+endif
+
 #message(conf_data.keys())
 
 configure_file(input : 'src/modules/common/AppDefines.meson.h.in', output : 'AppDefines.h', configuration : conf_data)

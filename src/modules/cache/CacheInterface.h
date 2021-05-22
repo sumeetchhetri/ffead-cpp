@@ -28,6 +28,11 @@
 #include "map"
 #include "ConnectionPooler.h"
 
+class ToString {
+public:
+	virtual void toString(std::string& out)=0;
+};
+
 class CacheInterface {
 	friend class CacheManager;
 protected:
@@ -48,7 +53,8 @@ public:
 
 	bool set(const std::string& key, const short& value, int expireSeconds = -1);
 	bool add(const std::string& key, const short& value, int expireSeconds = -1);
-	bool replace(const std::string& key, const short& value, int expireSeconds = -1);
+	bool replace(const std::string& key, const short& value, int expireSeconds = -1)
+	;
 	bool set(const std::string& key, const unsigned short& value, int expireSeconds = -1);
 	bool add(const std::string& key, const unsigned short& value, int expireSeconds = -1);
 	bool replace(const std::string& key, const unsigned short& value, int expireSeconds = -1);
@@ -56,6 +62,7 @@ public:
 	bool set(const std::string& key, const int& value, int expireSeconds = -1);
 	bool add(const std::string& key, const int& value, int expireSeconds = -1);
 	bool replace(const std::string& key, const int& value, int expireSeconds = -1);
+
 	bool set(const std::string& key, const unsigned int& value, int expireSeconds = -1);
 	bool add(const std::string& key, const unsigned int& value, int expireSeconds = -1);
 	bool replace(const std::string& key, const unsigned int& value, int expireSeconds = -1);
@@ -63,6 +70,7 @@ public:
 	bool set(const std::string& key, const long& value, int expireSeconds = -1);
 	bool add(const std::string& key, const long& value, int expireSeconds = -1);
 	bool replace(const std::string& key, const long& value, int expireSeconds = -1);
+
 	bool set(const std::string& key, const unsigned long& value, int expireSeconds = -1);
 	bool add(const std::string& key, const unsigned long& value, int expireSeconds = -1);
 	bool replace(const std::string& key, const unsigned long& value, int expireSeconds = -1);
@@ -70,6 +78,7 @@ public:
 	bool set(const std::string& key, const long long& value, int expireSeconds = -1);
 	bool add(const std::string& key, const long long& value, int expireSeconds = -1);
 	bool replace(const std::string& key, const long long& value, int expireSeconds = -1);
+
 	bool set(const std::string& key, const unsigned long long& value, int expireSeconds = -1);
 	bool add(const std::string& key, const unsigned long long& value, int expireSeconds = -1);
 	bool replace(const std::string& key, const unsigned long long& value, int expireSeconds = -1);
@@ -81,6 +90,7 @@ public:
 	bool set(const std::string& key, const double& value, int expireSeconds = -1);
 	bool add(const std::string& key, const double& value, int expireSeconds = -1);
 	bool replace(const std::string& key, const double& value, int expireSeconds = -1);
+
 	bool set(const std::string& key, const long double& value, int expireSeconds = -1);
 	bool add(const std::string& key, const long double& value, int expireSeconds = -1);
 	bool replace(const std::string& key, const long double& value, int expireSeconds = -1);
@@ -88,6 +98,13 @@ public:
 	bool set(const std::string& key, const bool& value, int expireSeconds = -1);
 	bool add(const std::string& key, const bool& value, int expireSeconds = -1);
 	bool replace(const std::string& key, const bool& value, int expireSeconds = -1);
+
+	virtual bool setRaw(const unsigned long long& key, const std::string_view& value, int expireSeconds = -1)=0;
+	virtual bool addRaw(const unsigned long long& key, const std::string_view& value, int expireSeconds = -1)=0;
+	virtual bool replaceRaw(const unsigned long long& key, const std::string_view& value, int expireSeconds = -1)=0;
+	virtual std::string getValue(const unsigned long long& key)=0;
+	virtual void getValues(const std::vector<unsigned long long>& keys, std::vector<std::string>& values)=0;
+	virtual bool remove(const unsigned long long& key)=0;
 
 	virtual bool set(const std::string& key, GenericObject& value, int expireSeconds)=0;
 	virtual bool add(const std::string& key, GenericObject& value, int expireSeconds)=0;

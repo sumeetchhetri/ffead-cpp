@@ -377,6 +377,10 @@ void Reflection::handleNamespace(std::string data, std::string namepsc, std::map
 		StringUtil::split(results, temp, (" "));
 		std::string classN,baseClassN,bcvisib,namSpc;
 		classN = results.at(0);
+		if(classN.find(";")!=std::string::npos) {
+			handleNamespace(data.substr(data.find(";")+1), namepsc, clsvec, glbnmspcs, pragmas);
+			return;//Ignore forward declarations
+		}
 		namSpc = namepsc;
 		if(results.size()>=3)
 		{
@@ -475,7 +479,7 @@ void Reflection::handleNamespace(std::string data, std::string namepsc, std::map
 			}
 		}
 		handleNamespace(sdata, namepsc, clsvec, glbnmspcs, pragmas);
-		handleNamespace(data.substr(data.find(" class ")), namepsc, clsvec, glbnmspcs, pragmas);
+		handleNamespace(data.substr(data.find(" class ")+1), namepsc, clsvec, glbnmspcs, pragmas);
 		pragmas.clear();
 	}
 	else if(clsvec.find(namepsc)!=clsvec.end())
@@ -782,7 +786,7 @@ std::map<std::string, ClassStructure, std::less<> > Reflection::getClassStructur
 				StringUtil::trim(data);
 				if(RegexUtil::find(data, "[ \t]*virtual[ \t]*[a-zA-Z0-9_]+")!=-1)
 				{
-					return clsvec;
+					//return clsvec;
 				}
 
 				allcont.append(data);
@@ -1146,7 +1150,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 					std::string typdefName,methsd,valsd,valsa,valsades;
 					//bool ctor = false;
 					if(methpm.size()>0 && methpm.at(0).find("virtual")!=std::string::npos)
-						return "";
+						methpm[0] = StringUtil::replaceFirstCopy(methpm.at(0), "virtual ", "");
 					//for(unsigned int j = 0; j < methpm.size(); j++)
 					{
 						if(methpm.at(0)==classStructure.getTreatedClassName(false))
@@ -1874,7 +1878,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 				std::string typdefName,methsd,valsd,valsa;
 				//bool ctor = false;
 				if(methpm.size()>0 && methpm.at(0).find("virtual")!=std::string::npos)
-					return "";
+					methpm[0] = StringUtil::replaceFirstCopy(methpm.at(0), "virtual ", "");
 
 				bool tmpltarg = false;
 				for(unsigned int j = 0; j < argpm.size(); j++)
@@ -2057,7 +2061,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 				std::string typdefName,methsd,valsd,valsa;
 				//bool ctor = false;
 				if(methpm.size()>0 && methpm.at(0).find("virtual")!=std::string::npos)
-					return "";
+					methpm[0] = StringUtil::replaceFirstCopy(methpm.at(0), "virtual ", "");
 
 				bool tmpltarg = false;
 				for(unsigned int j = 0; j < argpm.size(); j++)

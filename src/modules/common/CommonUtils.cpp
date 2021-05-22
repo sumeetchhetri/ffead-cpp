@@ -54,6 +54,7 @@ std::atomic<long long> CommonUtils::tsContRstSer = 0;
 std::atomic<long long> CommonUtils::cSocks = 0;
 std::atomic<long long> CommonUtils::cReqs = 0;
 std::atomic<long long> CommonUtils::cResps = 0;
+int CommonUtils::g_seed = 0;
 
 const char* CommonUtils::dateStr;
 

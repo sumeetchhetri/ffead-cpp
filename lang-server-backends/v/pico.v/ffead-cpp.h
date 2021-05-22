@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <stddef.h>
+#include <string.h>
 
 typedef struct ffead_request3 {
     const char* server_str;
@@ -38,6 +39,11 @@ typedef struct ffead_request3 {
 
 typedef struct ffead_request3 ffead_request3_t;
 
+inline void* fc_memcpy(void* ptr, char* c, size_t len) {
+	memcpy(ptr, (const void *)c, len);
+	ptr += len;
+	return ptr;
+}
 extern void ffead_cpp_resp_cleanup(void* ptr);
 extern void ffead_cpp_bootstrap(const char* srv, size_t srv_len, int type);
 extern void ffead_cpp_init();

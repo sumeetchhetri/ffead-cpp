@@ -50,7 +50,8 @@ public:
 	HttpResponse();
 	virtual ~HttpResponse();
     std::string getHttpVersion() const;
-    void setHTTPResponseStatus(HTTPResponseStatus& status);
+    HttpResponse& setHTTPResponseStatus(HTTPResponseStatus& status);
+    HttpResponse& httpStatus(HTTPResponseStatus& status);
     std::string getStatusCode() const;
     int getCode() const;
     const std::string& getStatusMsg();
@@ -62,7 +63,7 @@ public:
 	void addCookie(const std::string& cookie);
     void addContent(const MultipartContent& content);
     void addHeaderValue(std::string header, const std::string& value);
-    void setContentType(const std::string& value);
+    HttpResponse& setContentType(const std::string& value);
     bool hasHeader(const std::string& header);
     bool isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase= true);
     bool isNonBinary();
@@ -84,10 +85,10 @@ public:
 	void setUrl(const std::string& url);
 	const std::string& getUrl();
 	void addHeader(std::string header, const std::string& value);
-	void generateHeadResponse(std::string& resp);
-	void generateHeadResponse(std::string& resp, float httpVers, bool conn_clos);
-	void generateHeadResponse(std::string& resp, std::string& contentType, int content_length = -1);
-	void generateHeadResponse(std::string& resp, std::string& contentType, float httpVers, bool conn_clos, int content_length = -1);
+	HttpResponse& generateHeadResponse(std::string& resp);
+	HttpResponse& generateHeadResponse(std::string& resp, float httpVers, bool conn_clos);
+	HttpResponse& generateHeadResponse(std::string& resp, std::string& contentType, int content_length = -1);
+	HttpResponse& generateHeadResponse(std::string& resp, std::string& contentType, float httpVers, bool conn_clos, int content_length = -1);
 	void update(HttpRequest* req);
 private:
 	static RiMap HDRS_SW_CODES;
@@ -107,7 +108,7 @@ private:
 	FMap multipartFormData;
 	std::vector<MultipartContent> contentList;
 	std::string content;
-	fcpstream content_stream;
+	//fcpstream content_stream;
 	std::string outFileName;
 	std::vector<std::string> cookies;
 	RMap headers;

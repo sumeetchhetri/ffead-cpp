@@ -1,6 +1,6 @@
 <caches>
         <cache>
-                <init>TeBkUmLpqAsyncRouter.updateCache</init>
+                <init>TeBkUmLpqAsyncRouterPooled.updateCache</init>
                 <name>Memory-Cached</name>
                 <type>memory</type>
         </cache>

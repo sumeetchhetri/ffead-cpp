@@ -82,7 +82,7 @@ Quickstart (Using cmake/make)
 - Sip some coffee
 - cd ../ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
-- ./server.sh (Startup ffead-cpp Njoy!!)
+- ./server.sh (Startup ffead-cpp !!)
 
 Quickstart (Using cmake/ninja)
 ===========
@@ -93,7 +93,7 @@ Quickstart (Using cmake/ninja)
 - Sip some coffee
 - cd ../ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
-- ./server.sh (Startup ffead-cpp Njoy!!)
+- ./server.sh (Startup ffead-cpp !!)
 
 Quickstart (Using xmake)
 ===========
@@ -103,7 +103,7 @@ Quickstart (Using xmake)
 - Sip some coffee
 - cd ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
-- ./server.sh (Startup ffead-cpp Njoy!!)
+- ./server.sh (Startup ffead-cpp !!)
 
 Quickstart (Using meson)
 ===========
@@ -113,7 +113,7 @@ Quickstart (Using meson)
 - Sip some coffee
 - cd ../ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
-- ./server.sh (Startup ffead-cpp Njoy!!)
+- ./server.sh (Startup ffead-cpp !!)
 
 Quickstart (Using autoconf)
 ===========
@@ -124,6 +124,6 @@ Quickstart (Using autoconf)
 - Sip some coffee
 - cd ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
-- ./server.sh (Startup ffead-cpp Njoy!!)
+- ./server.sh (Startup ffead-cpp !!)
 
 For further details checkout the [wiki](https://github.com/sumeetchhetri/ffead-cpp/wiki) page 

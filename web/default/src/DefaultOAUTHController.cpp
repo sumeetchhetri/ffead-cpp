@@ -229,7 +229,7 @@ bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 		html += "<input type='submit' value='Submit'/>";
 		html += "</form></body></html>";
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-		res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
+		res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_HTML);
 		res->setContent(html);
 		std::cout << "Login page display" << std::endl;
 		return true;

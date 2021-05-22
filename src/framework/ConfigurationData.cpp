@@ -129,9 +129,9 @@ void ConfigurationData::initializeAllSingletonBeans() {
 	for(;it!=ConfigurationData::getInstance()->servingContextRouterNames.end();++it) {
 		std::string rt = it->second;
 		std::vector<std::string> prts = StringUtil::splitAndReturn<std::vector<std::string> >(rt, ";");
-		std::string scappName = ConfigurationData::getInstance()->servingContextAppNames[prts[1]];
+		//std::string scappName = ConfigurationData::getInstance()->servingContextAppNames[prts[1]];
 
-		Bean bean(prts[0],"",prts[0],"singleton",false,false,scappName);
+		Bean bean(prts[0],"",prts[0],"singleton",false,false,prts[1]);
 		ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 	}
 
@@ -147,7 +147,7 @@ void ConfigurationData::initializeAllSingletonBeans() {
 
 		ClassInfo* rtcls = getInstance()->reflector.getClassInfo(prts[0], scappName);
 		if(rtcls->getClassName()!="") {
-			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean(prts[0], scappName);
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean(prts[0], prts[1]);
 			Router* router = (Router*)_temp;
 			ConfigurationData::getInstance()->servingContextRouters[prts[1]] = router;
 		}

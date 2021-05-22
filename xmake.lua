@@ -591,6 +591,11 @@ function setIncludes(target)
 		target:add({links = "dl"})
 	end
 	target:add({linkdirs = "/usr/local/lib"})
+	import("lib.detect.has_cincludes")
+	local ok = has_cincludes("sys/sendfile.h")
+	if ok then
+		target:set("configvar", "IS_SENDFILE", 1)
+	end
 end
 
 local bindir = "$(projectdir)/ffead-cpp-6.0-bin"

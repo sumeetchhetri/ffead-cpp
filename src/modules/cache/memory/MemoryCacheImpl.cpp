@@ -186,6 +186,32 @@ bool MemoryCacheImpl::setInternal(const std::string& key, const std::string& val
 	return flag;
 }
 
+bool MemoryCacheImpl::setInternalN(const unsigned long long& key, const std::string& value, const int& expireSeconds, const int& setOrAddOrRep) {
+	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
+
+	if(setOrAddOrRep<1 || setOrAddOrRep>3) return false;
+
+	p->lock.lock();
+	auto it = p->internalMapN.find(key);
+	bool exists = it!=p->internalMapN.end();
+	if(exists) {
+		p->lruln.erase(it->second);
+		p->internalMapN.erase(it);
+	}
+
+	bool flag = false;
+	if(setOrAddOrRep==1 || (setOrAddOrRep==2 && !exists) || (setOrAddOrRep==3 && exists))
+	{
+		p->lruln.push_front(make_pair(key, value));
+		p->internalMapN.insert(make_pair(key, p->lruln.begin()));
+		clean();
+		flag = true;
+	}
+
+	p->lock.unlock();
+	return flag;
+}
+
 std::string MemoryCacheImpl::getValue(const std::string& key) {
 	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
 	std::string rval;
@@ -222,6 +248,57 @@ void MemoryCacheImpl::mgetRaw(const std::vector<std::string>& keys, std::vector<
 
 void* MemoryCacheImpl::executeCommand(const std::string command, ...) {
 	throw std::runtime_error("Not Implemented");
+}
+
+bool MemoryCacheImpl::setRaw(const unsigned long long& key, const std::string_view& value, int expireSeconds) {
+	bool status = setInternalN(key, std::string(value.data(), value.size()), expireSeconds, 1);
+	return status;
+}
+bool MemoryCacheImpl::addRaw(const unsigned long long& key, const std::string_view& value, int expireSeconds) {
+	bool status = setInternalN(key, std::string(value.data(), value.size()), expireSeconds, 2);
+	return status;
+}
+bool MemoryCacheImpl::replaceRaw(const unsigned long long& key, const std::string_view& value, int expireSeconds) {
+	bool status = setInternalN(key, std::string(value.data(), value.size()), expireSeconds, 3);
+	return status;
+}
+std::string MemoryCacheImpl::getValue(const unsigned long long& key) {
+	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
+	std::string rval;
+	p->lock.lock();
+	if(p->internalMapN.count(key)>0) {
+		auto it = p->internalMapN.find(key);
+		p->lruln.splice(p->lruln.begin(), p->lruln, it->second);
+		rval = it->second->second;
+	}
+	p->lock.unlock();
+	return rval;
+}
+void MemoryCacheImpl::getValues(const std::vector<unsigned long long>& keys, std::vector<std::string>& values) {
+	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
+	std::string rval;
+	p->lock.lock();
+	for(int i=0;i<(int)keys.size();++i) {
+		const unsigned long long& key = keys.at(i);
+		if(p->internalMapN.count(key)>0) {
+			auto it = p->internalMapN.find(key);
+			p->lruln.splice(p->lruln.begin(), p->lruln, it->second);
+			values.push_back(it->second->second);
+		}
+	}
+	p->lock.unlock();
+}
+bool MemoryCacheImpl::remove(const unsigned long long& key) {
+	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
+	p->lock.lock();
+	auto it = p->internalMapN.find(key);
+	bool exists = it!=p->internalMapN.end();
+	if(exists) {
+		p->lruln.erase(it->second);
+		p->internalMapN.erase(it);
+	}
+	p->lock.unlock();
+	return true;
 }
 
 bool MemoryCacheImpl::set(const std::string& key, GenericObject& value, int expireSeconds) {

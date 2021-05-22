@@ -1,9 +1,9 @@
-FROM archlinux:base-devel-20210214.0.15477
+FROM archlinux:latest
 
-RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst && \
-    curl -LO "https://repo.archlinuxcn.org/x86_64/$patched_glibc" && \
-    bsdtar -C / -xvf "$patched_glibc"
-RUN echo "IgnorePkg   = glibc" >> /etc/pacman.conf
+#RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst && \
+#    curl -LO "https://repo.archlinuxcn.org/x86_64/$patched_glibc" && \
+#    bsdtar -C / -xvf "$patched_glibc"
+#RUN echo "IgnorePkg   = glibc" >> /etc/pacman.conf
 
 RUN pacman-key --init
 RUN pacman -Sy --noconfirm --noprogressbar gawk
@@ -11,13 +11,12 @@ RUN pacman-key --populate archlinux
 RUN pacman -Sy archlinux-keyring pacman --noconfirm --noprogressbar --needed --quiet
 RUN pacman-db-upgrade
 RUN echo "[multilib]" >> /etc/pacman.conf \
-    && echo "Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-RUN echo "[ownstuff]" >> /etc/pacman.conf \
-    && echo "SigLevel = Optional TrustAll" >> /etc/pacman.conf \
-    && echo "Server = https://martchus.no-ip.biz/repo/arch/\$repo/os/\$arch " >> /etc/pacman.conf \
-    && pacman -Sy --noprogressbar
+    && echo "Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf \
+	&& echo "[ownstuff]" >> /etc/pacman.conf \
+    && echo "Server = https://martchus.no-ip.biz/repo/arch/\$repo/os/\$arch " >> /etc/pacman.conf
+RUN sed -i 's|SigLevel    = Required DatabaseOptional|SigLevel    = Never|g' /etc/pacman.conf && pacman -Sy --noprogressbar
 
-RUN pacman -S --noconfirm --noprogressbar mingw-w64-gcc mingw-w64-make mingw-w64-configure \
+RUN pacman -S --noconfirm --noprogressbar gcc gcc-libs libtool mingw-w64-gcc mingw-w64-make mingw-w64-configure \
 	mingw-w64-pkg-config mingw-w64-curl mingw-w64-openssl mingw-w64-zlib mingw-w64-jsoncpp \
 	mingw-w64-crt mingw-w64-headers mingw-w64-readline mingw-w64-cmake mingw-w64-dlfcn \
 	unzip wget tar grep sed make core/binutils diffutils base-devel

@@ -1,0 +1,24 @@
+name: TE benchmark (v-picov)
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: "contains(github.event.head_commit.message, '[docker_compare]')"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Benchmark ffead-cpp 6.0 (v-picov)
+      run: |
+        git clone https://github.com/TechEmpower/FrameworkBenchmarks
+        cp docker/benchmark_60_vpicov.json FrameworkBenchmarks/frameworks/C++/ffead-cpp/benchmark_config.json
+        cp docker/techempower-config/ffead-cpp-v-picov.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-v-picov-m.dockerfile
+        cp docker/techempower-config/ffead-cpp-v-picov-raw-profiled.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-v-picov-raw-profiled-m.dockerfile
+        cp docker/techempower-config/ffead-cpp-v-picov-raw-clibpqb-profiled.dockerfile FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp-v-picov-raw-clibpqb-profiled-upt.dockerfile
+        cd FrameworkBenchmarks
+        ./tfb --mode benchmark --test-dir C++/ffead-cpp
+        cd results/20* && cat results.json

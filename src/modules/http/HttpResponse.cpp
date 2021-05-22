@@ -121,15 +121,15 @@ void HttpResponse::generateResponse(const std::string& httpMethod, HttpRequest *
 {
 	if(httpMethod=="HEAD" && appendHeaders)
 	{
-		return generateHeadResponse(data);
+		generateHeadResponse(data);
 	}
 	else if(httpMethod=="OPTIONS" && appendHeaders)
 	{
-		return generateOptionsResponse(data);
+		generateOptionsResponse(data);
 	}
 	else if(httpMethod=="TRACE" && appendHeaders)
 	{
-		return generateTraceResponse(req, data);
+		generateTraceResponse(req, data);
 	}
 	else
 	{
@@ -312,7 +312,7 @@ const std::string& HttpResponse::getHeadersStr(const std::string& server, bool s
 	return _headers_str;
 }
 
-void HttpResponse::generateHeadResponse(std::string& resp, std::string& contentType, int content_length)
+HttpResponse& HttpResponse::generateHeadResponse(std::string& resp, std::string& contentType, int content_length)
 {
 	bool isTE = isHeaderValue(TransferEncoding, "chunked");
 	status->getResponseLine(httpVers, resp);
@@ -351,9 +351,10 @@ void HttpResponse::generateHeadResponse(std::string& resp, std::string& contentT
 		resp.append(HDR_END);
 	}
 	resp.append(HDR_END);
+	return *this;
 }
 
-void HttpResponse::generateHeadResponse(std::string& resp, std::string& contentType, float httpVers, bool conn_clos, int content_length)
+HttpResponse& HttpResponse::generateHeadResponse(std::string& resp, std::string& contentType, float httpVers, bool conn_clos, int content_length)
 {
 	bool isTE = isHeaderValue(TransferEncoding, "chunked");
 	status->getResponseLine(httpVers, resp);
@@ -392,9 +393,10 @@ void HttpResponse::generateHeadResponse(std::string& resp, std::string& contentT
 		resp.append(HDR_END);
 	}
 	resp.append(HDR_END);
+	return *this;
 }
 
-void HttpResponse::generateHeadResponse(std::string& resp)
+HttpResponse& HttpResponse::generateHeadResponse(std::string& resp)
 {
 	bool isTE = isHeaderValue(TransferEncoding, "chunked");
 	if(this->contentList.size()>0)
@@ -462,9 +464,10 @@ void HttpResponse::generateHeadResponse(std::string& resp)
 		resp.append(HDR_END);
 	}
 	resp.append(HDR_END);
+	return *this;
 }
 
-void HttpResponse::generateHeadResponse(std::string& resp, float httpVers, bool conn_clos)
+HttpResponse& HttpResponse::generateHeadResponse(std::string& resp, float httpVers, bool conn_clos)
 {
 	bool isTE = isHeaderValue(TransferEncoding, "chunked");
 	if(this->contentList.size()>0)
@@ -509,6 +512,11 @@ void HttpResponse::generateHeadResponse(std::string& resp, float httpVers, bool 
 	status->getResponseLine(httpVers, resp);
 	//resp.append(HDR_SRV);
 	CommonUtils::getDateStr(resp);
+	if(conn_clos) {
+		resp.append(CONN_CLOSE);
+	} else {
+		resp.append(CONN_KAL);
+	}
 	if(!isTE && !hasHeader(ContentLength) && content.length()>0)
 	{
 		resp.append(ContentLength);
@@ -532,6 +540,7 @@ void HttpResponse::generateHeadResponse(std::string& resp, float httpVers, bool 
 		resp.append(HDR_END);
 	}
 	resp.append(HDR_END);
+	return *this;
 }
 
 const std::string HttpResponse::HDR_CORS_ALW = "Allow: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE\r\n";
@@ -623,9 +632,16 @@ void HttpResponse::update(HttpRequest* req)
 	//addHeader(HttpResponse::AcceptRanges, "none");
 }
 
-void HttpResponse::setHTTPResponseStatus(HTTPResponseStatus& status)
+HttpResponse& HttpResponse::setHTTPResponseStatus(HTTPResponseStatus& status)
 {
 	this->status = &status;
+	return *this;
+}
+
+HttpResponse& HttpResponse::httpStatus(HTTPResponseStatus& status)
+{
+	this->status = &status;
+	return *this;
 }
 
 std::string HttpResponse::getStatusCode() const
@@ -653,9 +669,9 @@ std::string* HttpResponse::getContentP()
 	return &content;
 }
 
-fcpstream* HttpResponse::getStreamP() {
+/*fcpstream* HttpResponse::getStreamP() {
 	return &content_stream;
-}
+}*/
 
 void HttpResponse::setContent(const std::string& content)
 {
@@ -693,8 +709,9 @@ void HttpResponse::addHeader(std::string header, const std::string& value)
 	}
 }
 
-void HttpResponse::setContentType(const std::string& value) {
+HttpResponse& HttpResponse::setContentType(const std::string& value) {
 	headers[ContentType] = value;
+	return *this;
 }
 
 void HttpResponse::addHeaderValue(std::string header, const std::string& value)

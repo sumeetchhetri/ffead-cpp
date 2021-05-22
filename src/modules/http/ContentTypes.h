@@ -28,7 +28,7 @@
 class ContentTypes {
 public:
 	static std::string CONTENT_TYPE_TEXT_PLAIN;
-	static std::string CONTENT_TYPE_TEXT_SHTML;
+	static std::string CONTENT_TYPE_TEXT_HTML;
 	static std::string CONTENT_TYPE_APPLICATION_JSON;
 	static std::string CONTENT_TYPE_APPLICATION_XML;
 };

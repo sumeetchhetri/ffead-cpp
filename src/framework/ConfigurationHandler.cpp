@@ -238,21 +238,21 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		std::vector<std::string> adcps;
 		CommonUtils::listFiles(adcps, dcppath, ".dcp");
 		//listi(dcppath,".dcp",true,adcps,false);
-		for (int var = 0; var < (int)adcps.size(); ++var) {
-			dcps[adcps.at(var)] = name;
+		for (int var1 = 0; var1 < (int)adcps.size(); ++var1) {
+			dcps[adcps.at(var1)] = name;
 		}
 		std::vector<std::string> atpes;
 		CommonUtils::listFiles(atpes, tmplpath, ".tpe");
 		//listi(tmplpath,".tpe",true,atpes,false);
-		for (int var = 0; var < (int)atpes.size(); ++var) {
-			//tpes[atpes.at(var)] = name;
+		for (int var1 = 0; var1 < (int)atpes.size(); ++var1) {
+			//tpes[atpes.at(var1)] = name;
 		}
 
 		std::vector<std::string> acompnts;
 		CommonUtils::listFiles(acompnts, cmppath, ".cmp");
 		//listi(cmppath,".cmp",true,acompnts,false);
-		for (int var = 0; var < (int)acompnts.size(); ++var) {
-			compnts[acompnts.at(var)] = name;
+		for (int var1 = 0; var1 < (int)acompnts.size(); ++var1) {
+			compnts[acompnts.at(var1)] = name;
 		}
 
 		all.push_back(usrincludes);
@@ -2608,12 +2608,14 @@ void ConfigurationHandler::populateClassBeanInstanceCb(std::string& clsn, std::s
 		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean(clsn, appn);
 		if(_temp!=NULL) {
 			cbi->instance = _temp;
+			cbi->cleanUp = false;
 			return;
 		}
 		args argus;
 		vals valus;
 		const Constructor& ctor = cbi->clas->getConstructor(argus);
 		cbi->instance = ConfigurationData::getReflector()->newInstanceGVP(ctor);
+		cbi->cleanUp = true;
 	}
 }
 

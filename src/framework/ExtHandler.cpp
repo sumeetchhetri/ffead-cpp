@@ -84,7 +84,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 			if(done)
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
+				res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_HTML);
 				res->setContent(tstream.str());
 			}
 		}
@@ -209,7 +209,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 					if(content.length()>0)
 					{
 						res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-						res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
+						res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_HTML);
 						res->setContent(content);
 					}
 				} catch(const std::exception& e) {
@@ -265,7 +265,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 		if(content.length()>0)
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
+			res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_HTML);
 			res->setContent(content);
 		}
 	}

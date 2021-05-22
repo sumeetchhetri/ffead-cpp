@@ -47,6 +47,13 @@ public:
 	~MemcachedImpl();
 	void init();
 
+	bool setRaw(const unsigned long long& key, const std::string_view& value, int expireSeconds = -1);
+	bool addRaw(const unsigned long long& key, const std::string_view& value, int expireSeconds = -1);
+	bool replaceRaw(const unsigned long long& key, const std::string_view& value, int expireSeconds = -1);
+	std::string getValue(const unsigned long long& key);
+	void getValues(const std::vector<unsigned long long>& keys, std::vector<std::string>& values);
+	bool remove(const unsigned long long& key);
+
 	bool set(const std::string& key, GenericObject& value, int expireSeconds);
 	bool add(const std::string& key, GenericObject& value, int expireSeconds);
 	bool replace(const std::string& key, GenericObject& value, int expireSeconds);
