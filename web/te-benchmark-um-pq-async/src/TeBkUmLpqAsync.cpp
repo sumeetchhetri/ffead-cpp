@@ -699,6 +699,8 @@ TeBkUmLpqAsyncRouterPooled::TeBkUmLpqAsyncRouterPooled() {
 
 TeBkUmLpqAsyncRouterPooled::~TeBkUmLpqAsyncRouterPooled() {
 	for(auto sqli: pool) {
-		delete sqli;
+		if(sqli!=NULL) {
+			delete sqli;
+		}
 	}
 }

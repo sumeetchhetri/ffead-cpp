@@ -93,7 +93,7 @@ void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping
 		if(v.size()==2) {
 			CommonUtils::setAppName(appName);
 			ClassBeanIns cbi;
-			f(v.at(0), appName, &cbi);
+			f(v.at(0), mapping.getAppName(), &cbi);
 			void* _temp = cbi.instance;
 			try {
 				if(_temp!=NULL) {
