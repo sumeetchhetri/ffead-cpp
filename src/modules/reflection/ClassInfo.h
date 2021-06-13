@@ -30,12 +30,15 @@
 #include "vector"
 #include "map"
 #include "StringUtil.h"
+#include <tuple>
 
 typedef std::map<std::string,Constructor> ctorMap;
 typedef std::map<std::string,Method> methMap;
 typedef std::map<std::string,Field> fldMap;
 typedef std::vector<Field> fldVec;
 typedef std::vector<std::string> args;
+
+class ClassInfo;
 
 class ClassInfo {
 	NewInst f;
@@ -50,6 +53,8 @@ class ClassInfo {
 	fldVec fldvec;
 	std::string destRefName;
 	std::map<std::string, std::string> operRefNames;
+	std::vector<std::tuple<int, std::string>> bases;
+	std::map<std::string, ClassInfo*> baseCis;
 	std::string contRefName;
 	static Constructor nullcons;
 	static Method nullmeth;
@@ -63,6 +68,10 @@ public:
     void setClassName(const std::string&);
     std::string getBase() const;
     void setBase(const std::string&);
+    void addBase(int scope, const std::string& clas);
+    void addRuntimeBase(const std::string&, ClassInfo*);
+    ClassInfo* getRuntimeBase(const std::string&);
+    std::vector<std::tuple<int, std::string>> getBases();
     void setNamespace(const std::string&);
     std::string getNamespace();
     const Constructor& getConstructor(const args&) const;
@@ -83,6 +92,7 @@ public:
 	void addOperatorRefName(const std::string& oper, const std::string& rn);
 	std::string getContRefName();
 	void setContRefName(const std::string& rn);
+	bool isAbstractClass();
 };
 
 #endif /* CLASSINFO_H_ */

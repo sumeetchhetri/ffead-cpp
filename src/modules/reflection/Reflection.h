@@ -42,7 +42,7 @@ class Reflection {
 	//bool generateClassInfoFromDD(const std::string&);
 	//bool generateClassInfo(const std::string&);
 	//void collectInfo(const std::string&, const std::string&);
-	std::map<std::string,bool> methsall;
+	std::map<std::string, bool> methallpvstats;
 	static std::map<std::string,bool> validcls;
 	std::map<std::string,std::string> clspaths;
 	std::map<std::string,std::string> classNamespaces;

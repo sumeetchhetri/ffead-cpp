@@ -54,6 +54,25 @@ void ClassInfo::setBase(const std::string& base)
 	this->base = base;
 }
 
+void ClassInfo::addBase(int scope, const std::string& clas) {
+	bases.push_back(std::make_tuple(scope, clas));
+}
+
+void ClassInfo::addRuntimeBase(const std::string& clsnm, ClassInfo* ci) {
+	baseCis[clsnm] = ci;
+}
+
+ClassInfo* ClassInfo::getRuntimeBase(const std::string& clsnm) {
+	if(baseCis.find(clsnm)!=baseCis.end()) {
+		return baseCis.find(clsnm)->second;
+	}
+	return NULL;
+}
+
+std::vector<std::tuple<int, std::string>> ClassInfo::getBases() {
+	return bases;
+}
+
 const Constructor& ClassInfo::getConstructor(const args& argumentTypes) const
 {
 	std::string key = getClassName();
@@ -67,6 +86,15 @@ const Constructor& ClassInfo::getConstructor(const args& argumentTypes) const
 		return ctors.find(key)->second;
 	}
 	return nullcons;
+}
+
+bool ClassInfo::isAbstractClass() {
+	for(auto it: meths) {
+		if(it.second.isPureVirtual()) {
+			return true;
+		}
+	}
+	return false;
 }
 
 void ClassInfo::addConstructor(const Constructor& ctor)
@@ -103,6 +131,16 @@ const Method& ClassInfo::getMethod(const std::string& methodName, args argumentT
 	if(meths.find(key1)!=meths.end()) {
 		return meths.find(key1)->second;
 	} else {
+		if(baseCis.size()>0) {
+			for(auto it: baseCis) {
+				ClassInfo* t1 = it.second;
+				const Method& m = t1->getMethod(methodName, argumentTypes);
+				if(m.getMethodName()=="") {
+					return nullmeth;
+				}
+				return m;
+			}
+		}
 		return nullmeth;
 	}
 }

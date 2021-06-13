@@ -36,7 +36,7 @@ class Method {
 	std::string methodName;
 	std::string returnType;
 	args argumentTypes;
-	bool isstat;
+	bool isstat, isV, isPV;
 	friend class FFEADContext;
 public:
 	Method();
@@ -52,7 +52,9 @@ public:
     int getArgNum() const;
     void clear();
     bool isStatic();
-    void setIsStatic(const bool& isStatic);
+    bool isVirtual();
+    bool isPureVirtual();
+    void setFlags(const bool& isStatic, const bool& isV, const bool& isPV);
 	const std::string& getRefName() const;
 	void setRefName(const std::string& refName);
 	GetMeth getIns() const;

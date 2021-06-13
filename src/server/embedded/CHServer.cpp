@@ -749,7 +749,10 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	if(ilibtemp==NULL || dlibtemp==NULL)
 	{
 		libpresent = false;
-		logger << dlerror() << std::endl;
+		char *errstr = dlerror();
+		if (errstr != NULL) {
+			printf ("A dynamic linking error occurred: (%s)\n", errstr);
+		}
 		logger.info("Could not load Library");
 	}
 	else
@@ -820,7 +823,10 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 
 		if(checkdlib==NULL || checkddlib==NULL)
 		{
-			logger << dlerror() << std::endl;
+			char *errstr = dlerror();
+			if (errstr != NULL) {
+				printf ("A dynamic linking error occurred: (%s)\n", errstr);
+			}
 			logger.info("Could not load Library");
 			exit(0);
 		}
@@ -851,7 +857,10 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		void* checkddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
 		if(checkdlib==NULL || checkddlib==NULL)
 		{
-			logger << dlerror() << std::endl;
+			char *errstr = dlerror();
+			if (errstr != NULL) {
+				printf ("A dynamic linking error occurred: (%s)\n", errstr);
+			}
 			logger.info("Could not load Library");
 			exit(0);
 		}

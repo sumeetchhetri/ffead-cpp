@@ -328,7 +328,7 @@ HttpResponse& HttpResponse::generateHeadResponse(std::string& resp, std::string&
 	}
 	CommonUtils::getDateStr(resp);
 	content_length = content_length==-1?(int)content.length():content_length;
-	if(!isTE && !hasHeader(ContentLength) && content_length>0)
+	if(!isTE && !hasHeader(ContentLength))
 	{
 		resp.append(ContentLength);
 		resp.append(HDR_SEP);
@@ -370,7 +370,7 @@ HttpResponse& HttpResponse::generateHeadResponse(std::string& resp, std::string&
 	}
 	CommonUtils::getDateStr(resp);
 	content_length = content_length==-1?(int)content.length():content_length;
-	if(!isTE && !hasHeader(ContentLength) && content_length>0)
+	if(!isTE && !hasHeader(ContentLength))
 	{
 		resp.append(ContentLength);
 		resp.append(HDR_SEP);
@@ -441,7 +441,7 @@ HttpResponse& HttpResponse::generateHeadResponse(std::string& resp)
 	status->getResponseLine(httpVers, resp);
 	//resp.append(HDR_SRV);
 	CommonUtils::getDateStr(resp);
-	if(!isTE && !hasHeader(ContentLength) && content.length()>0)
+	if(!isTE && !hasHeader(ContentLength))
 	{
 		resp.append(ContentLength);
 		resp.append(HDR_SEP);
@@ -517,7 +517,7 @@ HttpResponse& HttpResponse::generateHeadResponse(std::string& resp, float httpVe
 	} else {
 		resp.append(CONN_KAL);
 	}
-	if(!isTE && !hasHeader(ContentLength) && content.length()>0)
+	if(!isTE && !hasHeader(ContentLength))
 	{
 		resp.append(ContentLength);
 		resp.append(HDR_SEP);

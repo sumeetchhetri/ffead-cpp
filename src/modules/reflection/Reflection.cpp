@@ -89,10 +89,10 @@ void Reflection::collectInfo(std::string data, const std::string& flag, ClassStr
 {
 	if(RegexUtil::find(data, "[ \t]*template[ \t]*<[ \t]*")!=-1)
 		return;
-	RegexUtil::replace(data, "[ \t]*const[; \t]+", "");
 	Logger logger = LoggerFactory::getLogger("Reflection");
 	if(data.find("(")!=std::string::npos && data.find(")")!=std::string::npos)
 	{
+		RegexUtil::replace(data, "[ \t]*const[; \t]+", "");
 		MethStructure ps;
 		ps.decl = data;
 		std::string t = data.substr(0, data.find("("));
@@ -372,22 +372,43 @@ void Reflection::handleNamespace(std::string data, std::string namepsc, std::map
 		std::string temp = data.substr(0, data.find("{"));
 		StringUtil::trim(temp);
 		StringUtil::replaceFirst(temp,"class ","");
-		StringUtil::replaceFirst(temp,":"," ");
+		//StringUtil::replaceFirst(temp,":"," ");
 		RegexUtil::replace(temp, "[ ]+", " ");
-		StringUtil::split(results, temp, (" "));
-		std::string classN,baseClassN,bcvisib,namSpc;
-		classN = results.at(0);
+		RegexUtil::replace(temp, "[ ]+,[ ]+", ",");
+		RegexUtil::replace(temp, ": ", ":");
+		RegexUtil::replace(temp, " : ", ":");
+		RegexUtil::replace(temp, " :", ":");
+		std::string claspre = temp;
+		std::string claspost;
+		if(claspre.find(":")!=std::string::npos) {
+			claspre = temp.substr(0, temp.find(":"));
+			claspost = temp.substr(temp.find(":")+1);
+			StringUtil::split(results, claspost, (","));
+		}
+		std::string classN,baseClassN,namSpc;
+		std::vector<std::tuple<int, std::string>> bases;
+		classN = claspre;
 		if(classN.find(";")!=std::string::npos) {
 			handleNamespace(data.substr(data.find(";")+1), namepsc, clsvec, glbnmspcs, pragmas);
 			return;//Ignore forward declarations
 		}
 		namSpc = namepsc;
-		if(results.size()>=3)
+		if(results.size()>0)
 		{
-			bcvisib = results.at(1);
+			for(int y=0;y<(int)results.size();y++) {
+				std::vector<std::string> bas;
+				StringUtil::split(bas, results.at(y), (" "));
+				if(1==(int)bas.size()) {
+					bases.push_back(std::make_tuple(1, bas.at(0)));
+				} else if(2==(int)bas.size()) {
+					bases.push_back(std::make_tuple(bas.at(0)=="public"?3:2, bas.at(1)));
+				}
+			}
+			baseClassN = claspost;
+			/*bcvisib = results.at(1);
 			StringUtil::replaceAll(bcvisib," ","");
 			baseClassN = results.at(2);
-			StringUtil::replaceAll(baseClassN," ","");
+			StringUtil::replaceAll(baseClassN," ","");*/
 		}
 		nmspc = namepsc + classN+"::";
 		//namepsc += temp+"::";
@@ -422,7 +443,7 @@ void Reflection::handleNamespace(std::string data, std::string namepsc, std::map
 			ClassStructure cstruc;
 			cstruc.classN = classN;
 			cstruc.baseClassN = baseClassN;
-			cstruc.bcvisib = bcvisib;
+			cstruc.bases = bases;
 			cstruc.nmSpc = namSpc;
 			for (int pi = 0; pi < (int)pragmas.size(); ++pi) {
 				std::string prg = pragmas.at(pi);
@@ -1006,6 +1027,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 	{
 		int opcounter = 1, methcounter = 1, fldcounter = 1;
 		ClassStructure classStructure = it->second;
+		bool ispurecs = false;
+		if(methallpvstats.find(classStructure.getTreatedClassName(true))!=methallpvstats.end()) {
+			if(methallpvstats.find(classStructure.getTreatedClassName(true))->second) {
+				ispurecs = true;
+			}
+		}
 		classStructure.prosetser = false;
 		includesDefs += "#include \"" + getClassPath(it->second.getTreatedClassName(true)) + "\"\n";
 		//classes += "\tif(className==\""+classStructure.getTreatedClassName(true)+"\")\n\t\treturn get"+classStructure.getTreatedClassName(true)+"();\n";
@@ -1016,7 +1043,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 		testStr += "ClassInfo ci = "+app+"_fcrcif_" + classStructure.getTreatedClassName(true) + "();\n";
 		testStr += "assert(ci.getClassName()==\"" + classStructure.classN+"\");\n";
 		testStr += "assert(ci.getNamespace()==\"" + classStructure.nmSpc+"\");\n";
-		testStr += "assert(ci.getBase()==\"" + classStructure.bcvisib + " " + classStructure.baseClassN +"\");\n";
+		testStr += "assert(ci.getBase()==\"" + classStructure.baseClassN +"\");\n";
 		testStr += ("\nConstructor ctor;\nMethod me;\nField f;\n");
 		testStr += ("args argu;\n");
 
@@ -1024,7 +1051,10 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 		refDef += ("\nci.setClassName(\"" + classStructure.classN + "\");");
 		refDef += ("\nci.setNamespace(\"" + classStructure.nmSpc + "\");");
 		//refDef += ("\nci.setInstance(new " + classStructure.getTreatedClassName(true) + ");");
-		refDef += ("\nci.setBase(\"" + classStructure.bcvisib + " " + classStructure.baseClassN + "\");");
+		refDef += ("\nci.setBase(\"" + classStructure.baseClassN + "\");");
+		for(int y=0;y<(int)classStructure.bases.size();y++) {
+			refDef += ("\nci.addBase("+CastUtil::fromNumber(std::get<0>(classStructure.bases.at(y)))+",\"" + std::get<1>(classStructure.bases.at(y)) + "\");");
+		}
 		refDef += ("\nConstructor ctor;\nMethod me;\nField f;\n");
 		refDef += ("args argu;\n");
 		std::string publf, privf, protf ,publm, privm, protm;
@@ -1068,12 +1098,13 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 					RegexUtil::replace(meth, "[ \t]*,[ \t]*", ",");
 
 					bool methstat = false;
-					if(RegexUtil::find(meth, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(meth, "[ \t]+static[ \t]+")!=-1)
-					{
-						RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
-						RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
-						methstat = true;
-					}
+					//bool methinline = false;
+					//if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
+					//{
+						methstat |= RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
+						methstat |= RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
+						//fldstatic = true;
+					//}
 					RegexUtil::replace(meth, "[ \t]*inline[ \t]+", " ");
 					RegexUtil::replace(meth, "[ \t]+inline[ \t]+", " ");
 					StringUtil::trim(meth);
@@ -1148,9 +1179,16 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						}
 					}
 					std::string typdefName,methsd,valsd,valsa,valsades;
-					//bool ctor = false;
-					if(methpm.size()>0 && methpm.at(0).find("virtual")!=std::string::npos)
+					bool isvirtual = false;
+					bool ispure = false;
+					if(methpm.size()>0 && methpm.at(0).find("virtual")!=std::string::npos) {
 						methpm[0] = StringUtil::replaceFirstCopy(methpm.at(0), "virtual ", "");
+						isvirtual = true;
+						std::string tmp = pubdecl;
+						RegexUtil::replace(tmp, "[ ]+", "");
+						//TODO
+						ispure = tmp.at(tmp.length()-2)=='=' && tmp.at(tmp.length()-1)=='0';
+					}
 					//for(unsigned int j = 0; j < methpm.size(); j++)
 					{
 						if(methpm.at(0)==classStructure.getTreatedClassName(false))
@@ -1637,7 +1675,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 								methods += valsd;
 								if(methstat)
 								{
-									methods += "\n\tvoid* returnValue=NULL;\n\t_"+classStructure.getFullyQualifiedClassName()+"::"+methpm.at(1)+"("+valsa+");\n";
+									methods += "\n\tvoid* returnValue=NULL;\n\t"+classStructure.getFullyQualifiedClassName()+"::"+methpm.at(1)+"("+valsa+");\n";
 								}
 								else
 								{
@@ -1665,12 +1703,9 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							methods += "\n}";
 							refDef += ("me.setMethodName(\""+methsd+"\");\n");
 							refDef += ("me.setRefName(\""+mmn+"\");\n");
-							methsall[methsd] = true;
+							methallpvstats[classStructure.getFullyQualifiedClassName()] |= ispure;
 							refDef += ("me.setArgumentTypes(argu);\n");
-							if(methstat)
-							{
-								refDef += ("me.setIsStatic(true);\n");
-							}
+							refDef += ("me.setFlags("+CastUtil::fromBool(methstat)+","+CastUtil::fromBool(isvirtual)+","+CastUtil::fromBool(ispure)+");\n");
 							refDef += ("argu.clear();\n");
 							refDef += ("if(me.getMethodName()!=\"\")\n{\nci.addMethod(me);\n}\n");
 
@@ -1678,7 +1713,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							testStr += "assert(me.getName()==\"" + methsd +"\");\n";
 							if(methstat)
 							{
-								testStr += "assert(me.isStatic());\n";
+								//testStr += "assert(me.isStatic());\n";
 							}
 							testStr += ("argu.clear();\n");
 
@@ -1690,13 +1725,15 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							std::string mmn = app+ "_" + classStructure.getTreatedClassName(true) + "_m" +
 									CastUtil::fromNumber(methcounter++);
 							typedefs += (") ("+typdefName+");\n");
-							methods += "\nvoid* " +mmn+"(vals values,bool cleanvals)\n{";
-							methods += "\n\t"+classStructure.getFullyQualifiedClassName()+" *_retVal = NULL;\n";
-							methods += valsd;
-							methods += "\n\t_retVal = (new "+classStructure.getFullyQualifiedClassName()+"("+valsa+"));";
-							methods += valsades;
-							methods += "\n\treturn _retVal;";
-							methods += "\n}";
+							if(!ispurecs) {
+								methods += "\nvoid* " +mmn+"(vals values,bool cleanvals)\n{";
+								methods += "\n\t"+classStructure.getFullyQualifiedClassName()+" *_retVal = NULL;\n";
+								methods += valsd;
+								methods += "\n\t_retVal = (new "+classStructure.getFullyQualifiedClassName()+"("+valsa+"));";
+								methods += valsades;
+								methods += "\n\treturn _retVal;";
+								methods += "\n}";
+							}
 							refDef += ("ctor.setName(\""+methsd+"\");\n");
 							refDef += ("ctor.setRefName(\""+mmn+"\");\n");
 							refDef += ("ctor.setArgumentTypes(argu);\n");
@@ -1730,15 +1767,16 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 				StringUtil::trim(fld);
 				if(fld.length()==0)continue;
 
-				//bool fldstatic = false;
-				if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
-				{
-					RegexUtil::replace(fld, "[ \t]*static[ \t]+", " ");
-					RegexUtil::replace(fld, "[ \t]+static[ \t]+", " ");
+				bool fldstatic = false;
+				bool fldconst = false;
+				//if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
+				//{
+					fldstatic |= RegexUtil::replace(fld, "[ \t]*static[ \t]+", " ");
+					fldstatic |= RegexUtil::replace(fld, "[ \t]+static[ \t]+", " ");
 					//fldstatic = true;
-				}
-				RegexUtil::replace(fld, "[ \t]*const[ \t]+", " ");
-				RegexUtil::replace(fld, "[ \t]+const[ \t]+", " ");
+				//}
+				fldconst |= RegexUtil::replace(fld, "[ \t]*const[ \t]+", " ");
+				fldconst |= RegexUtil::replace(fld, "[ \t]+const[ \t]+", " ");
 
 				RegexUtil::replace(fld, "[\t]+", " ");
 				RegexUtil::replace(fld, "[ ]+", " ");
@@ -1754,11 +1792,14 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 
 				std::vector<std::string> fldp;
 				if(fld.find(",")!=std::string::npos) {
-					std::string fldsbc = fld.substr(0, fld.find(","));
-					std::string fldss = fld.substr(fld.find(",")+1);
+					RegexUtil::replace(fld, "[ \t]*,[ \t]*", ",");
+					StringUtil::trim(fld);
+					std::string fldtype = fld.substr(0, fld.find_last_of(" "));
+					//std::string fldsbc = fld.substr(0, fld.find(","));
+					std::string fldss = fld.substr(fld.find_last_of(" ")+1);
 					fldp = StringUtil::splitAndReturn<std::vector<std::string> >(fldss, ",");
-					fldp.insert(fldp.begin(), fldsbc.substr(0, fldsbc.find_last_of(" ")));
-					fldp.insert(fldp.begin(), fldsbc.substr(fldsbc.find_last_of(" ")+1));
+					fldp.insert(fldp.begin(), fldtype);
+					//fldp.insert(fldp.begin(), fldsbc.substr(fldsbc.find_last_of(" ")+1));
 				} else {
 					fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
 					fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
@@ -1788,6 +1829,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						testStr += ("f.clear();\n");
 
 						refDef += ("f.setType(\""+fldp.at(0)+"\");\n");
+						refDef += ("f.updateStaticConst("+CastUtil::fromBool(fldstatic)+", "+CastUtil::fromBool(fldconst)+");\n");
 						testStr += "assert(f.getType()==\""+fldp.at(0)+"\");\n";
 						tms.type = fldp.at(0);
 
@@ -1831,13 +1873,14 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 				StringUtil::trim(meth);
 				RegexUtil::replace(meth, "[ \t]*,[ \t]*", ",");
 
-				//bool methstat = false;
-				if(RegexUtil::find(meth, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(meth, "[ \t]+static[ \t]+")!=-1)
-				{
-					RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
-					RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
-					//methstat = true;
-				}
+				bool methstat = false;
+				//bool methinline = false;
+				//if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
+				//{
+					methstat |= RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
+					methstat |= RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
+					//fldstatic = true;
+				//}
 				RegexUtil::replace(meth, "[ \t]*inline[ \t]+", " ");
 				RegexUtil::replace(meth, "[ \t]+inline[ \t]+", " ");
 				StringUtil::trim(meth);
@@ -1876,9 +1919,15 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 					}
 				}
 				std::string typdefName,methsd,valsd,valsa;
-				//bool ctor = false;
-				if(methpm.size()>0 && methpm.at(0).find("virtual")!=std::string::npos)
+				bool isvirtual = false;
+				bool ispure = false;
+				if(methpm.size()>0 && methpm.at(0).find("virtual")!=std::string::npos) {
 					methpm[0] = StringUtil::replaceFirstCopy(methpm.at(0), "virtual ", "");
+					isvirtual = true;
+					std::string tmp = pubdecl;
+					RegexUtil::replace(tmp, "[ ]+", "");
+					ispure = tmp.at(tmp.length()-2)=='=' && tmp.at(tmp.length()-1)=='0';
+				}
 
 				bool tmpltarg = false;
 				for(unsigned int j = 0; j < argpm.size(); j++)
@@ -1922,15 +1971,17 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 
 				fld = pubdecl;
 
-				//bool fldstatic = false;
-				if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
-				{
-					RegexUtil::replace(fld, "[ \t]*static[ \t]+", " ");
-					RegexUtil::replace(fld, "[ \t]+static[ \t]+", " ");
+				bool fldstatic = false;
+				bool fldconst = false;
+				//if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
+				//{
+				//TODO
+					fldstatic |= RegexUtil::replace(fld, "[ \t]*static[ \t]+", " ");
+					fldstatic |= RegexUtil::replace(fld, "[ \t]+static[ \t]+", " ");
 					//fldstatic = true;
-				}
-				RegexUtil::replace(fld, "[ \t]*const[ \t]+", " ");
-				RegexUtil::replace(fld, "[ \t]+const[ \t]+", " ");
+				//}
+				fldconst |= RegexUtil::replace(fld, "[ \t]*const[ \t]+", " ");
+				fldconst |= RegexUtil::replace(fld, "[ \t]+const[ \t]+", " ");
 
 				RegexUtil::replace(fld, "[\t]+", " ");
 				RegexUtil::replace(fld, "[ ]+", " ");
@@ -1946,11 +1997,14 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 
 				std::vector<std::string> fldp;
 				if(fld.find(",")!=std::string::npos) {
-					std::string fldsbc = fld.substr(0, fld.find(","));
-					std::string fldss = fld.substr(fld.find(",")+1);
+					RegexUtil::replace(fld, "[ \t]*,[ \t]*", ",");
+					StringUtil::trim(fld);
+					std::string fldtype = fld.substr(0, fld.find_last_of(" "));
+					//std::string fldsbc = fld.substr(0, fld.find(","));
+					std::string fldss = fld.substr(fld.find_last_of(" ")+1);
 					fldp = StringUtil::splitAndReturn<std::vector<std::string> >(fldss, ",");
-					fldp.insert(fldp.begin(), fldsbc.substr(0, fldsbc.find_last_of(" ")));
-					fldp.insert(fldp.begin(), fldsbc.substr(fldsbc.find_last_of(" ")+1));
+					fldp.insert(fldp.begin(), fldtype);
+					//fldp.insert(fldp.begin(), fldsbc.substr(fldsbc.find_last_of(" ")+1));
 				} else {
 					fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
 					fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
@@ -1974,6 +2028,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						testStr += ("f.clear();\n");
 
 						refDef += ("f.setType(\""+fldp.at(0)+"\");\n");
+						refDef += ("f.updateStaticConst("+CastUtil::fromBool(fldstatic)+", "+CastUtil::fromBool(fldconst)+");\n");
 						testStr += "assert(f.getType()==\""+fldp.at(0)+"\");\n";
 						tms.type = fldp.at(0);
 
@@ -2014,13 +2069,14 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 				StringUtil::trim(meth);
 				RegexUtil::replace(meth, "[ \t]*,[ \t]*", ",");
 
-				//bool methstat = false;
-				if(RegexUtil::find(meth, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(meth, "[ \t]+static[ \t]+")!=-1)
-				{
-					RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
-					RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
-					//methstat = true;
-				}
+				bool methstat = false;
+				//bool methinline = false;
+				//if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
+				//{
+					methstat |= RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
+					methstat |= RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
+					//fldstatic = true;
+				//}
 				RegexUtil::replace(meth, "[ \t]*inline[ \t]+", " ");
 				RegexUtil::replace(meth, "[ \t]+inline[ \t]+", " ");
 				StringUtil::trim(meth);
@@ -2059,9 +2115,15 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 					}
 				}
 				std::string typdefName,methsd,valsd,valsa;
-				//bool ctor = false;
-				if(methpm.size()>0 && methpm.at(0).find("virtual")!=std::string::npos)
+				bool isvirtual = false;
+				bool ispure = false;
+				if(methpm.size()>0 && methpm.at(0).find("virtual")!=std::string::npos) {
 					methpm[0] = StringUtil::replaceFirstCopy(methpm.at(0), "virtual ", "");
+					isvirtual = true;
+					std::string tmp = pubdecl;
+					RegexUtil::replace(tmp, "[ ]+", "");
+					ispure = tmp.at(tmp.length()-2)=='=' && tmp.at(tmp.length()-1)=='0';
+				}
 
 				bool tmpltarg = false;
 				for(unsigned int j = 0; j < argpm.size(); j++)
@@ -2105,15 +2167,16 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 
 				fld = pubdecl;
 
-				//bool fldstatic = false;
-				if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
-				{
-					RegexUtil::replace(fld, "[ \t]*static[ \t]+", " ");
-					RegexUtil::replace(fld, "[ \t]+static[ \t]+", " ");
+				bool fldstatic = false;
+				bool fldconst = false;
+				//if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
+				//{
+					fldstatic |= RegexUtil::replace(fld, "[ \t]*static[ \t]+", " ");
+					fldstatic |= RegexUtil::replace(fld, "[ \t]+static[ \t]+", " ");
 					//fldstatic = true;
-				}
-				RegexUtil::replace(fld, "[ \t]*const[ \t]+", " ");
-				RegexUtil::replace(fld, "[ \t]+const[ \t]+", " ");
+				//}
+				fldconst |= RegexUtil::replace(fld, "[ \t]*const[ \t]+", " ");
+				fldconst |= RegexUtil::replace(fld, "[ \t]+const[ \t]+", " ");
 
 				RegexUtil::replace(fld, "[\t]+", " ");
 				RegexUtil::replace(fld, "[ ]+", " ");
@@ -2129,11 +2192,14 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 
 				std::vector<std::string> fldp;
 				if(fld.find(",")!=std::string::npos) {
-					std::string fldsbc = fld.substr(0, fld.find(","));
-					std::string fldss = fld.substr(fld.find(",")+1);
+					RegexUtil::replace(fld, "[ \t]*,[ \t]*", ",");
+					StringUtil::trim(fld);
+					std::string fldtype = fld.substr(0, fld.find_last_of(" "));
+					//std::string fldsbc = fld.substr(0, fld.find(","));
+					std::string fldss = fld.substr(fld.find_last_of(" ")+1);
 					fldp = StringUtil::splitAndReturn<std::vector<std::string> >(fldss, ",");
-					fldp.insert(fldp.begin(), fldsbc.substr(0, fldsbc.find_last_of(" ")));
-					fldp.insert(fldp.begin(), fldsbc.substr(fldsbc.find_last_of(" ")+1));
+					fldp.insert(fldp.begin(), fldtype);
+					//fldp.insert(fldp.begin(), fldsbc.substr(fldsbc.find_last_of(" ")+1));
 				} else {
 					fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
 					fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
@@ -2157,6 +2223,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						testStr += ("f.clear();\n");
 
 						refDef += ("f.setType(\""+fldp.at(0)+"\");\n");
+						refDef += ("f.updateStaticConst("+CastUtil::fromBool(fldstatic)+", "+CastUtil::fromBool(fldconst)+");\n");
 						testStr += "assert(f.getType()==\""+fldp.at(0)+"\");\n";
 						tms.type = fldp.at(0);
 
@@ -2185,11 +2252,13 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 					CastUtil::fromNumber(methcounter++);
 			refDef += ("ctor.setName(\""+classStructure.getTreatedClassName(true)+"\");\n");
 			refDef += ("argu.clear();\n");
-			methods += "\nvoid* " +mmn+"(vals values,bool cleanvals)\n{";
-			methods += "\n\t"+classStructure.getFullyQualifiedClassName()+" *_retVal = NULL;\n";
-			methods += "\n\t_retVal = (new "+classStructure.getFullyQualifiedClassName()+"());";
-			methods += "\n\treturn _retVal;";
-			methods += "\n}";
+			if(!ispurecs) {
+				methods += "\nvoid* " +mmn+"(vals values,bool cleanvals)\n{";
+				methods += "\n\t"+classStructure.getFullyQualifiedClassName()+" *_retVal = NULL;\n";
+				methods += "\n\t_retVal = (new "+classStructure.getFullyQualifiedClassName()+"());";
+				methods += "\n\treturn _retVal;";
+				methods += "\n}";
+			}
 			refDef += ("ctor.setRefName(\""+mmn+"\");\n");
 			refDef += ("ctor.setArgumentTypes(argu);\n");
 			refDef += ("argu.clear();\n");
@@ -2221,14 +2290,16 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 
 		refDef += ("\nci.setContRefName(\""+app+ "_"+classStructure.getTreatedClassName(true)+"co\");");
 
-		methods += "\nvoid* " +app+ "_"+classStructure.getTreatedClassName(true)+"co(void* _vec,void* _instance,int pos,std::string contType,int t){"
-				+ "\nif(t==-1)return Reflector::destroyNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec);\n"
+		methods += "\nvoid* " +app+ "_"+classStructure.getTreatedClassName(true)+"co(void* _vec,void* _instance,int pos,std::string contType,int t){";
+		if(!ispurecs) {
+			methods += "\nif(t==-1)return Reflector::destroyNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec);\n"
 				+ "\nelse if(t==1)return Reflector::getNewNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType);\n"
 				+ "\nelse if(t==2){int* _obj = new int;\n*_obj = Reflector::getNestedContainerSize<"+classStructure.getFullyQualifiedClassName()+">(contType,_vec);return _obj;}\n"
 				+ "\nelse if(t==3){Reflector::addValueToNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType, *(("+classStructure.getFullyQualifiedClassName()+"*)_instance),_vec);return NULL;}\n"
 				+ "\nelse if(t==4){"+classStructure.getFullyQualifiedClassName()+" *_obj = new "+classStructure.getFullyQualifiedClassName()+";\n*_obj = Reflector::getValueFromNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec, pos);\nreturn _obj;\n}\n"
-				+ "\nelse if(t==5)return Reflector::getPValueFromNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec, pos);\n"
-				+ "return NULL;\n}";
+				+ "\nelse if(t==5)return Reflector::getPValueFromNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec, pos);\n";
+		}
+		methods += "return NULL;\n}";
 
 		/*methods += "\nvoid* " +app+ "_"+classStructure.getTreatedClassName(true)+"c1(std::string contType){\nreturn "
 				+ "Reflector::getNewNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType);\n}";
@@ -2265,14 +2336,16 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 			methods += "\nvoid* " +app+ "_"+classStructure.getTreatedClassName(true)+"c10(void* _vec,int pos,std::string contType){\n"
 					+ "return Reflector::getPValueFromNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec, pos);\n}\n";
 			*/
-			methods += "\nvoid* " +app+ "_"+classStructure.getTreatedClassName(true)+"cosv(void* _vec,void* _instance,int pos,std::string contType,int t){"
-					+ "\nif(t==0)return Reflector::destroyNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec);\n"
+			methods += "\nvoid* " +app+ "_"+classStructure.getTreatedClassName(true)+"cosv(void* _vec,void* _instance,int pos,std::string contType,int t){";
+			if(!ispurecs) {
+				methods += "\nif(t==0)return Reflector::destroyNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec);\n"
 					+ "\nelse if(t==6)return Reflector::getNewNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType);\n"
 					+ "\nif(t==7){int* _obj = new int;\n*_obj = Reflector::getNestedContainerSizeSV<"+classStructure.getFullyQualifiedClassName()+">(contType,_vec);return _obj;}\n"
 					+ "\nif(t==8){Reflector::addValueToNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType, *(("+classStructure.getFullyQualifiedClassName()+"*)_instance),_vec);return NULL;}\n"
 					+ "\nif(t==9){"+classStructure.getFullyQualifiedClassName()+" *_obj = new "+classStructure.getFullyQualifiedClassName()+";\n*_obj = Reflector::getValueFromNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec, pos);\nreturn _obj;\n}\n"
-					+ "\nif(t==10)return Reflector::getPValueFromNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec, pos);\n"
-					+ "return NULL;}";
+					+ "\nif(t==10)return Reflector::getPValueFromNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec, pos);\n";
+			}
+			methods += "return NULL;}";
 		}
 		refDef += "\nreturn ci;\n}\n";
 		allclsmap[it->first] = classStructure;
@@ -2357,6 +2430,11 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 	for (it=allclsmap.begin();it!=allclsmap.end();++it)
 	{
 		ClassStructure classStructure = it->second;
+		if(methallpvstats.find(classStructure.getTreatedClassName(true))!=methallpvstats.end()) {
+			if(methallpvstats.find(classStructure.getTreatedClassName(true))->second) {
+				continue;
+			}
+		}
 		includesDefs += "#include \"" + getClassPath(it->second.getTreatedClassName(true)) + "\"\n";
 		classStructure.prosetser = false;
 		classes += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true)
@@ -2525,13 +2603,14 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 					StringUtil::trim(meth);
 					RegexUtil::replace(meth, "[ \t]*,[ \t]*", ",");
 
-					//bool methstat = false;
-					if(RegexUtil::find(meth, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(meth, "[ \t]+static[ \t]+")!=-1)
-					{
-						RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
-						RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
-						//methstat = true;
-					}
+					bool methstat = false;
+					//bool methinline = false;
+					//if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
+					//{
+						methstat |= RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
+						methstat |= RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
+						//fldstatic = true;
+					//}
 					RegexUtil::replace(meth, "[ \t]*inline[ \t]+", " ");
 					RegexUtil::replace(meth, "[ \t]+inline[ \t]+", " ");
 					StringUtil::trim(meth);
@@ -2877,13 +2956,14 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 					StringUtil::trim(meth);
 					RegexUtil::replace(meth, "[ \t]*,[ \t]*", ",");
 
-					//bool methstat = false;
-					if(RegexUtil::find(meth, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(meth, "[ \t]+static[ \t]+")!=-1)
-					{
-						RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
-						RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
-						//methstat = true;
-					}
+					bool methstat = false;
+					//bool methinline = false;
+					//if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
+					//{
+						methstat |= RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
+						methstat |= RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
+						//fldstatic = true;
+					//}
 					RegexUtil::replace(meth, "[ \t]*inline[ \t]+", " ");
 					RegexUtil::replace(meth, "[ \t]+inline[ \t]+", " ");
 					StringUtil::trim(meth);
@@ -3628,13 +3708,14 @@ std::string Reflection::getXSDDefinitions(std::map<std::string, ClassStructure, 
 			StringUtil::trim(meth);
 			RegexUtil::replace(meth, "[ \t]*,[ \t]*", ",");
 
-			//bool methstat = false;
-			if(RegexUtil::find(meth, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(meth, "[ \t]+static[ \t]+")!=-1)
-			{
-				RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
-				RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
-				//methstat = true;
-			}
+			bool methstat = false;
+			//bool methinline = false;
+			//if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
+			//{
+				methstat |= RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
+				methstat |= RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
+				//fldstatic = true;
+			//}
 			RegexUtil::replace(meth, "[ \t]*inline[ \t]+", " ");
 			RegexUtil::replace(meth, "[ \t]+inline[ \t]+", " ");
 			StringUtil::trim(meth);

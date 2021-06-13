@@ -25,6 +25,7 @@
 #include "vector"
 #include "string"
 #include "map"
+#include <tuple>
 #include "MarkerHandler.h"
 
 
@@ -62,7 +63,8 @@ class ClassStructure
 	strVec pub,pri,pro;
 	std::vector<PropStructure> pubps, prips, props;
 	std::vector<MethStructure> pubms, prims, proms;
-	std::string classN,baseClassN,bcvisib,nmSpc;
+	std::vector<std::tuple<int, std::string>> bases;
+	std::string classN,baseClassN,nmSpc;
 	std::vector<std::string> namespaces;
 	std::vector<PropStructure> getAllProps()
 	{
@@ -105,7 +107,7 @@ public:
 		out.append(tab + "class " + classN);
 		if(baseClassN!="")
 		{
-			out.append(" : " + bcvisib + " " + baseClassN + " {n");
+			out.append(" : " + baseClassN + " {n");
 		}
 		for (int var = 0; var < (int)pri.size(); ++var) {
 			out.append(tab + "t" + pri.at(var) + "n");

@@ -184,6 +184,15 @@ public:
 	TeBkUmLpqAsyncRouter();
 	virtual ~TeBkUmLpqAsyncRouter();
 	void updateCache();
+	/* These functions are here just for test purposes and serve no purpose START */
+	static void temp() {
+	}
+	virtual void temp1() const {
+	}
+	std::map<std::string, std::string> l(std::map<std::string, std::string> a1, std::map<std::string, std::string> a2) {
+		return std::map<std::string, std::string>();
+	}
+	/* END */
 	bool route(HttpRequest* req, HttpResponse* res, SocketInterface* sif);
 };
 

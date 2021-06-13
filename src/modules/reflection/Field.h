@@ -34,6 +34,7 @@ class Field {
 	std::string fieldName;
 	std::string type;
 	std::string initVal;
+	bool isStatic, isConst;
 	friend class FFEADContext;
 public:
 	Field();
@@ -47,6 +48,7 @@ public:
     void clear();
 	const std::string& getRefName() const;
 	void setRefName(const std::string& refName);
+	void updateStaticConst(bool, bool);
 	GetFld getIns() const;
 };
 

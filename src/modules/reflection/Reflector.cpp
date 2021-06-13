@@ -77,6 +77,19 @@ ClassInfo* Reflector::getClassInfo(const std::string& cs, const std::string& app
 	{
 		ClassInfo* t = new ClassInfo();
 		*t = f();
+		if(t->getBases().size()>0) {
+			for(int y=0;y<(int)t->getBases().size();y++) {
+				if(std::get<0>(t->getBases().at(y))==3) {
+					ClassInfo* t1 = getClassInfo(std::get<1>(t->getBases().at(y)), app);
+					if(t1!=NULL) {
+						if(ciMap->find(std::get<1>(t->getBases().at(y)))==ciMap->end()) {
+							ciMap->insert({std::get<1>(t->getBases().at(y)), t});
+						}
+						t->addRuntimeBase(std::get<1>(t->getBases().at(y)), t1);
+					}
+				}
+			}
+		}
 		ciMap->insert({ca, t});
 		return t;
 	}

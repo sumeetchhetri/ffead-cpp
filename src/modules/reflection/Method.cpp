@@ -92,9 +92,21 @@ bool Method::isStatic()
 	return isstat;
 }
 
-void Method::setIsStatic(const bool& isStatic)
+bool Method::isVirtual()
+{
+	return isV;
+}
+
+bool Method::isPureVirtual()
+{
+	return isPV;
+}
+
+void Method::setFlags(const bool& isStatic, const bool& isV, const bool& isPV)
 {
 	this->isstat = isStatic;
+	this->isV = isV;
+	this->isPV = isPV;
 }
 
 const std::string& Method::getRefName() const {

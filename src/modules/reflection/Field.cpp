@@ -24,6 +24,8 @@
 
 Field::Field() {
 	f = NULL;
+	isStatic = false;
+	isConst = false;
 }
 
 GetFld Field::getIns() const {
@@ -76,4 +78,9 @@ const std::string& Field::getRefName() const {
 
 void Field::setRefName(const std::string& refName) {
 	this->refName = refName;
+}
+
+void Field::updateStaticConst(bool sta, bool cons) {
+	this->isStatic = sta;
+	this->isConst = cons;
 }
