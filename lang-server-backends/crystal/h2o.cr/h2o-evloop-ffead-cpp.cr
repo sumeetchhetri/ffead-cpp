@@ -85,7 +85,7 @@ class H2oFfeadCppCry < H2o
 	  out_headers_len: UInt64 = 0
 	  out_body_len: UInt64 = 0
 
-      FfeadCppRespTL.set LibFfeadCpp.ffead_cpp_handle_crystal_picov_1(pointerof(freq), pointerof(scode), out smsg, pointerof(smsg_len), out out_mime, pointerof(out_mime_len),
+      FfeadCppRespTL.set LibFfeadCpp.ffead_cpp_handle_crystal_js_1(pointerof(freq), pointerof(scode), out smsg, pointerof(smsg_len), out out_mime, pointerof(out_mime_len),
               out out_url, pointerof(out_url_len), freq.headers, pointerof(out_headers_len), out out_body, pointerof(out_body_len))
       
       #puts "scode=#{scode} smsg_len=#{smsg_len} out_url_len=#{out_url_len} out_mime_len=#{out_mime_len} out_headers_len=#{out_headers_len} out_body_len=#{out_body_len}"

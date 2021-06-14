@@ -56,7 +56,7 @@ struct C.ffead_request3_t {}
 	const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len, 
     phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 */
-fn C.ffead_cpp_handle_crystal_picov_1(&C.ffead_request3, &int, &string, &u64, &string, &u64, &string, &u64, &C.phr_header, &u64, &string, &u64) voidptr
+fn C.ffead_cpp_handle_picov_1(&C.ffead_request3, &int, &string, &u64, &string, &u64, &string, &u64, &C.phr_header, &u64, &string, &u64) voidptr
 
 fn C.ffead_cpp_resp_cleanup(voidptr)
 
@@ -72,7 +72,6 @@ fn cpy_str_1(dst byteptr, src string) byteptr {
 const (
 	hdr_sep = ': '
 	hdr_del = '\r\n'
-	hdr_end = '\r\n\r\n'
 )
 
 fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
@@ -119,7 +118,7 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 	out_body_len := u64(0)
 	headers_len := u64(0)
 	
-	resp := C.ffead_cpp_handle_crystal_picov_1(&freq, &scode, &smsg, &smsg_len, &out_mime, &out_mime_len, &out_url, &out_url_len, &req.headers[0], &headers_len, &out_body, &out_body_len)
+	resp := C.ffead_cpp_handle_picov_1(&freq, &scode, &smsg, &smsg_len, &out_mime, &out_mime_len, &out_url, &out_url_len, &req.headers[0], &headers_len, &out_body, &out_body_len)
 
 	/*$if debug {
 		println('ffead-cpp.scode = $scode')
@@ -132,8 +131,10 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 			smsg = tos(smsg.str, int(smsg_len))
 			res.buf = cpy_str_1(res.buf, "HTTP/1.1 ${scode} ${smsg}\r\n")
 		}
+		
 		res.header_server()
 		res.header_date()
+		
 		mut j := 0
 		for {
 			if j == int(headers_len) {
@@ -151,7 +152,7 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 			j = j + 1
 		}
 		
-		res.buf = C.fc_memcpy(res.buf, hdr_end.str, hdr_end.len)
+		res.buf = C.fc_memcpy(res.buf, hdr_del.str, hdr_del.len)
 		res.buf = C.fc_memcpy(res.buf, out_body.str, out_body_len)
 		
 		//out_body = tos(out_body.str, int(out_body_len))
@@ -173,10 +174,15 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 					println('file not found')
 				}
 
-				res.http_404()
+				res.buf = cpy_str_1(res.buf, "HTTP/1.1 404 Not Found\r\n")
+				res.header_server()
+				res.header_date()
+				res.buf = cpy_str_1(res.buf, "Content-Length: 0\r\n\r\n")
+				
 				C.ffead_cpp_resp_cleanup(resp)
 				return
 			}
+			
 			res.http_ok()
 			res.header_server()
 			res.header_date()
@@ -190,7 +196,11 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 			println('file not found')
 		}*/
 
-		res.http_404()
+		res.buf = cpy_str_1(res.buf, "HTTP/1.1 404 Not Found\r\n")
+		res.header_server()
+		res.header_date()
+		res.buf = cpy_str_1(res.buf, "Content-Length: 0\r\n\r\n")
+		
 		C.ffead_cpp_resp_cleanup(resp)
 		return
 	}

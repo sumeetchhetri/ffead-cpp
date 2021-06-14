@@ -251,6 +251,15 @@ RUN ninja install && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-mgr && \
 	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw-async
 
+RUN wget -q https://github.com/vlang/v/releases/download/0.1.29/v_linux.zip && unzip -q v_linux.zip && cd v && chmod +x v && ./v symlink && cd .. && rm -f v_linux.zip
+COPY pico.v /tmp/pico.v
+WORKDIR /tmp/pico.v
+RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* && \
+	ln -s /tmp/ffead-cpp-sql-raw/lib/libte-benchmark-um-pq.so /usr/local/lib/libte-benchmark-um-pq.so && \
+	ln -s /tmp/ffead-cpp-sql-raw/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
+	ln -s /tmp/ffead-cpp-sql-raw/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
+	ldconfig && chmod +x *.sh && ./build-debug.sh && cp main /tmp/ && rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc*
+
 COPY *.sh pipeline.lua /
 
 WORKDIR /

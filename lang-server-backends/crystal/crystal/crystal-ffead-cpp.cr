@@ -71,7 +71,7 @@ class HttpServerFfeadCppCry
 
             scode = 0;
 
-            @fresponse = LibFfeadCpp.ffead_cpp_handle_crystal_picov_1(pointerof(freq), pointerof(scode), out smsg, out smsg_len, out out_mime, out out_mime_len,
+            @fresponse = LibFfeadCpp.ffead_cpp_handle_crystal_js_1(pointerof(freq), pointerof(scode), out smsg, out smsg_len, out out_mime, out out_mime_len,
                     out out_url, out out_url_len, freq.headers, out out_headers_len, out out_body, out out_body_len)
 
             #puts "#{scode} #{smsg_len} #{out_url_len} #{out_mime_len} #{out_headers_len} #{out_body_len}"

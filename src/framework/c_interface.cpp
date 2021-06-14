@@ -168,7 +168,7 @@ void* ffead_cpp_handle_c_1(const ffead_request *request, int* scode, const char*
 /*
     Used by Crystal-Http/H2O (Crystal) and picov (vlang)
 */
-void* ffead_cpp_handle_crystal_picov_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
+void* ffead_cpp_handle_picov_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
 	const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len, 
     phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 )
@@ -194,9 +194,45 @@ void* ffead_cpp_handle_crystal_picov_1(const ffead_request3 *request, int* scode
         const std::string& cnt = respo->getContent();
         *out_body = cnt.c_str();
         *out_body_len = cnt.length();
-        if(cnt.length()>0) {
-            respo->addHeader(HttpResponse::ContentLength, CastUtil::fromNumber((int)cnt.length()));
-        }
+        respo->addHeader(HttpResponse::ContentLength, CastUtil::fromNumber((int)cnt.length()));
+    }
+    *out_headers_len = 0;
+    RMap::const_iterator it = respo->getCHeaders().cbegin();
+    for(;it!=respo->getCHeaders().cend();++it) {
+    	out_headers[*out_headers_len].name = it->first.c_str();
+    	out_headers[*out_headers_len].name_len = it->first.length();
+    	out_headers[*out_headers_len].value = it->second.c_str();
+    	out_headers[*out_headers_len].value_len = it->second.length();
+    	*out_headers_len = *out_headers_len+1;
+    }
+    return respo;
+}
+void* ffead_cpp_handle_crystal_js_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
+	const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len,
+    phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
+)
+{
+	HttpRequest req((void*)request->headers, request->headers_len, std::string_view{request->path, request->path_len},
+    		std::string_view{request->method, request->method_len}, request->version, std::string_view{request->body, request->body_len});
+    HttpResponse* respo = new HttpResponse();
+    ServiceTask task;
+    task.handle(&req, respo);
+    if(!respo->isDone()) {
+    	respo->setUrl(req.getUrl());
+		const std::string& resUrl = respo->getUrl();
+		*out_url = resUrl.c_str();
+		*out_url_len = resUrl.length();
+        const std::string& mime_type = CommonUtils::getMimeType(req.getExt());
+        *out_mime = mime_type.c_str();
+        *out_mime_len = mime_type.length();
+		*scode = 0;
+    } else {
+    	*scode = respo->getCode();
+        *smsg = respo->getStatusMsg().c_str();
+        *smsg_len = respo->getStatusMsg().length();
+        const std::string& cnt = respo->getContent();
+        *out_body = cnt.c_str();
+        *out_body_len = cnt.length();
     }
     *out_headers_len = 0;
     RMap::const_iterator it = respo->getCHeaders().cbegin();

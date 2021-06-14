@@ -132,7 +132,10 @@ extern "C" void* ffead_cpp_handle_c_1(const ffead_request *request, int* scode, 
 /*
     Crystal interface support functions
 */
-extern "C" void* ffead_cpp_handle_crystal_picov_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
+extern "C" void* ffead_cpp_handle_picov_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
+	const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len,
+    phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len);
+extern "C" void* ffead_cpp_handle_crystal_js_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
 	const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len, 
     phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len);
 

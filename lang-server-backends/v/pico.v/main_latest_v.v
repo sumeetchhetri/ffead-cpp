@@ -53,7 +53,7 @@ struct C.ffead_request3_t {}
 	const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len, 
     phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 */
-fn C.ffead_cpp_handle_crystal_picov_1(&C.ffead_request3, &int, &string, &u64, &string, &u64, &string, &u64, &C.phr_header, &u64, &string, &u64) voidptr
+fn C.ffead_cpp_handle_picov_1(&C.ffead_request3, &int, &string, &u64, &string, &u64, &string, &u64, &C.phr_header, &u64, &string, &u64) voidptr
 
 fn C.ffead_cpp_resp_cleanup(voidptr)
 
@@ -149,7 +149,7 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 	out_body_len := u64(0)
 	headers_len := u64(0)
 	
-	resp := C.ffead_cpp_handle_crystal_picov_1(&freq, &scode, &smsg, &smsg_len, &out_mime, &out_mime_len, &out_url, &out_url_len, &req.headers[0], &headers_len, &out_body, &out_body_len)
+	resp := C.ffead_cpp_handle_picov_1(&freq, &scode, &smsg, &smsg_len, &out_mime, &out_mime_len, &out_url, &out_url_len, &req.headers[0], &headers_len, &out_body, &out_body_len)
 
 	$if debug {
 		println('ffead-cpp.scode = $scode')

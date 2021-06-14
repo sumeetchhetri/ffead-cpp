@@ -39,7 +39,7 @@ typedef struct ffead_request3 {
 
 typedef struct ffead_request3 ffead_request3_t;
 
-inline void* fc_memcpy(void* ptr, char* c, size_t len) {
+static inline void* fc_memcpy(void* ptr, char* c, size_t len) {
 	memcpy(ptr, (const void *)c, len);
 	ptr += len;
 	return ptr;
@@ -48,6 +48,6 @@ extern void ffead_cpp_resp_cleanup(void* ptr);
 extern void ffead_cpp_bootstrap(const char* srv, size_t srv_len, int type);
 extern void ffead_cpp_init();
 extern void ffead_cpp_cleanup();
-extern void* ffead_cpp_handle_crystal_picov_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
+extern void* ffead_cpp_handle_picov_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
     const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len,
     phr_header_t *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len);
