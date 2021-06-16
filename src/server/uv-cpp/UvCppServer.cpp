@@ -54,13 +54,13 @@ void UvCppServer::handler(uv::http::Request& req2, uv::http::Response* res)
 	if(respo.isDone()) {
 		for (int var = 0; var < (int)respo.getCookies().size(); var++)
 		{
-			res->appendHead(std::string("Set-Cookie"), std::string(respo.getCookies().at(var)));
+			res->appendHead(std::string(HttpResponse::SetCookie), std::string(respo.getCookies().at(var)));
 		}
-		std::map<std::string,std::string>::const_iterator it;
+		RMap::const_iterator it;
 		for(it=respo.getCHeaders().begin();it!=respo.getCHeaders().end();++it) {
 			res->appendHead(std::string(it->first), std::string(it->second));
 		}
-
+		res->appendHead(std::string(HttpResponse::ContentLength), std::to_string(respo.getContent().length()));
 		res->swapContent(std::string(respo.getContent()));
 		res->setStatus(uv::http::Response::StatusCode(respo.getCode()), respo.getStatusMsg());
 	} else {
@@ -78,17 +78,17 @@ void UvCppServer::handler(uv::http::Request& req2, uv::http::Response* res)
 					fread (buffer, 1, length, f);
 				}
 				fclose (f);
-				res->appendHead("content-length", std::to_string(length));
-				res->appendHead("content-type", std::string(CommonUtils::getMimeType(req.getExt())));
+				res->appendHead(std::string(HttpResponse::ContentLength), std::to_string(length));
+				res->appendHead(std::string(HttpResponse::ContentType), std::string(CommonUtils::getMimeType(req.getExt())));
 				std::string content = std::string(buffer, length);
 				free(buffer);
 				res->swapContent(std::move(content));
-				res->setStatus(uv::http::Response::StatusCode(200), "OK");
+				res->setStatus(uv::http::Response::StatusCode(HTTPResponseStatus::Ok.getCode()), HTTPResponseStatus::Ok.getMsg());
 			} else {
-				res->setStatus(uv::http::Response::StatusCode(404), "Not Found");
+				res->setStatus(uv::http::Response::StatusCode(HTTPResponseStatus::NotFound.getCode()), HTTPResponseStatus::NotFound.getMsg());
 			}
 		} else {
-			res->setStatus(uv::http::Response::StatusCode(404), "Not Found");
+			res->setStatus(uv::http::Response::StatusCode(HTTPResponseStatus::NotFound.getCode()), HTTPResponseStatus::NotFound.getMsg());
 		}
 	}
 	res->setVersion(uv::http::HttpVersion::Http1_1);

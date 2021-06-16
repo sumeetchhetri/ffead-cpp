@@ -42,7 +42,7 @@ void LithiumServer::runServer(int port, std::vector<std::string> servedAppNames)
 			{
 				response.set_header("Set-Cookie", respo.getCookies().at(var));
 			}
-			std::map<std::string,std::string>::const_iterator it;
+			RMap::const_iterator it;
 			for(it=respo.getCHeaders().begin();it!=respo.getCHeaders().end();++it) {
 				response.set_header(it->first, it->second);
 			}

@@ -306,7 +306,7 @@ static int on_read(const lsi_session_t *session)
 
 		g_api->log(NULL, LSI_LOG_INFO, "[Module:mod_ffeadcpp] on_read set headers start\n");
 		std::string& data = respo.generateNginxApacheResponse();
-		std::map<std::string,std::string>::const_iterator it;
+		RMap::const_iterator it;
 		for(it=respo.getCHeaders().begin();it!=respo.getCHeaders().end();++it) {
 			g_api->set_resp_header(session, LSI_RSPHDR_UNKNOWN, it->first.c_str(), it->first.length(), it->first.c_str(), it->first.length(), LSI_HEADEROP_SET);
 		}

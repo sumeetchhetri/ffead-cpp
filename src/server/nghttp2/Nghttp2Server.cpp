@@ -51,11 +51,11 @@ void Nghttp2Server::handle(const request &req2, const response &res2, std::strin
 	if(respo.isDone()) {
 		for (int var = 0; var < (int)respo.getCookies().size(); var++)
 		{
-			hm.emplace("set-cookie", header_value{respo.getCookies().at(var)});
+			hm.emplace(HttpResponse::SetCookie, header_value{value: respo.getCookies().at(var)});
 		}
-		std::map<std::string,std::string>::const_iterator it;
+		RMap::const_iterator it;
 		for(it=respo.getCHeaders().begin();it!=respo.getCHeaders().end();++it) {
-			hm.emplace(it->first, header_value{it->second});
+			hm.emplace(it->first, header_value{value: std::string(it->second)});
 		}
 
 		res2.write_head(respo.getCode(), hm);
@@ -70,8 +70,8 @@ void Nghttp2Server::handle(const request &req2, const response &res2, std::strin
 
 			struct stat stbuf;
 			if (stat(req.getUrl().c_str(), &stbuf) == 0) {
-				header.emplace("content-length", header_value{std::to_string(stbuf.st_size)});
-				header.emplace("last-modified", header_value{http_date(stbuf.st_mtime)});
+				header.emplace(HttpResponse::ContentLength, header_value{std::to_string(stbuf.st_size)});
+				header.emplace(HttpResponse::LastModified, header_value{http_date(stbuf.st_mtime)});
 			}
 			res2.write_head(200, std::move(header));
 			res2.end(file_generator_from_fd(fd));

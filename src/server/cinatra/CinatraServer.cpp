@@ -111,7 +111,7 @@ void CinatraServer::runServer(std::string ip_addr, std::string port, std::vector
 					std::string val = respo.getCookies().at(var);
 					response.add_header("Set-Cookie", std::move(val));
 				}
-				std::map<std::string,std::string>::const_iterator it;
+				RMap::const_iterator it;
 				for(it=respo.getCHeaders().begin();it!=respo.getCHeaders().end();++it) {
 					std::string key = it->first;
 					std::string val = it->second;

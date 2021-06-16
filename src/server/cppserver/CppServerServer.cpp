@@ -24,7 +24,6 @@
 
 Logger logger;
 
-thread_local void* hrq = NULL;
 thread_local void* hrs = NULL;
 
 class CppIntSession : public CppServer::HTTP::HTTPSession
@@ -33,12 +32,9 @@ public:
     using CppServer::HTTP::HTTPSession::HTTPSession;
 protected:
     void onReceivedRequest(const CppServer::HTTP::HTTPRequest& request) override {
-    	if(hrq!=NULL) {
-    		HttpRequest* req = (HttpRequest*)hrq;
-    		delete req;
+    	if(hrs!=NULL) {
     		HttpResponse* res = (HttpResponse*)hrs;
     		delete res;
-    		hrq = NULL;
     		hrs = NULL;
     	}
 
@@ -57,12 +53,11 @@ protected:
 			headers[hc].value_len = std::get<1>(hdr).length();
 		}
 
-		HttpRequest* req = new HttpRequest(&headers, hc, request.url(), request.method(), 11, cont);
-		hrq = req;
+		HttpRequest req(&headers, hc, request.url(), request.method(), 11, cont);
 		HttpResponse* respo = new HttpResponse();
 		hrs = respo;
 		ServiceTask task;
-		task.handle(req, respo);
+		task.handle(&req, respo);
 
 		CppServer::HTTP::HTTPResponse& cresp = response();
 
@@ -70,19 +65,19 @@ protected:
 			cresp.SetBegin(respo->getCode());
 			for (int var = 0; var < (int)respo->getCookies().size(); var++)
 			{
-				cresp.SetHeader(std::string_view("Set-Cookie"), std::string_view(respo->getCookies().at(var)));
+				cresp.SetHeader(std::string_view(HttpResponse::SetCookie), std::string_view(respo->getCookies().at(var)));
 			}
-			std::map<std::string,std::string>::const_iterator it;
+			RMap::const_iterator it;
 			for(it=respo->getCHeaders().begin();it!=respo->getCHeaders().end();++it) {
 				cresp.SetHeader(std::string_view(it->first), std::string_view(it->second));
 			}
 			cresp.SetBody(respo->getContent());
 			cresp.SetBodyLength(respo->getContent().length());
 		} else {
-			if(access(req->getUrl().c_str(), F_OK) != -1) {
+			if(access(req.getUrl().c_str(), F_OK) != -1) {
 				char * buffer = 0;
 				long length;
-				FILE * f = fopen (req->getUrl().c_str(), "rb");
+				FILE * f = fopen (req.getUrl().c_str(), "rb");
 				if(f) {
 					fseek (f, 0, SEEK_END);
 					length = ftell (f);
@@ -94,8 +89,8 @@ protected:
 					}
 					fclose (f);
 					cresp.SetBegin(200);
-					cresp.SetHeader(std::string_view("content-length"), std::string_view(std::to_string(length)));
-					cresp.SetHeader(std::string_view("content-type"), std::string_view(CommonUtils::getMimeType(req->getExt())));
+					cresp.SetHeader(std::string_view(HttpResponse::ContentLength), std::string_view(std::to_string(length)));
+					cresp.SetHeader(std::string_view(HttpResponse::ContentType), std::string_view(CommonUtils::getMimeType(req.getExt())));
 					cresp.SetBody(std::string_view(std::string(buffer, length)));
 					free(buffer);
 					cresp.SetBodyLength(length);

@@ -55,14 +55,14 @@ void MongolsServer::runServer(std::string ipaddr, int port, std::vector<std::str
 		if(respo.isDone()) {
 			for (int var = 0; var < (int)respo.getCookies().size(); var++)
 			{
-				res.headers.emplace("Set-Cookie", respo.getCookies().at(var));
+				res.headers.emplace(HttpResponse::SetCookie, respo.getCookies().at(var));
 			}
-			std::map<std::string,std::string>::const_iterator it;
+			RMap::const_iterator it;
 			for(it=respo.getCHeaders().begin();it!=respo.getCHeaders().end();++it) {
-				res.headers.emplace(it->first, it->second);
+				res.set_header(it->first, it->second);
 			}
 
-			res.content = respo.getContent();
+			res.content = std::move(respo.getContent());
 			res.status = respo.getCode();
 		} else {
 			if(access(req.getUrl().c_str(), F_OK) != -1) {
@@ -79,8 +79,8 @@ void MongolsServer::runServer(std::string ipaddr, int port, std::vector<std::str
 						fread (buffer, 1, length, f);
 					}
 					fclose (f);
-					res.headers.emplace("content-length", std::to_string(length));
-					res.headers.emplace("content-type", CommonUtils::getMimeType(req.getExt()));
+					res.headers.emplace(HttpResponse::ContentLength, std::to_string(length));
+					res.headers.emplace(HttpResponse::ContentType, CommonUtils::getMimeType(req.getExt()));
 					res.content = std::string(buffer, length);
 					res.status = 200;
 					free(buffer);

@@ -182,7 +182,7 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 
 	if(respo.isDone()) {
 		std::string& data = respo.generateNginxApacheResponse();
-		std::map<std::string, std::string>::const_iterator it;
+		RMap::const_iterator it;
 		for(it=respo.getCHeaders().begin();it!=respo.getCHeaders().end();++it) {
 			apr_table_set(r->headers_out, it->first.c_str(), it->second.c_str());
 		}

@@ -88,7 +88,7 @@ void DrogonHttpHandler::handle(const HttpRequestPtr &requestptr, std::function<v
 		{
 			resp.get()->addHeader("Set-Cookie", respo.getCookies().at(var));
 		}
-		std::map<std::string,std::string>::const_iterator it;
+		RMap::const_iterator it;
 		for(it=respo.getCHeaders().begin();it!=respo.getCHeaders().end();++it) {
 			resp.get()->addHeader(it->first, it->second);
 		}

@@ -306,7 +306,7 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 
 		std::string& data = respo.generateNginxApacheResponse();
 		r->headers_out.content_length_n = (int)data.length();
-		std::map<std::string,std::string>::const_iterator it;
+		RMap::const_iterator it;
 		for(it=respo.getCHeaders().begin();it!=respo.getCHeaders().end();++it) {
 			set_custom_header_in_headers_out(r, it->first, it->second);
 		}
