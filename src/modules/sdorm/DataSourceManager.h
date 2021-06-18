@@ -57,7 +57,7 @@ public:
 	virtual ~DataSourceManager();
 	static DataSourceInterface* getImpl(std::string name = "", std::string appName = "");
 	static void cleanImpl(DataSourceInterface*);
-	static void* getRawImpl(std::string name = "", std::string appName = "");
+	static void* getRawImpl(std::string name = "", std::string appName = "", bool overrideSingleEVHFlag = false);
 	static void cleanRawImpl(DataSourceType*);
 	static void triggerAppInitCompletion(std::string appName = "");
 	static bool isInitCompleted();

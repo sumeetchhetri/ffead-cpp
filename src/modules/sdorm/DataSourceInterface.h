@@ -42,6 +42,8 @@ enum DSType {
 };
 
 class DataSourceType {
+	std::string name;
+	friend class DataSourceManager;
 public:
 	virtual DSType getType()=0;
 	virtual ~DataSourceType(){}

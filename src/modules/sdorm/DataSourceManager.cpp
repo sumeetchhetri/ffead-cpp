@@ -164,7 +164,7 @@ DataSourceManager::~DataSourceManager() {
 	}
 }
 
-void* DataSourceManager::getRawImpl(std::string name, std::string appName) {
+void* DataSourceManager::getRawImpl(std::string name, std::string appName, bool overrideSingleEVHFlag) {
 	if(appName=="") {
 		appName = CommonUtils::getAppName();
 	} else {
@@ -180,7 +180,7 @@ void* DataSourceManager::getRawImpl(std::string name, std::string appName) {
 		throw std::runtime_error("Data Source Not found...");
 	}
 	//This will cause serious issues if set/used in multi-threaded mode instead of single process mode
-	if(isSingleEVH) {
+	if(isSingleEVH && !overrideSingleEVHFlag) {
 		if(sevhDsnRawImpls.find(name)!=sevhDsnRawImpls.end()) {
 			return sevhDsnRawImpls[name];
 		}
@@ -191,6 +191,7 @@ void* DataSourceManager::getRawImpl(std::string name, std::string appName) {
 	{
 #if defined(INC_SDORM_SQL) && defined(HAVE_LIBPQ)
 		t = new LibpqDataSourceImpl(dsnMgr->props.getNodes().at(0).getBaseUrl(), dsnMgr->props.getProperty("async")=="true");
+		((LibpqDataSourceImpl*)t)->name = name;
 		((LibpqDataSourceImpl*)t)->init();
 #endif
 	}
@@ -198,34 +199,33 @@ void* DataSourceManager::getRawImpl(std::string name, std::string appName) {
 	{
 #if defined(INC_SDORM_MONGO)
 		t = new MongoDBRawDataSourceImpl(dsnMgr->pool);
+		((MongoDBRawDataSourceImpl*)t)->name = name;
 		((MongoDBRawDataSourceImpl*)t)->init();
 #endif
 	}
 	//This will cause serious issues if set/used in multi-threaded mode instead of single process mode
-	if(isSingleEVH) {
+	if(isSingleEVH && !overrideSingleEVHFlag) {
 		sevhDsnRawImpls[name] = t;
 	}
 	return t;
 }
 
 void DataSourceManager::cleanRawImpl(DataSourceType* dsImpl) {
-	if(!isSingleEVH) {
-		if(dsImpl->getType()==SD_RAW_SQLPG)
-		{
+	if(dsImpl->getType()==SD_RAW_SQLPG)
+	{
 #if defined(INC_SDORM_SQL) && defined(HAVE_LIBPQ)
-			delete (LibpqDataSourceImpl*)dsImpl;
+		delete (LibpqDataSourceImpl*)dsImpl;
 #endif
-		}
-		else if(dsImpl->getType()==SD_RAW_MONGO)
-		{
+	}
+	else if(dsImpl->getType()==SD_RAW_MONGO)
+	{
 #if defined(INC_SDORM_MONGO)
-			delete (MongoDBRawDataSourceImpl*)dsImpl;
+		delete (MongoDBRawDataSourceImpl*)dsImpl;
 #endif
-		}
-		else
-		{
-			delete dsImpl;
-		}
+	}
+	else
+	{
+		delete dsImpl;
 	}
 }
 
@@ -256,12 +256,14 @@ DataSourceInterface* DataSourceManager::getImpl(std::string name, std::string ap
 	{
 #ifdef INC_SDORM_SQL
 		t = new SQLDataSourceImpl(dsnMgr->pool, &dsnMgr->mapping);
+		((SQLDataSourceImpl*)t)->name = name;
 #endif
 	}
 	else if(StringUtil::toLowerCopy(dsnMgr->props.getType())=="mongo")
 	{
 #ifdef INC_SDORM_MONGO
 		t = new MongoDBDataSourceImpl(dsnMgr->pool, &dsnMgr->mapping);
+		((MongoDBDataSourceImpl*)t)->name = name;
 #endif
 	}
 	if(t == NULL)

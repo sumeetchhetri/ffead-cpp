@@ -653,7 +653,7 @@ TeBkUmLpqAsyncRouter::TeBkUmLpqAsyncRouter() {
 
 TeBkUmLpqAsyncRouter::~TeBkUmLpqAsyncRouter() {
 	if(sqli!=NULL) {
-		delete sqli;
+		DataSourceManager::cleanRawImpl(sqli);
 	}
 }
 
@@ -668,18 +668,19 @@ LibpqDataSourceImpl* TeBkUmLpqAsyncRouterPooled::getDb(int max) {
 	if(max==0) {
 		max = maxconns;
 	}
+	int pc = 0;
 	if(inited) {
-		opt++;
-		if(opt==INT_MAX) {
+		pc = ++opt;
+		if(pc>=INT_MAX-1) {
 			opt = 0;
 		}
 	} else {
 		for (int var = 0; var < maxconns; ++var) {
-			pool.push_back(static_cast<LibpqDataSourceImpl*>(DataSourceManager::getRawImpl("PostgreSQL-DSN", "te-benchmark-um-pq-async")));
+			pool.push_back(static_cast<LibpqDataSourceImpl*>(DataSourceManager::getRawImpl("PostgreSQL-DSN", "te-benchmark-um-pq-async", true)));
 		}
 		inited = true;
 	}
-	return pool.at(opt%max);
+	return pool.at(pc%max);
 }
 
 TeBkUmLpqAsyncRouterPooled::TeBkUmLpqAsyncRouterPooled() {
@@ -700,7 +701,7 @@ TeBkUmLpqAsyncRouterPooled::TeBkUmLpqAsyncRouterPooled() {
 TeBkUmLpqAsyncRouterPooled::~TeBkUmLpqAsyncRouterPooled() {
 	for(auto sqli: pool) {
 		if(sqli!=NULL) {
-			delete sqli;
+			DataSourceManager::cleanRawImpl(sqli);
 		}
 	}
 }
