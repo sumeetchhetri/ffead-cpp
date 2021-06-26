@@ -146,7 +146,7 @@ class LibpqQuery {
 	friend class LibpqAsyncReq;
 	friend class PgReadTask;
 	void reset();
-#ifdef HAVE_LIBPQ_BATCH
+#if defined(HAVE_LIBPQ_BATCH) || defined(HAVE_LIBPQ_PIPELINE)
 	friend class PgBatchReadTask;
 #endif
 public:
@@ -175,7 +175,7 @@ class LibpqAsyncReq {
 	std::deque<LibpqQuery> q;
 	friend class LibpqDataSourceImpl;
 	friend class PgReadTask;
-#ifdef HAVE_LIBPQ_BATCH
+#if defined(HAVE_LIBPQ_BATCH) || defined(HAVE_LIBPQ_PIPELINE)
 	friend class PgBatchReadTask;
 #endif
 	LibpqQuery* peek();
@@ -201,8 +201,9 @@ public:
 
 class LibpqDataSourceImpl;
 
-#ifdef HAVE_LIBPQ_BATCH
+#if defined(HAVE_LIBPQ_BATCH) || defined(HAVE_LIBPQ_PIPELINE)
 class PgBatchReadTask : public Task {
+protected:
 	LibpqAsyncReq* ritem;
 	int counter = 0;
 	LibpqQuery* q;
@@ -239,9 +240,6 @@ class LibpqDataSourceImpl : public DataSourceType, public SocketInterface {
 	PGresult* executeSync();
 #endif
 	static void* handle(void* inp);
-#ifdef HAVE_LIBPQ_BATCH
-	static void* handleBatchReminder(void* inp);
-#endif
 
 	LibpqAsyncReq* peek();
 	void pop();

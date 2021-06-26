@@ -75,6 +75,7 @@
 #mesondefine HAVE_TCP_DEFER_ACCEPT
 #mesondefine HAVE_TCP_FASTOPEN
 #mesondefine HAVE_LIBPQ_BATCH
+#mesondefine HAVE_LIBPQ_PIPELINE
 #mesondefine IS_SENDFILE
 
 #ifdef HAVE_ODBCLIB

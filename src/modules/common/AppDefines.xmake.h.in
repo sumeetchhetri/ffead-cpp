@@ -75,6 +75,7 @@ ${define HAVE_TCP_QUICKACK}
 ${define HAVE_TCP_DEFER_ACCEPT}
 ${define HAVE_TCP_FASTOPEN}
 ${define HAVE_LIBPQ_BATCH}
+${define HAVE_LIBPQ_PIPELINE}
 ${define IS_SENDFILE}
 
 #ifdef HAVE_ODBCLIB

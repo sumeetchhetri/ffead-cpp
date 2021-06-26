@@ -2,12 +2,13 @@ mkdir /tmp/profile-data
 
 rm -rf $IROOT/ffead-cpp-6.0-sql
 
-if [ "$1" = "batch" ]
+if [ "$1" = "batch-unused" ]
 then
 	apt remove -yqq libpq-dev
 	apt autoremove -yqq
+	rm -f /usr/local/lib/libpq.*
+	rm -f /usr/include/postgres_ext.h /usr/include/pg_config_ext.h /usr/include/libpq-fe.h
 	rm -f /usr/lib/x86_64-linux-gnu/libpq.*
-	apt update && apt install -y bison flex libreadline-dev
 	cd /tmp
 	#wget -q https://github.com/an-tao/postgres/archive/batch_mode_ubuntu.tar.gz
 	#tar -xzf batch_mode_ubuntu.tar.gz

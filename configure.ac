@@ -1078,6 +1078,8 @@ if test "x$mod_sdormsql" = "xyes"; then
 	fi
 	AC_CHECK_HEADER([sql.h],,[AC_MSG_ERROR([ODBC sql.h header not found])])
 	AC_CHECK_HEADER([libpq-fe.h],,[])
+	AC_CHECK_LIB(pq, PQenterBatchMode, [AC_DEFINE(HAVE_LIBPQ_BATCH, [1], [libpq batch mode])], [])
+	AC_CHECK_LIB(pq, PQenterPipelineMode, [AC_DEFINE(HAVE_LIBPQ_PIPELINE, [1], [libpq pipeline mode])], [])
 fi
 
 if test "x$mod_sdormmongo" = "xyes"; then

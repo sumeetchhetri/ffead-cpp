@@ -170,14 +170,14 @@ RUN rm -f master.zip
 
 RUN apt remove -yqq libpq-dev
 RUN apt autoremove -yqq
-RUN rm -f /usr/lib/x86_64-linux-gnu/libpq.*
+RUN rm -f /usr/local/lib/libpq.* /usr/lib/x86_64-linux-gnu/libpq.*
 RUN apt update && apt install -y bison flex libreadline-dev
 WORKDIR /tmp
-RUN wget -nv https://github.com/postgres/postgres/archive/b787d4ce6d910080065025bcd5f968544997271f.zip
-RUN unzip -q b787d4ce6d910080065025bcd5f968544997271f.zip
-WORKDIR /tmp/postgres-b787d4ce6d910080065025bcd5f968544997271f
-RUN wget -nv https://www.postgresql.org/message-id/attachment/115223/v22-0001-libpq-batch.patch
-RUN git apply ./v22-0001-libpq-batch.patch
+RUN wget -nv https://github.com/postgres/postgres/archive/4efcf47053eaf8dd88de2b1a89478df43d37d5c0.zip
+RUN unzip -q 4efcf47053eaf8dd88de2b1a89478df43d37d5c0.zip
+WORKDIR /tmp/postgres-4efcf47053eaf8dd88de2b1a89478df43d37d5c0
+#RUN wget -nv https://www.postgresql.org/message-id/attachment/115223/v22-0001-libpq-batch.patch
+#RUN git apply ./v22-0001-libpq-batch.patch
 RUN ./configure --prefix=/usr CFLAGS='-O3 -march=native -flto'
 WORKDIR src/interfaces/libpq
 RUN make all install -j4

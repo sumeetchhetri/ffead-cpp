@@ -63,10 +63,24 @@ bool LibpqDataSourceImpl::init() {
 				fprintf(stderr, "PQenterBatchMode error: %s\n?", PQerrorMessage(conn));
 				PQfinish(conn);
 			}
+			else
+			{
+				fprintf(stdout, "PQenterBatchMode successful\n");
+			}
 			rdTsk = new PgBatchReadTask(this);
 			//logger = LoggerFactory::getLogger("LibpqDataSourceImpl");
-			//Thread* pthread = new Thread(&handleBatchReminder, this);
-			//pthread->execute();
+#elif defined(HAVE_LIBPQ_PIPELINE)
+			if (PQenterPipelineMode(conn) == 0)
+			{
+				fprintf(stderr, "PQenterPipelineMode error: %s\n?", PQerrorMessage(conn));
+				PQfinish(conn);
+			}
+			else
+			{
+				fprintf(stdout, "PQenterPipelineMode successful\n");
+			}
+			rdTsk = new PgBatchReadTask(this);
+			//logger = LoggerFactory::getLogger("LibpqDataSourceImpl");
 #else
 			rdTsk = new PgReadTask(this);
 #endif
@@ -735,7 +749,7 @@ void LibpqDataSourceImpl::postAsync(LibpqAsyncReq* item, void* ctx, LipqComplFun
 		}
 
 		if(rdTsk!=NULL) {
-#ifdef HAVE_LIBPQ_BATCH
+#if defined(HAVE_LIBPQ_BATCH) || defined(HAVE_LIBPQ_PIPELINE)
 			((PgBatchReadTask*)rdTsk)->submit(item);
 #else
 			((PgReadTask*)rdTsk)->submit(item);
@@ -757,7 +771,7 @@ void LibpqDataSourceImpl::postAsync(LibpqAsyncReq* item, int numQ, void* ctx, Li
 		item->cnt += numQ-1;
 
 		if(rdTsk!=NULL) {
-#ifdef HAVE_LIBPQ_BATCH
+#if defined(HAVE_LIBPQ_BATCH) || defined(HAVE_LIBPQ_PIPELINE)
 			((PgBatchReadTask*)rdTsk)->submit(item);
 #else
 			((PgReadTask*)rdTsk)->submit(item);
@@ -860,7 +874,7 @@ LibpqAsyncReq* LibpqDataSourceImpl::getAsyncRequest() {
 	LibpqAsyncReq* item = NULL;
 	if(isAsync) {
 		if(rdTsk!=NULL) {
-#ifdef HAVE_LIBPQ_BATCH
+#if defined(HAVE_LIBPQ_BATCH) || defined(HAVE_LIBPQ_PIPELINE)
 			item = ((PgBatchReadTask*)rdTsk)->get();
 #else
 			item = ((PgReadTask*)rdTsk)->get();
@@ -1059,7 +1073,7 @@ PgReadTask::PgReadTask(SocketInterface* sif) {
 	flux = false;
 }
 
-#ifdef HAVE_LIBPQ_BATCH
+#if defined(HAVE_LIBPQ_BATCH) || defined(HAVE_LIBPQ_PIPELINE)
 PgBatchReadTask::~PgBatchReadTask() {
 }
 
@@ -1119,7 +1133,11 @@ void PgBatchReadTask::run() {
 		}
 
 		//ths->logger << ("run:Reading Resultset...\n");
+#ifdef HAVE_LIBPQ_PIPELINE
+		if(PQresultStatus(res) == PGRES_PIPELINE_SYNC) {
+#else
 		if(PQresultStatus(res) == PGRES_BATCH_END) {
+#endif
 			//ths->logger.write("run:End batch...%d\n", readQueries);
 			sendBatch = true;
 			PQclear(res);
@@ -1287,16 +1305,20 @@ void PgBatchReadTask::processPending() {
 			pop();
 			nitem = &(ths->Q.back());
 			batchQueries(nitem, numQueriesInBatch);
-			if(numQueriesInBatch>=30) break;
+			//if(numQueriesInBatch>=30) break;
 		}
 
 		if(numQueriesInBatch>0) {
+#ifdef HAVE_LIBPQ_PIPELINE
+			if (PQpipelineSync(ths->conn) == 0) {
+				fprintf(stderr, "processPending:PQpipelineSync error: %s\n", PQerrorMessage(ths->conn));
+#else
 			if (PQbatchSendQueue(ths->conn) == 0) {
 				fprintf(stderr, "processPending:PQbatchSendQueue error: %s\n", PQerrorMessage(ths->conn));
+#endif
+
 				//PQfinish(ths->conn);
 				//return;
-			} else {
-				//ths->logger.write("processPending:PQbatchSendQueue from run %d, Batch Query Q size %d\n", numQueriesInBatch, ths->Q.size());
 			}
 			sendBatch = false;
 		}
@@ -1331,8 +1353,13 @@ void PgBatchReadTask::submit(LibpqAsyncReq* nitem) {
 			//ths->Q.push(nitem);
 			int numQueriesInBatch = 0;
 			batchQueries(nitem, numQueriesInBatch);
+#ifdef HAVE_LIBPQ_PIPELINE
+			if (PQpipelineSync(ths->conn) == 0) {
+				fprintf(stderr, "submit:PQpipelineSync error: %s\n", PQerrorMessage(ths->conn));
+#else
 			if (PQbatchSendQueue(ths->conn) == 0) {
 				fprintf(stderr, "submit:PQbatchSendQueue error: %s\n", PQerrorMessage(ths->conn));
+#endif
 				//PQfinish(ths->conn);
 			} else {
 				//ths->logger.write("submit:PQbatchSendQueue from submit %d, Batch Query Q size %d\n", numQueriesInBatch, ths->Q.size());
@@ -1353,6 +1380,12 @@ void PgBatchReadTask::batchQueries(LibpqAsyncReq* nitem, int& numQueriesInBatch)
 	for (int i = 0; i < nitem->q.size(); ++i) {
 		LibpqQuery* q = &(nitem->q.at(i));
 		int psize = (int)q->pvals.size();
+
+		if(q->isMulti) {
+			PQsendQuery(ths->conn, q->query.c_str());
+			numQueriesInBatch++;
+			return;
+		}
 
 		if(q->isPrepared && ths->prepStmtMap.find(q->query)==ths->prepStmtMap.end()) {
 			//ths->logger << ("batchQueries:PQsendPrepare\n");

@@ -149,6 +149,20 @@ option("LIBPQ")
 			else
 				option:set("configvar", "HAVE_LIBPQ_BATCH", 1)
 			end
+			ok = has_cfuncs("PQenterPipelineMode", {includes = "libpq-fe.h"})
+			if not ok then
+				ok = has_cfuncs("PQenterPipelineMode", {includes = "postgresql/libpq-fe.h"})
+				if not ok then
+					ok = has_cfuncs("PQenterPipelineMode", {includes = "pgsql/ibpq-fe.h"})
+					if ok then
+						option:set("configvar", "HAVE_LIBPQ_PIPELINE", 1)
+					end
+				else
+					option:set("configvar", "HAVE_LIBPQ_PIPELINE", 1)
+				end
+			else
+				option:set("configvar", "HAVE_LIBPQ_PIPELINE", 1)
+			end
 		end
     end)
 option_end()

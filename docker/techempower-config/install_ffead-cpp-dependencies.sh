@@ -2,9 +2,26 @@
 
 apt update -yqq && apt install --no-install-recommends -yqq autoconf-archive unzip uuid-dev odbc-postgresql unixodbc unixodbc-dev \
 	apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev \
-	zlib1g-dev cmake make clang-format-9 ninja-build libcurl4-openssl-dev libpq-dev git \
-	wget build-essential pkg-config libpcre3-dev curl libgtk2.0-dev libgdk-pixbuf2.0-dev
+	zlib1g-dev cmake make clang-format-9 ninja-build libcurl4-openssl-dev git \
+	wget build-essential pkg-config libpcre3-dev curl libgtk2.0-dev libgdk-pixbuf2.0-dev bison flex libreadline-dev
 apt-get install --reinstall ca-certificates
+
+cd $IROOT
+apt remove -yqq libpq-dev
+apt autoremove -yqq
+rm -f /usr/local/lib/libpq.*
+rm -f /usr/include/postgres_ext.h /usr/include/pg_config_ext.h /usr/include/libpq-fe.h
+rm -f /usr/lib/x86_64-linux-gnu/libpq.*
+PG_CMT=4efcf47053eaf8dd88de2b1a89478df43d37d5c0
+wget -nv https://github.com/postgres/postgres/archive/$PG_CMT.zip
+unzip -q $PG_CMT.zip
+cd postgres-$PG_CMT
+./configure --prefix=/usr CFLAGS='-O3 -march=native -flto'
+cd src/interfaces/libpq
+make all install -j4
+cp ../../../src/include/postgres_ext.h ../../../src/include/pg_config_ext.h /usr/include
+cd $IROOT
+rm -rf postgres-$PG_CMT
 
 mkdir /usr/local/share/ca-certificates/cacert.org
 wget -P /usr/local/share/ca-certificates/cacert.org http://www.cacert.org/certs/root.crt http://www.cacert.org/certs/class3.crt
