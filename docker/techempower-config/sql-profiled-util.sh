@@ -2,7 +2,7 @@ mkdir /tmp/profile-data
 
 rm -rf $IROOT/ffead-cpp-6.0-sql
 
-if [ "$1" = "batch-unused" ]
+if [ "$1" = "batch-old" ]
 then
 	apt remove -yqq libpq-dev
 	apt autoremove -yqq
@@ -24,6 +24,23 @@ then
 	cd src/interfaces/libpq
 	make all install -j4
 	cp ../../../src/include/postgres_ext.h ../../../src/include/pg_config_ext.h libpq-fe.h /usr/include
+fi
+
+if [ "$1" = "batch" ]
+then
+	apt remove -yqq libpq-dev
+	apt autoremove -yqq
+	rm -f /usr/local/lib/libpq.*
+	rm -f /usr/include/postgres_ext.h /usr/include/pg_config_ext.h /usr/include/libpq-fe.h
+	rm -f /usr/lib/x86_64-linux-gnu/libpq.*
+	PG_CMT=4efcf47053eaf8dd88de2b1a89478df43d37d5c0
+	wget -nv https://github.com/postgres/postgres/archive/$PG_CMT.zip
+	unzip -q $PG_CMT.zip
+	cd postgres-$PG_CMT
+	./configure --prefix=/usr CFLAGS='-O3 -march=native -flto'
+	cd src/interfaces/libpq
+	make all install -j4
+	cp ../../../src/include/postgres_ext.h ../../../src/include/pg_config_ext.h /usr/include
 fi
 
 if [ "$2" = "clang" ]
