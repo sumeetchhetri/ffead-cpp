@@ -2,7 +2,7 @@ mkdir /tmp/profile-data
 
 rm -rf $IROOT/ffead-cpp-6.0-sql
 
-if [ "$1" = "batch-old" ]
+if [ "$1" = "batch" ]
 then
 	apt remove -yqq libpq-dev
 	apt autoremove -yqq
@@ -26,7 +26,7 @@ then
 	cp ../../../src/include/postgres_ext.h ../../../src/include/pg_config_ext.h libpq-fe.h /usr/include
 fi
 
-if [ "$1" = "batch" ]
+if [ "$1" = "batch-pipeline" ]
 then
 	apt remove -yqq libpq-dev
 	apt autoremove -yqq
@@ -64,6 +64,10 @@ then
 	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/te-benchmark-um-pq/libte-benchmark-um-pq${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 	sed -i 's|tfb-database|localhost|g' $IROOT/ffead-cpp-src/web/te-benchmark-um-pq-async/config/sdorm.xml
 	rm -rf web/te-benchmark-um-pq
+	if [ "$4" = "pool" ]
+	then
+		sed -i 's|"TeBkUmLpqAsyncRouter"|"TeBkUmLpqAsyncRouterPooled"|g' $IROOT/ffead-cpp-src/web/te-benchmark-um-pq-async/config/application.xml
+	fi
 else
 	sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq-async)||g' CMakeLists.txt
 	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/te-benchmark-um-pq-async/libte-benchmark-um-pq-async${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
