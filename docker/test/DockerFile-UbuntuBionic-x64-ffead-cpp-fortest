@@ -173,9 +173,9 @@ RUN apt autoremove -yqq
 RUN rm -f /usr/local/lib/libpq.* /usr/lib/x86_64-linux-gnu/libpq.*
 RUN apt update && apt install -y bison flex libreadline-dev
 WORKDIR /tmp
-RUN wget -nv https://github.com/postgres/postgres/archive/4efcf47053eaf8dd88de2b1a89478df43d37d5c0.zip
-RUN unzip -q 4efcf47053eaf8dd88de2b1a89478df43d37d5c0.zip
-WORKDIR /tmp/postgres-4efcf47053eaf8dd88de2b1a89478df43d37d5c0
+RUN wget -nv https://github.com/postgres/postgres/archive/514b4c11d24701d2cc90ad75ed787bf1380af673.zip
+RUN unzip -q 514b4c11d24701d2cc90ad75ed787bf1380af673.zip
+WORKDIR /tmp/postgres-514b4c11d24701d2cc90ad75ed787bf1380af673
 #RUN wget -nv https://www.postgresql.org/message-id/attachment/115223/v22-0001-libpq-batch.patch
 #RUN git apply ./v22-0001-libpq-batch.patch
 RUN ./configure --prefix=/usr CFLAGS='-O3 -march=native -flto'

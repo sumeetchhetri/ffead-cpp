@@ -220,6 +220,17 @@ CHECK_C_SOURCE_COMPILES("
 	int main() { return TCP_FASTOPEN; }"
 HAVE_TCP_FASTOPEN)
 
+include(CheckCSourceCompiles)
+CHECK_C_SOURCE_COMPILES("
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <netinet/tcp.h>
+	#include <linux/bpf.h>
+	#include <linux/filter.h>
+	#include <sys/sysinfo.h>
+	int main() { return SO_ATTACH_REUSEPORT_CBPF; }"
+HAVE_SO_ATTACH_REUSEPORT_CBPF)
+
 if(EMSCRIPTEN)
 	set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
 	set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)

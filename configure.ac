@@ -1138,6 +1138,16 @@ AC_LINK_IFELSE(
                       [[return TCP_FASTOPEN;]])],
       [AC_DEFINE(HAVE_TCP_FASTOPEN, [1], [TCP_FASTOPEN])],
       [])
+AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM([[#include <sys/socket.h>
+						 #include <netinet/in.h>
+						 #include <netinet/tcp.h>
+						 #include <linux/bpf.h>
+						 #include <linux/filter.h>
+						 #include <sys/sysinfo.h>]],
+                      [[return SO_ATTACH_REUSEPORT_CBPF;]])],
+      [AC_DEFINE(HAVE_SO_ATTACH_REUSEPORT_CBPF, [1], [SO_ATTACH_REUSEPORT_CBPF])],
+      [])
 
 dnl# Checks for library functions.
 AC_FUNC_ERROR_AT_LINE

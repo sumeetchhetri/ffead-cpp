@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-sql-raw-async-clibpqpp-pool-profiled-base:6.0
+FROM sumeetchhetri/ffead-cpp-sql-raw-async-pool-profiled-base:6.0
 
 ENV IROOT=/installs
 

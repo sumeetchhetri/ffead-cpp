@@ -46,6 +46,10 @@
 #ifndef OS_MINGW
 #include <netinet/tcp.h>
 #endif
+#ifdef OS_LINUX
+#include <linux/bpf.h>
+#include <linux/filter.h>
+#endif
 
 class SocketInterface;
 
