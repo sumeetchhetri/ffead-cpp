@@ -118,30 +118,28 @@ std::unordered_map<int, std::string> TeBkUmLpqAsyncRouter::_qC;
 int TeBkUmLpqAsyncRouter::g_seed = 0;
 
 void TeBkUmLpqAsyncRouter::dbAsync(AsyncDbReq* req) {
-	LibpqDataSourceImpl* sqli = getDb();
+	LibpqDataSourceImpl* sqli = getDb(5);
 	int rid = CommonUtils::fastrand(g_seed) % 10000 + 1;
 	LibpqAsyncReq* areq = sqli->getAsyncRequest();
 	LibpqQuery* q = areq->getQuery();
 	q->withParamInt4(rid);
-	q->withSelectQuery(WORLD_ONE_QUERY).withContext(req).withCb(&TeBkUmLpqAsyncRouter::dbAsyncUtil);
-	sqli->postAsync(areq, req, &TeBkUmLpqAsyncRouter::dbAsyncCh);
-}
-void TeBkUmLpqAsyncRouter::dbAsyncUtil(void* ctx, int rn, int cn, char * d) {
-	AsyncDbReq* req = (AsyncDbReq*)ctx;
-	if(cn==0)req->w.setId(ntohl(*((uint32_t *) d)));
-	if(cn==1)req->w.setRandomNumber(ntohl(*((uint32_t *) d)));
-}
-void TeBkUmLpqAsyncRouter::dbAsyncCh(void* ctx, bool status, const std::string& q, int counter) {
-	AsyncDbReq* req = (AsyncDbReq*)ctx;
-	HttpResponse r;
-	JSONSerialize::serializeObject(&req->w, w_ser, r.getContentP());
-	std::string h;
-	r.httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->httpVers, req->conn_clos);
-	req->sif->writeDirect(h, r.getContent());
-	req->sif->unUse();
-	delete req;
-}
+	q->withSelectQuery(WORLD_ONE_QUERY).withContext(req).withCb3([](void* ctx, bool endofdata, int rn, int cn, char * d) {
+		AsyncDbReq* req = (AsyncDbReq*)ctx;
+		if(cn==0)req->w.setId(ntohl(*((uint32_t *) d)));
+		if(cn==1)req->w.setRandomNumber(ntohl(*((uint32_t *) d)));
 
+		if(endofdata) {
+			HttpResponse r;
+			JSONSerialize::serializeObject(&req->w, w_ser, r.getContentP());
+			std::string h;
+			r.httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->httpVers, req->conn_clos);
+			req->sif->writeDirect(h, r.getContent());
+			req->sif->unUse();
+			delete req;
+		}
+	});
+	sqli->postAsync(areq);
+}
 
 void TeBkUmLpqAsyncRouter::queriesAsync(const char* q, int ql, AsyncQueriesReq* req) {
 	int queryCount = 0;
@@ -150,35 +148,33 @@ void TeBkUmLpqAsyncRouter::queriesAsync(const char* q, int ql, AsyncQueriesReq* 
 
 	req->vec.reserve(queryCount);
 
-	LibpqDataSourceImpl* sqli = getDb();
+	LibpqDataSourceImpl* sqli = getDb(3);
 	LibpqAsyncReq* areq = sqli->getAsyncRequest();
 	for (int c = 0; c < queryCount; ++c) {
 		int rid = CommonUtils::fastrand(g_seed) % 10000 + 1;
 		LibpqQuery* q = areq->getQuery();
 		q->withParamInt4(rid);
-		q->withSelectQuery(WORLD_ONE_QUERY).withContext(&req->vec).withCb(&TeBkUmLpqAsyncRouter::queriesAsyncUtil);
+		q->withSelectQuery(WORLD_ONE_QUERY).withContext(req).withCb3([](void* ctx, bool endofdata, int rn, int cn, char * d) {
+			AsyncQueriesReq* req = (AsyncQueriesReq*)ctx;
+			if(cn==0) {
+				req->vec.emplace_back(ntohl(*((uint32_t *) d)));
+			} else {
+				req->vec.back().setRandomNumber(ntohl(*((uint32_t *) d)));
+			}
+		});
 	}
-	sqli->postAsync(areq, req, &TeBkUmLpqAsyncRouter::queriesAsyncCh);
+	areq->withFinalCb(req, [](void *ctx, bool status, const std::string &q, int counter) {
+		AsyncQueriesReq* req = (AsyncQueriesReq*)ctx;
+		HttpResponse r;
+		JSONSerialize::serializeObjectCont(&req->vec, wcont_ser, "vector", r.getContentP());
+		std::string h;
+		r.httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->httpVers, req->conn_clos);
+		req->sif->writeDirect(h, r.getContent());
+		req->sif->unUse();
+		delete req;
+	});
+	sqli->postAsync(areq);
 }
-void TeBkUmLpqAsyncRouter::queriesAsyncUtil(void* ctx, int rn, int cn, char * d) {
-	std::vector<TeBkUmLpqAsyncWorld>* vec = (std::vector<TeBkUmLpqAsyncWorld>*)ctx;
-	if(cn==0) {
-		vec->emplace_back(ntohl(*((uint32_t *) d)));
-	} else {
-		vec->back().setRandomNumber(ntohl(*((uint32_t *) d)));
-	}
-}
-void TeBkUmLpqAsyncRouter::queriesAsyncCh(void* ctx, bool status, const std::string& q, int counter) {
-	AsyncQueriesReq* req = (AsyncQueriesReq*)ctx;
-	HttpResponse r;
-	JSONSerialize::serializeObjectCont(&req->vec, wcont_ser, "vector", r.getContentP());
-	std::string h;
-	r.httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->httpVers, req->conn_clos);
-	req->sif->writeDirect(h, r.getContent());
-	req->sif->unUse();
-	delete req;
-}
-
 
 #ifndef HAVE_LIBPQ_BATCH
 void TeBkUmLpqAsyncRouter::queriesMultiAsync(const char* q, int ql, AsyncQueriesReq* req) {
@@ -188,7 +184,7 @@ void TeBkUmLpqAsyncRouter::queriesMultiAsync(const char* q, int ql, AsyncQueries
 
 	req->vec.reserve(queryCount);
 
-	LibpqDataSourceImpl* sqli = getDb();
+	LibpqDataSourceImpl* sqli = getDb(3);
 
 	std::stringstream ss;
 	for (int c = 0; c < queryCount; ++c) {
@@ -198,28 +194,27 @@ void TeBkUmLpqAsyncRouter::queriesMultiAsync(const char* q, int ql, AsyncQueries
 
 	LibpqAsyncReq* areq = sqli->getAsyncRequest();
 	LibpqQuery* qu = areq->getQuery();
-	qu->withSelectQuery(ss.str()).withMulti().withContext(req).withCb(&TeBkUmLpqAsyncRouter::queriesMultiAsyncUtil);
-	sqli->postAsync(areq, queryCount, req, &TeBkUmLpqAsyncRouter::queriesMultiAsyncCh);
-}
-void TeBkUmLpqAsyncRouter::queriesMultiAsyncUtil(void* ctx, int rn, int cn, char * d, int l) {
-	AsyncQueriesReq* req = (AsyncQueriesReq*)ctx;
-	int tmp = 0;
-	CommonUtils::fastStrToNum(d, l, tmp);
-	if(cn==0) {
-		req->vec.emplace_back(tmp);
-	} else {
-		req->vec.back().setRandomNumber(tmp);
-	}
-}
-void TeBkUmLpqAsyncRouter::queriesMultiAsyncCh(void* ctx, bool status, const std::string& q, int counter) {
-	AsyncQueriesReq* req = (AsyncQueriesReq*)ctx;
-	HttpResponse r;
-	JSONSerialize::serializeObjectCont(&req->vec, wcont_ser, "vector", r.getContentP());
-	std::string h;
-	r.httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->httpVers, req->conn_clos);
-	req->sif->writeDirect(h, r.getContent());
-	req->sif->unUse();
-	delete req;
+	qu->withSelectQuery(ss.str()).withMulti().withContext(req).withCb2([](void* ctx, bool endofdata, int rn, int cn, char * d, int l) {
+		AsyncQueriesReq* req = (AsyncQueriesReq*)ctx;
+		int tmp = 0;
+		CommonUtils::fastStrToNum(d, l, tmp);
+		if(cn==0) {
+			req->vec.emplace_back(tmp);
+		} else {
+			req->vec.back().setRandomNumber(tmp);
+		}
+	});
+	areq->withFinalCb(req, [](void *ctx, bool status, const std::string &q, int counter) {
+		AsyncQueriesReq* req = (AsyncQueriesReq*)ctx;
+		HttpResponse r;
+		JSONSerialize::serializeObjectCont(&req->vec, wcont_ser, "vector", r.getContentP());
+		std::string h;
+		r.httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->httpVers, req->conn_clos);
+		req->sif->writeDirect(h, r.getContent());
+		req->sif->unUse();
+		delete req;
+	});
+	sqli->postAsync(areq, queryCount);
 }
 
 void TeBkUmLpqAsyncRouter::updatesMulti(const char* q, int ql, AsyncUpdatesReq* req) {
@@ -229,7 +224,7 @@ void TeBkUmLpqAsyncRouter::updatesMulti(const char* q, int ql, AsyncUpdatesReq* 
 
 	req->vec.reserve(queryCount);
 
-	LibpqDataSourceImpl* sqli = getDb();
+	LibpqDataSourceImpl* sqli = getDb(3);
 	req->sqli = sqli;
 
 	std::stringstream ss;
@@ -243,68 +238,67 @@ void TeBkUmLpqAsyncRouter::updatesMulti(const char* q, int ql, AsyncUpdatesReq* 
 
 	LibpqAsyncReq* areq = sqli->getAsyncRequest();
 	LibpqQuery* qu = areq->getQuery();
-	qu->withSelectQuery(ss.str()).withMulti().withContext(req).withCb(&TeBkUmLpqAsyncRouter::updatesMultiUtil);
-	sqli->postAsync(areq, queryCount, req, &TeBkUmLpqAsyncRouter::updatesMultiUtilCh);
-}
-void TeBkUmLpqAsyncRouter::updatesMultiUtil(void *ctx, int rn, int cn, char* d, int l) {
-	AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
-	int tmp = 0;
-	CommonUtils::fastStrToNum(d, l, tmp);
-	if(cn==0) {
-		req->vec.emplace_back(tmp);
-	} else {
-		TeBkUmLpqAsyncWorld& w = req->vec.back();
-		int newRandomNumber = CommonUtils::fastrand(g_seed) % 10000 + 1;
-		if(tmp == newRandomNumber) {
-			newRandomNumber += 1;
-			if(newRandomNumber>=10000) {
-				newRandomNumber = 1;
+	qu->withSelectQuery(ss.str()).withMulti().withContext(req).withCb2([](void *ctx, bool endofdata, int rn, int cn, char* d, int l) {
+		AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
+		int tmp = 0;
+		CommonUtils::fastStrToNum(d, l, tmp);
+		if(cn==0) {
+			req->vec.emplace_back(tmp);
+		} else {
+			TeBkUmLpqAsyncWorld& w = req->vec.back();
+			int newRandomNumber = CommonUtils::fastrand(g_seed) % 10000 + 1;
+			if(tmp == newRandomNumber) {
+				newRandomNumber += 1;
+				if(newRandomNumber>=10000) {
+					newRandomNumber = 1;
+				}
 			}
+			w.setRandomNumber(newRandomNumber);
+			req->ss << "when ";
+			req->ss << w.getId();
+			req->ss << " then ";
+			req->ss << newRandomNumber;
 		}
-		w.setRandomNumber(newRandomNumber);
-		req->ss << "when ";
-		req->ss << w.getId();
-		req->ss << " then ";
-		req->ss << newRandomNumber;
-	}
-}
-void TeBkUmLpqAsyncRouter::updatesMultiUtilCh(void *ctx, bool status, const std::string &q, int counter) {
-	AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
-	if(status) {
-		LibpqDataSourceImpl* sqli = req->sqli;
-		int queryCount = (int)req->vec.size();
+	});
+	areq->withFinalCb(req, [](void *ctx, bool status, const std::string &q, int counter) {
+		AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
+		if(status) {
+			LibpqDataSourceImpl* sqli = req->sqli;
+			int queryCount = (int)req->vec.size();
 
-		req->ss << "else randomnumber end where id in (";
-		for (int c = 0; c < queryCount; ++c) {
-			req->ss << req->vec.at(c).getId();
-			if(c<queryCount-1) {
-				req->ss << ",";
+			req->ss << "else randomnumber end where id in (";
+			for (int c = 0; c < queryCount; ++c) {
+				req->ss << req->vec.at(c).getId();
+				if(c<queryCount-1) {
+					req->ss << ",";
+				}
 			}
-		}
-		req->ss << ");commit;";
+			req->ss << ");commit;";
 
-		LibpqAsyncReq* areq = sqli->getAsyncRequest();
-		LibpqQuery* qu = areq->getQuery();
-		qu->withUpdateQuery(req->ss.str()).withMulti();
-		sqli->postAsync(areq, 3, req, &TeBkUmLpqAsyncRouter::updatesMultiUtilChCh);
-	}
-}
-void TeBkUmLpqAsyncRouter::updatesMultiUtilChCh(void *ctx, bool status, const std::string &q, int counter) {
-	AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
-	if(status) {
-		HttpResponse r;
-		JSONSerialize::serializeObjectCont(&req->vec, wcont_ser, "vector", r.getContentP());
-		std::string h;
-		r.httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->httpVers, req->conn_clos);
-		req->sif->writeDirect(h, r.getContent());
-	} else {
-		HttpResponse r;
-		std::string h;
-		r.httpStatus(HTTPResponseStatus::InternalServerError).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->httpVers, true);
-		req->sif->writeDirect(h);
-	}
-	req->sif->unUse();
-	delete req;
+			LibpqAsyncReq* areq = sqli->getAsyncRequest();
+			LibpqQuery* qu = areq->getQuery();
+			qu->withUpdateQuery(req->ss.str()).withMulti();
+			areq->withFinalCb(req, [](void *ctx, bool status, const std::string &q, int counter) {
+				AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
+				if(status) {
+					HttpResponse r;
+					JSONSerialize::serializeObjectCont(&req->vec, wcont_ser, "vector", r.getContentP());
+					std::string h;
+					r.httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->httpVers, req->conn_clos);
+					req->sif->writeDirect(h, r.getContent());
+				} else {
+					HttpResponse r;
+					std::string h;
+					r.httpStatus(HTTPResponseStatus::InternalServerError).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->httpVers, true);
+					req->sif->writeDirect(h);
+				}
+				req->sif->unUse();
+				delete req;
+			});
+			sqli->postAsync(areq, 3);
+		}
+	});
+	sqli->postAsync(areq, queryCount);
 }
 #endif
 
@@ -343,7 +337,7 @@ void TeBkUmLpqAsyncRouter::updatesAsyncb(const char* q, int ql, AsyncUpdatesReq*
 
 	req->vec.reserve(queryCount);
 
-	LibpqDataSourceImpl* sqli = getDb();
+	LibpqDataSourceImpl* sqli = getDb(3);
 	req->sqli = sqli;
 
 	LibpqAsyncReq* areq = sqli->getAsyncRequest();
@@ -351,47 +345,54 @@ void TeBkUmLpqAsyncRouter::updatesAsyncb(const char* q, int ql, AsyncUpdatesReq*
 		int rid = CommonUtils::fastrand(g_seed) % 10000 + 1;
 		LibpqQuery* q = areq->getQuery();
 		q->withParamInt4(rid);
-		q->withSelectQuery(WORLD_ONE_QUERY).withContext(&req->vec).withCb(&TeBkUmLpqAsyncRouter::queriesAsyncUtil);
-	}
-	sqli->postAsync(areq, req, &TeBkUmLpqAsyncRouter::updatesAsyncbChQ);
-}
-void TeBkUmLpqAsyncRouter::updatesAsyncbChQ(void* ctx, bool status, const std::string& query, int counter) {
-	AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
-
-	int queryCount = (int)req->vec.size();
-
-	LibpqAsyncReq* areq = req->sqli->getAsyncRequest();
-	req->sqli->beginAsync(areq);
-	LibpqQuery* q = areq->getQuery();
-	q->withUpdateQuery(getUpdQuery(queryCount)).withContext(req);
-	for(std::vector<TeBkUmLpqAsyncWorld>::iterator it=req->vec.begin(); it != req->vec.end(); ++it) {
-		int newRandomNumber = CommonUtils::fastrand(g_seed) % 10000 + 1;
-		if((*it).getRandomNumber() == newRandomNumber) {
-			newRandomNumber += 1;
-			if(newRandomNumber>=10000) {
-				newRandomNumber = 1;
+		q->withSelectQuery(WORLD_ONE_QUERY).withContext(req).withCb3([](void* ctx, bool endofdata, int rn, int cn, char * d) {
+			AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
+			if(cn==0) {
+				req->vec.emplace_back(ntohl(*((uint32_t *) d)));
+			} else {
+				req->vec.back().setRandomNumber(ntohl(*((uint32_t *) d)));
 			}
-		}
-		(*it).setRandomNumber(newRandomNumber);
-		q->withParamInt4((*it).getId());
-		q->withParamInt4((*it).getRandomNumber());
+		});
 	}
-	for(std::vector<TeBkUmLpqAsyncWorld>::iterator it=req->vec.begin(); it != req->vec.end(); ++it) {
-		q->withParamInt4((*it).getId());
-	}
-	req->sqli->commitAsync(areq);
+	areq->withFinalCb(req, [](void *ctx, bool status, const std::string &query, int counter) {
+		AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
 
-	req->sqli->postAsync(areq, req, &TeBkUmLpqAsyncRouter::updatesAsyncbChU);
-}
-void TeBkUmLpqAsyncRouter::updatesAsyncbChU(void* ctx, bool status, const std::string& q, int counter) {
-	AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
-	HttpResponse r;
-	JSONSerialize::serializeObjectCont(&req->vec, wcont_ser, "vector", r.getContentP());
-	std::string h;
-	r.httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->httpVers, req->conn_clos);
-	req->sif->writeDirect(h, r.getContent());
-	req->sif->unUse();
-	delete req;
+		int queryCount = (int)req->vec.size();
+
+		LibpqAsyncReq* areq = req->sqli->getAsyncRequest();
+		req->sqli->beginAsync(areq);
+		LibpqQuery* q = areq->getQuery();
+		q->withUpdateQuery(getUpdQuery(queryCount)).withContext(req);
+		for(std::vector<TeBkUmLpqAsyncWorld>::iterator it=req->vec.begin(); it != req->vec.end(); ++it) {
+			int newRandomNumber = CommonUtils::fastrand(g_seed) % 10000 + 1;
+			if((*it).getRandomNumber() == newRandomNumber) {
+				newRandomNumber += 1;
+				if(newRandomNumber>=10000) {
+					newRandomNumber = 1;
+				}
+			}
+			(*it).setRandomNumber(newRandomNumber);
+			q->withParamInt4((*it).getId());
+			q->withParamInt4((*it).getRandomNumber());
+		}
+		for(std::vector<TeBkUmLpqAsyncWorld>::iterator it=req->vec.begin(); it != req->vec.end(); ++it) {
+			q->withParamInt4((*it).getId());
+		}
+		req->sqli->commitAsync(areq);
+
+		areq->withFinalCb(req, [](void* ctx, bool status, const std::string& q, int counter) {
+			AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
+			HttpResponse r;
+			JSONSerialize::serializeObjectCont(&req->vec, wcont_ser, "vector", r.getContentP());
+			std::string h;
+			r.httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->httpVers, req->conn_clos);
+			req->sif->writeDirect(h, r.getContent());
+			req->sif->unUse();
+			delete req;
+		});
+		req->sqli->postAsync(areq);
+	});
+	sqli->postAsync(areq);
 }
 
 void TeBkUmLpqAsyncRouter::updatesAsync(const char* q, int ql, AsyncUpdatesReq* req) {
@@ -401,86 +402,95 @@ void TeBkUmLpqAsyncRouter::updatesAsync(const char* q, int ql, AsyncUpdatesReq* 
 
 	req->vec.reserve(queryCount);
 
-	req->sqli = getDb();
+	req->sqli = getDb(3);
 
 	LibpqAsyncReq* areq = req->sqli->getAsyncRequest();
 	for (int c = 0; c < queryCount; ++c) {
 		int rid = CommonUtils::fastrand(g_seed) % 10000 + 1;
 		LibpqQuery* qu = areq->getQuery();
 		qu->withParamInt4(rid);
-		qu->withSelectQuery(WORLD_ONE_QUERY).withContext(&req->vec).withCb(&TeBkUmLpqAsyncRouter::queriesAsyncUtil);
-	}
-	req->sqli->postAsync(areq, req, &TeBkUmLpqAsyncRouter::updatesAsyncChQ);
-}
-void TeBkUmLpqAsyncRouter::updatesAsyncChQ(void* ctx, bool status, const std::string& q, int counter) {
-	AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
-
-	LibpqAsyncReq* areq = req->sqli->getAsyncRequest();
-	for(std::vector<TeBkUmLpqAsyncWorld>::iterator it=req->vec.begin(); it != req->vec.end(); ++it) {
-		int newRandomNumber = CommonUtils::fastrand(g_seed) % 10000 + 1;
-		if((*it).getRandomNumber() == newRandomNumber) {
-			newRandomNumber += 1;
-			if(newRandomNumber>=10000) {
-				newRandomNumber = 1;
+		qu->withSelectQuery(WORLD_ONE_QUERY).withContext(req).withCb2([](void* ctx, bool endofdata, int rn, int cn, char * d, int l) {
+			AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
+			int tmp = 0;
+			CommonUtils::fastStrToNum(d, l, tmp);
+			if(cn==0) {
+				req->vec.emplace_back(tmp);
+			} else {
+				req->vec.back().setRandomNumber(tmp);
 			}
-		}
-		(*it).setRandomNumber(newRandomNumber);
-
-		std::stringstream ss;
-		ss << "update world set randomnumber = " << newRandomNumber << " where id = " << (*it).getId();
-
-		req->sqli->beginAsync(areq);
-		LibpqQuery* q = areq->getQuery();
-		q->withUpdateQuery(ss.str(), false);
-		req->sqli->commitAsync(areq);
+		});
 	}
+	areq->withFinalCb(req, [](void *ctx, bool status, const std::string &query, int counter) {
+		AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
+		LibpqAsyncReq* areq = req->sqli->getAsyncRequest();
+		for(std::vector<TeBkUmLpqAsyncWorld>::iterator it=req->vec.begin(); it != req->vec.end(); ++it) {
+			int newRandomNumber = CommonUtils::fastrand(g_seed) % 10000 + 1;
+			if((*it).getRandomNumber() == newRandomNumber) {
+				newRandomNumber += 1;
+				if(newRandomNumber>=10000) {
+					newRandomNumber = 1;
+				}
+			}
+			(*it).setRandomNumber(newRandomNumber);
 
-	req->sqli->postAsync(areq, req, &TeBkUmLpqAsyncRouter::updatesAsyncChU);
-}
-void TeBkUmLpqAsyncRouter::updatesAsyncChU(void* ctx, bool status, const std::string& q, int counter) {
-	AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
-	HttpResponse r;
-	JSONSerialize::serializeObjectCont(&req->vec, wcont_ser, "vector", r.getContentP());
-	std::string h;
-	r.httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->httpVers, req->conn_clos);
-	req->sif->writeDirect(h, r.getContent());
-	req->sif->unUse();
-	delete req;
+			std::stringstream ss;
+			ss << "update world set randomnumber = " << newRandomNumber << " where id = " << (*it).getId();
+
+			req->sqli->beginAsync(areq);
+			LibpqQuery* q = areq->getQuery();
+			q->withUpdateQuery(ss.str(), false);
+			req->sqli->commitAsync(areq);
+		}
+
+		areq->withFinalCb(req, [](void* ctx, bool status, const std::string& q, int counter) {
+			AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
+			HttpResponse r;
+			JSONSerialize::serializeObjectCont(&req->vec, wcont_ser, "vector", r.getContentP());
+			std::string h;
+			r.httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_APPLICATION_JSON, req->httpVers, req->conn_clos);
+			req->sif->writeDirect(h, r.getContent());
+			req->sif->unUse();
+			delete req;
+		});
+		req->sqli->postAsync(areq);
+	});
+	req->sqli->postAsync(areq);
 }
 
 void TeBkUmLpqAsyncRouter::updateCache() {
-	LibpqDataSourceImpl* sqli = getDb();
+	LibpqDataSourceImpl* sqli = getDb(1);
 
 	AsyncCacheReq* req = new AsyncCacheReq;
 	req->cchi = CacheManager::getImpl();
 
 	LibpqAsyncReq* areq = sqli->getAsyncRequest();
 	LibpqQuery* q = areq->getQuery();
-	q->withSelectQuery(WORLD_ALL_QUERY).withContext(req).withCb(&TeBkUmLpqAsyncRouter::updateCacheAsyncUtil);
-	sqli->postAsync(areq, req, &TeBkUmLpqAsyncRouter::updateCacheAsyncCh);
-}
-void TeBkUmLpqAsyncRouter::updateCacheAsyncUtil(void* ctx, int rn, std::vector<LibpqRes>& data) {
-	AsyncCacheReq* req = (AsyncCacheReq*)ctx;
-	req->vec.emplace_back(ntohl(*((uint32_t *) data.at(0).d)), ntohl(*((uint32_t *) data.at(1).d)));
-}
-void TeBkUmLpqAsyncRouter::updateCacheAsyncCh(void* ctx, bool status, const std::string& q, int counter) {
-	AsyncCacheReq* req = (AsyncCacheReq*)ctx;
-	CacheInterface* cchi = req->cchi;
-
-	try {
-		for(std::vector<TeBkUmLpqAsyncWorld>::iterator it=req->vec.begin(); it != req->vec.end(); ++it) {
-			char str[12];
-			sprintf(str, "%d;%d", (*it).getId(), (*it).getRandomNumber());
-			cchi->setRaw((*it).getId(), str);
+	q->withSelectQuery(WORLD_ALL_QUERY).withContext(req).withCb3([](void* ctx, bool endofdata, int row, int col, char* value) {
+		AsyncCacheReq* req = (AsyncCacheReq*)ctx;
+		if(col==0) {
+			req->vec.emplace_back(ntohl(*((uint32_t *) value)));
+		} else {
+			req->vec.back().setRandomNumber(ntohl(*((uint32_t *) value)));
 		}
-		CacheManager::cleanImpl(cchi);
-		delete req;
-		CacheManager::triggerAppInitCompletion("te-benchmark-um-pq-async");
-	} catch(const std::exception& e) {
-		CacheManager::cleanImpl(cchi);
-		delete req;
-		throw e;
-	}
+
+		if(endofdata) {
+			CacheInterface* cchi = req->cchi;
+			try {
+				for(std::vector<TeBkUmLpqAsyncWorld>::iterator it=req->vec.begin(); it != req->vec.end(); ++it) {
+					char str[12];
+					sprintf(str, "%d;%d", (*it).getId(), (*it).getRandomNumber());
+					cchi->setRaw((*it).getId(), str);
+				}
+				CacheManager::cleanImpl(cchi);
+				delete req;
+				CacheManager::triggerAppInitCompletion("te-benchmark-um-pq-async");
+			} catch(const std::exception& e) {
+				CacheManager::cleanImpl(cchi);
+				delete req;
+			}
+		}
+	});
+	sqli->postAsync(areq);
 }
 void TeBkUmLpqAsyncRouter::cachedWorlds(const char* q, int ql, std::vector<TeBkUmLpqAsyncWorld>& wlst) {
 	int queryCount = 0;
@@ -511,40 +521,39 @@ void TeBkUmLpqAsyncRouter::cachedWorlds(const char* q, int ql, std::vector<TeBkU
 
 
 void TeBkUmLpqAsyncRouter::getContextAsync(AsyncFortuneReq* req) {
-	LibpqDataSourceImpl* sqli = getDb();
+	LibpqDataSourceImpl* sqli = getDb(7);
 	LibpqAsyncReq* areq = sqli->getAsyncRequest();
 	LibpqQuery* q = areq->getQuery();
-	q->withSelectQuery(FORTUNE_ALL_QUERY).withContext(req).withCb(&TeBkUmLpqAsyncRouter::getContextAsyncUtil);
-	sqli->postAsync(areq, req, &TeBkUmLpqAsyncRouter::getContextAsyncCh);
-}
-void TeBkUmLpqAsyncRouter::getContextAsyncUtil(void* ctx, int rn, int cn, char * d, int l) {
-	AsyncFortuneReq* req = (AsyncFortuneReq*)ctx;
-	if(cn==0) {
-		req->flst.emplace_back(ntohl(*((uint32_t *) d)));
-	} else {
-		TeBkUmLpqAsyncFortune& w = req->flst.back();
-		w.message = CryptoHandler::sanitizeHtmlFast((const uint8_t *)d, (size_t)l, w.message_i, w.allocd);
-	}
-}
-void TeBkUmLpqAsyncRouter::getContextAsyncCh(void* ctx, bool status, const std::string& q, int counter) {
-	AsyncFortuneReq* req = (AsyncFortuneReq*)ctx;
-	Context context;
+	q->withSelectQuery(FORTUNE_ALL_QUERY).withContext(req).withCb2([](void* ctx, bool endofdata, int rn, int cn, char * d, int l) {
+		AsyncFortuneReq* req = (AsyncFortuneReq*)ctx;
+		if(cn==0) {
+			req->flst.emplace_back(ntohl(*((uint32_t *) d)));
+		} else {
+			TeBkUmLpqAsyncFortune& w = req->flst.back();
+			w.message = CryptoHandler::sanitizeHtmlFast((const uint8_t *)d, (size_t)l, w.message_i, w.allocd);
+		}
 
-	req->flst.emplace_back(0, "Additional fortune added at request time.");
-	req->flst.sort();
+		if(endofdata) {
+			Context context;
 
-	context.emplace("fortunes", &req->flst);
+			req->flst.emplace_back(0, "Additional fortune added at request time.");
+			req->flst.sort();
 
-	fcpstream str;
-	tmplFunc(&context, str);
-	std::string out = str.str();
-	HttpResponse r;
-	std::string h;
-	r.httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_TEXT_HTML, req->httpVers, req->conn_clos, (int)out.length());
-	req->sif->writeDirect(h, out);
-	req->sif->unUse();
+			context.emplace("fortunes", &req->flst);
 
-	delete req;
+			fcpstream str;
+			tmplFunc(&context, str);
+			std::string out = str.str();
+			HttpResponse r;
+			std::string h;
+			r.httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_TEXT_HTML, req->httpVers, req->conn_clos, (int)out.length());
+			req->sif->writeDirect(h, out);
+			req->sif->unUse();
+
+			delete req;
+		}
+	});
+	sqli->postAsync(areq);
 }
 
 bool TeBkUmLpqAsyncRouter::route(HttpRequest* req, HttpResponse* res, SocketInterface* sif) {
@@ -684,7 +693,7 @@ LibpqDataSourceImpl* TeBkUmLpqAsyncRouterPooled::getDb(int max) {
 }
 
 TeBkUmLpqAsyncRouterPooled::TeBkUmLpqAsyncRouterPooled() {
-	maxconns = 5;
+	maxconns = 7;
 	propMap props = ConfigurationData::getAppProperties();
 	if(props.size()>0) {
 		if(props.find("dbpoolsize")!=props.end()) {

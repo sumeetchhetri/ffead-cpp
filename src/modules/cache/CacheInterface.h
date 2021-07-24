@@ -28,11 +28,6 @@
 #include "map"
 #include "ConnectionPooler.h"
 
-class ToString {
-public:
-	virtual void toString(std::string& out)=0;
-};
-
 class CacheInterface {
 	friend class CacheManager;
 protected:

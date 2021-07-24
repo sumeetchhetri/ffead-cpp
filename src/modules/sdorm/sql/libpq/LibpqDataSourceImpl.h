@@ -124,11 +124,15 @@ struct LibpqRes {
 	int l;
 };
 
-typedef void (*LipqComplFunc) (void* ctx, bool, const std::string&, int);
-typedef void (*LipqResFunc) (void* ctx, int, std::vector<LibpqRes>&);
-typedef void (*LipqColResFunc1) (void* ctx, int, int, char *, char *, int);
-typedef void (*LipqColResFunc2) (void* ctx, int, int, char *, int);
-typedef void (*LipqColResFunc3) (void* ctx, int, int, char *);
+typedef void (*LipqCbFunc1) (void* ctx, bool endofdata, int row, int col, char* name, char* value, int vlen);
+typedef void (*LipqCbFunc2) (void* ctx, bool endofdata, int row, int col, char* value, int vlen);
+typedef void (*LipqCbFunc3) (void* ctx, bool endofdata, int row, int col, char* value);
+
+typedef void (*LipqCbFunc4) (void* ctx, int row, int col, char* name, char* value, int vlen);
+typedef void (*LipqCbFunc5) (void* ctx, int row, int col, char* value, int vlen);
+typedef void (*LipqCbFunc6) (void* ctx, int row, int col, char* value);
+
+typedef void (*LipqCbFuncF) (void* ctx, bool status, const std::string& query, int counter);
 
 class LibpqQuery {
 	std::list<LibpqParam> pvals;
@@ -136,30 +140,69 @@ class LibpqQuery {
 	bool isSelect;
 	bool isMulti;
 	std::string query;
+	LipqCbFunc1 cb1;
+	LipqCbFunc2 cb2;
+	LipqCbFunc3 cb3;
+	LipqCbFunc4 cb4;
+	LipqCbFunc5 cb5;
+	LipqCbFunc6 cb6;
+	LipqCbFuncF fcb;
 	void* ctx;
-	LipqResFunc cb;
-	LipqColResFunc1 cb1;
-	LipqColResFunc2 cb2;
-	LipqColResFunc3 cb3;
-	LipqComplFunc cb4;
+	int cbType;
 	friend class LibpqDataSourceImpl;
 	friend class LibpqAsyncReq;
 	friend class PgReadTask;
-	void reset();
 #if defined(HAVE_LIBPQ_BATCH) || defined(HAVE_LIBPQ_PIPELINE)
 	friend class PgBatchReadTask;
 #endif
 public:
+	void reset();
 	LibpqQuery& withSelectQuery(const std::string& query, bool isPrepared = false);
 	LibpqQuery& withUpdateQuery(const std::string& query, bool isPrepared = false);
 	LibpqQuery& withPrepared();
-	LibpqQuery& withMulti();//multi statement non parameterized queries
 	LibpqQuery& withContext(void* ctx);
-	LibpqQuery& withCb(LipqResFunc cb);//for select queries
-	LibpqQuery& withCb(LipqColResFunc1 cb1);//for select queries
-	LibpqQuery& withCb(LipqColResFunc2 cb2);//for select queries
-	LibpqQuery& withCb(LipqColResFunc3 cb3);//for select queries
-	LibpqQuery& withCb(LipqComplFunc cmcb);//for update queries
+	LibpqQuery& withMulti();//multi-statement non parameterized queries
+	template<typename Func1>
+	LibpqQuery& withCb1(Func1 cb) {
+		this->cb1 = cb;
+		this->cbType = 1;
+		return *this;
+	}
+	template<typename Func2>
+	LibpqQuery& withCb2(Func2 cb) {
+		this->cb2 = cb;
+		this->cbType = 2;
+		return *this;
+	}
+	template<typename Func3>
+	LibpqQuery& withCb3(Func3 cb) {
+		this->cb3 = cb;
+		this->cbType = 3;
+		return *this;
+	}
+	template<typename Func4>
+	LibpqQuery& withCb4(Func4 cb) {
+		this->cb4 = cb;
+		this->cbType = 4;
+		return *this;
+	}
+	template<typename Func5>
+	LibpqQuery& withCb5(Func5 cb) {
+		this->cb5 = cb;
+		this->cbType = 5;
+		return *this;
+	}
+	template<typename Func6>
+	LibpqQuery& withCb6(Func6 cb) {
+		this->cb6 = cb;
+		this->cbType = 6;
+		return *this;
+	}
+	template<typename FuncF>
+	LibpqQuery& withFinalCb(FuncF fcb) {
+		this->fcb = fcb;
+		return *this;
+	}
 	LibpqQuery();
 	void withParamInt2(unsigned short i);
 	void withParamInt4(unsigned int i);
@@ -169,8 +212,8 @@ public:
 };
 
 class LibpqAsyncReq {
+	LipqCbFuncF fcb;
 	void* ctx;
-	LipqComplFunc cmcb;
 	int cnt;
 	std::deque<LibpqQuery> q;
 	friend class LibpqDataSourceImpl;
@@ -181,7 +224,14 @@ class LibpqAsyncReq {
 	LibpqQuery* peek();
 	void pop();
 public:
+	LibpqAsyncReq();
 	LibpqQuery* getQuery();
+	template<typename FuncF>
+	LibpqAsyncReq& withFinalCb(void* ctx, FuncF fcb) {
+		this->ctx = ctx;
+		this->fcb = fcb;
+		return *this;
+	}
 };
 
 class PgReadTask : public Task {
@@ -234,10 +284,9 @@ class LibpqDataSourceImpl : public DataSourceType, public SocketInterface {
 	static std::atomic<bool> done;
 	ConditionMutex c_mutex;
 	std::atomic<bool> cvar;
-	LibpqQuery syncQuery;//only used for synchronous mode operations
 #ifdef HAVE_LIBPQ
 	PGconn* conn; //statement
-	PGresult* executeSync();
+	PGresult* executeSync(LibpqQuery* q);
 #endif
 	static void* handle(void* inp);
 
@@ -265,14 +314,13 @@ public:
 	bool init();
 
 	//Synchronous mode operations, NOT THREAD SAFE
-	LibpqQuery* getQuery();
 	bool begin();
 	bool commit();
 	bool rollback();
-	void executeQuery(LipqComplFunc cmcb = NULL);
-	void executeMultiQuery(LipqComplFunc cmcb = NULL);
-	bool executeUpdateQuery(LipqComplFunc cmcb = NULL);
-	void executeUpdateMultiQuery(LipqComplFunc cmcb = NULL);
+	void executeQuery(LibpqQuery* q);
+	void executeMultiQuery(LibpqQuery* q);
+	bool executeUpdateQuery(LibpqQuery* q);
+	void executeUpdateMultiQuery(LibpqQuery* q);
 	//Synchronous mode operations, NOT THREAD SAFE
 
 	//Asynchronous mode operations, NOT THREAD SAFE
@@ -280,8 +328,8 @@ public:
 	void commitAsync(LibpqAsyncReq* vitem);
 	void rollbackAsync(LibpqAsyncReq* vitem);
 	LibpqAsyncReq* getAsyncRequest();
-	void postAsync(LibpqAsyncReq* vitem, void* ctx, LipqComplFunc cmcb);
-	void postAsync(LibpqAsyncReq* vitem, int numQ, void* ctx, LipqComplFunc cmcb);//post async request with n number of multi queries
+	void postAsync(LibpqAsyncReq* vitem);
+	void postAsync(LibpqAsyncReq* vitem, int numQ);//post async request with n number of multi queries
 	//Asynchronous mode operations, NOT THREAD SAFE
 };
 

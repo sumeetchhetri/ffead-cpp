@@ -135,40 +135,19 @@ class TeBkUmLpqAsyncRouter : public Router {
 	static Ser w_ser;
 	static SerCont wcont_ser;
 
-	void dbAsync(AsyncDbReq* req);
-	static void dbAsyncUtil(void* ctx, int rn, int cn, char * d);
-	static void dbAsyncCh(void* ctx, bool status, const std::string& q, int counter);
+	static std::string& getUpdQuery(int count);
 
+	void dbAsync(AsyncDbReq* req);
 	void queriesAsync(const char* q, int ql, AsyncQueriesReq* req);
-	static void queriesAsyncUtil(void* ctx, int rn, int cn, char * d);
-	static void queriesAsyncCh(void* ctx, bool status, const std::string& q, int counter);
+	void updatesAsync(const char* q, int ql, AsyncUpdatesReq* req);
+	void updatesAsyncb(const char* q, int ql, AsyncUpdatesReq* req);
+	void cachedWorlds(const char*, int, std::vector<TeBkUmLpqAsyncWorld>&);
+	void getContextAsync(AsyncFortuneReq* req);
 
 #ifndef HAVE_LIBPQ_BATCH
 	void queriesMultiAsync(const char*, int, AsyncQueriesReq*);
-	static void queriesMultiAsyncUtil(void* ctx, int, int, char *, int);
-	static void queriesMultiAsyncCh(void* ctx, bool status, const std::string& q, int counter);
 	void updatesMulti(const char*, int, AsyncUpdatesReq*);
-	static void updatesMultiUtil(void* ctx, int, int, char *, int);
-	static void updatesMultiUtilCh(void* ctx, bool status, const std::string& q, int counter);
-	static void updatesMultiUtilChCh(void* ctx, bool status, const std::string& q, int counter);
 #endif
-
-	void updatesAsync(const char* q, int ql, AsyncUpdatesReq* req);
-	static void updatesAsyncChQ(void* ctx, bool status, const std::string& q, int counter);
-	static void updatesAsyncChU(void* ctx, bool status, const std::string& q, int counter);
-
-	static std::string& getUpdQuery(int count);
-	void updatesAsyncb(const char* q, int ql, AsyncUpdatesReq* req);
-	static void updatesAsyncbChQ(void* ctx, bool status, const std::string& q, int counter);
-	static void updatesAsyncbChU(void* ctx, bool status, const std::string& q, int counter);
-	
-	void cachedWorlds(const char*, int, std::vector<TeBkUmLpqAsyncWorld>&);
-	static void updateCacheAsyncUtil(void* ctx, int rn, std::vector<LibpqRes>& data);
-	static void updateCacheAsyncCh(void* ctx, bool status, const std::string& q, int counter);
-
-	void getContextAsync(AsyncFortuneReq* req);
-	static void getContextAsyncUtil(void* ctx, int rn, int cn, char * d, int l);
-	static void getContextAsyncCh(void* ctx, bool status, const std::string& q, int counter);
 
 	static std::unordered_map<int, std::string> _qC;
 	LibpqDataSourceImpl* sqli;
