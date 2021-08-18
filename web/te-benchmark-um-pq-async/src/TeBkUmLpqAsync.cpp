@@ -367,9 +367,6 @@ void TeBkUmLpqAsyncRouter::updatesAsyncb(const char* q, int ql, AsyncUpdatesReq*
 					q->withParamInt4(w.getRandomNumber());
 				}
 			}
-			(*it).setRandomNumber(newRandomNumber);
-			q->withParamInt4((*it).getId());
-			q->withParamInt4((*it).getRandomNumber());
 		}
 		for(auto w: req->vec) {
 			q->withParamInt4(w.getId());
