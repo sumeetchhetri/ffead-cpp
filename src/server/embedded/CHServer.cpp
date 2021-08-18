@@ -1268,6 +1268,9 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		logger << "Unable to start the server on the specified ip/port..." << std::endl;
 		return;
 	}
+#ifdef OS_LINUX
+	Server::set_cbpf(sockfd, get_nprocs());
+#endif
 	reader.addListenerSocket(&doRegisterListenerFunc, sockfd);
 
 #ifdef INC_JOBS

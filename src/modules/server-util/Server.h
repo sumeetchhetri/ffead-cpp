@@ -25,6 +25,9 @@
 #include "SelEpolKqEvPrt.h"
 #include "CastUtil.h"
 #include "LoggerFactory.h"
+#ifdef OS_LINUX
+#include <sys/sysinfo.h>
+#endif
 
 /*Fix for Windows Cygwin*///#include <sys/epoll.h>
 
@@ -68,6 +71,8 @@ public:
 	void start();
 	void stop();
 	
+
+	static void set_cbpf(int socket, int group_size);
 	static SOCKET createListener(const std::string& ipAddress, const int& port, const bool& block, bool isSinglEVH);
 	static SOCKET createListener(const int& port, const bool& block, bool isSinglEVH);
 };

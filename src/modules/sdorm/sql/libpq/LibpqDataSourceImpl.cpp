@@ -82,6 +82,7 @@ bool LibpqDataSourceImpl::init() {
 			rdTsk = new PgBatchReadTask(this);
 			//logger = LoggerFactory::getLogger("LibpqDataSourceImpl");
 #else
+			fprintf(stdout, "PQconnectdb successful\n");
 			rdTsk = new PgReadTask(this);
 #endif
 			PQsetnonblocking(conn, 1);
@@ -219,9 +220,9 @@ void* LibpqDataSourceImpl::handle(void* inp) {
 							fprintf(stderr, "PREPARE failed: %s\n", PQerrorMessage(ths->conn));
 							PQclear(res);
 							if(item->fcb!=NULL) {
-								item->fcb(item->ctx, false, qu->query, counter);
+								item->fcb(item->ctx, false, NULL, qu->query, counter);
 							} else if(qu->fcb!=NULL) {
-								qu->fcb(qu->ctx, false, qu->query, counter);
+								qu->fcb(qu->ctx, false, NULL, qu->query, counter);
 							}
 							item = NULL;
 							break;
@@ -291,9 +292,9 @@ void* LibpqDataSourceImpl::handle(void* inp) {
 				if (!qs) {
 					fprintf(stderr, "Failed to send query %s\n", PQerrorMessage(ths->conn));
 					if(item->fcb!=NULL) {
-						item->fcb(item->ctx, false, qu->query, counter);
+						item->fcb(item->ctx, false, NULL, qu->query, counter);
 					} else if(qu->fcb!=NULL) {
-						qu->fcb(qu->ctx, false, qu->query, counter);
+						qu->fcb(qu->ctx, false, NULL, qu->query, counter);
 					}
 
 					item = NULL;
@@ -334,16 +335,19 @@ void* LibpqDataSourceImpl::handle(void* inp) {
 									if(qu->isSelect) {
 										if (PQresultStatus(res) != PGRES_TUPLES_OK) {
 											if(item->fcb!=NULL) {
-												item->fcb(item->ctx, false, qu->query, counter);
+												item->fcb(item->ctx, false, NULL, qu->query, counter);
 											} else if(qu->fcb!=NULL) {
-												qu->fcb(qu->ctx, false, qu->query, counter);
+												qu->fcb(qu->ctx, false, NULL, qu->query, counter);
 											}
 											fprintf(stderr, "SELECT failed: %s\n", PQerrorMessage(ths->conn));
-											PQclear(res);
 											item->q.clear();
 											item->cnt = 0;
 										} else {
 											switch(qu->cbType) {
+												case 0: {
+													qu->cb0(qu->ctx, res);
+													break;
+												}
 												case 1: {
 													int cols = PQnfields(res);
 													int rows = PQntuples(res);
@@ -376,7 +380,7 @@ void* LibpqDataSourceImpl::handle(void* inp) {
 												}
 												default: {
 													if(qu->fcb!=NULL) {
-														qu->fcb(qu->ctx, false, qu->query, counter);
+														qu->fcb(qu->ctx, false, NULL, qu->query, counter);
 													}
 													break;
 												}
@@ -384,7 +388,7 @@ void* LibpqDataSourceImpl::handle(void* inp) {
 
 											if(item->cnt--==0) {
 												if(item->fcb!=NULL) {
-													item->fcb(item->ctx, true, qu->query, counter);
+													item->fcb(item->ctx, true, &item->results, qu->query, counter);
 												}
 												itemDone = true;
 											} else {
@@ -394,9 +398,9 @@ void* LibpqDataSourceImpl::handle(void* inp) {
 									} else {
 										if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 											if(item->fcb!=NULL) {
-												item->fcb(item->ctx, false, qu->query, counter);
+												item->fcb(item->ctx, false, NULL, qu->query, counter);
 											} else if(qu->fcb!=NULL) {
-												qu->fcb(qu->ctx, false, qu->query, counter);
+												qu->fcb(qu->ctx, false, NULL, qu->query, counter);
 											}
 											fprintf(stderr, "UPDATE failed: %s\n", PQerrorMessage(ths->conn));
 											PQclear(res);
@@ -405,7 +409,7 @@ void* LibpqDataSourceImpl::handle(void* inp) {
 										} else {
 											if(item->cnt--==0) {
 												if(item->fcb!=NULL) {
-													item->fcb(item->ctx, true, qu->query, counter);
+													item->fcb(item->ctx, true, &item->results, qu->query, counter);
 												}
 												itemDone = true;
 											} else {
@@ -438,16 +442,7 @@ void PgReadTask::run() {
 	}
 
 	if(PQisBusy(ths->conn)==1) {
-		while(true) {
-			errno = 0;
-
-			if (!PQconsumeInput(ths->conn)) {
-				fprintf(stderr, "Failed to consume pg input: %s\n", PQerrorMessage(ths->conn));
-				throw std::runtime_error("Invalid connection state");
-			}
-			if(errno == EAGAIN) return;
-			if(!PQisBusy(ths->conn)) break;
-		}
+		return;
 	}
 
 	PGresult* res = NULL;
@@ -460,9 +455,9 @@ void PgReadTask::run() {
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 				fprintf(stderr, "PREPARE failed: %s\n", PQerrorMessage(ths->conn));
 				if(ritem->fcb!=NULL) {
-					ritem->fcb(ritem->ctx, false, q->query, counter);
+					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
 				} else if(q->fcb!=NULL) {
-					q->fcb(q->ctx, false, q->query, counter);
+					q->fcb(q->ctx, false, NULL, q->query, counter);
 				}
 				ritemDone = true;
 				q = NULL;
@@ -473,20 +468,31 @@ void PgReadTask::run() {
 				ritem->cnt--;
 				q->isPrepared = false;
 			}
+			PQclear(res);
 		} else if(q->isSelect) {
 			if (PQresultStatus(res) != PGRES_TUPLES_OK) {
 				if(ritem->fcb!=NULL) {
-					ritem->fcb(ritem->ctx, false, q->query, counter);
+					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
 				} else if(q->fcb!=NULL) {
-					q->fcb(q->ctx, false, q->query, counter);
+					q->fcb(q->ctx, false, NULL, q->query, counter);
 				}
 				fprintf(stderr, "SELECT failed: %s\n", PQerrorMessage(ths->conn));
 				ritemDone = true;
 				ritem = NULL;
 				ths->pop();
 				counter = -1;
+				PQclear(res);
 			} else {
 				switch(q->cbType) {
+					case -1: {
+						ritem->results.push_back(res);
+						break;
+					}
+					case 0: {
+						q->cb0(q->ctx, res);
+						PQclear(res);
+						break;
+					}
 					case 1: {
 						int cols = PQnfields(res);
 						int rows = PQntuples(res);
@@ -495,6 +501,7 @@ void PgReadTask::run() {
 								q->cb1(q->ctx, (i==rows-1 && j==cols-1), i, j, PQfname(res, j), PQgetvalue(res, i, j), PQgetlength(res, i, j));
 							}
 						}
+						PQclear(res);
 						break;
 					}
 					case 2: {
@@ -505,6 +512,7 @@ void PgReadTask::run() {
 								q->cb2(q->ctx, (i==rows-1 && j==cols-1), i, j, PQgetvalue(res, i, j), PQgetlength(res, i, j));
 							}
 						}
+						PQclear(res);
 						break;
 					}
 					case 3: {
@@ -515,6 +523,7 @@ void PgReadTask::run() {
 								q->cb3(q->ctx, (i==rows-1 && j==cols-1), i, j, PQgetvalue(res, i, j));
 							}
 						}
+						PQclear(res);
 						break;
 					}
 					case 4: {
@@ -525,6 +534,7 @@ void PgReadTask::run() {
 								q->cb4(q->ctx, i, j, PQfname(res, j), PQgetvalue(res, i, j), PQgetlength(res, i, j));
 							}
 						}
+						PQclear(res);
 						break;
 					}
 					case 5: {
@@ -535,6 +545,7 @@ void PgReadTask::run() {
 								q->cb5(q->ctx, i, j, PQgetvalue(res, i, j), PQgetlength(res, i, j));
 							}
 						}
+						PQclear(res);
 						break;
 					}
 					case 6: {
@@ -545,54 +556,69 @@ void PgReadTask::run() {
 								q->cb6(q->ctx, i, j, PQgetvalue(res, i, j));
 							}
 						}
+						PQclear(res);
 						break;
 					}
 					default: {
 						break;
+						PQclear(res);
 					}
 				}
 
 				if(ritem->cnt--==0) {
 					if(ritem->fcb!=NULL) {
-						ritem->fcb(ritem->ctx, true, q->query, counter);
+						ritem->fcb(ritem->ctx, true, &ritem->results, q->query, counter);
 					}
 					ritemDone = true;
+					if(q->isMulti) {
+						ritem->pop();
+					}
+					q = NULL;
 					ritem = NULL;
 					ths->pop();
 					counter = -1;
 				} else {
-					ritem->pop();
+					if(!q->isMulti) {
+						ritem->pop();
+						q = NULL;
+					}
 				}
 			}
-			q = NULL;
 		} else {
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 				if(ritem->fcb!=NULL) {
-					ritem->fcb(ritem->ctx, false, q->query, counter);
+					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
 				} else if(q->fcb!=NULL) {
-					q->fcb(q->ctx, false, q->query, counter);
+					q->fcb(q->ctx, false, NULL, q->query, counter);
 				}
 				fprintf(stderr, "UPDATE failed: %s\n", PQerrorMessage(ths->conn));
 				ritemDone = true;
 				ritem = NULL;
 				ths->pop();
 				counter = -1;
+				q = NULL;
 			} else {
 				if(ritem->cnt--==0) {
 					if(ritem->fcb!=NULL) {
-						ritem->fcb(ritem->ctx, true, q->query, counter);
+						ritem->fcb(ritem->ctx, true, NULL, q->query, counter);
 					}
 					ritemDone = true;
+					if(q->isMulti) {
+						ritem->pop();
+					}
+					q = NULL;
 					ritem = NULL;
 					ths->pop();
 					counter = -1;
 				} else {
-					ritem->pop();
+					if(!q->isMulti) {
+						ritem->pop();
+						q = NULL;
+					}
 				}
 			}
-			q = NULL;
+			PQclear(res);
 		}
-		PQclear(res);
 	}
 	flux = false;
 	submit(NULL);
@@ -638,9 +664,9 @@ void PgReadTask::submit(LibpqAsyncReq* nitem) {
 				if (!qs) {
 					fprintf(stderr, "Failed to prepare query %s\n", PQerrorMessage(ths->conn));
 					if(ritem->fcb!=NULL) {
-						ritem->fcb(ritem->ctx, false, q->query, counter);
+						ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
 					} else if(q->fcb!=NULL) {
-						q->fcb(q->ctx, false, q->query, counter);
+						q->fcb(q->ctx, false, NULL, q->query, counter);
 					}
 					q = NULL;
 					ritem = NULL;
@@ -653,6 +679,7 @@ void PgReadTask::submit(LibpqAsyncReq* nitem) {
 			} else {
 				q->isPrepared = false;
 			}
+
 
 			int qs = -1;
 			if(q->isMulti) {
@@ -715,9 +742,9 @@ void PgReadTask::submit(LibpqAsyncReq* nitem) {
 			if (!qs) {
 				fprintf(stderr, "Failed to send query %s\n", PQerrorMessage(ths->conn));
 				if(ritem->fcb!=NULL) {
-					ritem->fcb(ritem->ctx, false, q->query, counter);
+					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
 				} else if(q->fcb!=NULL) {
-					q->fcb(q->ctx, false, q->query, counter);
+					q->fcb(q->ctx, false, NULL, q->query, counter);
 				}
 				q = NULL;
 				ritem = NULL;
@@ -879,17 +906,28 @@ void LibpqDataSourceImpl::executeMultiQuery(LibpqQuery* q) {
 	PGresult* res = NULL;
 	bool stat = true;
 	int counter = -1;
+	std::vector<PGresult*> results;
 	while((res = PQgetResult(conn))!=NULL) {
 		counter++;
 		if (PQresultStatus(res) != PGRES_TUPLES_OK) {
 			fprintf(stderr, "SELECT failed: %s\n", PQerrorMessage(conn));
 			if(q->fcb!=NULL) {
-				q->fcb(q->ctx, false, q->query, counter);
+				q->fcb(q->ctx, false, NULL, q->query, counter);
 			}
 			stat = false;
+			PQclear(res);
 			break;
 		} else {
 			switch(q->cbType) {
+				case -1: {
+					results.push_back(res);
+					break;
+				}
+				case 0: {
+					q->cb0(q->ctx, res);
+					PQclear(res);
+					break;
+				}
 				case 1: {
 					int cols = PQnfields(res);
 					int rows = PQntuples(res);
@@ -898,6 +936,7 @@ void LibpqDataSourceImpl::executeMultiQuery(LibpqQuery* q) {
 							q->cb1(q->ctx, (i==rows-1 && j==cols-1), i, j, PQfname(res, j), PQgetvalue(res, i, j), PQgetlength(res, i, j));
 						}
 					}
+					PQclear(res);
 					break;
 				}
 				case 2: {
@@ -908,6 +947,7 @@ void LibpqDataSourceImpl::executeMultiQuery(LibpqQuery* q) {
 							q->cb2(q->ctx, (i==rows-1 && j==cols-1), i, j, PQgetvalue(res, i, j), PQgetlength(res, i, j));
 						}
 					}
+					PQclear(res);
 					break;
 				}
 				case 3: {
@@ -918,6 +958,7 @@ void LibpqDataSourceImpl::executeMultiQuery(LibpqQuery* q) {
 							q->cb3(q->ctx, (i==rows-1 && j==cols-1), i, j, PQgetvalue(res, i, j));
 						}
 					}
+					PQclear(res);
 					break;
 				}
 				case 4: {
@@ -928,6 +969,7 @@ void LibpqDataSourceImpl::executeMultiQuery(LibpqQuery* q) {
 							q->cb4(q->ctx, i, j, PQfname(res, j), PQgetvalue(res, i, j), PQgetlength(res, i, j));
 						}
 					}
+					PQclear(res);
 					break;
 				}
 				case 5: {
@@ -938,6 +980,7 @@ void LibpqDataSourceImpl::executeMultiQuery(LibpqQuery* q) {
 							q->cb5(q->ctx, i, j, PQgetvalue(res, i, j), PQgetlength(res, i, j));
 						}
 					}
+					PQclear(res);
 					break;
 				}
 				case 6: {
@@ -948,18 +991,19 @@ void LibpqDataSourceImpl::executeMultiQuery(LibpqQuery* q) {
 							q->cb6(q->ctx, i, j, PQgetvalue(res, i, j));
 						}
 					}
+					PQclear(res);
 					break;
 				}
 				default: {
 					break;
+					PQclear(res);
 				}
 			}
 		}
-		PQclear(res);
 	}
 	if(stat) {
 		if(q->fcb!=NULL) {
-			q->fcb(q->ctx, true, q->query, counter);
+			q->fcb(q->ctx, true, &results, q->query, counter);
 		}
 	}
 #endif
@@ -979,7 +1023,7 @@ void LibpqDataSourceImpl::executeUpdateMultiQuery(LibpqQuery* q) {
 			PQclear(res);
 			stat = false;
 			if(q->fcb!=NULL) {
-				q->fcb(q->ctx, false, q->query, counter);
+				q->fcb(q->ctx, false, NULL, q->query, counter);
 			}
 			break;
 		}
@@ -987,7 +1031,7 @@ void LibpqDataSourceImpl::executeUpdateMultiQuery(LibpqQuery* q) {
 	}
 	if(stat) {
 		if(q->fcb!=NULL) {
-			q->fcb(q->ctx, true, q->query, counter);
+			q->fcb(q->ctx, true, NULL, q->query, counter);
 		}
 	}
 #endif
@@ -1001,11 +1045,15 @@ void LibpqDataSourceImpl::executeQuery(LibpqQuery* q) {
 		fprintf(stderr, "SELECT failed: %s\n", PQerrorMessage(conn));
 		PQclear(res);
 		if(q->fcb!=NULL) {
-			q->fcb(q->ctx, false, q->query, 0);
+			q->fcb(q->ctx, false, NULL, q->query, 0);
 		}
 		return;
 	}
 	switch(q->cbType) {
+		case 0: {
+			q->cb0(q->ctx, res);
+			break;
+		}
 		case 1: {
 			int cols = PQnfields(res);
 			int rows = PQntuples(res);
@@ -1072,7 +1120,7 @@ void LibpqDataSourceImpl::executeQuery(LibpqQuery* q) {
 	}
 
 	if(q->fcb!=NULL) {
-		q->fcb(q->ctx, true, q->query, 0);
+		q->fcb(q->ctx, true, NULL, q->query, 0);
 	}
 
 	PQclear(res);
@@ -1086,14 +1134,14 @@ bool LibpqDataSourceImpl::executeUpdateQuery(LibpqQuery* q) {
 		fprintf(stderr, "UPDATE failed: %s\n", PQerrorMessage(conn));
 		PQclear(res);
 		if(q->fcb!=NULL) {
-			q->fcb(q->ctx, false, q->query, 0);
+			q->fcb(q->ctx, false, NULL, q->query, 0);
 		}
 		return false;
 	}
 	PQclear(res);
 
 	if(q->fcb!=NULL) {
-		q->fcb(q->ctx, true, q->query, 0);
+		q->fcb(q->ctx, true, NULL, q->query, 0);
 	}
 #endif
 	return true;
@@ -1139,32 +1187,30 @@ void PgBatchReadTask::pop() {
 void PgBatchReadTask::run() {
 #ifdef HAVE_LIBPQ
 	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)sif;
+	//ths->logger.write("run:Resultset ready...Q size %d\n", ths->Q.size());
 
-	//ths->logger << ("run:Read Data waiting...\n");
-	if (!PQconsumeInput(ths->conn)) {
-		fprintf(stderr, "Failed to consume pg input: %s\n", PQerrorMessage(ths->conn));
-		throw std::runtime_error("Invalid connection state");
-	}
-
-	if(PQisBusy(ths->conn)==1) {
+	int readQueries = 0;
+	while(true) {
+		//ths->logger << ("run:Read Data waiting...\n");
 		if (!PQconsumeInput(ths->conn)) {
 			fprintf(stderr, "Failed to consume pg input: %s\n", PQerrorMessage(ths->conn));
 			throw std::runtime_error("Invalid connection state");
 		}
-		if(PQisBusy(ths->conn)==1) {
-			return;
-		}
-	}
-	//ths->logger.write("run:Resultset ready...Q size %d\n", ths->Q.size());
 
-	int readQueries = 0;
-	while(!PQisBusy(ths->conn)) {
-		PGresult* res = PQgetResult(ths->conn);
-		if(res==NULL) {
-			if (!PQconsumeInput(ths->conn)) {
+		if(PQisBusy(ths->conn)==1) {
+			/*if (!PQconsumeInput(ths->conn)) {
 				fprintf(stderr, "Failed to consume pg input: %s\n", PQerrorMessage(ths->conn));
 				throw std::runtime_error("Invalid connection state");
 			}
+			if(PQisBusy(ths->conn)==1) {
+				return;
+			}*/
+			return;
+		}
+
+
+		PGresult* res = PQgetResult(ths->conn);
+		if(res==NULL) {
 			//ths->logger << ("run:Null Resultset...\n");
 			continue;
 		}
@@ -1200,9 +1246,9 @@ void PgBatchReadTask::run() {
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 				fprintf(stderr, "PREPARE failed: %s\n", PQerrorMessage(ths->conn));
 				if(ritem->fcb!=NULL) {
-					ritem->fcb(ritem->ctx, false, q->query, counter);
+					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
 				} else if(q->fcb!=NULL) {
-					q->fcb(q->ctx, false, q->query, counter);
+					q->fcb(q->ctx, false, NULL, q->query, counter);
 				}
 				q = NULL;
 				ritem = NULL;
@@ -1212,19 +1258,30 @@ void PgBatchReadTask::run() {
 				q->isPrepared = false;
 				ritem->cnt--;
 			}
+			PQclear(res);
 		} else if(q->isSelect) {
 			if (PQresultStatus(res) != PGRES_TUPLES_OK) {
 				if(ritem->fcb!=NULL) {
-					ritem->fcb(ritem->ctx, false, q->query, counter);
+					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
 				} else if(q->fcb!=NULL) {
-					q->fcb(q->ctx, false, q->query, counter);
+					q->fcb(q->ctx, false, NULL, q->query, counter);
 				}
 				fprintf(stderr, "SELECT failed: %s\n", PQerrorMessage(ths->conn));
 				ritem = NULL;
 				ths->pop();
 				counter = -1;
+				PQclear(res);
 			} else {
 				switch(q->cbType) {
+					case -1: {
+						ritem->results.push_back(res);
+						break;
+					}
+					case 0: {
+						q->cb0(q->ctx, res);
+						PQclear(res);
+						break;
+					}
 					case 1: {
 						int cols = PQnfields(res);
 						int rows = PQntuples(res);
@@ -1233,6 +1290,7 @@ void PgBatchReadTask::run() {
 								q->cb1(q->ctx, (i==rows-1 && j==cols-1), i, j, PQfname(res, j), PQgetvalue(res, i, j), PQgetlength(res, i, j));
 							}
 						}
+						PQclear(res);
 						break;
 					}
 					case 2: {
@@ -1243,6 +1301,7 @@ void PgBatchReadTask::run() {
 								q->cb2(q->ctx, (i==rows-1 && j==cols-1), i, j, PQgetvalue(res, i, j), PQgetlength(res, i, j));
 							}
 						}
+						PQclear(res);
 						break;
 					}
 					case 3: {
@@ -1253,6 +1312,7 @@ void PgBatchReadTask::run() {
 								q->cb3(q->ctx, (i==rows-1 && j==cols-1), i, j, PQgetvalue(res, i, j));
 							}
 						}
+						PQclear(res);
 						break;
 					}
 					case 4: {
@@ -1263,6 +1323,7 @@ void PgBatchReadTask::run() {
 								q->cb4(q->ctx, i, j, PQfname(res, j), PQgetvalue(res, i, j), PQgetlength(res, i, j));
 							}
 						}
+						PQclear(res);
 						break;
 					}
 					case 5: {
@@ -1273,6 +1334,7 @@ void PgBatchReadTask::run() {
 								q->cb5(q->ctx, i, j, PQgetvalue(res, i, j), PQgetlength(res, i, j));
 							}
 						}
+						PQclear(res);
 						break;
 					}
 					case 6: {
@@ -1283,31 +1345,39 @@ void PgBatchReadTask::run() {
 								q->cb6(q->ctx, i, j, PQgetvalue(res, i, j));
 							}
 						}
+						PQclear(res);
 						break;
 					}
 					default: {
+						PQclear(res);
 						break;
 					}
 				}
 
 				if(ritem->cnt--==0) {
 					if(ritem->fcb!=NULL) {
-						ritem->fcb(ritem->ctx, true, q->query, counter);
+						ritem->fcb(ritem->ctx, true, &ritem->results, q->query, counter);
 					}
+					if(q->isMulti) {
+						ritem->pop();
+					}
+					q = NULL;
 					ritem = NULL;
 					ths->pop();
 					counter = -1;
 				} else {
-					ritem->pop();
+					if(!q->isMulti) {
+						ritem->pop();
+						q = NULL;
+					}
 				}
 			}
-			q = NULL;
 		} else {
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 				if(ritem->fcb!=NULL) {
-					ritem->fcb(ritem->ctx, false, q->query, counter);
+					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
 				} else if(q->fcb!=NULL) {
-					q->fcb(q->ctx, false, q->query, counter);
+					q->fcb(q->ctx, false, NULL, q->query, counter);
 				}
 				fprintf(stderr, "UPDATE failed: %s\n", PQerrorMessage(ths->conn));
 				ths->pop();
@@ -1316,18 +1386,24 @@ void PgBatchReadTask::run() {
 			} else {
 				if(ritem->cnt--==0) {
 					if(ritem->fcb!=NULL) {
-						ritem->fcb(ritem->ctx, true, q->query, counter);
+						ritem->fcb(ritem->ctx, true, NULL, q->query, counter);
 					}
+					if(q->isMulti) {
+						ritem->pop();
+					}
+					q = NULL;
 					ritem = NULL;
 					ths->pop();
 					counter = -1;
 				} else {
-					ritem->pop();
+					if(!q->isMulti) {
+						ritem->pop();
+						q = NULL;
+					}
 				}
 			}
-			q = NULL;
+			PQclear(res);
 		}
-		PQclear(res);
 		//ths->logger << ("run:Done Resultset...\n");
 	}
 
@@ -1358,7 +1434,8 @@ void PgBatchReadTask::processPending() {
 			if (PQbatchSendQueue(ths->conn) == 0) {
 				fprintf(stderr, "processPending:PQbatchSendQueue error: %s\n", PQerrorMessage(ths->conn));
 #endif
-
+			} else {
+				//fprintf(stdout, "processPending:PQbatchSendQueue from submit %d, Batch Query Q size %d\n", numQueriesInBatch, ths->Q.size());
 				//PQfinish(ths->conn);
 				//return;
 			}
@@ -1404,7 +1481,7 @@ void PgBatchReadTask::submit(LibpqAsyncReq* nitem) {
 #endif
 				//PQfinish(ths->conn);
 			} else {
-				//ths->logger.write("submit:PQbatchSendQueue from submit %d, Batch Query Q size %d\n", numQueriesInBatch, ths->Q.size());
+				//fprintf(stdout, "submit:PQbatchSendQueue from submit %d, Batch Query Q size %d\n", numQueriesInBatch, ths->Q.size());
 			}
 			queueEntries = true;
 			sendBatch = false;
@@ -1440,9 +1517,9 @@ void PgBatchReadTask::batchQueries(LibpqAsyncReq* nitem, int& numQueriesInBatch)
 			if (!qs) {
 				fprintf(stderr, "Failed to prepare query %s\n", PQerrorMessage(ths->conn));
 				if(nitem->fcb!=NULL) {
-					nitem->fcb(nitem->ctx, false, q->query, i+1);
+					nitem->fcb(nitem->ctx, false, NULL, q->query, i+1);
 				} else if(q->fcb!=NULL) {
-					q->fcb(q->ctx, false, q->query, i+1);
+					q->fcb(q->ctx, false, NULL, q->query, i+1);
 				}
 				return;
 			}
@@ -1513,9 +1590,9 @@ void PgBatchReadTask::batchQueries(LibpqAsyncReq* nitem, int& numQueriesInBatch)
 		if (!qs) {
 			fprintf(stderr, "Failed to send query %s\n", PQerrorMessage(ths->conn));
 			if(nitem->fcb!=NULL) {
-				nitem->fcb(nitem->ctx, false, q->query, i+1);
+				nitem->fcb(nitem->ctx, false, NULL, q->query, i+1);
 			} else if(q->fcb!=NULL) {
-				q->fcb(q->ctx, false, q->query, i+1);
+				q->fcb(q->ctx, false, NULL, q->query, i+1);
 			}
 			return;
 		}
@@ -1605,6 +1682,14 @@ LibpqQuery* LibpqAsyncReq::peek() {
 	return NULL;
 }
 
+LibpqAsyncReq::~LibpqAsyncReq() {
+	if(results.size()>0) {
+		for (auto res: results) {
+			PQclear(res);
+		}
+	}
+}
+
 LibpqAsyncReq::LibpqAsyncReq() {
 	ctx = NULL;
 	fcb = NULL;
@@ -1616,6 +1701,7 @@ void LibpqAsyncReq::pop() {
 }
 
 void LibpqQuery::reset() {
+	cb0 = NULL;
 	cb1 = NULL;
 	cb2 = NULL;
 	cb3 = NULL;
@@ -1632,6 +1718,7 @@ void LibpqQuery::reset() {
 }
 
 LibpqQuery::LibpqQuery() {
+	cb0 = NULL;
 	cb1 = NULL;
 	cb2 = NULL;
 	cb3 = NULL;
@@ -1639,7 +1726,7 @@ LibpqQuery::LibpqQuery() {
 	cb5 = NULL;
 	cb6 = NULL;
 	fcb = NULL;
-	cbType = 0;
+	cbType = -1;
 	isSelect = false;
 	isPrepared = false;
 	isMulti = false;

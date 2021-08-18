@@ -40,6 +40,10 @@ docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-async-profiled-base:6.0
 docker build --progress plain -f ffead-cpp-sql-raw-async-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-async-profiled-base:6.0 .
 docker push sumeetchhetri/ffead-cpp-sql-raw-async-profiled-base:6.0
 
+docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-async-pool-profiled-base:6.0
+docker build --progress plain -f ffead-cpp-sql-raw-async-pool-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-async-pool-profiled-base:6.0 .
+docker push sumeetchhetri/ffead-cpp-sql-raw-async-pool-profiled-base:6.0
+
 docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-async-clibpqb-profiled-base:6.0
 docker build --progress plain -f ffead-cpp-sql-raw-async-clibpqb-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-async-clibpqb-profiled-base:6.0 .
 docker push sumeetchhetri/ffead-cpp-sql-raw-async-clibpqb-profiled-base:6.0
@@ -47,14 +51,6 @@ docker push sumeetchhetri/ffead-cpp-sql-raw-async-clibpqb-profiled-base:6.0
 docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-async-clibpqb-pool-profiled-base:6.0
 docker build --progress plain -f ffead-cpp-sql-raw-async-clibpqb-pool-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-async-clibpqb-pool-profiled-base:6.0 .
 docker push sumeetchhetri/ffead-cpp-sql-raw-async-clibpqb-pool-profiled-base:6.0
-
-docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-async-clibpqpp-profiled-base:6.0
-docker build --progress plain -f ffead-cpp-sql-raw-async-clibpqpp-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-async-clibpqpp-profiled-base:6.0 .
-docker push sumeetchhetri/ffead-cpp-sql-raw-async-clibpqpp-profiled-base:6.0
-
-docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-async-clibpqpp-pool-profiled-base:6.0
-docker build --progress plain -f ffead-cpp-sql-raw-async-clibpqpp-pool-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-async-clibpqpp-pool-profiled-base:6.0 .
-docker push sumeetchhetri/ffead-cpp-sql-raw-async-clibpqpp-pool-profiled-base:6.0
 
 docker rmi -f sumeetchhetri/ffead-cpp-rust-rocket-base:6.0
 docker build --progress plain -f ffead-cpp-rust-rocket-base.dockerfile -t sumeetchhetri/ffead-cpp-rust-rocket-base:6.0 .

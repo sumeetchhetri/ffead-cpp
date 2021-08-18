@@ -544,6 +544,20 @@ option("TCP_FASTOPEN")
 	end)
 option_end()
 
+option("SO_ATTACH_REUSEPORT_CBPF")
+	set_default(true)
+	set_showmenu(false)
+	after_check(function (option)
+		import("lib.detect.check_cxsnippets")
+		local ok = check_cxsnippets({"#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\n#include <linux/bpf.h>\n#include <linux/filter.h>\n#include <sys/sysinfo.h>\nint main() { return SO_ATTACH_REUSEPORT_CBPF; }"})
+		if ok then
+			option:set("configvar", "HAVE_SO_ATTACH_REUSEPORT_CBPF", 1)
+		else
+			option:enable(false)
+		end
+	end)
+option_end()
+
 add_includedirs("/usr/local/include")
 add_includedirs("$(projectdir)/src/modules/common")
 add_includedirs("$(projectdir)/src/modules/cache")

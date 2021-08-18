@@ -248,15 +248,19 @@ if cc.has_function('accept4', prefix: '#include <sys/socket.h>')
 endif
 
 if cc.compiles('#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\nint test() { return TCP_QUICKACK; }')
-	conf_data.set('TCP_QUICKACK', 1)
+	conf_data.set('HAVE_TCP_QUICKACK', 1)
 endif
 
 if cc.compiles('#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\nint test() { return TCP_DEFER_ACCEPT; }')
-	conf_data.set('TCP_DEFER_ACCEPT', 1)
+	conf_data.set('HAVE_TCP_DEFER_ACCEPT', 1)
 endif
 
 if cc.compiles('#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\nint test() { return TCP_FASTOPEN; }')
-	conf_data.set('TCP_FASTOPEN', 1)
+	conf_data.set('HAVE_TCP_FASTOPEN', 1)
+endif
+
+if cc.compiles('#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\n#include <linux/bpf.h>\n#include <linux/filter.h>\n#include <sys/sysinfo.h>\nint main() { return SO_ATTACH_REUSEPORT_CBPF; }')
+	conf_data.set('HAVE_SO_ATTACH_REUSEPORT_CBPF', 1)
 endif
 
 if cc.has_header('liburing', args : '-I/usr/local/include')

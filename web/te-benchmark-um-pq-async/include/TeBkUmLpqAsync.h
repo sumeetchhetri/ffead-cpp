@@ -103,9 +103,6 @@ struct AsyncUpdatesReq {
 	bool conn_clos;
 	SocketInterface* sif;
 	LibpqDataSourceImpl* sqli;
-#ifndef HAVE_LIBPQ_BATCH
-	std::stringstream ss;
-#endif
 	std::vector<TeBkUmLpqAsyncWorld> vec;
 };
 
@@ -137,17 +134,15 @@ class TeBkUmLpqAsyncRouter : public Router {
 
 	static std::string& getUpdQuery(int count);
 
-	void dbAsync(AsyncDbReq* req);
-	void queriesAsync(const char* q, int ql, AsyncQueriesReq* req);
+	void dbAsync(SocketInterface* sif);
+	void queriesAsync(const char* q, int ql, SocketInterface* sif);
 	void updatesAsync(const char* q, int ql, AsyncUpdatesReq* req);
 	void updatesAsyncb(const char* q, int ql, AsyncUpdatesReq* req);
 	void cachedWorlds(const char*, int, std::vector<TeBkUmLpqAsyncWorld>&);
-	void getContextAsync(AsyncFortuneReq* req);
+	void fortunes(SocketInterface* sif);
 
-#ifndef HAVE_LIBPQ_BATCH
-	void queriesMultiAsync(const char*, int, AsyncQueriesReq*);
+	void queriesMultiAsync(const char*, int, SocketInterface* sif);
 	void updatesMulti(const char*, int, AsyncUpdatesReq*);
-#endif
 
 	static std::unordered_map<int, std::string> _qC;
 	LibpqDataSourceImpl* sqli;

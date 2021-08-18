@@ -35,6 +35,7 @@
 #include "Thread.h"
 #include "SocketInterface.h"
 #include "RequestReaderHandler.h"
+#include <variant>
 
 class LibpqParamsBase {
 public:
@@ -124,6 +125,7 @@ struct LibpqRes {
 	int l;
 };
 
+typedef void (*LipqCbFunc0) (void* ctx, PGresult* res);
 typedef void (*LipqCbFunc1) (void* ctx, bool endofdata, int row, int col, char* name, char* value, int vlen);
 typedef void (*LipqCbFunc2) (void* ctx, bool endofdata, int row, int col, char* value, int vlen);
 typedef void (*LipqCbFunc3) (void* ctx, bool endofdata, int row, int col, char* value);
@@ -132,7 +134,7 @@ typedef void (*LipqCbFunc4) (void* ctx, int row, int col, char* name, char* valu
 typedef void (*LipqCbFunc5) (void* ctx, int row, int col, char* value, int vlen);
 typedef void (*LipqCbFunc6) (void* ctx, int row, int col, char* value);
 
-typedef void (*LipqCbFuncF) (void* ctx, bool status, const std::string& query, int counter);
+typedef void (*LipqCbFuncF) (void* ctx, bool status, std::vector<PGresult*>* results, const std::string& query, int counter);
 
 class LibpqQuery {
 	std::list<LibpqParam> pvals;
@@ -140,6 +142,7 @@ class LibpqQuery {
 	bool isSelect;
 	bool isMulti;
 	std::string query;
+	LipqCbFunc0 cb0;
 	LipqCbFunc1 cb1;
 	LipqCbFunc2 cb2;
 	LipqCbFunc3 cb3;
@@ -162,6 +165,12 @@ public:
 	LibpqQuery& withPrepared();
 	LibpqQuery& withContext(void* ctx);
 	LibpqQuery& withMulti();//multi-statement non parameterized queries
+	template<typename Func1>
+	LibpqQuery& withCb0(Func1 cb) {
+		this->cb0 = cb;
+		this->cbType = 0;
+		return *this;
+	}
 	template<typename Func1>
 	LibpqQuery& withCb1(Func1 cb) {
 		this->cb1 = cb;
@@ -215,6 +224,7 @@ class LibpqAsyncReq {
 	LipqCbFuncF fcb;
 	void* ctx;
 	int cnt;
+	std::vector<PGresult*> results;
 	std::deque<LibpqQuery> q;
 	friend class LibpqDataSourceImpl;
 	friend class PgReadTask;
@@ -224,6 +234,7 @@ class LibpqAsyncReq {
 	LibpqQuery* peek();
 	void pop();
 public:
+	virtual ~LibpqAsyncReq();
 	LibpqAsyncReq();
 	LibpqQuery* getQuery();
 	template<typename FuncF>

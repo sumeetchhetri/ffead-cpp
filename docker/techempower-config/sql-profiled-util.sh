@@ -33,7 +33,7 @@ then
 	rm -f /usr/local/lib/libpq.*
 	rm -f /usr/include/postgres_ext.h /usr/include/pg_config_ext.h /usr/include/libpq-fe.h
 	rm -f /usr/lib/x86_64-linux-gnu/libpq.*
-	PG_CMT=4efcf47053eaf8dd88de2b1a89478df43d37d5c0
+	PG_CMT=514b4c11d24701d2cc90ad75ed787bf1380af673
 	wget -nv https://github.com/postgres/postgres/archive/$PG_CMT.zip
 	unzip -q $PG_CMT.zip
 	cd postgres-$PG_CMT
@@ -67,6 +67,7 @@ then
 	if [ "$4" = "pool" ]
 	then
 		sed -i 's|"TeBkUmLpqAsyncRouter"|"TeBkUmLpqAsyncRouterPooled"|g' $IROOT/ffead-cpp-src/web/te-benchmark-um-pq-async/config/application.xml
+		sed -i 's|TeBkUmLpqAsyncRouter|TeBkUmLpqAsyncRouterPooled|g' $IROOT/ffead-cpp-src/web/te-benchmark-um-pq-async/config/cachememory.xml
 	fi
 else
 	sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq-async)||g' CMakeLists.txt

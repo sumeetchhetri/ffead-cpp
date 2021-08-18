@@ -115,9 +115,9 @@ void TeBkUmLpqMessage::setMessage(const std::string& message) {
 
 const std::string TeBkUmLpqRouter::HELLO_WORLD = "Hello, World!";
 const std::string TeBkUmLpqRouter::WORLD = "world";
-const std::string TeBkUmLpqRouter::WORLD_ONE_QUERY = "select id, randomnumber from world where id = $1";
-const std::string TeBkUmLpqRouter::WORLD_ALL_QUERY = "select id, randomnumber from world";
-const std::string TeBkUmLpqRouter::FORTUNE_ALL_QUERY = "select id, message from fortune";
+const std::string TeBkUmLpqRouter::WORLD_ONE_QUERY = "select id,randomnumber from world where id=$1";
+const std::string TeBkUmLpqRouter::WORLD_ALL_QUERY = "select id,randomnumber from world";
+const std::string TeBkUmLpqRouter::FORTUNE_ALL_QUERY = "select id,message from fortune";
 int TeBkUmLpqRouter::g_seed = 0;
 
 void TeBkUmLpqRouter::db(TeBkUmLpqWorld& w) {
@@ -125,10 +125,13 @@ void TeBkUmLpqRouter::db(TeBkUmLpqWorld& w) {
 	int rid = CommonUtils::fastrand(g_seed) % 10000 + 1;
 	LibpqQuery q;
 	q.withParamInt4(rid);
-	q.withSelectQuery(WORLD_ONE_QUERY).withContext(&w).withCb6([](void* ctx, int rn, int cn, char * d) {
+	q.withSelectQuery(WORLD_ONE_QUERY).withContext(&w).withCb0([](void* ctx, PGresult* res) {
 		TeBkUmLpqWorld* w = (TeBkUmLpqWorld*)ctx;
-		if(cn==0)w->setId(ntohl(*((uint32_t *) d)));
-		if(cn==1)w->setRandomNumber(ntohl(*((uint32_t *) d)));
+		int cols = PQnfields(res);
+		for (int j = 0; j < cols; ++j) {
+			if(j==0)w->setId(ntohl(*((uint32_t *) PQgetvalue(res, 0, j))));
+			else w->setRandomNumber(ntohl(*((uint32_t *) PQgetvalue(res, 0, j))));
+		}
 	});
 	sqli->executeQuery(&q);
 }
@@ -144,15 +147,15 @@ void TeBkUmLpqRouter::queries(const char* q, int ql, std::vector<TeBkUmLpqWorld>
 
 	for (int c = 0; c < queryCount; ++c) {
 		int rid = CommonUtils::fastrand(g_seed) % 10000 + 1;
-		wlst.emplace_back();
-		TeBkUmLpqWorld& w = wlst.back();
-
 		LibpqQuery q;
 		q.withParamInt4(rid);
-		q.withSelectQuery(WORLD_ONE_QUERY).withContext(&w).withCb6([](void* ctx, int rn, int cn, char * d) {
-			TeBkUmLpqWorld* w = (TeBkUmLpqWorld*)ctx;
-			if(cn==0)w->setId(ntohl(*((uint32_t *) d)));
-			if(cn==1)w->setRandomNumber(ntohl(*((uint32_t *) d)));
+		q.withSelectQuery(WORLD_ONE_QUERY).withContext(&wlst).withCb0([](void* ctx, PGresult* res) {
+			std::vector<TeBkUmLpqWorld>* wlst = (std::vector<TeBkUmLpqWorld>*)ctx;
+			int cols = PQnfields(res);
+			for (int j = 0; j < cols; ++j) {
+				if(j==0) wlst->emplace_back(ntohl(*((uint32_t *) PQgetvalue(res, 0, j))));
+				else wlst->back().setRandomNumber(ntohl(*((uint32_t *) PQgetvalue(res, 0, j))));
+			}
 		});
 		sqli->executeQuery(&q);
 	}
@@ -198,16 +201,16 @@ std::string& TeBkUmLpqRouter::getUpdQuery(int count) {
 	}
 
 	std::stringstream ss;
-	ss << "update world as t set randomnumber = case id ";
+	ss << "update world as t set randomnumber = case id";
 
 	int pc = 1;
 	for (int c = 0; c < count; ++c) {
-		ss << "when $";
+		ss << " when $";
 		ss << pc++;
 		ss << " then $";
 		ss << pc++;
 	}
-	ss << "else randomnumber end where id in (";
+	ss << " else randomnumber end where id in (";
 	for (int c = 0; c < count; ++c) {
 		ss << "$" << pc++ << ",";
 	}
@@ -237,10 +240,13 @@ void TeBkUmLpqRouter::updates(const char* q, int ql, std::vector<TeBkUmLpqWorld>
 
 		LibpqQuery q;
 		q.withParamInt4(rid);
-		q.withSelectQuery(WORLD_ONE_QUERY).withContext(&w).withCb6([](void* ctx, int rn, int cn, char * d) {
+		q.withSelectQuery(WORLD_ONE_QUERY).withContext(&w).withCb0([](void* ctx, PGresult* res) {
 			TeBkUmLpqWorld* w = (TeBkUmLpqWorld*)ctx;
-			if(cn==0)w->setId(ntohl(*((uint32_t *) d)));
-			if(cn==1)w->setRandomNumber(ntohl(*((uint32_t *) d)));
+			int cols = PQnfields(res);
+			for (int j = 0; j < cols; ++j) {
+				if(j==0)w->setId(ntohl(*((uint32_t *) PQgetvalue(res, 0, j))));
+				else w->setRandomNumber(ntohl(*((uint32_t *) PQgetvalue(res, 0, j))));
+			}
 		});
 		sqli->executeQuery(&q);
 
@@ -315,7 +321,7 @@ void TeBkUmLpqRouter::updatesMulti(const char* q, int ql, std::vector<TeBkUmLpqW
 			updt->ss << " then ";
 			updt->ss << newRandomNumber;
 		}
-	}).withFinalCb([](void* ctx, bool status, const std::string& query, int counter) {
+	}).withFinalCb([](void* ctx, bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
 		UpdQrData* updt = (UpdQrData*)ctx;
 		updt->status = status;
 	});
@@ -399,13 +405,19 @@ void TeBkUmLpqRouter::handleTemplate(HttpRequest* req, HttpResponse* res, Socket
 	std::list<TeBkUmLpqFortune> flst;
 
 	LibpqQuery q;
-	q.withSelectQuery(FORTUNE_ALL_QUERY).withContext(&flst).withCb5([](void* ctx, int rn, int cn, char * d, int l) {
+	q.withSelectQuery(FORTUNE_ALL_QUERY).withContext(&flst).withCb0([](void* ctx, PGresult* res) {
 		std::list<TeBkUmLpqFortune>* flst = (std::list<TeBkUmLpqFortune>*)ctx;
-		if(cn==0) {
-			flst->emplace_back(ntohl(*((uint32_t *) d)));
-		} else {
-			TeBkUmLpqFortune& w = flst->back();
-			w.message = CryptoHandler::sanitizeHtmlFast((const uint8_t *)d, (size_t)l, w.message_i, w.allocd);
+		int cols = PQnfields(res);
+		int rows = PQntuples(res);
+		for(int i=0; i<rows; i++) {
+			for (int j = 0; j < cols; ++j) {
+				if(j==0) {
+					flst->emplace_back(ntohl(*((uint32_t *) PQgetvalue(res, i, j))));
+				} else {
+					TeBkUmLpqFortune& w = flst->back();
+					w.message = CryptoHandler::sanitizeHtmlFast((const uint8_t *)PQgetvalue(res, i, j), (size_t)PQgetlength(res, i, j), w.message_i, w.allocd);
+				}
+			}
 		}
 	});
 	sqli->executeQuery(&q);
