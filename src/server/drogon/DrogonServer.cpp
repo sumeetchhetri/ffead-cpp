@@ -55,10 +55,9 @@ void DrogonWebsockHandler::handleNewConnection(const HttpRequestPtr& hreq, const
 	DrogonServer::websocks.insert(dsk->getAddress(), dsk);
 
 	::HttpRequest req(request->bodyData(), request->bodyLength(), request->getHeaders(), request->getPath(), request->getQuery(), request->getMethodString(), hv);
-	ServiceTask task;
 	WebSocketData wreq;
 	WebSocketRespponseData wres;
-	dsk->h = task.handleWebsockOpen(&wreq, &wres, dsk, &req);
+	dsk->h = ServiceTask::handleWebsockOpen(&wreq, &wres, dsk, &req);
 	dsk->writeWsData(&wres);
 }
 
@@ -78,8 +77,7 @@ void DrogonHttpHandler::handle(const HttpRequestPtr &requestptr, std::function<v
 
 	::HttpRequest req(request->bodyData(), request->bodyLength(), request->getHeaders(), request->getPath(), request->getQuery(), request->getMethodString(), hv);
 	::HttpResponse respo;
-	ServiceTask task;
-	task.handle(&req, &respo);
+	ServiceTask::handle(&req, &respo);
 
 	drogon::HttpResponsePtr resp = NULL;
 	if(respo.isDone()) {

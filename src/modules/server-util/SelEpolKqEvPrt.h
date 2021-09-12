@@ -30,7 +30,7 @@
 #include "SSLHandler.h"
 #endif
 
-#define MAXDESCRIPTORS 4096
+#define MAXDESCRIPTORS 1024
 #define OP_READ     0
 #define OP_WRITE    1
 
@@ -164,25 +164,9 @@ enum event_type {
 
 class SelEpolKqEvPrt;
 
-typedef SocketInterface* (*onEvent) (SelEpolKqEvPrt* ths, SocketInterface* sfd, int type, int fd, char* buf, size_t len, bool isClosed);
+typedef BaseSocket* (*onEvent) (SelEpolKqEvPrt* ths, BaseSocket* sfd, int type, int fd, char* buf, size_t len, bool isClosed);
 typedef bool (*eventLoopContinue) (SelEpolKqEvPrt* ths);
 
-class DummySocketInterface : public SocketInterface {
-public:
-	DummySocketInterface() {
-		closed = true;
-	}
-	~DummySocketInterface(){}
-	std::string getProtocol(void* context){return "";}
-	int getTimeout(){return -1;};
-	bool readRequest(void* request, void*& context, int& pending, int& reqPos){return false;}
-	bool writeResponse(void* req, void* res, void* context, std::string& d, int reqPos){return false;}
-	void onOpen(){}
-	void onClose(){}
-	void addHandler(SocketInterface* handler){}
-	int getType(void* context) {return -1;}
-	bool isEmbedded(){return true;}
-};
 
 class SelEpolKqEvPrt : public EventHandler {
 	bool listenerMode;
@@ -191,7 +175,7 @@ class SelEpolKqEvPrt : public EventHandler {
 	SOCKET curfds;
 	void* context;
 	Mutex l;
-	DummySocketInterface* dsi;
+	BaseSocket* dsi;
 	#if !defined(USE_EPOLL) && !defined(USE_KQUEUE) && !defined(USE_WIN_IOCP) && !defined(USE_EVPORT)
 		libcuckoo::cuckoohash_map<int, void*> connections;
 	#endif
@@ -235,8 +219,8 @@ public:
 	SelEpolKqEvPrt();
 	virtual ~SelEpolKqEvPrt();
 #if defined(USE_IO_URING) //Not thread safe
-	void post_write(SocketInterface* sfd, const std::string& data);
-	void post_read(SocketInterface* sfd);
+	void post_write(BaseSocket* sfd, const std::string& data);
+	void post_read(BaseSocket* sfd);
 #endif
 	void setCtx(void* ctx);
 	void* getCtx();
@@ -247,9 +231,9 @@ public:
 	void addListeningSocket(SOCKET sockfd);
 	SOCKET getDescriptor(const SOCKET& index, void*& obj, bool& isRead);
 	bool isListeningDescriptor(const SOCKET& descriptor);
-	bool registerWrite(SocketInterface* obj);
-	bool unRegisterWrite(SocketInterface* obj);
-	bool registerRead(SocketInterface* obj, const bool& isListeningSock = false, bool epoll_et = true, bool isNonBlocking = false);
+	bool registerWrite(BaseSocket* obj);
+	bool unRegisterWrite(BaseSocket* obj);
+	bool registerRead(BaseSocket* obj, const bool& isListeningSock = false, bool epoll_et = true, bool isNonBlocking = false);
 	bool unRegisterRead(const SOCKET& descriptor);
 	void* getOptData(const int& index);
 	void reRegisterServerSock(void* obj);

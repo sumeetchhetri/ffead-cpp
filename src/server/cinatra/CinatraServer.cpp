@@ -40,10 +40,9 @@ void CinatraServer::runServer(std::string ip_addr, std::string port, std::vector
 				std::pair<phr_header*, size_t> hl = req.get_headers();
 				HttpRequest reqf(hl.first, hl.second, req.raw_url(), req.get_method(), req.minor_version(), req.body());
 
-				ServiceTask task;
 				WebSocketData wreq;
 				WebSocketRespponseData wres;
-				csk->h = task.handleWebsockOpen(&wreq, &wres, csk, &reqf);
+				csk->h = ServiceTask::handleWebsockOpen(&wreq, &wres, csk, &reqf);
 				csk->writeWsData(&wres);
 			});
 
@@ -103,8 +102,7 @@ void CinatraServer::runServer(std::string ip_addr, std::string port, std::vector
 			std::pair<phr_header*, size_t> hl = r.get_headers();
 			HttpRequest req(hl.first, hl.second, r.raw_url(), r.get_method(), r.minor_version(), r.body());
 			HttpResponse respo;
-			ServiceTask task;
-			task.handle(&req, &respo);
+			ServiceTask::handle(&req, &respo);
 			if(respo.isDone()) {
 				for (int var = 0; var < (int)respo.getCookies().size(); var++)
 				{

@@ -151,6 +151,7 @@ class HttpRequest {
 	friend class HandlerRequest;
 	friend class CinatraServer;
 	friend class LithiumServer;
+	friend class Http11Socket;
 	static const std::string VALID_METHODS;
 	void reset(std::string &&data, int* content_length);
 public:

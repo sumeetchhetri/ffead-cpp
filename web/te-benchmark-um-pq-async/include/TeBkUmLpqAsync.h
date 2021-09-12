@@ -45,6 +45,8 @@
 #include <unordered_map>
 #include "ConfigurationData.h"
 
+class TeBkUmLpqAsyncWorld;
+
 class TeBkUmLpqAsyncWorld {
 	int id;
 	int randomNumber;
@@ -57,6 +59,25 @@ public:
 	void setId(int id);
 	int getRandomNumber() const;
 	void setRandomNumber(int randomNumber);
+#ifdef HAVE_RAPID_JSON
+	void toJson(rapidjson::Writer<rapidjson::StringBuffer>& w) {
+		w.StartObject();
+		w.String("id", 2);
+	    w.Int(id);
+		w.String("randomNumber", 12);
+	    w.Int(randomNumber);
+		w.EndObject();
+	}
+#endif
+#ifdef HAVE_RAPID_JSON
+	static void toJson(std::vector<TeBkUmLpqAsyncWorld>& vec, rapidjson::Writer<rapidjson::StringBuffer>& w) {
+		w.StartArray();
+		for(auto el: vec) {
+			el.toJson(w);
+		}
+		w.EndArray();
+	}
+#endif
 };
 
 class TeBkUmLpqAsyncFortune {
@@ -82,26 +103,34 @@ public:
 	virtual ~TeBkUmLpqAsyncMessage();
 	const std::string& getMessage() const;
 	void setMessage(const std::string& message);
+#ifdef HAVE_RAPID_JSON
+	void toJson(rapidjson::Writer<rapidjson::StringBuffer>& w) {
+		w.StartObject();
+		w.String("message", 7);
+	    w.String(message.c_str(), static_cast<rapidjson::SizeType>(message.length()));
+		w.EndObject();
+	}
+#endif
 };
 
 struct AsyncDbReq {
 	float httpVers;
 	bool conn_clos;
-	SocketInterface* sif;
+	BaseSocket* sif;
 	TeBkUmLpqAsyncWorld w;
 };
 
 struct AsyncQueriesReq {
 	float httpVers;
 	bool conn_clos;
-	SocketInterface* sif;
+	BaseSocket* sif;
 	std::vector<TeBkUmLpqAsyncWorld> vec;
 };
 
 struct AsyncUpdatesReq {
 	float httpVers;
 	bool conn_clos;
-	SocketInterface* sif;
+	BaseSocket* sif;
 	LibpqDataSourceImpl* sqli;
 	std::vector<TeBkUmLpqAsyncWorld> vec;
 };
@@ -109,7 +138,7 @@ struct AsyncUpdatesReq {
 struct AsyncFortuneReq {
 	float httpVers;
 	bool conn_clos;
-	SocketInterface* sif;
+	BaseSocket* sif;
 	std::list<TeBkUmLpqAsyncFortune> flst;
 };
 
@@ -133,15 +162,14 @@ class TeBkUmLpqAsyncRouter : public Router {
 	static SerCont wcont_ser;
 
 	static std::string& getUpdQuery(int count);
-
-	void dbAsync(SocketInterface* sif);
-	void queriesAsync(const char* q, int ql, SocketInterface* sif);
+	void dbAsync(BaseSocket* sif);
+	void queriesAsync(const char* q, int ql, BaseSocket* sif);
 	void updatesAsync(const char* q, int ql, AsyncUpdatesReq* req);
 	void updatesAsyncb(const char* q, int ql, AsyncUpdatesReq* req);
 	void cachedWorlds(const char*, int, std::vector<TeBkUmLpqAsyncWorld>&);
-	void fortunes(SocketInterface* sif);
+	void fortunes(BaseSocket* sif);
 
-	void queriesMultiAsync(const char*, int, SocketInterface* sif);
+	void queriesMultiAsync(const char*, int, BaseSocket* sif);
 	void updatesMulti(const char*, int, AsyncUpdatesReq*);
 
 	static std::unordered_map<int, std::string> _qC;
@@ -167,7 +195,7 @@ public:
 		return std::map<std::string, std::string>();
 	}
 	/* END */
-	bool route(HttpRequest* req, HttpResponse* res, SocketInterface* sif);
+	bool route(HttpRequest* req, HttpResponse* res, BaseSocket* sif);
 };
 
 class TeBkUmLpqAsyncRouterPooled : public TeBkUmLpqAsyncRouter {

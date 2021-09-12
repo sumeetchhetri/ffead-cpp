@@ -78,6 +78,9 @@
 #mesondefine HAVE_LIBPQ_BATCH
 #mesondefine HAVE_LIBPQ_PIPELINE
 #mesondefine IS_SENDFILE
+#mesondefine HAVE_RAPID_JSON
+#mesondefine HAVE_PUGI_XML
+#mesondefine HAVE_SYSINFO
 
 #ifdef HAVE_ODBCLIB
 #define HAVE_LIBODBC 1

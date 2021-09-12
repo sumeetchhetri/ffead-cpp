@@ -25,7 +25,7 @@
 #include "SelEpolKqEvPrt.h"
 #include "CastUtil.h"
 #include "LoggerFactory.h"
-#ifdef OS_LINUX
+#ifdef HAVE_SYSINFO
 #include <sys/sysinfo.h>
 #endif
 

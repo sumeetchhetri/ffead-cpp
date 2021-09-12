@@ -123,9 +123,21 @@
 				<param type="std::vector&lt;int&gt;" from="body" />
 			</restfunction>
 		</restcontroller>
+		<restcontroller class="DefaultRestController" path="/restvec">
+			<restfunction name="testVector" path="tstvecxml" meth="POST" rtype="std::vector&lt;int&gt;"
+				statusCode="200" icontentType="application/json" ocontentType="application/xml">
+				<param type="std::vector&lt;int&gt;" from="body" />
+			</restfunction>
+		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/restvecobj">
 			<restfunction name="testVectorObject" path="tstvecobj" rtype="std::vector&lt;TestMany&gt;"
 				meth="POST" icontentType="application/json" ocontentType="application/json" statusCode="200">
+				<param type="std::vector&lt;TestMany&gt;" from="body" />
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" path="/restvecobj">
+			<restfunction name="testVectorObject" path="tstvecobjxml" rtype="std::vector&lt;TestMany&gt;"
+				meth="POST" icontentType="application/json" ocontentType="application/xml" statusCode="200">
 				<param type="std::vector&lt;TestMany&gt;" from="body" />
 			</restfunction>
 		</restcontroller>
@@ -136,15 +148,22 @@
 				<param type="TestMany" from="body" />
 			</restfunction>
 		</restcontroller>
+		<restcontroller class="DefaultRestController" path="/restobj">
+			<restfunction name="testObject" path="tstobjxml" meth="POST" rtype="TestMany"
+				icontentType="application/json" ocontentType="application/xml"
+				statusCode="200">
+				<param type="TestMany" from="body" />
+			</restfunction>
+		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/restvecobj">
 			<restfunction name="testVectorObject" path="tstvecobj.xml" rtype="std::vector&lt;TestMany&gt;"
-				meth="POST" icontentType="application/xml" ocontentType="application/json" statusCode="200">
+				meth="POST" icontentType="application/xml" ocontentType="application/xml" statusCode="200">
 				<param type="std::vector&lt;TestMany&gt;" from="body" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/restobj">
 			<restfunction name="testObject" path="tstobj.xml" meth="POST" rtype="TestMany"
-				icontentType="application/xml" ocontentType="application/json" statusCode="200">
+				icontentType="application/xml" ocontentType="application/xml" statusCode="200">
 				<param type="TestMany" from="body" />
 			</restfunction>
 		</restcontroller>
@@ -174,6 +193,20 @@
 		<restcontroller class="DefaultRestController" path="/sertest">
 			<restfunction name="sertest" path="s" meth="POST"
 				icontentType="application/json" ocontentType="application/json" rtype="TestSTLs"
+				statusCode="200">
+				<param type="TestSTLs" from="body" />
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" path="/sertest">
+			<restfunction name="sertest" path="sxml" meth="POST"
+				icontentType="application/json" ocontentType="application/xml" rtype="TestSTLs"
+				statusCode="200">
+				<param type="TestSTLs" from="body" />
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" path="/sertest">
+			<restfunction name="sertest" path="sxml1" meth="POST"
+				icontentType="application/xml" ocontentType="application/xml" rtype="TestSTLs"
 				statusCode="200">
 				<param type="TestSTLs" from="body" />
 			</restfunction>

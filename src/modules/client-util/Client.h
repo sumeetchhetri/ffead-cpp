@@ -38,6 +38,7 @@ public:
 	//bool connectionUnresolv(const std::string& host, const int& port);
 	int sendData(std::string);
 	std::string getTextData(const std::string& hdrdelm, const std::string& cntlnhdr);
+	static std::string getHttpData(const std::string& hdrdelm, const std::string& cntlnhdr, bool connected, std::string& buffer);
 	std::string getBinaryData(const int&, const bool&);
 	void closeConnection();
 	bool isConnected();

@@ -26,17 +26,17 @@
 #include "SocketInterface.h"
 
 class WebSockHandler {
-	SocketInterface* sif;
+	BaseSocket* sif;
 	friend class HttpServiceTask;
 	friend class ServiceTask;
 public:
 	int writeTo(WebSocketRespponseData* res);
-	int writeToPeer(WebSocketRespponseData* res, SocketInterface* sif);
+	int writeToPeer(WebSocketRespponseData* res, BaseSocket* sif);
 	virtual bool onOpen(WebSocketData* req, WebSocketRespponseData* res, std::string uniqueAddress, void* hreq)=0;
 	virtual void onClose(std::string uniqueAddress)=0;
 	virtual bool onMessage(WebSocketData* req, WebSocketRespponseData* res, std::string uniqueAddress)=0;
 	virtual bool isWriteControl();
-	SocketInterface* getSif();
+	BaseSocket* getSif();
 	virtual ~WebSockHandler();
 };
 

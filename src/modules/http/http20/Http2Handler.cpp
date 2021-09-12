@@ -89,7 +89,11 @@ Http2Frame* Http2Handler::getFrameByType(const std::string& data, Http2FrameHead
 	return NULL;
 }
 
-Http2Handler::Http2Handler(const SOCKET& fd, void* ssl, void* io, const bool& isServer, const std::string& webpath) : SocketInterface(fd, ssl, io) {
+#ifdef HAVE_SSLINC
+Http2Handler::Http2Handler(const SOCKET& fd, void* ssl, void* io, const bool& isServer, const std::string& webpath) : SocketInterface(fd, (SSL*)ssl, (BIO*)io) {
+#else
+	Http2Handler::Http2Handler(const SOCKET& fd, void* ssl, void* io, const bool& isServer, const std::string& webpath) : SocketInterface(fd) {
+#endif
 	this->highestStreamIdentifier = 0;
 	this->context.huffmanEncoding = true;
 	this->highestPushPromiseStreamIdentifier = 2;
@@ -103,7 +107,11 @@ Http2Handler::Http2Handler(const SOCKET& fd, void* ssl, void* io, const bool& is
 	logger = LoggerFactory::getLogger("Http2Handler");
 }
 
-Http2Handler::Http2Handler(const SOCKET& fd, void* ssl, void* io, const bool& isServer, const std::string& webpath, const std::string& settingsFrameData) : SocketInterface(fd, ssl, io) {
+#ifdef HAVE_SSLINC
+Http2Handler::Http2Handler(const SOCKET& fd, void* ssl, void* io, const bool& isServer, const std::string& webpath, const std::string& settingsFrameData) : SocketInterface(fd, (SSL*)ssl, (BIO*)io) {
+#else
+Http2Handler::Http2Handler(const SOCKET& fd, void* ssl, void* io, const bool& isServer, const std::string& webpath, const std::string& settingsFrameData) : SocketInterface(fd) {
+#endif
 	this->highestStreamIdentifier = 0;
 	this->context.huffmanEncoding = true;
 	this->highestPushPromiseStreamIdentifier = 2;
@@ -244,7 +252,7 @@ std::string Http2Handler::serialize(Http2Frame* frame) {
 }
 
 void Http2Handler::writeInitData(Http2Frame* frame) {
-	writeTo(serialize(frame), 0);
+	writeToBuf(serialize(frame), 0);
 }
 
 bool Http2Handler::writePendingDataFrame(Http2RequestResponseData& pendingSendData, std::string& data) {

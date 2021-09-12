@@ -135,6 +135,7 @@
 #include <execinfo.h>
 #endif
 #include "RequestReaderHandler.h"
+#include "RequestHandler2.h"
 #include "Http2Handler.h"
 #include "Http11Handler.h"
 #include "HttpServiceHandler.h"
@@ -175,13 +176,12 @@ typedef void (*ReceiveTask1)(const int&);
 class CHServer {
 	static int techunkSiz, connKeepAlive, maxReqHdrCnt, maxEntitySize;
 	static std::string serverCntrlFileNm;
-	static HttpServiceTask* httpServiceFactoryMethod();
-	static HttpReadTask* httpReadFactoryMethod();
 	static unsigned int hardware_concurrency();
 	static void* gracefullShutdown_monitor(void* args);
 public:
 	static bool doRegisterListenerFunc();
 	static SocketInterface* createSocketInterface(SOCKET);
+	static Http11Socket* createSocketInterface2(SOCKET);
 	static void* dynamic_page_monitor(void* arg);
 	static void serve(std::string port, std::string ipaddr, int thrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber);
 	static int entryPoint(int vhostNum, bool isMain, std::string serverRootDirectory, std::string port, std::string ipaddr, std::vector<std::string> servedAppNames);

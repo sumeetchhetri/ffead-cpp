@@ -928,6 +928,25 @@ fi
 ########################################################################################################
 
 
+AC_ARG_ENABLE(with_rapidjson,
+AS_HELP_STRING([--enable-with_rapidjson],
+               [enable with_rapidjson, default: yes]),
+[case "${enableval}" in
+             yes) with_rapidjson=yes ;;
+             no)  with_rapidjson=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-with_rapidjson]) ;;
+esac],
+[with_rapidjson=yes])
+
+AC_ARG_ENABLE(with_pugixml,
+AS_HELP_STRING([--enable-with_pugixml],
+               [enable with_pugixml, default: yes]),
+[case "${enableval}" in
+             yes) with_pugixml=yes ;;
+             no)  with_pugixml=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-with_pugixml]) ;;
+esac],
+[with_pugixml=yes])
 
 # store current user given compiler flags to avoid default setup via AC_PROG_CXX
 OLD_CXXFLAGS=$CXXFLAGS
@@ -1049,9 +1068,19 @@ AC_CHECK_HEADER([regex.h],
                      		AC_CHECK_LIB(pcreposix, regcomp, , [AC_MSG_ERROR([Not found libpcreposix library])])
                      	], [])
                      ])
-AC_CHECK_HEADER([execinfo.h],
-                     [AC_DEFINE(HAVE_EXECINFOINC, [1], [execinfo.h presence])],
-                     [])
+                     
+if test "x$with_rapidjson" = "xyes"; then
+	AC_CHECK_HEADER([rapidjson/document.h], [AC_DEFINE(HAVE_RAPID_JSON, [1], [rapidjson/document.h presence])], [])
+fi
+
+if test "x$with_pugixml" = "xyes"; then                   
+AC_CHECK_HEADER([pugixml.hpp], [AC_DEFINE(HAVE_PUGI_XML, [1], [pugixml.hpp presence])], [])
+AC_CHECK_HEADER([pugixml.hpp],
+                     [
+                     	AC_CHECK_LIB(pugixml, main, [AC_DEFINE(HAVE_PUGI_XML, [1], [pugixml.hpp presence])], [AC_MSG_ERROR([pugixml library not found])])
+                     	
+                     ], [])
+fi
 
 OLD_CPP=$CPP
 CPP="$CXXCPP $STDCXX_SWITCH"
@@ -1063,7 +1092,8 @@ AC_CHECK_HEADER([cstdatomic],
                      [AC_DEFINE(USE_CSTDATOMIC_H, [0], [cstdatomic support not found])], [-])
 CPP=$OLD_CPP
 
-AC_CHECK_HEADER([openssl/ssl.h],AC_DEFINE(HAVE_SSLINC, 1, [Define if ssl is present]),[])
+AC_CHECK_HEADER([openssl/ssl.h], AC_DEFINE(HAVE_SSLINC, 1, [Define if ssl is present]),[])
+AC_CHECK_HEADER([sys/sysinfo.h], AC_DEFINE(HAVE_SYSINFO, 1, [Define if sysinfo is present]),[])
 
 if test "x$mod_sdormsql" = "xyes"; then
 	if test "x$os_flavor" = "xbsd"; then

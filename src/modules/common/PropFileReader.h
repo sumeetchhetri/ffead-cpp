@@ -28,10 +28,10 @@
 #include "vector"
 #include "StringUtil.h"
 
-
 typedef std::vector<std::string> strVec;
 typedef std::map<std::string, std::string> propMap;
 typedef std::map<std::string, std::vector<std::string> > propMultiMap;
+
 class PropFileReader {
 public:
 	PropFileReader();

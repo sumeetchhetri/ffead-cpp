@@ -50,8 +50,8 @@ void* ffead_cpp_handle_rust_1(const ffead_request *request, int* scode,
     HttpRequest req((void*)request->headers, request->headers_len, std::string_view{request->path, request->path_len},
     		std::string_view{request->method, request->method_len}, request->version, std::string_view{request->body, request->body_len});
     HttpResponse* respo = new HttpResponse();
-    ServiceTask task;
-    task.handle(&req, respo);
+
+    ServiceTask::handle(&req, respo);
     if(!respo->isDone()) {
     	respo->setUrl(req.getUrl());
 		const std::string& resUrl = respo->getUrl();
@@ -86,8 +86,8 @@ void* ffead_cpp_handle_rust_swift_1(const ffead_request *request, int* scode,
     HttpRequest req((void*)request->headers, request->headers_len, std::string_view{request->path, request->path_len},
     		std::string_view{request->method, request->method_len}, request->version, std::string_view{request->body, request->body_len});
     HttpResponse* respo = new HttpResponse();
-    ServiceTask task;
-    task.handle(&req, respo);
+
+    ServiceTask::handle(&req, respo);
     if(!respo->isDone()) {
     	respo->setUrl(req.getUrl());
 		const std::string& resUrl = respo->getUrl();
@@ -125,8 +125,8 @@ void* ffead_cpp_handle_c_1(const ffead_request *request, int* scode, const char*
     HttpRequest req((void*)request->headers, request->headers_len, std::string_view{request->path, request->path_len},
     		std::string_view{request->method, request->method_len}, request->version, std::string_view{request->body, request->body_len});
     HttpResponse* respo = new HttpResponse();
-    ServiceTask task;
-    task.handle(&req, respo);
+
+    ServiceTask::handle(&req, respo);
     if(!respo->isDone()) {
     	respo->setUrl(req.getUrl());
 		const std::string& resUrl = respo->getUrl();
@@ -176,8 +176,8 @@ void* ffead_cpp_handle_picov_1(const ffead_request3 *request, int* scode, const 
 	HttpRequest req((void*)request->headers, request->headers_len, std::string_view{request->path, request->path_len},
     		std::string_view{request->method, request->method_len}, request->version, std::string_view{request->body, request->body_len});
     HttpResponse* respo = new HttpResponse();
-    ServiceTask task;
-    task.handle(&req, respo);
+
+    ServiceTask::handle(&req, respo);
     if(!respo->isDone()) {
     	respo->setUrl(req.getUrl());
 		const std::string& resUrl = respo->getUrl();
@@ -215,8 +215,8 @@ void* ffead_cpp_handle_crystal_js_1(const ffead_request3 *request, int* scode, c
 	HttpRequest req((void*)request->headers, request->headers_len, std::string_view{request->path, request->path_len},
     		std::string_view{request->method, request->method_len}, request->version, std::string_view{request->body, request->body_len});
     HttpResponse* respo = new HttpResponse();
-    ServiceTask task;
-    task.handle(&req, respo);
+
+    ServiceTask::handle(&req, respo);
     if(!respo->isDone()) {
     	respo->setUrl(req.getUrl());
 		const std::string& resUrl = respo->getUrl();
@@ -258,8 +258,8 @@ void* ffead_cpp_handle_go_1(const char *server_str, size_t server_str_len,
 {
 	HttpRequest req(method, method_len, path, path_len, query, query_len, in_headers, in_headers_len, in_body, in_body_len, version);
     HttpResponse* respo = new HttpResponse();
-    ServiceTask task;
-    task.handle(&req, respo);
+
+    ServiceTask::handle(&req, respo);
     if(!respo->isDone()) {
     	respo->setUrl(req.getUrl());
 		const std::string& resUrl = respo->getUrl();
@@ -299,8 +299,8 @@ void* ffead_cpp_handle_go_2(const char *server_str, size_t server_str_len,
 {
 	HttpRequest req(method, method_len, path, path_len, NULL, 0, in_headers, in_headers_len, in_body, in_body_len, version);
     HttpResponse* respo = new HttpResponse();
-    ServiceTask task;
-    task.handle(&req, respo);
+
+    ServiceTask::handle(&req, respo);
     if(!respo->isDone()) {
     	respo->setUrl(req.getUrl());
 		const std::string& resUrl = respo->getUrl();
@@ -337,8 +337,8 @@ void* ffead_cpp_handle_v(const char *server_str, size_t server_str_len,
 {
     HttpRequest req(in_headers, in_headers_len, in_body, in_body_len);
     HttpResponse* respo = new HttpResponse();
-    ServiceTask task;
-    task.handle(&req, respo);
+
+    ServiceTask::handle(&req, respo);
     if(!respo->isDone()) {
     	respo->setUrl(req.getUrl());
 		const std::string& resUrl = respo->getUrl();
@@ -375,8 +375,8 @@ void* ffead_cpp_handle_d_1(const ffead_request *request, int* scode,
 	HttpRequest req((void*)request->headers, request->headers_len, std::string_view{request->path, request->path_len},
 	    		std::string_view{request->method, request->method_len}, request->version, std::string_view{request->body, request->body_len});
     HttpResponse* respo = new HttpResponse();
-    ServiceTask task;
-    task.handle(&req, respo);
+
+    ServiceTask::handle(&req, respo);
     if(!respo->isDone()) {
     	respo->setUrl(req.getUrl());
 		const std::string& resUrl = respo->getUrl();
@@ -420,8 +420,8 @@ void* ffead_cpp_handle_java(int *scode, const char **out_url, size_t *out_url_le
         req.addNginxApacheHeader(kp, kl, vp, vl);
 	}
     HttpResponse* respo = new HttpResponse();
-    ServiceTask task;
-    task.handle(&req, respo);
+
+    ServiceTask::handle(&req, respo);
     if(!respo->isDone()) {
     	respo->setUrl(req.getUrl());
 		const std::string& resUrl = respo->getUrl();
@@ -465,8 +465,8 @@ void* ffead_cpp_handle_1t(const ffead_request2 *request, int* scode,
             std::string_view{request->qstr, request->qstr_len}, std::string_view{request->method, request->method_len}, 
             request->version, std::string_view{request->body, request->body_len});
     HttpResponse* respo = new HttpResponse();
-    ServiceTask task;
-    task.handle(&req, respo);
+
+    ServiceTask::handle(&req, respo);
     if(!respo->isDone()) {
     	respo->setUrl(req.getUrl());
 		const std::string& resUrl = respo->getUrl();
@@ -508,8 +508,8 @@ void* ffead_cpp_handle_2(const ffead_request1 *request, int* scode,
     HttpRequest req(std::string_view{request->path, request->path_len}, std::string_view{request->method, request->method_len}, request->version,
     		request->headers, request->headers_len, request->body, request->body_len);
     HttpResponse* respo = new HttpResponse();
-    ServiceTask task;
-    task.handle(&req, respo);
+
+    ServiceTask::handle(&req, respo);
     if(!respo->isDone()) {
     	respo->setUrl(req.getUrl());
 		const std::string& resUrl = respo->getUrl();
@@ -542,8 +542,8 @@ void* ffead_cpp_handle_3(const char *server_str, size_t server_str_len,
 {
     HttpRequest req(in_headers, in_headers_len, in_body, in_body_len);
     HttpResponse* respo = new HttpResponse();
-    ServiceTask task;
-    task.handle(&req, respo);
+
+    ServiceTask::handle(&req, respo);
     respo->setUrl(req.getUrl());
     const std::string& resUrl = respo->getUrl();
     *out_url = resUrl.c_str();
@@ -571,8 +571,8 @@ void* ffead_cpp_handle_5(const char *in_headers, size_t in_headers_len,
 {
     HttpRequest req(in_headers, in_headers_len, in_body, in_body_len);
     HttpResponse* respo = new HttpResponse();
-    ServiceTask task;
-    task.handle(&req, respo);
+
+    ServiceTask::handle(&req, respo);
     respo->setUrl(req.getUrl());
     const std::string& resUrl = respo->getUrl();
     *out_url = resUrl.c_str();
@@ -637,8 +637,8 @@ void* ffead_cpp_handle_js_1(const ffead_request *request, int* scode, size_t *ou
     HttpRequest req((void*)request->headers, request->headers_len, std::string_view{request->path, request->path_len},
     		std::string_view{request->method, request->method_len}, request->version, std::string_view{request->body, request->body_len});
     HttpResponse* respo = new HttpResponse();
-    ServiceTask task;
-    task.handle(&req, respo);
+
+    ServiceTask::handle(&req, respo);
     if(!respo->isDone()) {
     	respo->setUrl(req.getUrl());
 		const std::string& resUrl = respo->getUrl();

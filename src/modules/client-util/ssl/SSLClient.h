@@ -26,7 +26,7 @@
 #include "SSLCommon.h"
 #include "ClientInterface.h"
 #include "PropFileReader.h"
-
+#include "Client.h"
 
 class SSLClient : public ClientInterface {
 	SSL *ssl;
@@ -42,6 +42,7 @@ class SSLClient : public ClientInterface {
 	void destroy_ctx(SSL_CTX *ctx);
 	static int password_cb(char *buf, int num, int rwflag, void *userdata);
 	Logger logger;
+	std::string buffer;
 public:
 	SSLClient();
 	SSLClient(const std::string& secFile);

@@ -362,7 +362,37 @@ option("LIBCUCKOO")
 	end)
 option_end()
 
-option("EXECINFO")
+option("WITH_RAPIDJSON")
+	set_default(true)
+	set_showmenu(false)
+	after_check(function (option)
+		import("lib.detect.has_cxxincludes")
+		local ok = has_cxxincludes({"rapidjson/document.h"}, {target = target})
+		if ok then
+			option:set("configvar", "HAVE_RAPID_JSON", 1)
+		end
+	end)
+option_end()
+
+option("WITH_PUGIXML")
+	set_default(true)
+	set_showmenu(false)
+	after_check(function (option)
+		import("lib.detect.has_cxxincludes")
+		local ok = has_cxxincludes({"pugixml.hpp"}, {target = target})
+		if ok then
+			import("lib.detect.find_package")
+			local l = find_package("pugixml")
+			if not l then
+				raise('pugixml library not found')
+			end
+			option:set("configvar", "HAVE_PUGI_XML", 1)
+	        option:add(l)
+		end
+	end)
+option_end()
+
+option("GENERIC")
 	set_default(true)
 	set_showmenu(false)
 	after_check(function (option)
@@ -370,6 +400,11 @@ option("EXECINFO")
 		ok = has_cincludes({"execinfo.h"})
 		if ok then
 			option:set("configvar", "HAVE_EXECINFOINC", 1)
+		end
+		import("lib.detect.has_cincludes")
+		ok = has_cincludes({"sys/sysinfo.h"})
+		if ok then
+			option:set("configvar", "HAVE_SYSINFO", 1)
 		end
 	end)
 option_end()
@@ -549,7 +584,7 @@ option("SO_ATTACH_REUSEPORT_CBPF")
 	set_showmenu(false)
 	after_check(function (option)
 		import("lib.detect.check_cxsnippets")
-		local ok = check_cxsnippets({"#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\n#include <linux/bpf.h>\n#include <linux/filter.h>\n#include <sys/sysinfo.h>\nint main() { return SO_ATTACH_REUSEPORT_CBPF; }"})
+		local ok = check_cxsnippets({"#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\n#include <linux/bpf.h>\n#include <linux/filter.h>\n#include <sys/sysinfo.h>\nint test() { return SO_ATTACH_REUSEPORT_CBPF; }"})
 		if ok then
 			option:set("configvar", "HAVE_SO_ATTACH_REUSEPORT_CBPF", 1)
 		else
@@ -629,10 +664,10 @@ end
 local bindir = "$(projectdir)/ffead-cpp-6.0-bin"
 
 function getOptions()
-	return {"CHECK_UUID", "LIBPQ", "CHECK_REGEX", "SSL", "ZLIB", "CURL", "EXECINFO", "LIBCUCKOO", 
+	return {"CHECK_UUID", "LIBPQ", "CHECK_REGEX", "SSL", "ZLIB", "CURL", "GENERIC", "LIBCUCKOO", 
 			 "SELECT", "POLL", "DEVPOLL", "IOURING", "EPOLL", "KQUEUE", "EVPORT", "ACCEPT4", "TCP_QUICKACK", 
 			 "TCP_DEFER_ACCEPT", "TCP_FASTOPEN", "MOD_MEMORY","MOD_MEMCACHED", "MOD_REDIS", "MOD_SDORM_SQL", 
-			 "MOD_SDORM_MONGO", "MOD_SER_BIN", "MOD_JOBS", "SRV_EMB"}
+			 "MOD_SDORM_MONGO", "MOD_SER_BIN", "MOD_JOBS", "SRV_EMB", "WITH_RAPIDJSON", "WITH_PUGIXML"}
 end
 
 includes("src/modules")

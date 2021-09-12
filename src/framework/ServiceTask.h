@@ -59,26 +59,24 @@
 #include "WebSockHandler.h"
 #include "string_view"
 
-class ServiceTask : public HttpServiceTask
+class ServiceTask
 {
-	Logger logger;
-	void saveSessionDataToFile(const std::string& sessionId, const std::string& value);
-	std::map<std::string,std::string> getSessionDataFromFile(const std::string& sessionId);
-	void saveSessionDataToDistocache(const std::string& sessionId, std::map<std::string,std::string>& sessAttrs);
-	std::map<std::string,std::string> getSessionDataFromDistocache(const std::string& sessionId);
-	void storeSessionAttributes(HttpResponse* res, HttpRequest* req, const long& sessionTimeout, const bool& sessatserv);
-	void updateContent(HttpRequest* req, HttpResponse *res, const std::string& ext, const int&);
-	unsigned int getFileSize(const char *fileName);
-	std::string getFileContents(const char *fileName, const int& start= -1, const int& end= -1);
-	bool checkSocketWaitForTimeout(const int& sock_fd, const int& writing, const int& seconds, const int& micros= 0);
-	void handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, SocketInterface* sockUtil);
+	//Logger logger;
+	static void saveSessionDataToFile(const std::string& sessionId, const std::string& value);
+	static std::map<std::string,std::string> getSessionDataFromFile(const std::string& sessionId);
+	static void saveSessionDataToDistocache(const std::string& sessionId, std::map<std::string,std::string>& sessAttrs);
+	static std::map<std::string,std::string> getSessionDataFromDistocache(const std::string& sessionId);
+	static void storeSessionAttributes(HttpResponse* res, HttpRequest* req, const long& sessionTimeout, const bool& sessatserv);
+	static void updateContent(HttpRequest* req, HttpResponse *res, const std::string& ext, const int&);
+	static unsigned int getFileSize(const char *fileName);
+	static std::string getFileContents(const char *fileName, const int& start= -1, const int& end= -1);
+	static bool checkSocketWaitForTimeout(const int& sock_fd, const int& writing, const int& seconds, const int& micros= 0);
+	static void handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, BaseSocket* sockUtil);
 public:
-	ServiceTask();
-	virtual ~ServiceTask();
-	std::string getCntEncoding();
-	WebSockHandler* handleWebsockOpen(WebSocketData* request, WebSocketRespponseData* response, SocketInterface* sif, HttpRequest* hreq);
-	void handle(HttpRequest* req, HttpResponse* res);
-	bool handle(HttpRequest* req, HttpResponse* res, SocketInterface* sif);
+	//static std::string getCntEncoding();
+	static WebSockHandler* handleWebsockOpen(WebSocketData* request, WebSocketRespponseData* response, BaseSocket* sif, HttpRequest* hreq);
+	static void handle(HttpRequest* req, HttpResponse* res);
+	static bool handle(HttpRequest* req, HttpResponse* res, BaseSocket* sif);
 };
 
 #endif /* SERVICETASK_H_ */

@@ -353,82 +353,34 @@ std::string SSLClient::getData(const std::string& hdrdelm, const std::string& cn
 
 std::string SSLClient::getTextData(const std::string& hdrdelm, const std::string& cntlnhdr)
 {
-	int er=-1;
+	int er = -1;
 	bool flag = true;
-	std::string alldat;
-	int cntlen = 0;
 	char buf[MAXBUFLE];
-	memset(buf, 0, sizeof(buf));
 	while(flag)
 	{
-		er = BIO_gets(io,buf,MAXBUFLE-1);
+		memset(buf, 0, sizeof(buf));
+		er = BIO_read(io,buf,sizeof(buf));
 		switch(SSL_get_error(ssl,er))
 		{
-		case SSL_ERROR_NONE:
-			break;
-		case SSL_ERROR_ZERO_RETURN:
-		{
-			logger << "SSL - Connection closed\n";
-			return alldat;
-		}
-		default:
-		{
-			logger << "SSL read problem";
-			return alldat;
-		}
-		}
-		if(!strcmp(buf,hdrdelm.c_str()))
-		{
-			std::string tt(buf, er);
-			alldat += tt;
-			break;
-		}
-		std::string temp(buf, er);
-		temp = temp.substr(0,temp.length()-1);
-		alldat += (temp + "\n");
-		if(temp.find(cntlnhdr)!=std::string::npos)
-		{
-			std::string cntle = temp.substr(temp.find(": ")+2);
-			cntle = cntle.substr(0,cntle.length()-1);
-			try
+			case SSL_ERROR_NONE:
 			{
-				cntlen = CastUtil::toInt(cntle);
+				buffer.append(buf, er);
+				break;
 			}
-			catch(const std::exception& e)
+			case SSL_ERROR_ZERO_RETURN:
 			{
-				logger << "bad lexical cast" <<std::endl;
+				connected = false;
+				logger << "SSL - Connection closed\n";
+				throw std::runtime_error("SSL - Connection closed");
+			}
+			default:
+			{
+				logger << "SSL read problem";
+				throw std::runtime_error("SSL read problem");
 			}
 		}
-		memset(&buf[0], 0, sizeof(buf));
 	}
-	while(cntlen>0)
-	{
-		//logger << "reading conetnt " << cntlen;
-		int toRead = cntlen;
-		if(cntlen>MAXBUFLE)
-			toRead = MAXBUFLE - 1;
-		er = BIO_read(io,buf,toRead);
-		switch(SSL_get_error(ssl,er))
-		{
-		case SSL_ERROR_NONE:
-			cntlen -= er;
-			break;
-		case SSL_ERROR_ZERO_RETURN:
-		{
-			logger << "SSL - Connection closed\n";
-			return alldat;
-		}
-		default:
-		{
-			logger << "SSL read problem";
-			return alldat;
-		}
-		}
-		std::string temp(buf, er);
-		alldat += temp;
-		memset(&buf[0], 0, sizeof(buf));
-	}
-	return alldat;
+	return Client::getHttpData(hdrdelm, cntlnhdr, connected, buffer);
 }
 
 std::string SSLClient::getData(int cntlen)

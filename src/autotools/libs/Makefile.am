@@ -196,6 +196,7 @@ libffead_modules_la_SOURCES += \
 						../../modules/serialization/xml/XMLSerialize.cpp \
 						../../modules/server-util/NBServer.cpp \
 						../../modules/server-util/RequestReaderHandler.cpp \
+						../../modules/server-util/RequestHandler2.cpp \
 						../../modules/server-util/SelEpolKqEvPrt.cpp \
 						../../modules/server-util/Server.cpp \
 						../../modules/server-util/ServiceHandler.cpp \
@@ -329,6 +330,7 @@ libffead_modules_la_SOURCES += \
 				../../modules/serialization/xml/XMLSerialize.cpp \
 				../../modules/server-util/NBServer.cpp \
 				../../modules/server-util/RequestReaderHandler.cpp \
+				../../modules/server-util/RequestHandler2.cpp \
 				../../modules/server-util/SelEpolKqEvPrt.cpp \
 				../../modules/server-util/Server.cpp \
 				../../modules/server-util/ServiceHandler.cpp \

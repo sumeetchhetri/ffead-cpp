@@ -24,14 +24,13 @@
 
 PropFileReader::PropFileReader()
 {
-	mergeSimProps = false;
+	this->mergeSimProps = false;
 }
 PropFileReader::PropFileReader(const bool& mergeSimProps)
 {
 	this->mergeSimProps = mergeSimProps;
 }
 PropFileReader::~PropFileReader() {
-	
 }
 
 propMap PropFileReader::getProperties(const std::string& filepath)
@@ -50,12 +49,19 @@ propMap PropFileReader::getProperties(const std::string& filepath)
 	  {
 		  if(line!="")
 		  {
+			  StringUtil::trim(line);
+			  if(line.find("#")==0) continue;//Single line comment
 		  	  if(line.find("=")!=std::string::npos)
 		  	  {
-		  		  StringUtil::trim(line);
 		  		  if(line.find("=")!=line.length()-1)
 		  		  {
-		  			  all[line.substr(0, line.find("="))] = StringUtil::trimCopy(line.substr(line.find("=")+1));
+		  			  std::string v = StringUtil::trimCopy(line.substr(line.find("=")+1));
+		  			  if(v.at(0)=='\'' && v.at(v.length()-1)=='\'') {
+		  				  v = v.substr(1, v.length()-2);
+		  			  } else if(v.at(0)=='"' && v.at(v.length()-1)=='"') {
+		  				  v = v.substr(1, v.length()-2);
+		  			  }
+		  			  all[StringUtil::trimCopy(line.substr(0, line.find("=")))] = v;
 		  		  }
 		  	  }
 		  }
@@ -81,12 +87,19 @@ propMultiMap PropFileReader::getPropertiesMultiMap(const std::string& filepath)
 	  {
 		  if(line!="")
 		  {
+			  StringUtil::trim(line);
+			  if(line.find("#")==0) continue;//Single line comment
 		  	  if(line.find("=")!=std::string::npos)
 		  	  {
-		  		  StringUtil::trim(line);
 		  		  if(line.find("=")!=line.length()-1)
 		  		  {
-		  			  all[line.substr(0, line.find("="))].push_back(StringUtil::trimCopy(line.substr(line.find("=")+1)));
+		  			  std::string v = StringUtil::trimCopy(line.substr(line.find("=")+1));
+		  			  if(v.at(0)=='\'' && v.at(v.length()-1)=='\'') {
+		  				  v = v.substr(1, v.length()-2);
+		  			  } else if(v.at(0)=='"' && v.at(v.length()-1)=='"') {
+		  				  v = v.substr(1, v.length()-2);
+		  			  }
+		  			  all[StringUtil::trimCopy(line.substr(0, line.find("=")))].push_back(v);
 		  		  }
 		  	  }
 		  }

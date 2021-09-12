@@ -295,8 +295,7 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 	}
 
 	HttpResponse respo;
-	ServiceTask task;
-	task.handle(&req, &respo);
+	ServiceTask::handle(&req, &respo);
 
 	if(respo.isDone()) {
 		for (int var = 0; var < (int)respo.getCookies().size(); var++)

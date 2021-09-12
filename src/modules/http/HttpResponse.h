@@ -142,6 +142,7 @@ private:
 	friend class HttpClient;
 	friend class CORSHandler;
 	friend class HttpRequest;
+	friend class Http11Socket;
 };
 
 #endif /* HTTPRESPONSE_H_ */

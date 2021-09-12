@@ -203,22 +203,22 @@ int Client::sendData(std::string data)
 	return sent;
 }
 
-std::string Client::getTextData(const std::string& hdrdelm, const std::string& cntlnhdr)
-{
-	getData();
+std::string Client::getHttpData(const std::string& hdrdelm, const std::string& cntlnhdr, bool connected, std::string& buffer) {
 	int cntlen = 0;
 	std::string alldat;
 	bool isTE = false;
-	std::string tehdr = "transfer-encoding";
+	std::string tehdr = "transfer-encoding: chunked";
 	if(connected) {
 		if(buffer.find(hdrdelm)!=std::string::npos) {
 			alldat = buffer.substr(0, buffer.find(hdrdelm)+4);
 			buffer = buffer.substr(buffer.find(hdrdelm)+4);
 		}
 		std::string ltemp = StringUtil::toLowerCopy(alldat);
-		if(ltemp.find(cntlnhdr)!=std::string::npos)
+		std::string cntlnhdr1 = cntlnhdr + ": ";
+		size_t ps = ltemp.find(cntlnhdr1);
+		if(ps!=std::string::npos)
 		{
-			std::string cntle = alldat.substr(alldat.find(": ")+2);
+			std::string cntle = alldat.substr(ps+cntlnhdr1.length(), ltemp.find("\r\n", ps));
 			StringUtil::trim(cntle);
 			try
 			{
@@ -231,11 +231,7 @@ std::string Client::getTextData(const std::string& hdrdelm, const std::string& c
 		}
 		else if(ltemp.find(tehdr)!=std::string::npos)
 		{
-			std::string cntle = ltemp.substr(ltemp.find(": ")+2);
-			StringUtil::trim(cntle);
-			if(cntle=="chunked") {
-				isTE = true;
-			}
+			isTE = true;
 		}
 	} else {
 		return alldat;
@@ -258,6 +254,12 @@ std::string Client::getTextData(const std::string& hdrdelm, const std::string& c
 		buffer = buffer.substr(cntlen);
 	}
 	return alldat;
+}
+
+std::string Client::getTextData(const std::string& hdrdelm, const std::string& cntlnhdr)
+{
+	getData();
+	return getHttpData(hdrdelm, cntlnhdr, connected, buffer);
 }
 
 bool Client::isReady(int mode) {

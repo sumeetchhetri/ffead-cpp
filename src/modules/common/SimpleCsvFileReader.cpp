@@ -14,7 +14,7 @@
     limitations under the License.
 */
 /*
- * SimpleCsvFileReader.cpp
+ * SimpleCsvReader.cpp
  *
  *  Created on: 29-Jan-2013
  *      Author: sumeetc
@@ -22,16 +22,7 @@
 
 #include "SimpleCsvFileReader.h"
 
-SimpleCsvFileReader::SimpleCsvFileReader() {
-	
-
-}
-
-SimpleCsvFileReader::~SimpleCsvFileReader() {
-	
-}
-
-strVecVec SimpleCsvFileReader::getRows(const std::string& filepath)
+strVecVec SimpleCsvReader::getRows(const std::string& filepath)
 {
 	strVecVec all;
 	std::string line;
@@ -49,11 +40,34 @@ strVecVec SimpleCsvFileReader::getRows(const std::string& filepath)
 				StringUtil::replaceAll(line,"\n","");
 				StringUtil::replaceAll(line,"\r","");
 				std::vector<std::string> vemp = StringUtil::splitAndReturn<std::vector<std::string> >(line, (","));
-				if(vemp.size()>0)
-					all.push_back(vemp);
+			    if(vemp.size()>0) {
+			    	all.push_back(vemp);
+			    }
 			}
 		}
 		myfile.close();
+	}
+	return all;
+}
+
+strVecVec AdvancedCsvReader::getRows(const std::string& filepath)
+{
+	strVecVec all;
+	std::string line;
+	if (filepath=="")
+	{
+		return all;
+	}
+	std::ifstream myfile (&filepath[0],std::ios::in | std::ios::binary);
+	csv::CSVReader reader(filepath);
+	for (csv::CSVRow& row: reader) {
+		std::vector<std::string> vemp;
+	    for (csv::CSVField& field: row) {
+	    	vemp.push_back(field.get());
+	    }
+	    if(vemp.size()>0) {
+	    	all.push_back(vemp);
+	    }
 	}
 	return all;
 }

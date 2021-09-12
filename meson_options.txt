@@ -7,3 +7,5 @@ option('MOD_SER_BIN', type: 'boolean', description: 'Enable Binary Serialization
 option('MOD_JOBS', type: 'boolean', description: 'Enable Jobs module', value: true)
 option('SRV_ALL', type: 'boolean', description: 'Build All inbuilt HTTP Server Engines', value: true)
 option('SRV_EMB', type: 'boolean', description: 'Embedded Http Server Engine', value: true)
+option('WITH_RAPIDJSON', type: 'boolean', description: 'Use rapidjson for json handling', value: true)
+option('WITH_PUGIXML', type: 'boolean', description: 'Use pugixml for xml handling', value: true)

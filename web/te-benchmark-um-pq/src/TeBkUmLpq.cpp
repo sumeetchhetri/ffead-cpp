@@ -125,6 +125,7 @@ void TeBkUmLpqRouter::db(TeBkUmLpqWorld& w) {
 	int rid = CommonUtils::fastrand(g_seed) % 10000 + 1;
 	LibpqQuery q;
 	q.withParamInt4(rid);
+#ifdef HAVE_LIBPQ
 	q.withSelectQuery(WORLD_ONE_QUERY).withContext(&w).withCb0([](void* ctx, PGresult* res) {
 		TeBkUmLpqWorld* w = (TeBkUmLpqWorld*)ctx;
 		int cols = PQnfields(res);
@@ -133,6 +134,7 @@ void TeBkUmLpqRouter::db(TeBkUmLpqWorld& w) {
 			else w->setRandomNumber(ntohl(*((uint32_t *) PQgetvalue(res, 0, j))));
 		}
 	});
+#endif
 	sqli->executeQuery(&q);
 }
 
@@ -149,6 +151,7 @@ void TeBkUmLpqRouter::queries(const char* q, int ql, std::vector<TeBkUmLpqWorld>
 		int rid = CommonUtils::fastrand(g_seed) % 10000 + 1;
 		LibpqQuery q;
 		q.withParamInt4(rid);
+#ifdef HAVE_LIBPQ
 		q.withSelectQuery(WORLD_ONE_QUERY).withContext(&wlst).withCb0([](void* ctx, PGresult* res) {
 			std::vector<TeBkUmLpqWorld>* wlst = (std::vector<TeBkUmLpqWorld>*)ctx;
 			int cols = PQnfields(res);
@@ -157,6 +160,7 @@ void TeBkUmLpqRouter::queries(const char* q, int ql, std::vector<TeBkUmLpqWorld>
 				else wlst->back().setRandomNumber(ntohl(*((uint32_t *) PQgetvalue(res, 0, j))));
 			}
 		});
+#endif
 		sqli->executeQuery(&q);
 	}
 }
@@ -240,6 +244,7 @@ void TeBkUmLpqRouter::updates(const char* q, int ql, std::vector<TeBkUmLpqWorld>
 
 		LibpqQuery q;
 		q.withParamInt4(rid);
+#ifdef HAVE_LIBPQ
 		q.withSelectQuery(WORLD_ONE_QUERY).withContext(&w).withCb0([](void* ctx, PGresult* res) {
 			TeBkUmLpqWorld* w = (TeBkUmLpqWorld*)ctx;
 			int cols = PQnfields(res);
@@ -248,6 +253,7 @@ void TeBkUmLpqRouter::updates(const char* q, int ql, std::vector<TeBkUmLpqWorld>
 				else w->setRandomNumber(ntohl(*((uint32_t *) PQgetvalue(res, 0, j))));
 			}
 		});
+#endif
 		sqli->executeQuery(&q);
 
 		int newRandomNumber = CommonUtils::fastrand(g_seed) % 10000 + 1;
@@ -300,6 +306,7 @@ void TeBkUmLpqRouter::updatesMulti(const char* q, int ql, std::vector<TeBkUmLpqW
 	}
 
 	LibpqQuery qu;
+#ifdef HAVE_LIBPQ
 	qu.withSelectQuery(ssq.str()).withContext(&updt).withCb5([](void* ctx, int rn, int cn, char * d, int l) {
 		UpdQrData* updt = (UpdQrData*)ctx;
 		int tmp = 0;
@@ -325,6 +332,7 @@ void TeBkUmLpqRouter::updatesMulti(const char* q, int ql, std::vector<TeBkUmLpqW
 		UpdQrData* updt = (UpdQrData*)ctx;
 		updt->status = status;
 	});
+#endif
 	sqli->executeMultiQuery(&qu);
 
 	if(!updt.status) {
@@ -398,13 +406,14 @@ void TeBkUmLpqRouter::cachedWorlds(const char* q, int ql, std::vector<TeBkUmLpqW
 	CacheManager::cleanImpl(cchi);
 }
 
-void TeBkUmLpqRouter::handleTemplate(HttpRequest* req, HttpResponse* res, SocketInterface* sif) {
+void TeBkUmLpqRouter::handleTemplate(HttpRequest* req, HttpResponse* res, BaseSocket* sif) {
 	LibpqDataSourceImpl* sqli = getDb();
 
 	Context ctx;
 	std::list<TeBkUmLpqFortune> flst;
 
 	LibpqQuery q;
+#ifdef HAVE_LIBPQ
 	q.withSelectQuery(FORTUNE_ALL_QUERY).withContext(&flst).withCb0([](void* ctx, PGresult* res) {
 		std::list<TeBkUmLpqFortune>* flst = (std::list<TeBkUmLpqFortune>*)ctx;
 		int cols = PQnfields(res);
@@ -420,6 +429,7 @@ void TeBkUmLpqRouter::handleTemplate(HttpRequest* req, HttpResponse* res, Socket
 			}
 		}
 	});
+#endif
 	sqli->executeQuery(&q);
 
 	flst.emplace_back(0, "Additional fortune added at request time.");
@@ -437,7 +447,7 @@ void TeBkUmLpqRouter::handleTemplate(HttpRequest* req, HttpResponse* res, Socket
 
 //Do not use this class with non-embedded servers as it needs access to the underlying socket
 //and writes the response directly to the socket, use TeBkUmLpqRouterPicoV for all lang-server implementations
-bool TeBkUmLpqRouter::route(HttpRequest* req, HttpResponse* res, SocketInterface* sif) {
+bool TeBkUmLpqRouter::route(HttpRequest* req, HttpResponse* res, BaseSocket* sif) {
 	std::string h;
 	if(StringUtil::endsWith(req->getPath(), "/plaintext")) {
 		res->httpStatus(HTTPResponseStatus::Ok).generateHeadResponse(h, ContentTypes::CONTENT_TYPE_TEXT_PLAIN, (int)HELLO_WORLD.length());
@@ -561,7 +571,7 @@ void TeBkUmLpqRouterPicoV::handleTemplate(HttpResponse* res) {
 	res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_TEXT_HTML).setContent(str.str());
 }
 
-bool TeBkUmLpqRouterPicoV::route(HttpRequest *req, HttpResponse *res, SocketInterface *sif) {
+bool TeBkUmLpqRouterPicoV::route(HttpRequest *req, HttpResponse *res, BaseSocket *sif) {
 	if(StringUtil::endsWith(req->getPath(), "/plaintext")) {
 		res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_TEXT_PLAIN).setContent(HELLO_WORLD);
 	} else if(StringUtil::endsWith(req->getPath(), "/json")) {

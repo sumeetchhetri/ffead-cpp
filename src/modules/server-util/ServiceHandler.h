@@ -37,6 +37,11 @@
 #include "ReusableInstanceHolder.h"
 #include "CommonUtils.h"
 
+typedef bool (*doRegisterListener) ();
+typedef WebSockHandler* (*webSockHandle)(WebSocketData* request, WebSocketRespponseData* response, BaseSocket* sif, HttpRequest* hreq);
+typedef void (*httpHandle)(HttpRequest* req, HttpResponse* res);
+typedef bool (*httpSockHandle)(HttpRequest* req, HttpResponse* res, BaseSocket* sif);
+
 class ServiceHandler;
 
 class HandlerRequest {
@@ -69,7 +74,7 @@ public:
 class ServiceHandler {
 	static void* closeConnections(void *arg);
 	static void* timer(void *arg);
-	moodycamel::ConcurrentQueue<SocketInterface*> toBeClosedConns;
+	moodycamel::ConcurrentQueue<BaseSocket*> toBeClosedConns;
 	std::atomic<bool> run;
 	bool isThreadPerRequests;
 	int spoolSize;
@@ -85,6 +90,7 @@ class ServiceHandler {
 	friend class HandlerRequest;
 	friend class HttpReadTask;
 	friend class HttpServiceTask;
+	friend class RequestHandler2;
 	virtual void sockInit(SocketInterface* si)=0;
 protected:
 	static std::string getDateStr();
@@ -94,7 +100,7 @@ protected:
 	virtual void handleRead(SocketInterface* req)=0;
 	virtual void handleWrite(SocketInterface* sif)=0;
 public:
-	void closeConnection(SocketInterface* si);
+	void closeConnection(BaseSocket* si);
 	void registerReadRequest(SocketInterface* si);
 	void registerWriteRequest(SocketInterface* sif);
 	void start();

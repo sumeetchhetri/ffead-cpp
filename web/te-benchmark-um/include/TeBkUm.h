@@ -85,7 +85,7 @@ public:
 	TeBkUmRouter();
 	virtual ~TeBkUmRouter();
 	void updateCache();
-	bool route(HttpRequest* req, HttpResponse* res, SocketInterface* sif);
+	bool route(HttpRequest* req, HttpResponse* res, BaseSocket* sif);
 };
 
 #endif /* WEB_TE_BENCHMARK_UM_INCLUDE_TeBkUm_H_ */

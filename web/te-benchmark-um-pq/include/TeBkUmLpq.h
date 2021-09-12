@@ -58,6 +58,25 @@ public:
 	int getRandomNumber() const;
 	void setRandomNumber(int randomNumber);
 	bool operator < (const TeBkUmLpqWorld& other) const;
+#ifdef HAVE_RAPID_JSON
+	void toJson(rapidjson::Writer<rapidjson::StringBuffer>& w) {
+		w.StartObject();
+		w.String("id", 2);
+	    w.Int(id);
+		w.String("randomNumber", 12);
+	    w.Int(randomNumber);
+		w.EndObject();
+	}
+#endif
+#ifdef HAVE_RAPID_JSON
+	static void toJson(std::vector<TeBkUmLpqWorld>& vec, rapidjson::Writer<rapidjson::StringBuffer>& w) {
+		w.StartArray();
+		for(auto el: vec) {
+			el.toJson(w);
+		}
+		w.EndArray();
+	}
+#endif
 };
 
 struct UpdQrData {
@@ -92,6 +111,14 @@ public:
 	virtual ~TeBkUmLpqMessage();
 	const std::string& getMessage() const;
 	void setMessage(const std::string& message);
+#ifdef HAVE_RAPID_JSON
+	void toJson(rapidjson::Writer<rapidjson::StringBuffer>& w) {
+		w.StartObject();
+		w.String("message", 7);
+	    w.String(message.c_str(), static_cast<rapidjson::SizeType>(message.length()));
+		w.EndObject();
+	}
+#endif
 };
 
 class TeBkUmLpqRouter : public Router {
@@ -114,19 +141,19 @@ class TeBkUmLpqRouter : public Router {
 	void updates(const char*, int, std::vector<TeBkUmLpqWorld>&);
 	void updatesMulti(const char*, int, std::vector<TeBkUmLpqWorld>&);
 	void cachedWorlds(const char*, int, std::vector<TeBkUmLpqWorld>&);
-	void handleTemplate(HttpRequest* req, HttpResponse* res, SocketInterface* sif);
+	void handleTemplate(HttpRequest* req, HttpResponse* res, BaseSocket* sif);
+	std::string& getUpdQuery(int count);
 
 	std::unordered_map<int, std::string> _qC;
 	LibpqDataSourceImpl* sqli;
 	LibpqDataSourceImpl* getDb();
 
-	std::string& getUpdQuery(int count);
 	friend class TeBkUmLpqRouterPicoV;
 public:
 	TeBkUmLpqRouter();
 	virtual ~TeBkUmLpqRouter();
 	void updateCache();
-	bool route(HttpRequest* req, HttpResponse* res, SocketInterface* sif);
+	bool route(HttpRequest* req, HttpResponse* res, BaseSocket* sif);
 };
 
 class TeBkUmLpqRouterPicoV : public TeBkUmLpqRouter {
@@ -134,7 +161,7 @@ class TeBkUmLpqRouterPicoV : public TeBkUmLpqRouter {
 public:
 	TeBkUmLpqRouterPicoV();
 	virtual ~TeBkUmLpqRouterPicoV();
-	bool route(HttpRequest* req, HttpResponse* res, SocketInterface* sif);
+	bool route(HttpRequest* req, HttpResponse* res, BaseSocket* sif);
 };
 
 #endif /* WEB_TE_BENCHMARK_UM_INCLUDE_TeBkUmLpq_H_ */

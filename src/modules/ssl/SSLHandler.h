@@ -29,8 +29,6 @@
 #define CLIENT_AUTH_REQUIRE 2
 #define CLIENT_AUTH_REHANDSHAKE 3
 
-
-
 class SecurityProperties {
 public:
 	std::string cert_file;
@@ -51,6 +49,7 @@ public:
 	friend class ConfigurationHandler;
 	friend class CHServer;
 	friend class SocketInterface;
+	friend class BaseSecureSocket;
 	SecurityProperties() {
 		client_auth = 0;
 		isDHParams = false;
@@ -78,6 +77,7 @@ class SSLHandler {
 	static std::string getAlpnProto(const int& fd);
 	static void removeAlpnProtoSocket(const int& fd);
 	friend class SocketInterface;
+	friend class BaseSecureSocket;
 public:
 	bool getIsSSL() const;
 	SSL_CTX* getCtx() const;

@@ -172,8 +172,7 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 	}
 
 	HttpResponse respo;
-	ServiceTask task;
-	task.handle(&req, &respo);
+	ServiceTask::handle(&req, &respo);
 
 	for (int var = 0; var < (int)respo.getCookies().size(); var++)
 	{

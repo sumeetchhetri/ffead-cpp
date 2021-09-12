@@ -19,33 +19,44 @@
  *  Created on: 12-Jun-2013
  *      Author: sumeetc
  */
-//TODO
 #ifndef JSONSERIALIZE_H_
 #define JSONSERIALIZE_H_
 #include "SerializeBase.h"
 #include "JSONUtil.h"
-#ifdef RAPID_JSON
-#define RAPIDJSON_HAS_STDSTRING 1
-#include "rapidjson/writer.h"
+#include <stdexcept>
+
+//#undef HAVE_RAPID_JSON
+#ifdef HAVE_RAPID_JSON
+//Copied from https://github.com/Tencent/rapidjson/blob/a627774/test/unittest/unittest.h#L109
+class AssertException : public std::logic_error {
+public:
+    AssertException(const char* w) : std::logic_error(w) {}
+    AssertException(const AssertException& rhs) : std::logic_error(rhs) {}
+    virtual ~AssertException() throw(){}
+};
+#define RAPIDJSON_ASSERT(x) if (!(x)) throw AssertException(RAPIDJSON_STRINGIFY(x))
+#include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
 #endif
 
 class JSONSerialize;
 
-#ifdef RAPID_JSON
+#ifdef HAVE_RAPID_JSON
 class RapiJsonState {
+	std::string* str;
 	rapidjson::StringBuffer s;
 	rapidjson::Writer<rapidjson::StringBuffer> writer;
 	friend class JSONSerialize;
-public:
-	RapiJsonState(): writer(s) {
+	friend class Serializer;
+	RapiJsonState(void* str): str((std::string*)str), writer(s) {
 	}
 };
 #endif
 
 class JSONSerialize : public SerializeBase {
 	static JSONSerialize _i;
-	void* getSerializableObject();
+	void* getSerializableObject(void* exobj);
 	void cleanSerializableObject(void* _1);
 	void startContainerSerialization(void* _1, const std::string& className, const std::string& container);
 	void endContainerSerialization(void* _1, const std::string& className, const std::string& container);
@@ -176,7 +187,7 @@ public:
 
 	bool isValidClassNamespace(void* _1, const std::string& className, const std::string& namespc, const bool& iscontainer= false);
 	bool isValidObjectProperty(void* _1, const std::string& propname, const int& counter);
-	void* getObjectProperty(void* _1, const int& counter);
+	void* getObjectProperty(void* _1, const int& counter, const std::string& propname);
 	void startObjectSerialization(void* _1, const std::string& className);
 	void endObjectSerialization(void* _1, const std::string& className);
 	void afterAddObjectProperty(void* _1, const std::string& propName);
@@ -185,6 +196,7 @@ public:
 	void* getObjectPrimitiveValue(void* _1, int serOpt, const std::string& className, const std::string& propName);
 	static void* unSerializeUnknown(const std::string& objJson, int serOpt, const std::string& className, const std::string& appName = "");
 	std::string serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName, void* serobject);
+	std::string serializeUnknownBaseInt(void* t, int serOpt, const std::string& className, const std::string& appName, void* serobject);
 	void* unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName = "");
 	void* unSerializeUnknownBase(const std::string& serVal, int serOpt, const std::string& className, const std::string& appName = "");
 };

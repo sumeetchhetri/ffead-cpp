@@ -45,8 +45,8 @@
 class PeerState {
 	std::string id;
 	std::string token;
-	SocketInterface* sif;
-	PeerState(const std::string& uniqueAddress, const std::string& token, SocketInterface* sif);
+	BaseSocket* sif;
+	PeerState(const std::string& uniqueAddress, const std::string& token, BaseSocket* sif);
 	friend class PeerServerRouter;
 	friend class PeerServerController;
 };
@@ -57,7 +57,7 @@ class PeerServerRouter : public Router {
 	bool isAuthorizedKey(const std::string &key, HttpResponse* res);
 	bool isValidUser(const std::string& id, const std::string& token, HttpResponse* res);
 public:
-	bool route(HttpRequest* req, HttpResponse* res, SocketInterface* sif);
+	bool route(HttpRequest* req, HttpResponse* res, BaseSocket* sif);
 	PeerServerRouter();
 	virtual ~PeerServerRouter();
 };

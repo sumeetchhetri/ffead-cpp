@@ -56,8 +56,7 @@ protected:
 		HttpRequest req(&headers, hc, request.url(), request.method(), 11, cont);
 		HttpResponse* respo = new HttpResponse();
 		hrs = respo;
-		ServiceTask task;
-		task.handle(&req, respo);
+		ServiceTask::handle(&req, respo);
 
 		CppServer::HTTP::HTTPResponse& cresp = response();
 

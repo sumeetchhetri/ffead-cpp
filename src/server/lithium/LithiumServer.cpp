@@ -34,8 +34,7 @@ void LithiumServer::runServer(int port, std::vector<std::string> servedAppNames)
 			request.http_ctx.get_parameters_string_, meth, request.http_ctx.http_version_, request.http_ctx.body_);
 
 		HttpResponse respo;
-		ServiceTask task;
-		task.handle(&req, &respo);
+		ServiceTask::handle(&req, &respo);
 
 		if(respo.isDone()) {
 			for (int var = 0; var < (int)respo.getCookies().size(); var++)

@@ -30,9 +30,7 @@ class Http11Handler : public SocketInterface {
 	bool isHeadersDone;
 	int bytesToRead;
 	bool isTeRequest;
-	std::vector<HttpRequest*> requests;
 
-	std::string webpath;
 	int chunkSize;
 	int connKeepAlive;
 	int maxReqHdrCnt;
@@ -49,10 +47,9 @@ public:
 	std::string getProtocol(void* context);
 	int getType(void* context);
 	int getTimeout();
-	HttpRequest* getAvailableRequest();
 	bool readRequest(void* request, void*& context, int& pending, int& reqPos);
 	bool writeResponse(void* req, void* res, void* context, std::string& data, int reqPos);
-	Http11Handler(const SOCKET& fd, void* ssl, void* io, const std::string& webpath, const int& chunkSize,
+	Http11Handler(const SOCKET& fd, void* ssl, void* io, const int& chunkSize,
 			const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize);
 	virtual ~Http11Handler();
 	bool isEmbedded();

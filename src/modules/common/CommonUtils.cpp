@@ -376,7 +376,7 @@ std::vector<std::string> CommonUtils::getFiles(const std::string& cwd, const std
 }
 
 void CommonUtils::printStats() {
-	Logger logger = LoggerFactory::getLogger("CommonUtils");
+	/*Logger logger = LoggerFactory::getLogger("CommonUtils");
 	std::string a = ("Connections (Sockets: "+CastUtil::fromNumber(cSocks) + ", Open Sockets: " + CastUtil::fromNumber(SocketInterface::openSocks)
 			+", Requests: "+CastUtil::fromNumber(cReqs)+", Responses: "+CastUtil::fromNumber(cResps)+")\n");
 	logger.info(a);
@@ -420,7 +420,7 @@ void CommonUtils::printStats() {
 				", Rest_PrsArgs: "+CastUtil::fromNumber(tsContRstPrsArgs/cReqs)+", Rest_Exec: "+CastUtil::fromNumber(tsContRstExec/cReqs)+
 				", Rest_Ser: "+CastUtil::fromNumber(tsContRstSer/cReqs)+")\n");
 		logger.info(g);
-	}
+	}*/
 }
 
 std::string CommonUtils::normalizeAppName(const std::string& appName) {

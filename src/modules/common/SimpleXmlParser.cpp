@@ -22,15 +22,222 @@
 
 #include "SimpleXmlParser.h"
 
+const std::string XmlWriter::BLANK = "";
+
+SimpleStreamXmlWriter::SimpleStreamXmlWriter(std::ostream& os, bool is_format) : os(os), tag_open(false), new_line(true), is_format(is_format) {
+	if(is_format) {
+		os << HEADER;
+	}
+}
+
+SimpleStreamXmlWriter::~SimpleStreamXmlWriter() {}
+
+std::string SimpleStreamXmlWriter::writerType() {
+	return "stream";
+}
+
+std::string SimpleStreamXmlWriter::toString() {
+	return XmlWriter::BLANK;
+}
+
+void SimpleStreamXmlWriter::startElement(const char* tag) {
+	this->closeTag();
+	if (is_format && elt_stack.size() > 0)
+		os << NEWLINE_STR;
+	this->indent();
+	this->os << "<" << tag;
+	elt_stack.push(tag);
+	tag_open = true;
+	new_line = false;
+}
+
+void SimpleStreamXmlWriter::startElement(const std::string& tag) {
+	this->closeTag();
+	if (is_format && elt_stack.size() > 0)
+		os << NEWLINE_STR;
+	this->indent();
+	this->os << "<" << tag;
+	elt_stack.push(tag);
+	tag_open = true;
+	new_line = false;
+}
+
+void SimpleStreamXmlWriter::closeElement() {
+	this->closeTag();
+	std::string elt = elt_stack.top();
+	this->elt_stack.pop();
+	if (is_format && new_line)
+	{
+		os << NEWLINE_STR;
+		this->indent();
+	}
+	new_line = true;
+	this->os << "</" << elt << ">";
+}
+
+void SimpleStreamXmlWriter::closeAll() {
+	while (elt_stack.size())
+		this->closeElement();
+}
+
+void SimpleStreamXmlWriter::attribute(const std::string& key, const std::string& val) {
+	this->os << " " << key << "=\"";
+	this->write_escape(val);
+	this->os << "\"";
+}
+
+void SimpleStreamXmlWriter::attribute(const char* key, const char* val) {
+	this->os << " " << key << "=\"";
+	this->write_escape(val);
+	this->os << "\"";
+}
+
+void SimpleStreamXmlWriter::content(const char* val) {
+	this->closeTag();
+	this->write_escape(val);
+}
+
+void SimpleStreamXmlWriter::content(const std::string& val) {
+	this->closeTag();
+	this->write_escape(val);
+}
+
+void SimpleStreamXmlWriter::cdata(const char* val) {
+	this->closeTag();
+	this->os << "<![CDATA[";
+	this->os << val;
+	this->os << "]]>";
+}
+
+void SimpleStreamXmlWriter::cdata(const std::string& val) {
+	this->closeTag();
+	this->os << "<![CDATA[";
+	this->os << val;
+	this->os << "]]>";
+}
+
+SimpleStringXmlWriter::SimpleStringXmlWriter(std::string& os, bool is_format) {
+	this->os = &os;
+	tag_open = false;
+	new_line = true;
+	this->is_format = is_format;
+	if(is_format) {
+		this->os->append(HEADER);
+	}
+}
+
+SimpleStringXmlWriter::SimpleStringXmlWriter(std::string* os, bool is_format) {
+	this->os = os;
+	tag_open = false;
+	new_line = true;
+	this->is_format = is_format;
+	if(is_format) {
+		this->os->append(HEADER);
+	}
+}
+
+SimpleStringXmlWriter::SimpleStringXmlWriter(bool is_format) {
+	this->os = &ib;
+	tag_open = false;
+	new_line = true;
+	this->is_format = is_format;
+	if(is_format) {
+		this->os->append(HEADER);
+	}
+}
+
+SimpleStringXmlWriter::~SimpleStringXmlWriter() {}
+
+std::string SimpleStringXmlWriter::writerType() {
+	return "string";
+}
+
+std::string SimpleStringXmlWriter::toString() {
+	return ib;
+}
+
+void SimpleStringXmlWriter::startElement(const char* tag) {
+	this->closeTag();
+	if (is_format && elt_stack.size() > 0)
+		os->append(NEWLINE_STR);
+	this->indent();
+	os->append("<");os->append(tag);
+	elt_stack.push(tag);
+	tag_open = true;
+	new_line = false;
+}
+
+void SimpleStringXmlWriter::startElement(const std::string& tag) {
+	this->closeTag();
+	if (is_format && elt_stack.size() > 0)
+		os->append(NEWLINE_STR);
+	this->indent();
+	os->append("<");os->append(tag);
+	elt_stack.push(tag);
+	tag_open = true;
+	new_line = false;
+}
+
+void SimpleStringXmlWriter::closeElement() {
+	this->closeTag();
+	std::string elt = elt_stack.top();
+	this->elt_stack.pop();
+	if (is_format && new_line)
+	{
+		os->append(NEWLINE_STR);
+		this->indent();
+	}
+	new_line = true;
+	os->append("</");os->append(elt);os->append(">");
+}
+
+void SimpleStringXmlWriter::closeAll() {
+	while (elt_stack.size())
+		this->closeElement();
+}
+
+void SimpleStringXmlWriter::attribute(const std::string& key, const std::string& val) {
+	os->append(" ");os->append(key);os->append("=\"");
+	this->write_escape(val);
+	os->append("\"");
+}
+
+void SimpleStringXmlWriter::attribute(const char* key, const char* val) {
+	os->append(" ");os->append(key);os->append("=\"");
+	this->write_escape(val);
+	os->append("\"");
+}
+
+void SimpleStringXmlWriter::content(const char* val) {
+	this->closeTag();
+	this->write_escape(val);
+}
+
+void SimpleStringXmlWriter::content(const std::string& val) {
+	this->closeTag();
+	this->write_escape(val);
+}
+
+void SimpleStringXmlWriter::cdata(const char* val) {
+	this->closeTag();
+	os->append("<![CDATA[");
+	os->append(val);
+	os->append("]]>");
+}
+
+void SimpleStringXmlWriter::cdata(const std::string& val) {
+	this->closeTag();
+	os->append("<![CDATA[");
+	os->append(val);
+	os->append("]]>");
+}
 
 SimpleXmlParser::SimpleXmlParser(const std::string& mode)
 {
-	//logger = LoggerFactory::getLogger("SimpleXmlParser");
 	this->mode = mode;
 }
 
 SimpleXmlParser::~SimpleXmlParser() {
-	
 }
 
 void SimpleXmlParser::readDocument(const std::string& filename, Document& doc)
@@ -223,19 +430,16 @@ void SimpleXmlParser::readXML(std::string xml, const std::string& parent, Elemen
     {
         std::string errmsg = ("Invalid End Tag - at position: " + CastUtil::fromNumber((int)xml.find("<\t/")+1) + "\n");
         throw XmlParseException(errmsg);
-
     }
     else if(xml.find("<"+ta)==std::string::npos && xml.find("</"+ta)!=std::string::npos)
     {
         std::string errmsg = ("No Start Tag - for : " + ta + "\n");
         throw XmlParseException(errmsg);
-
     }
     else if(xml.find("<"+ta)!=std::string::npos && pndTag==0 && endTag==0)
     {
         std::string errmsg = ("No End Tag - for : " + ta + "\n");
         throw XmlParseException(errmsg);
-
     }
     if(xml.find("<"+ta)!=std::string::npos && (xml.find("</"+ta)!=std::string::npos || xml.find("/>")!=std::string::npos))
     {
@@ -262,6 +466,20 @@ void SimpleXmlParser::readXML(std::string xml, const std::string& parent, Elemen
 			std::string tagx = "</"+ta+">";
 			int end = xml.find("</"+ta+">");
 			std::string txml = xml.substr(ed+1,end-ed-1);
+			int stoc = StringUtil::countOccurrences(txml, "<"+ta+">");
+			int sstoc = StringUtil::countOccurrences(txml, "<"+ta+" ");
+			int etoc = StringUtil::countOccurrences(txml, "</"+ta+">");
+			while(stoc+sstoc!=etoc) {
+				end = xml.find("</"+ta+">", end+2);
+				if(end==std::string::npos) {
+			        std::string errmsg = ("No Start Tag - for : " + ta + "\n");
+			        throw XmlParseException(errmsg);
+			    }
+				txml = xml.substr(ed+1,end-ed-1);
+				stoc = StringUtil::countOccurrences(txml, "<"+ta+">");
+				sstoc = StringUtil::countOccurrences(txml, "<"+ta+" ");
+				etoc = StringUtil::countOccurrences(txml, "</"+ta+">");
+			}
 			//logger << "temp = " << txml << std::flush;
 			//logger << "\n" << std::flush;
 			if(parent!="")
@@ -311,4 +529,3 @@ void SimpleXmlParser::readXML(std::string xml, const std::string& parent, Elemen
 		throw XmlParseException(errmsg);
 	}
 }
-

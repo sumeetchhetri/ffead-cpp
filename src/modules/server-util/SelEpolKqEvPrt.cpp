@@ -157,7 +157,7 @@ void SelEpolKqEvPrt::addListeningSocket(SOCKET sockfd) {
 	#elif defined(USE_SELECT)
 		fdMax = sockfd;
 	#endif
-	dsi = new DummySocketInterface();
+	dsi = new BaseSocket();
 	dsi->fd = sockfd;
 	#ifdef USE_IO_URING
 	    client_len = sizeof(client_addr);
@@ -228,7 +228,7 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
 			polled_fds[i].revents = 0;
 		}
 	#endif
-	dsi = new DummySocketInterface();
+	dsi = new BaseSocket();
 	dsi->fd = sockfd;
 	#ifdef USE_IO_URING
 		memset(&params, 0, sizeof(params));
@@ -395,7 +395,7 @@ int SelEpolKqEvPrt::getEvents()
 	return numEvents;
 }
 
-bool SelEpolKqEvPrt::registerWrite(SocketInterface* obj) {
+bool SelEpolKqEvPrt::registerWrite(BaseSocket* obj) {
 #if defined USE_EPOLL || defined USE_WIN_IOCP
 	struct epoll_event ev;
 	memset(&ev, 0, sizeof(ev));
@@ -423,7 +423,7 @@ bool SelEpolKqEvPrt::registerWrite(SocketInterface* obj) {
 	return true;
 }
 
-bool SelEpolKqEvPrt::unRegisterWrite(SocketInterface* obj) {
+bool SelEpolKqEvPrt::unRegisterWrite(BaseSocket* obj) {
 #if defined USE_EPOLL || defined USE_WIN_IOCP
 	struct epoll_event ev;
 	memset(&ev, 0, sizeof(ev));
@@ -473,7 +473,7 @@ SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index, void*& obj, bool& isRe
 	#elif defined USE_EPOLL || defined USE_WIN_IOCP
 		if(index>-1 && index<(int)(sizeof events))
 		{
-			SocketInterface* p = (SocketInterface*)events[index].data.ptr;
+			BaseSocket* p = (BaseSocket*)events[index].data.ptr;
 			if ((events[index].events & EPOLLERR) ||
 				  (events[index].events & EPOLLHUP) ||
 				  (events[index].events & EPOLLRDHUP))
@@ -501,7 +501,7 @@ SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index, void*& obj, bool& isRe
 				return polled_fds[index].fd;
 			} else if((polled_fds[index].revents & POLLERR) || (polled_fds[index].revents & POLLHUP)) {
 				obj = connections.find(polled_fds[index].fd);
-				((SocketInterface*)obj)->closeSocket();
+				((BaseSocket*)obj)->closeSocket();
 				int descriptor = polled_fds[index].fd;
 				polled_fds[index].fd = -1;
 				polled_fds[index].revents = 0;
@@ -516,7 +516,7 @@ SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index, void*& obj, bool& isRe
 				return (int)evlist[index].portev_object;
 			} else if((evlist[index].portev_events & POLLERR) || (evlist[index].portev_events & POLLHUP)) {
 				obj = evlist[index].portev_user;
-				((SocketInterface*)obj)->closeSocket();
+				((BaseSocket*)obj)->closeSocket();
 				return (int)evlist[index].portev_object;
 			}
 		}
@@ -533,7 +533,7 @@ bool SelEpolKqEvPrt::isListeningDescriptor(const SOCKET& descriptor)
 	return false;
 }
 
-bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningSock, bool epoll_et, bool isNonBlocking)
+bool SelEpolKqEvPrt::registerRead(BaseSocket* obj, const bool& isListeningSock, bool epoll_et, bool isNonBlocking)
 {
 	#ifdef USE_IO_URING
 		return true;
@@ -753,7 +753,7 @@ void SelEpolKqEvPrt::reRegisterServerSock(void* obj)
 }
 
 void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
-	DummySocketInterface df;
+	BaseSocket df;
 	df.io_uring_type = PROV_BUF;
 
 	while (evlc(this)) {
@@ -767,7 +767,7 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
 		io_uring_for_each_cqe(&ring, head, cqe) {
 			++count;
 			// There is an optional `std::uintptr_t` in C++11
-			SocketInterface* udata = (SocketInterface*)io_uring_cqe_get_data(cqe);
+			BaseSocket* udata = (BaseSocket*)io_uring_cqe_get_data(cqe);
 
 			if (cqe->res == -ENOBUFS) {
 				fprintf(stdout, "bufs in automatic buffer selection empty, this should not happen...\n");
@@ -782,7 +782,7 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
 				int sock_conn_fd = cqe->res;
 				// only read when there is no error, >= 0
 				if (sock_conn_fd >= 0) {
-					SocketInterface* sifd = ev(this, udata, ACCEPTED, sock_conn_fd, NULL, -1, false);
+					BaseSocket* sifd = ev(this, udata, ACCEPTED, sock_conn_fd, NULL, -1, false);
 
 					struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
 					io_uring_prep_recv(sqe, sock_conn_fd, sifd->buff, MAX_MESSAGE_LEN, 0);
@@ -852,7 +852,7 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
 			SOCKET descriptor = getDescriptor(n, vsi, isRead);
 			if(descriptor!=-1)
 			{
-				SocketInterface* udata = (SocketInterface*)vsi;
+				BaseSocket* udata = (BaseSocket*)vsi;
 				if(isListeningDescriptor(descriptor))
 				{
 					while (true) {
@@ -874,7 +874,7 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
 								break;
 							}
 						}
-						SocketInterface* sifd = ev(this, udata, ACCEPTED, newSocket, NULL, -1, false);
+						BaseSocket* sifd = ev(this, udata, ACCEPTED, newSocket, NULL, -1, false);
 						registerRead(sifd);
 					}
 					reRegisterServerSock(udata);
@@ -895,14 +895,14 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
 }
 
 #if defined USE_IO_URING
-void SelEpolKqEvPrt::post_write(SocketInterface* sifd, const std::string& data) {
+void SelEpolKqEvPrt::post_write(BaseSocket* sifd, const std::string& data) {
 	struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
 	io_uring_prep_send(sqe, sifd->fd, &data[0], data.length(), 0);
 	io_uring_sqe_set_flags(sqe, 0);
 	sifd->io_uring_type = WRITE;
 	io_uring_sqe_set_data(sqe, sifd);
 }
-void SelEpolKqEvPrt::post_read(SocketInterface* sifd) {
+void SelEpolKqEvPrt::post_read(BaseSocket* sifd) {
 	struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
 	io_uring_prep_recv(sqe, sifd->fd, sifd->buff, MAX_MESSAGE_LEN, 0);
 	//io_uring_sqe_set_flags(sqe, IOSQE_BUFFER_SELECT);

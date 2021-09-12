@@ -134,7 +134,7 @@ bool RequestReaderHandler::loopContinue(SelEpolKqEvPrt* ths) {
 	return ins->isActive();
 }
 
-SocketInterface* RequestReaderHandler::loopEventCb(SelEpolKqEvPrt* ths, SocketInterface* si, int type, int fd, char* buf, size_t len, bool isClosed) {
+BaseSocket* RequestReaderHandler::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* bi, int type, int fd, char* buf, size_t len, bool isClosed) {
 	RequestReaderHandler* ins = static_cast<RequestReaderHandler*>(ths->getCtx());
 	switch(type) {
 		case ACCEPTED: {
@@ -149,6 +149,7 @@ SocketInterface* RequestReaderHandler::loopEventCb(SelEpolKqEvPrt* ths, SocketIn
 			return sockIntf;
 		}
 		case READ_READY: {
+			SocketInterface* si = (SocketInterface*)bi;
 			if(ins->isSinglEVH) {
 				if(!si->isClosed()) {
 					si->rdTsk->run();
@@ -167,6 +168,7 @@ SocketInterface* RequestReaderHandler::loopEventCb(SelEpolKqEvPrt* ths, SocketIn
 			break;
 		}
 		case WRITE_READY: {
+			SocketInterface* si = (SocketInterface*)bi;
 			if(ins->isSinglEVH) {
 				if(!si->isClosed()) {
 					ins->selector.unRegisterWrite(si);
@@ -187,11 +189,13 @@ SocketInterface* RequestReaderHandler::loopEventCb(SelEpolKqEvPrt* ths, SocketIn
 			break;
 		}
 		case CLOSED: {
+			SocketInterface* si = (SocketInterface*)bi;
 			si->onClose();
 			ins->shi->closeConnection(si);
 			break;
 		}
 		case ON_DATA_READ: {
+			SocketInterface* si = (SocketInterface*)bi;
 			si->buffer.append(buf, len);
 			if(ins->isSinglEVH) {
 				si->rdTsk->run();
@@ -201,6 +205,7 @@ SocketInterface* RequestReaderHandler::loopEventCb(SelEpolKqEvPrt* ths, SocketIn
 			break;
 		}
 		case ON_DATA_WRITE: {
+			SocketInterface* si = (SocketInterface*)bi;
 			si->endRequest(-1);
 			break;
 		}
@@ -227,7 +232,7 @@ void* RequestReaderHandler::handle(void* inp) {
 	return 0;
 }
 
-//Deprecated old handler -- can be used if existing event loop need to be overriden
+//Deprecated old handler -- can be used if existing event loop needs to be overriden
 void* RequestReaderHandler::handle_Old(void* inp) {
 	//Logger logger = LoggerFactory::getLogger("RequestReaderHandler");
 	RequestReaderHandler* ins  = static_cast<RequestReaderHandler*>(inp);

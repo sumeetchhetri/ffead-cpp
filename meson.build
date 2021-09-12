@@ -220,6 +220,20 @@ if not cc.has_header('libcuckoo/cuckoohash_map.hh', args : '-I/usr/local/include
 	error('libcuckoo headers not found')
 endif
 
+if get_option('WITH_RAPIDJSON') == true and cc.has_header('rapidjson/document.h', args : '-I/usr/local/include/')
+	conf_data.set('HAVE_RAPID_JSON', 1)
+endif
+
+if get_option('WITH_PUGIXML') == true and cc.has_header('pugixml.hpp', args : '-I/usr/local/include/')
+	conf_data.set('HAVE_PUGI_XML', 1)
+	libpxml = cc.find_library('pugixml')
+	if libpxml.found()
+		global_libs += [libpxml]
+	else
+		error('pugixml headers not found')
+	endif
+endif
+
 if get_option('SRV_EMB') == true
 	conf_data.set('SRV_EMB', 1)
 endif
@@ -261,6 +275,10 @@ endif
 
 if cc.compiles('#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\n#include <linux/bpf.h>\n#include <linux/filter.h>\n#include <sys/sysinfo.h>\nint main() { return SO_ATTACH_REUSEPORT_CBPF; }')
 	conf_data.set('HAVE_SO_ATTACH_REUSEPORT_CBPF', 1)
+endif
+
+if cc.has_header('sys/sysinfo.h')
+	conf_data.set('HAVE_SYSINFO', 1)
 endif
 
 if cc.has_header('liburing', args : '-I/usr/local/include')

@@ -22,65 +22,94 @@
 
 #include "SocketInterface.h"
 
-std::atomic<int> SocketInterface::openSocks = 0;
+//std::atomic<int> BaseSocket::openSocks = 0;
 
-SocketInterface::SocketInterface() {
+BaseSocket::BaseSocket() {
 	eh = NULL;
-	http2 = false;
 	closed = false;
-	ssl = NULL;
-	io = NULL;
-	reqPos = 0;
-	current = 0;
-	http2 = false;
 	fd = -1;
-	tid = -1;
-	rdTsk = NULL;
-	wrTsk = NULL;
-	srvTsk = NULL;
 	useCounter = 0;
 	io_uring_type = -1;
 	//io_uring_bid = -1;
 }
 
-SocketInterface::SocketInterface(const SOCKET& fd, void* ssl, void* io) {
+SocketInterface::SocketInterface(): BaseSecureSocket() {
 	http2 = false;
+	reqPos = 0;
+	current = 0;
+	http2 = false;
+	tid = -1;
+	rdTsk = NULL;
+	wrTsk = NULL;
+	srvTsk = NULL;
+}
+
+BaseSocket::BaseSocket(const SOCKET& fd) {
+	eh = NULL;
 	closed = false;
+	useCounter = 0;
+	io_uring_type = -1;
+	//io_uring_bid = -1;
+	address = StringUtil::toHEX((long long)this);
+	this->fd = fd;
+	//openSocks++;
+	useCounter = 0;
+	io_uring_type = -1;
+	//io_uring_bid = -1;
+}
+
+#ifdef HAVE_SSLINC
+SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) : BaseSecureSocket(fd) {
+	http2 = false;
 #ifdef HAVE_SSLINC
 	this->ssl = (SSL*)ssl;
 	this->io = (BIO*)io;
-#else
-	this->ssl = NULL;
-	this->io = NULL;
 #endif
-	eh = NULL;
 	reqPos = 0;
 	current = 0;
-	address = StringUtil::toHEX((long long)this);
-	this->fd = fd;
 #ifdef HAVE_SSLINC
 	http2 = SSLHandler::getAlpnProto(fd).find("h2")==0;
 #endif
-	openSocks++;
 	tid = -1;
 	rdTsk = NULL;
 	wrTsk = NULL;
 	srvTsk = NULL;
-	useCounter = 0;
-	io_uring_type = -1;
-	//io_uring_bid = -1;
+}
+#endif
+
+SocketInterface::SocketInterface(const SOCKET& fd) : BaseSecureSocket(fd) {
+	http2 = false;
+	reqPos = 0;
+	current = 0;
+	tid = -1;
+	rdTsk = NULL;
+	wrTsk = NULL;
+	srvTsk = NULL;
 }
 
-void SocketInterface::use() {
+
+BaseSecureSocket::BaseSecureSocket(): BaseSocket() {
+}
+
+BaseSecureSocket::BaseSecureSocket(const SOCKET& fd): BaseSocket(fd) {
+#ifdef HAVE_SSLINC
+	init(fd, ssl, io);
+#endif
+}
+
+BaseSecureSocket::~BaseSecureSocket() {
+}
+
+void BaseSocket::use() {
 	useCounter++;
 }
 
-void SocketInterface::unUse() {
+void BaseSocket::unUse() {
 	useCounter--;
 }
 
 #ifdef HAVE_SSLINC
-bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger) {
+bool BaseSecureSocket::init(const SOCKET& fd, SSL*& ssl, BIO*& io) {
 	if(SSLHandler::getInstance()->getIsSSL())
 	{
 		BIO* sbio = BIO_new_socket(fd, BIO_NOCLOSE);
@@ -94,7 +123,7 @@ bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger
 
 		if(SSL_accept(ssl)<=0)
 		{
-			logger << "SSL accept error" << std::endl;
+			fprintf(stderr, "SSL accept error\n");
 			ERR_print_errors_fp(stderr);
 			close(fd);
 			return false;
@@ -110,7 +139,7 @@ bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger
 				char* str = X509_NAME_oneline(X509_get_subject_name(client_cert), 0, 0);
 				if(str == NULL)
 				{
-					logger << "Could not get client certificate subject name" << std::endl;
+					fprintf(stderr, "Could not get client certificate subject name\n");
 					close(fd);
 					return false;
 				}
@@ -119,7 +148,7 @@ bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger
 				str = X509_NAME_oneline(X509_get_issuer_name(client_cert), 0, 0);
 				if(str == NULL)
 				{
-					logger << "Could not get client certificate issuer name" << std::endl;
+					fprintf(stderr, "Could not get client certificate issuer name\n");
 					close(fd);
 					return false;
 				}
@@ -129,7 +158,7 @@ bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger
 			}
 			else
 			{
-				logger << ("The SSL client does not have certificate.\n") << std::endl;
+				fprintf(stderr, "The SSL client does not have certificate.\n\n");
 			}
 		}
 		return SSLHandler::getAlpnProto(fd).find("h2")==0;
@@ -138,16 +167,15 @@ bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger
 }
 #endif
 
-SocketInterface::~SocketInterface() {
+BaseSocket::~BaseSocket() {
 	closeSocket();
-	openSocks--;
 }
 
-int SocketInterface::writeWsData(void* d) {
-	return -1;
+SocketInterface::~SocketInterface() {
+	//openSocks--;
 }
 
-bool SocketInterface::isClosed() {
+bool BaseSocket::isClosed() {
 	return closed;
 }
 
@@ -193,7 +221,7 @@ int SocketInterface::completeWrite() {
 	return done;
 }
 
-void SocketInterface::writeTo(const std::string& d, int reqPos) {
+void SocketInterface::writeToBuf(const std::string& d, int reqPos) {
 	//wm.lock();
 	ResponseData& rd = wtl[reqPos];
 	//wm.unlock();
@@ -267,7 +295,7 @@ bool SocketInterface::isCurrentRequest(int reqp) {
 	return reqp == (current + 1);
 }
 
-int SocketInterface::writeDirect(const std::string& h, const std::string& d) {
+int BaseSocket::writeDirect(const std::string& h, const std::string& d) {
 	int res = writeDirect(h);
 	if(res>0) {
 		res = writeDirect(d);
@@ -276,8 +304,34 @@ int SocketInterface::writeDirect(const std::string& h, const std::string& d) {
 	return res;
 }
 
-int SocketInterface::writeDirect(const std::string& d, int off) {
-	if(ssl==NULL) {
+int BaseSocket::writeDirect(const std::string& h, const char* d, size_t len) {
+	int res = writeDirect(h);
+	if(res>0) {
+		if(!isSecure()) {
+			int er = send(fd, d , len, 0);
+			switch(er) {
+				case -1:
+				case 0:
+					if (er == -1 && errno == EAGAIN) {
+						return -1;
+					} else {
+						closeSocket();
+						return 0;
+					}
+				default:
+					return er;
+			}
+		} else {
+			return secureWriteDirect(d, len, 0);
+		}
+
+		return 1;
+	}
+	return res;
+}
+
+int BaseSocket::writeDirect(const std::string& d, int off) {
+	if(!isSecure()) {
 		int er = send(fd, &d[off] , d.length()-off, 0);
 		switch(er) {
 			case -1:
@@ -291,31 +345,53 @@ int SocketInterface::writeDirect(const std::string& d, int off) {
 			default:
 				return er;
 		}
+	} else {
+		return secureWriteDirect(d, off);
 	}
+}
+
+int BaseSecureSocket::secureWriteDirect(const std::string& d, int off) {
 #ifdef HAVE_SSLINC
-	else {
-		if(handleRenegotiation()) {
+	if(handleRenegotiation()) {
+		return 0;
+	}
+	int er  = BIO_write(io, &d[off] , d.length()-off);
+	int ser = SSL_get_error(ssl, er);
+	switch(ser) {
+		case SSL_ERROR_WANT_WRITE:
+			return -1;
+		case SSL_ERROR_NONE:
+			return er;
+		default:
+			closeSocket();
 			return 0;
-		}
-		int er  = BIO_write(io, &d[off] , d.length()-off);
-		int ser = SSL_get_error(ssl, er);
-		switch(ser) {
-			case SSL_ERROR_WANT_WRITE:
-				return -1;
-			case SSL_ERROR_NONE:
-				return er;
-			default:
-				closeSocket();
-				return 0;
-		}
 	}
 #endif
 	return -1;
 }
 
-int SocketInterface::writeTo(ResponseData* d)
-{
-	if(ssl==NULL) {
+int BaseSecureSocket::secureWriteDirect(const char* d, size_t len, int off) {
+#ifdef HAVE_SSLINC
+	if(handleRenegotiation()) {
+		return 0;
+	}
+	int er  = BIO_write(io, d, len-off);
+	int ser = SSL_get_error(ssl, er);
+	switch(ser) {
+		case SSL_ERROR_WANT_WRITE:
+			return -1;
+		case SSL_ERROR_NONE:
+			return er;
+		default:
+			closeSocket();
+			return 0;
+	}
+#endif
+	return -1;
+}
+
+int BaseSocket::writeTo(ResponseData* d) {
+	if(!isSecure()) {
 		int er = 0;
 		do {
 			er = send(fd, &d->_b[d->oft] , d->_b.length()-d->oft, 0);
@@ -336,37 +412,42 @@ int SocketInterface::writeTo(ResponseData* d)
 					break;
 			}
 		} while(er>0);
+	} else {
+		return secureWriteTo(d);
 	}
+	return 1;
+}
+
+int BaseSecureSocket::secureWriteTo(ResponseData* d)
+{
 #ifdef HAVE_SSLINC
-	else {
-		if(handleRenegotiation()) {
-			return 0;
-		}
-		int er = 0;
-		int ser = 0;
-		do {
-			er  = BIO_write(io, &d->_b[d->oft] , d->_b.length()-d->oft);
-			ser = SSL_get_error(ssl, er);
-			switch(ser) {
-				case SSL_ERROR_WANT_WRITE:
-					return -1;
-				case SSL_ERROR_NONE:
-					d->oft += er;
-					if(d->oft==(int)d->_b.length()) {
-						return 1;
-					}
-					break;
-				default:
-					closeSocket();
-					return 0;
-			}
-		} while(er!=0);
+	if(handleRenegotiation()) {
+		return 0;
 	}
+	int er = 0;
+	int ser = 0;
+	do {
+		er  = BIO_write(io, &d->_b[d->oft] , d->_b.length()-d->oft);
+		ser = SSL_get_error(ssl, er);
+		switch(ser) {
+			case SSL_ERROR_WANT_WRITE:
+				return -1;
+			case SSL_ERROR_NONE:
+				d->oft += er;
+				if(d->oft==(int)d->_b.length()) {
+					return 1;
+				}
+				break;
+			default:
+				closeSocket();
+				return 0;
+		}
+	} while(er!=0);
 #endif
 	return 1;
 }
 
-bool SocketInterface::writeFile(int fdes, int remain_data)
+bool BaseSocket::writeFile(int fdes, int remain_data)
 {
 	off_t offset = 0;
 #if defined(OS_DARWIN)
@@ -417,12 +498,12 @@ bool SocketInterface::writeFile(int fdes, int remain_data)
 	return isClosed();
 }
 
-int SocketInterface::readFrom()
+int BaseSocket::readFrom()
 {
 #if defined(USE_IO_URING)
 	return 1;
 #endif
-	if(ssl==NULL) {
+	if(!isSecure()) {
 		int er = 0;
 		do {
 #if defined USE_IO_URING
@@ -447,50 +528,59 @@ int SocketInterface::readFrom()
 					break;
 			}
 		} while(er>0);
+	} else {
+		return secureReadFrom();
 	}
+	return 1;
+}
+
+int BaseSecureSocket::secureReadFrom()
+{
 #ifdef HAVE_SSLINC
-	else {
-		int er = 0;
-		int ser = 0;
-		do {
+	int er = 0;
+	int ser = 0;
+	do {
 #if defined USE_IO_URING
-			er  = BIO_read(io, buff, 2048);
+		er  = BIO_read(io, buff, 2048);
 #else
-			er = BIO_read(io, buff, 8192);
+		er = BIO_read(io, buff, 8192);
 #endif
-			ser = SSL_get_error(ssl, er);
-			switch(ser) {
-				case SSL_ERROR_WANT_READ:
-					return -1;
-				case SSL_ERROR_NONE:
-					buffer.append(buff, er);
-					break;
-				default:
+		ser = SSL_get_error(ssl, er);
+		switch(ser) {
+			case SSL_ERROR_WANT_READ:
+				return -1;
+			case SSL_ERROR_NONE:
+				buffer.append(buff, er);
+				break;
+			default:
 #if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL)
-					eh->unRegisterRead(fd);
+				eh->unRegisterRead(fd);
 #endif
-					closeSocket();
-					return 0;
-			}
-		} while(er>0);
-	}
+				closeSocket();
+				return 0;
+		}
+	} while(er>0);
 #endif
 	return 1;
 }
 
-int SocketInterface::getDescriptor() {
+int BaseSocket::getDescriptor() {
 	return fd;
 }
-std::string SocketInterface::getAddress() {
+std::string BaseSocket::getAddress() {
 	return address;
 }
 
-bool SocketInterface::flush() {
+bool BaseSocket::flush() {
+	return false;
+}
+
+bool BaseSecureSocket::flush() {
 	bool fl = false;
 #ifdef HAVE_SSLINC
 	if(!closed && BIO_flush(io)<=0 && !BIO_should_retry(io))
 	{
-		logger.debug("Error flushing BIO");
+		fprintf(stderr, "Error flushing BIO\n");
 		closeSocket();
 		fl = true;
 	}
@@ -498,7 +588,20 @@ bool SocketInterface::flush() {
 	return fl;
 }
 
-void SocketInterface::closeSocket()
+void BaseSocket::closeSocket()
+{
+#if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL)
+	eh->unRegisterRead(fd);
+#endif
+	if(!closed) {
+		close(fd);
+	} else {
+		return;
+	}
+	closed = true;
+}
+
+void BaseSecureSocket::closeSocket()
 {
 #if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL)
 	eh->unRegisterRead(fd);
@@ -521,7 +624,7 @@ void SocketInterface::closeSocket()
 	closed = true;
 }
 
-bool SocketInterface::checkSocketWaitForTimeout(const int& writing, const int& seconds, const int& micros)
+bool BaseSocket::checkSocketWaitForTimeout(const int& writing, const int& seconds, const int& micros)
 {
 	#ifdef OS_MINGW
 		u_long iMode = 1;
@@ -575,7 +678,7 @@ bool SocketInterface::checkSocketWaitForTimeout(const int& writing, const int& s
 	return rc <= 0 ? false : true;
 }
 
-bool SocketInterface::isBlocking()
+bool BaseSocket::isBlocking()
 {
 	#ifndef OS_MINGW
 		int flags = fcntl(fd, F_GETFL, 0);
@@ -585,7 +688,7 @@ bool SocketInterface::isBlocking()
 	#endif
 }
 
-bool SocketInterface::handleRenegotiation()
+bool BaseSecureSocket::handleRenegotiation()
 {
 #ifdef HAVE_SSLINC
 	if(SSLHandler::getInstance()->securityProperties.client_auth==CLIENT_AUTH_REHANDSHAKE)
@@ -598,13 +701,13 @@ bool SocketInterface::handleRenegotiation()
 
 		if(SSL_renegotiate(ssl)<=0)
 		{
-			logger.debug("SSL renegotiation error");
+			fprintf(stderr, "SSL renegotiation error\n");
 			closeSocket();
 			return true;
 		}
 		if(SSL_do_handshake(ssl)<=0)
 		{
-			logger.debug("SSL renegotiation error");
+			fprintf(stderr, "SSL renegotiation error\n");
 			closeSocket();
 			return true;
 		}
@@ -615,7 +718,7 @@ bool SocketInterface::handleRenegotiation()
 #endif
 		if(SSL_do_handshake(ssl)<=0)
 		{
-			logger.debug("SSL handshake error");
+			fprintf(stderr, "SSL handshake error\n");
 			closeSocket();
 			return true;
 		}
@@ -635,11 +738,23 @@ bool SocketInterface::isHttp2() {
 	return http2;
 }
 
+bool BaseSocket::isSecure() {
+	return false;
+}
+
+bool BaseSecureSocket::isSecure() {
+#ifdef HAVE_SSLINC
+	return ssl!=NULL;
+#else
+	return false;
+#endif
+}
+
 bool SocketInterface::hasPendingRead() {
 	return false;
 }
 
-void SocketInterface::doneRead() {
+void BaseSocket::doneRead() {
 #if defined USE_IO_URING
 	if(hasPendingRead()) {
 		eh->post_read(this);

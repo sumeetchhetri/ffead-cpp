@@ -52,7 +52,8 @@ bool LibpqDataSourceImpl::init() {
 	}
 	fd = PQsocket(conn);
 	if(isAsync) {
-		if(RequestReaderHandler::getInstance()!=NULL) {
+		bool rHandler = RequestReaderHandler::getInstance()!=NULL || RequestHandler2::getInstance()!=NULL;
+		if(rHandler) {
 #ifdef USE_IO_URING
 			Thread* pthread = new Thread(&handle, this);
 			pthread->execute();
@@ -86,8 +87,14 @@ bool LibpqDataSourceImpl::init() {
 			rdTsk = new PgReadTask(this);
 #endif
 			PQsetnonblocking(conn, 1);
-			RequestReaderHandler::getInstance()->addSf(this);
-			RequestReaderHandler::getInstance()->selector.registerRead(this, false, false, true);
+#if defined(OS_LINUX) && !defined(DISABLE_BPF)
+			Server::set_cbpf(fd, get_nprocs());
+#endif
+			if(RequestReaderHandler::getInstance()!=NULL) {
+				RequestReaderHandler::getInstance()->selector.registerRead(this, false, false, true);
+			} else {
+				RequestHandler2::getInstance()->selector.registerRead(this, false, false, true);
+			}
 #endif
 		} else {
 			PQsetnonblocking(conn, 1);
@@ -1439,6 +1446,7 @@ void PgBatchReadTask::processPending() {
 				//PQfinish(ths->conn);
 				//return;
 			}
+			PQflush(ths->conn);
 			sendBatch = false;
 		}
 	}
@@ -1483,6 +1491,7 @@ void PgBatchReadTask::submit(LibpqAsyncReq* nitem) {
 			} else {
 				//fprintf(stdout, "submit:PQbatchSendQueue from submit %d, Batch Query Q size %d\n", numQueriesInBatch, ths->Q.size());
 			}
+			PQflush(ths->conn);
 			queueEntries = true;
 			sendBatch = false;
 		} else {
@@ -1595,6 +1604,8 @@ void PgBatchReadTask::batchQueries(LibpqAsyncReq* nitem, int& numQueriesInBatch)
 				q->fcb(q->ctx, false, NULL, q->query, i+1);
 			}
 			return;
+		} else {
+			PQflush(ths->conn);
 		}
 	}
 #endif
@@ -1685,7 +1696,9 @@ LibpqQuery* LibpqAsyncReq::peek() {
 LibpqAsyncReq::~LibpqAsyncReq() {
 	if(results.size()>0) {
 		for (auto res: results) {
+#ifdef HAVE_LIBPQ
 			PQclear(res);
+#endif
 		}
 	}
 }

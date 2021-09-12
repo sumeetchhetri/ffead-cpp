@@ -44,8 +44,7 @@ void Nghttp2Server::handle(const request &req2, const response &res2, std::strin
 
 	HttpRequest req(&headers, hc, url, qv, meth, 20, cont);
 	HttpResponse respo;
-	ServiceTask task;
-	task.handle(&req, &respo);
+	ServiceTask::handle(&req, &respo);
 
 	header_map hm;
 	if(respo.isDone()) {

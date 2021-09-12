@@ -68,21 +68,20 @@ std::string BinarySerialize::serializePrimitive(int serOpt, const std::string& c
 	return enc.encodeB(&object);
 }
 
-void* BinarySerialize::getSerializableObject()
+void* BinarySerialize::getSerializableObject(void* exobj)
 {
-	return new AMEFObject;
+	return exobj!=NULL?exobj:new AMEFObject;
 }
 
 void BinarySerialize::cleanSerializableObject(void* _1)
 {
-	AMEFObject* object = static_cast<AMEFObject*>(_1);
-	delete object;
+	delete (AMEFObject*)_1;
 }
 
 void BinarySerialize::startContainerSerialization(void* _1, const std::string& className, const std::string& container)
 {
 	AMEFEncoder enc;
-	AMEFObject* object = static_cast<AMEFObject*>(_1);
+	AMEFObject* object = (AMEFObject*)_1;
 	object->setName(container+"-"+className);
 }
 
@@ -93,7 +92,7 @@ void BinarySerialize::afterAddContainerSerializableElement(void* _1, const int& 
 void BinarySerialize::addContainerSerializableElement(void* _1, const std::string& tem)
 {
 	AMEFEncoder enc;
-	AMEFObject* object = static_cast<AMEFObject*>(_1);
+	AMEFObject* object = (AMEFObject*)_1;
 	object->addPacket(tem);
 }
 
@@ -101,20 +100,20 @@ void BinarySerialize::addContainerSerializableElementMulti(void* _1, const std::
 {
 	//tem = tem.substr(4);
 	AMEFEncoder enc;
-	AMEFObject* object = static_cast<AMEFObject*>(_1);
+	AMEFObject* object = (AMEFObject*)_1;
 	object->addPacket(tem);
 }
 
 std::string BinarySerialize::fromSerializableObjectToString(void* _1)
 {
 	AMEFEncoder enc;
-	AMEFObject* object = static_cast<AMEFObject*>(_1);
+	AMEFObject* object = (AMEFObject*)_1;
 	return enc.encodeB(object);
 }
 
 std::string BinarySerialize::elementToSerializedString(void* _1, const int& counter)
 {
-	AMEFObject* object = static_cast<AMEFObject*>(_1);
+	AMEFObject* object = (AMEFObject*)_1;
 	return object->getPackets().at(counter)->getValueStr();
 }
 
@@ -282,13 +281,12 @@ void* BinarySerialize::getUnserializableObject(const std::string& _1)
 
 void BinarySerialize::cleanUnserializableObject(void* _1)
 {
-	AMEFObject* object = static_cast<AMEFObject*>(_1);
-	delete object;
+	delete (AMEFObject*)_1;
 }
 
 void BinarySerialize::cleanValidUnserializableObject(void* _1)
 {
-	AMEFObject* object = static_cast<AMEFObject*>(_1);
+	AMEFObject* object = (AMEFObject*)_1;
 	delete object;
 }
 
@@ -458,34 +456,42 @@ bool BinarySerialize::isValidClassNamespace(void* _1, const std::string& cn, con
 bool BinarySerialize::isValidObjectProperty(void* _1, const std::string& propname, const int& counter)
 {
 	AMEFObject* element = static_cast<AMEFObject*>(_1);
-	if((int)element->getPackets().size()>counter && element->getPackets().at(counter)->getNameStr()==propname)
-		return true;
+	for(auto el: element->getPackets()) {
+		if(el->getNameStr()==propname) {
+			return true;
+		}
+	}
 	return false;
 }
 
-void* BinarySerialize::getObjectProperty(void* _1, const int& counter)
+void* BinarySerialize::getObjectProperty(void* _1, const int& counter, const std::string& propname)
 {
 	AMEFObject* element = static_cast<AMEFObject*>(_1);
-	return element->getPackets().at(counter);
+	for(auto el: element->getPackets()) {
+		if(el->getNameStr()==propname) {
+			return el;
+		}
+	}
+	return NULL;
 }
 
 void BinarySerialize::startObjectSerialization(void* _1, const std::string& className)
 {
 	AMEFEncoder enc;
-	AMEFObject* object = static_cast<AMEFObject*>(_1);
+	AMEFObject* object = (AMEFObject*)_1;
 	object->setName(className);
 }
 
 void BinarySerialize::endObjectSerialization(void* _1, const std::string& className) {}
 
 void BinarySerialize::afterAddObjectProperty(void* _1, const std::string& propName) {
-	AMEFObject* object = static_cast<AMEFObject*>(_1);
+	AMEFObject* object = (AMEFObject*)_1;
 	object->getPackets().at(object->getPackets().size()-1)->name = propName;
 }
 
 void BinarySerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::string& propName, const std::string& className, void* t)
 {
-	AMEFObject* object = static_cast<AMEFObject*>(_1);
+	AMEFObject* object = (AMEFObject*)_1;
 	switch(serOpt) {
 		case 1:
 		{

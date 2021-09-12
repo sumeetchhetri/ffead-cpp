@@ -399,7 +399,7 @@ SOCKET Server::createListener(const int& port, const bool& block, bool isSinglEV
 //https://github.com/torvalds/linux/blob/5bfc75d92efd494db37f5c4c173d3639d4772966/tools/testing/selftests/net/reuseport_bpf.c
 void Server::set_cbpf(int socket, int group_size)
 {
-#if defined(OS_LINUX) && defined(HAVE_SO_ATTACH_REUSEPORT_CBPF)
+#ifdef HAVE_SO_ATTACH_REUSEPORT_CBPF
 	struct sock_filter code[] = {
 		{ BPF_LD  | BPF_W | BPF_ABS, 0, 0, (unsigned int)SKF_AD_OFF + SKF_AD_CPU }, // A = #cpu
 		{ BPF_ALU | BPF_MOD | BPF_K, 0, 0, (unsigned int)group_size },     		    // A = A % group_size

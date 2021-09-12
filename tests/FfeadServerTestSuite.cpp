@@ -46,8 +46,7 @@ int main()
 	PropFileReader propFileReader;
 	propMap props = propFileReader.getProperties("testValues.prop");
 
-	SimpleCsvFileReader csvFileReader;
-	strVecVec testCases = csvFileReader.getRows("test.csv");
+	strVecVec testCases = SimpleCsvReader::getRows("test.csv");
 
 	Timer timer, timerc;
 	std::string cookies, result;
@@ -93,7 +92,7 @@ int main()
 	}
 
 	timerc.start();
-	for (int var = 0; var < total; ++var)
+	for (int var = 0; var < total; var++)
 	{
 		ClientInterface* client;
 #ifdef HAVE_SSLINC
@@ -203,7 +202,7 @@ int main()
 			timer.start();
 
 			if(isDebug) {
-				std::cout << "HTTP Request Is=>\n" << data << "\n\n" << std::endl;
+				std::cout << "\n[[\nHTTP Request Is=>\n" << data << "\n" << std::endl;
 			}
 
 			if(!client->connectionNB(ip,port)) {
@@ -226,7 +225,7 @@ int main()
 			long long millis = timer.elapsedMilliSeconds();
 
 			if(isDebug) {
-				std::cout << "HTTP Response Is=>\n" << tot << "\n\n" << std::endl;
+				std::cout << "HTTP Response Is=>\n" << tot << std::endl;
 			}
 
 			HttpResponse res;
@@ -241,7 +240,11 @@ int main()
 			std::string debugContentValue;
 			if(debugCont)
 			{
-				debugContentValue = ", Content => " + parser.getContent();
+				if(isDebug) {
+					std::cout << parser.getContent() << "\n]]\n" << std::endl;
+				} else {
+					debugContentValue = ", Content => " + parser.getContent();
+				}
 			}
 
 			std::string ss;

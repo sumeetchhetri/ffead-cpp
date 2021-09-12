@@ -196,9 +196,6 @@ typedef struct cpu_set {
 
 static inline void
 CPU_ZERO(cpu_set_t *cs) { cs->count = 0; }
-int sched_getaffinity(pid_t pid, size_t cpu_size, cpu_set_t *cpu_set);
-int pthread_setaffinity_np(pthread_t thread, size_t cpu_size,
-                           cpu_set_t *cpu_set);
 
 static inline void
 CPU_SET(int num, cpu_set_t *cs) { cs->count |= (1 << num); }
@@ -206,6 +203,9 @@ CPU_SET(int num, cpu_set_t *cs) { cs->count |= (1 << num); }
 static inline int
 CPU_ISSET(int num, cpu_set_t *cs) { return (cs->count & (1 << num)); }
 
+int sched_getaffinity(pid_t pid, size_t cpu_size, cpu_set_t *cpu_set);
+
+int pthread_setaffinity_np(pthread_t thread, size_t cpu_size, cpu_set_t *cpu_set);
 
 #ifndef CLOCK_REALTIME
 #define CLOCK_REALTIME  0
@@ -240,6 +240,9 @@ typedef int NUMEVENTS;
 
 #ifdef EMSCRIPTEN
 FILE * popen (const char *command, const char *mode);
+#endif
+
+#if defined(OS_DARWIN)
 #endif
 
 #include <sys/socket.h>

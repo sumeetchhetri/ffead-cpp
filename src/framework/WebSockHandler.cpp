@@ -21,7 +21,7 @@
  */
 #include "WebSockHandler.h"
 
-int WebSockHandler::writeToPeer(WebSocketRespponseData* response, SocketInterface* sif) {
+int WebSockHandler::writeToPeer(WebSocketRespponseData* response, BaseSocket* sif) {
 	if(!response->isEmpty()) {
 		std::cout << "WS:Start:Writing" << std::endl;
 		std::cout << "WS:Packets:" << response->getMore().size() << std::endl;
@@ -68,7 +68,7 @@ bool WebSockHandler::isWriteControl() {
 	return false;
 }
 
-SocketInterface* WebSockHandler::getSif() {
+BaseSocket* WebSockHandler::getSif() {
 	return sif;
 }
 

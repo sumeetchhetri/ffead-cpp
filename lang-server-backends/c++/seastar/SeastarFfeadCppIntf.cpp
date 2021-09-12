@@ -80,8 +80,7 @@ public:
 		HttpRequest freq(&f_headers, hc, url, meth, 11, cont);
 		HttpResponse* respo = new HttpResponse;
 		fcpres = respo;
-		ServiceTask task;
-		task.handle(&freq, respo);
+		ServiceTask::handle(&freq, respo);
 
 		if(respo->isDone()) {
 			RMap::const_iterator it = respo->getCHeaders().cbegin();

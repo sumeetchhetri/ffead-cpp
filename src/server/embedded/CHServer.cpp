@@ -308,14 +308,6 @@ void signalSIGILL(int sig)
 	abort();
 }
 
-void* service(void* arg)
-{
-	ServiceTask *task = (ServiceTask*)arg;
-	//task->run();
-	delete task;
-	return NULL;
-}
-
 void* CHServer::gracefullShutdown_monitor(void* args)
 {
 	std::string* ipaddr = (std::string*)args;
@@ -1226,6 +1218,14 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	} catch(const std::exception& e) {
 	}
 
+	std::string rHandler = "RequestReaderHandler";
+	try {
+		rHandler = ConfigurationData::getInstance()->coreServerProperties.sprops["REQUEST_HANDLER"];
+	} catch(const std::exception& e) {
+	}
+
+	bool isrHandler1 = rHandler=="RequestReaderHandler";
+
 	//Load all the FFEADContext beans so that the same copy is shared by all process
 	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
 	logger << ("Initializing ffeadContext....") << std::endl;
@@ -1237,13 +1237,32 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	ConfigurationHandler::initializeWsdls();
 	logger << ("Initializing WSDL files done....") << std::endl;
 
+	if(isrHandler1) {
+		isSinglEVH = true;
+	}
+
 	unsigned int nthreads = hardware_concurrency();
-	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &httpServiceFactoryMethod, nthreads, isSinglEVH, &httpReadFactoryMethod);
-	RequestReaderHandler reader(handler, true, isSinglEVH);
-	RequestReaderHandler::setInstance(&reader);
-	handler->start();
-	reader.registerSocketInterfaceFactory(&CHServer::createSocketInterface);
-	reader.startNL(-1);
+	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &ServiceTask::handleWebsockOpen, nthreads, isSinglEVH, &ServiceTask::handle);
+
+	void* rHandleIns = NULL;
+
+	if(isrHandler1) {
+		RequestReaderHandler* reader = new RequestReaderHandler(handler, true, isSinglEVH);
+		RequestReaderHandler::setInstance(reader);
+		handler->start();
+		reader->registerSocketInterfaceFactory(&CHServer::createSocketInterface);
+		reader->startNL(-1);
+		rHandleIns = reader;
+		logger << ("Initializing RequestReaderHandler....") << std::endl;
+	} else {
+		RequestHandler2* reader = new RequestHandler2(handler, true, isSSLEnabled, &ServiceTask::handle);
+		RequestHandler2::setInstance(reader);
+		handler->start();
+		reader->registerSocketInterfaceFactory(&CHServer::createSocketInterface2);
+		reader->startNL(-1);
+		rHandleIns = reader;
+		logger << ("Initializing RequestHandler2....") << std::endl;
+	}
 
 	std::ofstream serverCntrlFileo;
 	serverCntrlFileo.open(serverCntrlFileNm.c_str());
@@ -1268,10 +1287,16 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		logger << "Unable to start the server on the specified ip/port..." << std::endl;
 		return;
 	}
-#ifdef OS_LINUX
+#if defined(OS_LINUX) && !defined(DISABLE_BPF)
 	Server::set_cbpf(sockfd, get_nprocs());
 #endif
-	reader.addListenerSocket(&doRegisterListenerFunc, sockfd);
+	if(isrHandler1) {
+		RequestReaderHandler* rh = (RequestReaderHandler*)rHandleIns;
+		rh->addListenerSocket(&doRegisterListenerFunc, sockfd);
+	} else {
+		RequestHandler2* rh = (RequestHandler2*)rHandleIns;
+		rh->addListenerSocket(&doRegisterListenerFunc, sockfd);
+	}
 
 #ifdef INC_JOBS
 	if(StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["ENABLE_JOBS"])=="true") {
@@ -1315,7 +1340,19 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	}
 
 	std::string ip = ipport.substr(0, ipport.find(":"));
-	reader.stop(ip, CastUtil::toInt(port), isSSLEnabled);
+	if(isrHandler1) {
+		RequestReaderHandler* rh = (RequestReaderHandler*)rHandleIns;
+		rh->stop(ip, CastUtil::toInt(port), isSSLEnabled);
+	} else {
+		RequestHandler2* rh = (RequestHandler2*)rHandleIns;
+		rh->stop(ip, CastUtil::toInt(port), isSSLEnabled);
+	}
+
+	if(isrHandler1) {
+		delete (RequestReaderHandler*)rHandleIns;
+	} else {
+		delete (RequestHandler2*)rHandleIns;
+	}
 
 	close(sockfd);
 
@@ -1386,28 +1423,22 @@ int CHServer::techunkSiz = 0;
 int CHServer::connKeepAlive = 10;
 int CHServer::maxReqHdrCnt = 100, CHServer::maxEntitySize = 2147483647;
 
-HttpServiceTask* CHServer::httpServiceFactoryMethod() {
-	return new ServiceTask();
-}
-
-HttpReadTask* CHServer::httpReadFactoryMethod() {
-	return new HttpReadTask();
-}
-
 SocketInterface* CHServer::createSocketInterface(SOCKET fd) {
 #ifdef HAVE_SSLINC
 	SSL* ssl = NULL;
 	BIO* io = NULL;
-	if(SocketInterface::init(fd, ssl, io, logger)) {
+	if(BaseSecureSocket::init(fd, ssl, io)) {
 		return new Http2Handler(fd, ssl, io, true, ConfigurationData::getInstance()->coreServerProperties.webPath);
 	} else {
-		return new Http11Handler(fd, ssl, io, ConfigurationData::getInstance()->coreServerProperties.webPath,
-			techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
+		return new Http11Handler(fd, ssl, io, techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
 	}
 #else
-	return new Http11Handler(fd, NULL, NULL, ConfigurationData::getInstance()->coreServerProperties.webPath,
-		techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
+	return new Http11Handler(fd, NULL, NULL, techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
 #endif
+}
+
+Http11Socket* CHServer::createSocketInterface2(SOCKET fd) {
+	return new Http11Socket(fd, techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
 }
 
 bool CHServer::doRegisterListenerFunc() {

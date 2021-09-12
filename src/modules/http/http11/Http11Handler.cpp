@@ -151,11 +151,15 @@ int Http11Handler::getTimeout() {
 	return connKeepAlive;
 }
 
-Http11Handler::Http11Handler(const SOCKET& fd, void* ssl, void* io, const std::string& webpath, const int& chunkSize,
-		const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) : SocketInterface(fd, ssl, io) {
+#ifdef HAVE_SSLINC
+Http11Handler::Http11Handler(const SOCKET& fd, void* ssl, void* io, const int& chunkSize,
+		const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) : SocketInterface(fd, (SSL*)ssl, (BIO*)io) {
+#else
+Http11Handler::Http11Handler(const SOCKET& fd, void* ssl, void* io, const int& chunkSize,
+		const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) : SocketInterface(fd) {
+#endif
 	isHeadersDone = false;
 	bytesToRead = 0;
-	this->webpath = webpath;
 	this->chunkSize = chunkSize<=0?0:chunkSize;
 	this->isTeRequest = false;
 	this->connKeepAlive = connKeepAlive;
@@ -165,38 +169,11 @@ Http11Handler::Http11Handler(const SOCKET& fd, void* ssl, void* io, const std::s
 	//logger = LoggerFactory::getLogger("Http11Handler");
 }
 
-HttpRequest* Http11Handler::getAvailableRequest() {
-	if((int)requests.size()<10) {
-		HttpRequest* r = new HttpRequest();
-		r->resp = new HttpResponse();
-		this->requests.push_back(r);
-		return r;
-	} else {
-		for(int i=0;i<(int)requests.size();i++) {
-			if(requests.at(i)->isInit==false) {
-				return requests.at(i);
-			}
-		}
-		//TODO need to clean up requests after peak load is handled and done
-		//also need a max cap on the number of pending or active requests per connection
-		HttpRequest* r = new HttpRequest();
-		r->resp = new HttpResponse();
-		this->requests.push_back(r);
-		return r;
-	}
-	return NULL;
-}
-
 void Http11Handler::addHandler(SocketInterface* handler) {
 	this->handler = handler;
 }
 
 Http11Handler::~Http11Handler() {
-	for(int i=0;i<(int)requests.size();i++) {
-		HttpRequest* r = requests.at(i);
-		delete (HttpResponse*)r->resp;
-		delete r;
-	}
 	if(srvTsk!=NULL) {
 		delete srvTsk;
 	}

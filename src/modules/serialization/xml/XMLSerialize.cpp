@@ -35,351 +35,390 @@ XMLSerialize::~XMLSerialize() {
 
 std::string XMLSerialize::serializePrimitive(int serOpt, const std::string& className, void* t, void* serobject)
 {
-	std::string* str = (std::string*)serobject;
+	XmlWriter* str = (XmlWriter*)serobject;
 	switch(serOpt) {
 		case 1: {
 			if(str!=NULL) {
-				str->append("<string>");
-				str->append(*(std::string*)t);
-				str->append("</string>");
+				str->startElement("element");
+				str->content(*(std::string*)t);
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
-			return "<string>"+*(std::string*)t+"</string>";
+			return "<element>"+*(std::string*)t+"</element>";
 		}
 		case 2: {
 			if(str!=NULL) {
-				str->append("<char>");
-				str->push_back(((char*)t)[0]);
-				str->append("</char>");
+				str->startElement("element");
+				str->content((char*)t);
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
 			std::string s;
 			s.push_back(((char*)t)[0]);
-			return "<char>"+s+"</char>";
+			return "<element>"+s+"</element>";
 		}
 		case 3: {
 			if(str!=NULL) {
-				str->append("<uchar>");
-				str->push_back(((unsigned char*)t)[0]);
-				str->append("</uchar>");
+				str->startElement("element");
+				str->content((char*)t);
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
 			std::string s;
 			s.push_back(((unsigned char*)t)[0]);
-			return "<uchar>"+s+"</uchar>";
+			return "<element>"+s+"</element>";
 		}
 		case 4: {
 			if(str!=NULL) {
-				str->append("<int>");
-				CastUtil::fromNumber(*(int*)t, str);
-				str->append("</int>");
+				str->startElement("element");
+				str->content(CastUtil::fromNumber(*(int*)t));
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
-			return "<int>"+CastUtil::fromNumber(*(int*)t)+"</int>";
+			return "<element>"+CastUtil::fromNumber(*(int*)t)+"</element>";
 		}
 		case 5: {
 			if(str!=NULL) {
-				str->append("<uint>");
-				CastUtil::fromNumber(*(unsigned int*)t, str);
-				str->append("</uint>");
+				str->startElement("element");
+				str->content(CastUtil::fromNumber(*(unsigned int*)t));
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
-			return "<uint>"+CastUtil::fromNumber(*(unsigned int*)t)+"</uint>";
+			return "<element>"+CastUtil::fromNumber(*(unsigned int*)t)+"</element>";
 		}
 		case 6: {
 			if(str!=NULL) {
-				str->append("<short>");
-				CastUtil::fromNumber(*(short*)t, str);
-				str->append("</short>");
+				str->startElement("element");
+				str->content(CastUtil::fromNumber(*(short*)t));
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
-			return "<short>"+CastUtil::fromNumber(*(short*)t)+"</short>";
+			return "<element>"+CastUtil::fromNumber(*(short*)t)+"</element>";
 		}
 		case 7: {
 			if(str!=NULL) {
-				str->append("<ushort>");
-				CastUtil::fromNumber(*(unsigned short*)t, str);
-				str->append("</ushort>");
+				str->startElement("element");
+				str->content(CastUtil::fromNumber(*(unsigned short*)t));
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
-			return "<ushort>"+CastUtil::fromNumber(*(unsigned short*)t)+"</ushort>";
+			return "<element>"+CastUtil::fromNumber(*(unsigned short*)t)+"</element>";
 		}
 		case 8: {
 			if(str!=NULL) {
-				str->append("<long>");
-				CastUtil::fromNumber(*(long*)t, str);
-				str->append("</long>");
+				str->startElement("element");
+				str->content(CastUtil::fromNumber(*(long*)t));
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
-			return "<long>"+CastUtil::fromNumber(*(long*)t)+"</long>";
+			return "<element>"+CastUtil::fromNumber(*(long*)t)+"</element>";
 		}
 		case 9: {
 			if(str!=NULL) {
-				str->append("<ulong>");
-				CastUtil::fromNumber(*(unsigned long*)t, str);
-				str->append("</ulong>");
+				str->startElement("element");
+				str->content(CastUtil::fromNumber(*(unsigned long*)t));
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
-			return "<ulong>"+CastUtil::fromNumber(*(unsigned long*)t)+"</ulong>";
+			return "<element>"+CastUtil::fromNumber(*(unsigned long*)t)+"</element>";
 		}
 		case 10: {
 			if(str!=NULL) {
-				str->append("<llong>");
-				CastUtil::fromNumber(*(long long*)t, str);
-				str->append("</llong>");
+				str->startElement("element");
+				str->content(CastUtil::fromNumber(*(long long*)t));
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
-			return "<llong>"+CastUtil::fromNumber(*(long long*)t)+"</llong>";
+			return "<element>"+CastUtil::fromNumber(*(long long*)t)+"</element>";
 		}
 		case 11: {
 			if(str!=NULL) {
-				str->append("<ullong>");
-				CastUtil::fromNumber(*(unsigned long long*)t, str);
-				str->append("</ullong>");
+				str->startElement("element");
+				str->content(CastUtil::fromNumber(*(unsigned long long*)t));
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
-			return "<ullong>"+CastUtil::fromNumber(*(unsigned long long*)t)+"</ullong>";
+			return "<element>"+CastUtil::fromNumber(*(unsigned long long*)t)+"</element>";
 		}
 		case 12: {
 			if(str!=NULL) {
-				str->append("<float>");
-				CastUtil::fromFloat(*(float*)t, str);
-				str->append("</float>");
+				str->startElement("element");
+				str->content(CastUtil::fromFloat(*(float*)t));
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
-			return "<float>"+CastUtil::fromFloat(*(float*)t)+"</float>";
+			return "<element>"+CastUtil::fromFloat(*(float*)t)+"</element>";
 		}
 		case 13: {
 			if(str!=NULL) {
-				str->append("<double>");
-				CastUtil::fromDouble(*(double*)t, str);
-				str->append("</double>");
+				str->startElement("element");
+				str->content(CastUtil::fromDouble(*(double*)t));
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
-			return "<double>"+CastUtil::fromDouble(*(double*)t)+"</double>";
+			return "<element>"+CastUtil::fromDouble(*(double*)t)+"</element>";
 		}
 		case 14: {
 			if(str!=NULL) {
-				str->append("<ldouble>");
-				CastUtil::fromLongdouble(*(long double*)t, str);
-				str->append("</ldouble>");
+				str->startElement("element");
+				str->content(CastUtil::fromLongdouble(*(long double*)t));
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
-			return "<ldouble>"+CastUtil::fromLongdouble(*(long double*)t)+"</ldouble>";
+			return "<element>"+CastUtil::fromLongdouble(*(long double*)t)+"</element>";
 		}
 		case 15: {
 			if(str!=NULL) {
-				str->append("<bool>");
-				CastUtil::fromBool(*(bool*)t, str);
-				str->append("</bool>");
+				str->startElement("element");
+				str->content(CastUtil::fromBool(*(bool*)t));
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
-			return "<bool>"+CastUtil::fromBool(*(bool*)t)+"</bool>";
+			return "<element>"+CastUtil::fromBool(*(bool*)t)+"</element>";
 		}
 		case 16: {
 			DateFormat formt;
 			if(str!=NULL) {
-				str->append("<Date>"+formt.format(*(Date*)t)+"</Date>");
+				str->startElement("element");
+				str->content(formt.format(*(Date*)t));
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
-			return "<Date>"+formt.format(*(Date*)t)+"</Date>";
+			return "<element>"+formt.format(*(Date*)t)+"</element>";
 		}
 		case 17: {
 			if(str!=NULL) {
-				str->append("<BinaryData>"+BinaryData::serilaize(*(BinaryData*)t)+"</BinaryData>");
+				str->startElement("element");
+				str->content(BinaryData::serilaize(*(BinaryData*)t));
+				str->closeElement();
 				return CommonUtils::BLANK;
 			}
-			return "<BinaryData>"+BinaryData::serilaize(*(BinaryData*)t)+"</BinaryData>";
+			return "<element>"+BinaryData::serilaize(*(BinaryData*)t)+"</element>";
 		}
 	}
 	return CommonUtils::BLANK;
 }
 
-void* XMLSerialize::getSerializableObject()
+void* XMLSerialize::getSerializableObject(void* exobj)
 {
-	return new std::string;
+	return exobj!=NULL?exobj:new SimpleStringXmlWriter;
 }
 
 void XMLSerialize::cleanSerializableObject(void* _1)
 {
-	std::string* object = (std::string*)_1;
-	delete object;
+	XmlWriter* xw = (XmlWriter*)_1;
+	xw->closeAll();
+	if(xw->writerType()=="stream") {
+		delete (SimpleStreamXmlWriter*)_1;
+	} else {
+		delete (SimpleStringXmlWriter*)_1;
+	}
 }
 
 void XMLSerialize::startContainerSerialization(void* _1, const std::string& className, const std::string& container)
 {
-	std::string clsn = StringUtil::replaceFirstCopy(className, "std::", "");
-	std::string cntn = StringUtil::replaceFirstCopy(container, "std::", "");
-	std::string* object = (std::string*)_1;
-	*object += "<"+cntn+"-"+clsn+">";
+	XmlWriter* xw = (XmlWriter*)_1;
+	xw->startElement("collection");
+	xw->attribute("ctype", container);
+	xw->attribute("etype", className);
 }
 
 void XMLSerialize::endContainerSerialization(void* _1, const std::string& className, const std::string& container)
 {
-	std::string clsn = StringUtil::replaceFirstCopy(className, "std::", "");
-	std::string cntn = StringUtil::replaceFirstCopy(container, "std::", "");
-	std::string* object = (std::string*)_1;
-	*object += "</"+cntn+"-"+clsn+">";
+	XmlWriter* xw = (XmlWriter*)_1;
+	xw->closeElement();
 }
 
 void XMLSerialize::afterAddContainerSerializableElement(void* _1, const int& counter, const int& size){}
 
-void XMLSerialize::addContainerSerializableElement(void* _1, const std::string& tem)
-{
-	std::string* object = (std::string*)_1;
-	*object += tem;
-}
+void XMLSerialize::addContainerSerializableElement(void* _1, const std::string& tem){}
 
-void XMLSerialize::addContainerSerializableElementMulti(void* _1, const std::string& tem)
-{
-	std::string* object = (std::string*)_1;
-	*object += tem;
-}
+void XMLSerialize::addContainerSerializableElementMulti(void* _1, const std::string& tem){}
 
 std::string XMLSerialize::fromSerializableObjectToString(void* _1)
 {
-	std::string* object = (std::string*)_1;
-	return *object;
+	XmlWriter* xw = (XmlWriter*)_1;
+	return xw->toString();
 }
 
 std::string XMLSerialize::elementToSerializedString(void* _1, const int& counter)
 {
+#ifdef HAVE_PUGI_XML
+	pugi::xml_node doc((pugi::xml_node_struct*)_1);
+	int cnt = 0;
+	for (pugi::xml_node n: doc.children()) {
+		if(cnt++==counter) {
+			xml_string_writer xw;
+			n.print(xw);
+			return xw.result;
+		}
+	}
+	return CommonUtils::BLANK;
+#else
 	Element* object = (Element*)_1;
 	return object->getChildElements().at(counter).renderChildren();
+#endif
 }
 
 std::string XMLSerialize::getConatinerElementClassName(void* _1, const std::string& className)
 {
-	Element* root = (Element*)_1;
-	std::string stlclassName = root->getTagName();
-	if(stlclassName.find("-")!=std::string::npos)
-	{
-		return stlclassName.substr(stlclassName.find_last_of("-")+1);
+#ifdef HAVE_PUGI_XML
+	pugi::xml_node doc((pugi::xml_node_struct*)_1);
+	if(strcmp(doc.name(), "collection")==0) {
+		return std::string(doc.attribute("etype").value());
 	}
+#else
+	Element* root = (Element*)_1;
+	if(root->getTagName()=="collection") {
+		return root->getAttribute("etype");
+	}
+#endif
 	return className;
 }
 
 void* XMLSerialize::getContainerElement(void* _1, const int& counter, const int& counter1)
 {
+#ifdef HAVE_PUGI_XML
+	pugi::xml_node doc((pugi::xml_node_struct*)_1);
+	int cnt = 0, cnt1 = 0;
+	for (pugi::xml_node c: doc.children()) {
+		if(cnt++==counter && strcmp(c.name(), "element")==0) {
+			return c.internal_object();
+		}
+	}
+	return NULL;
+#else
 	Element* root = (Element*)_1;
 	if((int)root->getChildElements().size()<counter)
 		return NULL;
 	Element* ele = (Element*)&(root->getChildElements().at(counter));
-	if(counter1!=-1)
+	if(ele->getTagName()=="element")
 	{
-		if((int)ele->getChildElements().size()<counter1)
-			return NULL;
-		ele = (Element*)&(ele->getChildElements().at(counter1));
+		return ele;
 	}
-	return ele;
+	return NULL;
+#endif
 }
 
 void XMLSerialize::addPrimitiveElementToContainer(void* _1, int serOpt, const int& counter, const std::string& className, void* cont, const std::string& container)
 {
+#ifdef HAVE_PUGI_XML
+	std::string tval;
+	pugi::xml_node doc((pugi::xml_node_struct*)_1);
+	int cnt = 0;
+	for (pugi::xml_node n: doc.children()) {
+		if(cnt++==counter) {
+			tval.append(n.text().get());
+			break;
+		}
+	}
+#else
 	Element* root = (Element*)_1;
 	Element* ele = (Element*)&(root->getChildElements().at(counter));
+	std::string tval = ele->getText();
+#endif
 	switch(serOpt) {
 		case 1:
 		{
-			std::string retVal = ele->getText();
+			std::string retVal = tval;
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 2:
 		{
-			char retVal = ele->getText().at(0);
+			char retVal = tval.at(0);
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 3:
 		{
-			unsigned char retVal = ele->getText().at(0);
+			unsigned char retVal = tval.at(0);
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 4:
 		{
-			int retVal = CastUtil::toInt(ele->getText());
+			int retVal = CastUtil::toInt(tval);
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 5:
 		{
-			unsigned int retVal = CastUtil::toUInt(ele->getText());
+			unsigned int retVal = CastUtil::toUInt(tval);
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 6:
 		{
-			short retVal = CastUtil::toShort(ele->getText());
+			short retVal = CastUtil::toShort(tval);
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 7:
 		{
-			unsigned short retVal = CastUtil::toUShort(ele->getText());
+			unsigned short retVal = CastUtil::toUShort(tval);
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 8:
 		{
-			long retVal = CastUtil::toLong(ele->getText());
+			long retVal = CastUtil::toLong(tval);
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 9:
 		{
-			unsigned long retVal = CastUtil::toULong(ele->getText());
+			unsigned long retVal = CastUtil::toULong(tval);
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 10:
 		{
-			long long retVal = CastUtil::toLonglong(ele->getText());
+			long long retVal = CastUtil::toLonglong(tval);
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 11:
 		{
-			unsigned long long retVal = CastUtil::toULonglong(ele->getText());
+			unsigned long long retVal = CastUtil::toULonglong(tval);
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 12:
 		{
-			float retVal = CastUtil::toFloat(ele->getText());
+			float retVal = CastUtil::toFloat(tval);
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 13:
 		{
-			double retVal = CastUtil::toDouble(ele->getText());
+			double retVal = CastUtil::toDouble(tval);
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 14:
 		{
-			long double retVal = CastUtil::toLongdouble(ele->getText());
+			long double retVal = CastUtil::toLongdouble(tval);
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 15:
 		{
-			bool retVal = CastUtil::toBool(ele->getText());
+			bool retVal = CastUtil::toBool(tval);
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
@@ -387,7 +426,7 @@ void XMLSerialize::addPrimitiveElementToContainer(void* _1, int serOpt, const in
 		case 16:
 		{
 			DateFormat formt;
-			Date* _d = formt.parse(ele->getText());
+			Date* _d = formt.parse(tval);
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, *_d, cont);
 			else addValueToNestedContainer(container, *_d, cont);
 			delete _d;
@@ -398,6 +437,13 @@ void XMLSerialize::addPrimitiveElementToContainer(void* _1, int serOpt, const in
 
 void* XMLSerialize::getUnserializableObject(const std::string& _1)
 {
+#ifdef HAVE_PUGI_XML
+	pugi::xml_document* doc = new pugi::xml_document;
+	pugi::xml_parse_result result = doc->load_buffer(_1.c_str(), _1.length());
+	if (!result) return NULL;
+	pugiDoc.set(doc);
+	return doc->document_element().internal_object();
+#else
 	SimpleXmlParser parser("Parser");
 	try
 	{
@@ -412,136 +458,162 @@ void* XMLSerialize::getUnserializableObject(const std::string& _1)
 		std::cout << "XML Parse Error" << std::endl;
 	}
 	return NULL;
+#endif
 }
 
 void XMLSerialize::cleanUnserializableObject(void* _1)
 {
+#ifdef HAVE_PUGI_XML
+	if(pugiDoc.get()!=NULL) {
+		pugi::xml_document* doc = (pugi::xml_document*)pugiDoc.get();
+		pugiDoc.reset(NULL);
+		delete doc;
+	}
+#else
 	Element* object = (Element*)_1;
 	delete object;
+#endif
 }
 
 void XMLSerialize::cleanValidUnserializableObject(void* _1)
 {
-	Element* object = (Element*)_1;
-	delete object;
+	//no op
 }
 
 void* XMLSerialize::getValidUnserializableObject(const std::string& _1){return NULL;}
 
 int XMLSerialize::getContainerSize(void* _1)
 {
+#ifdef HAVE_PUGI_XML
+	pugi::xml_node doc((pugi::xml_node_struct*)_1);
+	int counter = 0;
+	for (pugi::xml_node tool: doc.children()) counter++;
+	return counter;
+#else
 	Element* root = (Element*)_1;
 	return root->getChildElements().size();
+#endif
 }
 
 std::string XMLSerialize::getUnserializableClassName(void* _1, const std::string& className)
 {
+#ifdef HAVE_PUGI_XML
+	pugi::xml_node doc((pugi::xml_node_struct*)_1);
+	return std::string(doc.name());
+#else
 	Element* root = (Element*)_1;
 	return root->getTagName();
+#endif
 }
 
 void* XMLSerialize::getPrimitiveValue(void* _1, int serOpt, const std::string& className)
 {
+#ifdef HAVE_PUGI_XML
+	pugi::xml_node doc((pugi::xml_node_struct*)_1);
+	std::string tval(doc.text().get());
+#else
 	Element* root = (Element*)_1;
+	std::string tval = root->getText();
+#endif
 	switch(serOpt) {
 		case 1:
 		{
 			std::string *vt = new std::string;
-			*vt = root->getText();
+			*vt = tval;
 			return vt;
 		}
 		case 2:
 		{
 			char *vt = new char;
-			*vt = root->getText().at(0);
+			*vt = tval.at(0);
 			return vt;
 		}
 		case 3:
 		{
 			unsigned char *vt = new unsigned char;
-			*vt = root->getText().at(0);
+			*vt = tval.at(0);
 			return vt;
 		}
 		case 4:
 		{
 			int *vt = new int;
-			*vt = CastUtil::toInt(root->getText());
+			*vt = CastUtil::toInt(tval);
 			return vt;
 		}
 		case 5:
 		{
 			unsigned int *vt = new unsigned int;
-			*vt = CastUtil::toUInt(root->getText());
+			*vt = CastUtil::toUInt(tval);
 			return vt;
 		}
 		case 6:
 		{
 			short *vt = new short;
-			*vt = CastUtil::toShort(root->getText());
+			*vt = CastUtil::toShort(tval);
 			return vt;
 		}
 		case 7:
 		{
 			unsigned short *vt = new unsigned short;
-			*vt = CastUtil::toUShort(root->getText());
+			*vt = CastUtil::toUShort(tval);
 			return vt;
 		}
 		case 8:
 		{
 			long *vt = new long;
-			*vt = CastUtil::toLong(root->getText());
+			*vt = CastUtil::toLong(tval);
 			return vt;
 		}
 		case 9:
 		{
 			unsigned long *vt = new unsigned long;
-			*vt = CastUtil::toLong(root->getText());
+			*vt = CastUtil::toLong(tval);
 			return vt;
 		}
 		case 10:
 		{
 			long long *vt = new long long;
-			*vt = CastUtil::toLonglong(root->getText());
+			*vt = CastUtil::toLonglong(tval);
 			return vt;
 		}
 		case 11:
 		{
 			unsigned long long *vt = new unsigned long long;
-			*vt = CastUtil::toLong(root->getText());
+			*vt = CastUtil::toLong(tval);
 			return vt;
 		}
 		case 12:
 		{
 			float *vt = new float;
-			*vt = CastUtil::toFloat(root->getText());
+			*vt = CastUtil::toFloat(tval);
 			return vt;
 		}
 		case 13:
 		{
 			double *vt = new double;
-			*vt = CastUtil::toDouble(root->getText());
+			*vt = CastUtil::toDouble(tval);
 			return vt;
 		}
 		case 14:
 		{
 			long double *vt = new long double;
-			*vt = CastUtil::toLongdouble(root->getText());
+			*vt = CastUtil::toLongdouble(tval);
 			return vt;
 		}
 		case 15:
 		{
 			bool *vt = new bool;
-			*vt = CastUtil::toBool(root->getText());
+			*vt = CastUtil::toBool(tval);
 			return vt;
 		}
 		case 16:
 		{
 			DateFormat formt;
-			return formt.parse(root->getText());
+			return formt.parse(tval);
 		}
 		case 17:
 		{
-			return BinaryData::unSerilaize(root->getText());
+			return BinaryData::unSerilaize(tval);
 		}
 	}
 	return NULL;
@@ -549,6 +621,13 @@ void* XMLSerialize::getPrimitiveValue(void* _1, int serOpt, const std::string& c
 
 std::string XMLSerialize::serializeUnknown(void* t, int serOpt, const std::string& className, void* serobject, const std::string& appName)
 {
+	bool soe = serobject!=NULL;
+	if(soe) {
+		serobject = new SimpleStringXmlWriter((std::string*)serobject);
+		_handleAllSerialization(serOpt,className,t,appName, &_i, NULL, NULL, NULL, serobject);
+		XMLSerialize::_i.cleanSerializableObject(serobject);
+		return CommonUtils::BLANK;
+	}
 	return _handleAllSerialization(serOpt,className,t,appName, &_i, NULL, NULL, NULL, serobject);
 }
 
@@ -559,285 +638,329 @@ void* XMLSerialize::unSerializeUnknown(const std::string& objXml, int serOpt, co
 
 bool XMLSerialize::isValidClassNamespace(void* _1, const std::string& className, const std::string& namespc, const bool& iscontainer)
 {
-	std::string tnmspc = namespc;
-	StringUtil::replaceAll(tnmspc, "::", "_");
-	/*StringUtil::replaceAll(className, "std::", "");
-	StringUtil::replaceAll(className, "::", "_");
-	StringUtil::replaceAll(className, "<", "-");
-	StringUtil::replaceAll(className, ">", "-");
-	if(className.at(className.length()-1)=='-')
-		className = className.substr(0, className.length()-1);*/
-	std::string cn = className;
-	if(cn.find('-')!=std::string::npos)
-	{
-		std::string pre = cn.substr(0, cn.find_last_of("-")+1);
-		cn = cn.substr(cn.find_last_of("-")+1);
-		cn = pre + tnmspc + cn;
+	std::string cn = namespc+className;
+#ifdef HAVE_PUGI_XML
+	pugi::xml_node doc((pugi::xml_node_struct*)_1);
+	if(!iscontainer && strcmp(doc.name(), "element")==0 && strcmp(doc.attribute("type").value(), cn.c_str())==0) {
+		return true;
 	}
-	else
-		cn = tnmspc + cn;
+	if(iscontainer && strcmp(doc.name(), "collection")==0 && strcmp(doc.attribute("etype").value(), cn.c_str())==0) {
+		return true;
+	}
+#else
 	Element* element = (Element*)_1;
-	if(element->getTagName()!=cn || (iscontainer &&  element->getChildElements().size()==0))
-		return false;
-	return true;
+	if(!iscontainer && element->getTagName()=="element" && element->getAttribute("type")==cn) {
+		return true;
+	}
+	if(iscontainer && element->getTagName()=="collection" && element->getAttribute("etype")==cn) {
+		return true;
+	}
+#endif
+	return false;
 }
 
 bool XMLSerialize::isValidObjectProperty(void* _1, const std::string& propname, const int& counter)
 {
-	Element* element = (Element*)_1;
-	if((int)element->getChildElements().size()>counter && element->getChildElements().at(counter).getTagName()==propname)
-		return true;
+#ifdef HAVE_PUGI_XML
+	pugi::xml_node doc((pugi::xml_node_struct*)_1);
+	for (pugi::xml_node n: doc.children()) {
+		if(strcmp(n.name(), "property")==0 && strcmp(n.attribute("name").value(), propname.c_str())==0) {
+			return true;
+		}
+	}
+#else
+	Element* elel = (Element*)_1;
+	for(auto& el: elel->getChildElements()) {
+		if(el.getTagName()=="property" && el.getAttribute("name")==propname) {
+			return true;
+		}
+	}
+#endif
 	return false;
 }
 
-void* XMLSerialize::getObjectProperty(void* _1, const int& counter)
+void* XMLSerialize::getObjectProperty(void* _1, const int& counter, const std::string& propname)
 {
+#ifdef HAVE_PUGI_XML
+	pugi::xml_node doc((pugi::xml_node_struct*)_1);
+	for (pugi::xml_node n: doc.children()) {
+		if(strcmp(n.name(), "property")==0 && strcmp(n.attribute("name").value(), propname.c_str())==0) {
+			if(n.first_child().type()==pugi::xml_node_type::node_element) return n.first_child().internal_object();
+			return n.internal_object();
+		}
+	}
+#else
 	Element* elel = (Element*)_1;
-	return (void*)&(elel->getChildElements().at(counter));
+	for(auto& el: elel->getChildElements()) {
+		if(el.getTagName()=="property" && el.getAttribute("name")==propname) {
+			if(el.getChildElements().size()>0) {
+				return (Element*)&(el.getChildElements().at(0));
+			}
+			return (Element*)&el;
+		}
+	}
+#endif
+	return NULL;
 }
 
 void XMLSerialize::startObjectSerialization(void* _1, const std::string& className)
 {
-	std::string* object = (std::string*)_1;
-	*object += "<"+className+">";
+	XmlWriter* xw = (XmlWriter*)_1;
+	xw->startElement("element");
+	xw->attribute("type", className);
 }
 
 void XMLSerialize::endObjectSerialization(void* _1, const std::string& className)
 {
-	std::string* object = (std::string*)_1;
-	*object += "</"+className+">";
+	XmlWriter* xw = (XmlWriter*)_1;
+	xw->closeElement();
 }
 
 void XMLSerialize::afterAddObjectProperty(void* _1, const std::string& propName) {
-	std::string* object = (std::string*)_1;
-	*object += "</" + propName + ">";
+	XmlWriter* xw = (XmlWriter*)_1;
+	xw->closeElement();
 }
 
 void XMLSerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::string& propName, const std::string& className, void* t)
 {
-	std::string* object = (std::string*)_1;
-	std::string objXml;
+	XmlWriter* xw = (XmlWriter*)_1;
+	xw->startElement("property");
+	xw->attribute("name", propName);
 	switch(serOpt) {
 		case 1:
 		{
-			*object += "<" + propName + ">" + *(std::string*)t;
+			xw->content(*(std::string*)t);
 			break;
 		}
 		case 2:
 		{
 			std::string s;
 			s.push_back(((char*)t)[0]);
-			*object += "<" + propName + ">" + s;
+			xw->content(s);
 			break;
 		}
 		case 3:
 		{
 			std::string s;
 			s.push_back(((unsigned char*)t)[0]);
-			*object += "<" + propName + ">" + s;
+			xw->content(s);
 			break;
 		}
 		case 4:
 		{
-			*object += "<" + propName + ">" + CastUtil::fromNumber(*(int*)t);
+			xw->content(CastUtil::fromNumber(*(int*)t));
 			break;
 		}
 		case 5:
 		{
-			*object += "<" + propName + ">" + CastUtil::fromNumber(*(unsigned int*)t);
+			xw->content(CastUtil::fromNumber(*(unsigned int*)t));
 			break;
 		}
 		case 6:
 		{
-			*object += "<" + propName + ">" + CastUtil::fromNumber(*(short*)t);
+			xw->content(CastUtil::fromNumber(*(short*)t));
 			break;
 		}
 		case 7:
 		{
-			*object += "<" + propName + ">" + CastUtil::fromNumber(*(unsigned short*)t);
+			xw->content(CastUtil::fromNumber(*(unsigned short*)t));
 			break;
 		}
 		case 8:
 		{
-			*object += "<" + propName + ">" + CastUtil::fromNumber(*(long*)t);
+			xw->content(CastUtil::fromNumber(*(long*)t));
 			break;
 		}
 		case 9:
 		{
-			*object += "<" + propName + ">" + CastUtil::fromNumber(*(unsigned long*)t);
+			xw->content(CastUtil::fromNumber(*(unsigned long*)t));
 			break;
 		}
 		case 10:
 		{
-			*object += "<" + propName + ">" + CastUtil::fromNumber(*(long long*)t);
+			xw->content(CastUtil::fromNumber(*(long long*)t));
 			break;
 		}
 		case 11:
 		{
-			*object += "<" + propName + ">" + CastUtil::fromNumber(*(unsigned long long*)t);
+			xw->content(CastUtil::fromNumber(*(unsigned long long*)t));
 			break;
 		}
 		case 12:
 		{
-			*object += "<" + propName + ">" + CastUtil::fromFloat(*(float*)t);
+			xw->content(CastUtil::fromFloat(*(float*)t));
 			break;
 		}
 		case 13:
 		{
-			*object += "<" + propName + ">" + CastUtil::fromDouble(*(double*)t);
+			xw->content(CastUtil::fromDouble(*(double*)t));
 			break;
 		}
 		case 14:
 		{
-			*object += "<" + propName + ">" + CastUtil::fromLongdouble(*(long double*)t);
+			xw->content(CastUtil::fromLongdouble(*(long double*)t));
 			break;
 		}
 		case 15:
 		{
-			*object += "<" + propName + ">" + CastUtil::fromBool(*(bool*)t);
+			xw->content(CastUtil::fromBool(*(bool*)t));
 			break;
 		}
 		case 16:
 		{
 			DateFormat formt;
-			*object += "<" + propName + ">" + formt.format((Date*)t);
+			xw->content(formt.format((Date*)t));
 			break;
 		}
 		case 17:
 		{
-			*object += "<" + propName + ">" + BinaryData::serilaize(*(BinaryData*)t);
+			xw->content(BinaryData::serilaize(*(BinaryData*)t));
+			break;
 		}
 	}
 }
 
 void XMLSerialize::addObjectProperty(void* _1, const std::string& propName, std::string className)
 {
-	std::string* object = (std::string*)_1;
-
-	StringUtil::replaceAll(className, "std::", "");
-	StringUtil::replaceAll(className, "::", "_");
-	StringUtil::replaceAll(className, "<", "-");
-	StringUtil::replaceAll(className, ">", "-");
-	if(className.at(className.length()-1)=='-')
-		className = className.substr(0, className.length()-1);
-	//TODO - any side effects??
-	//*object += "<" + propName + " type=\"" + className + "\">" + t + "</" + propName + ">";
-	*object += "<" + propName + ">";
+	XmlWriter* xw = (XmlWriter*)_1;
+	xw->startElement("property");
+	xw->attribute("name", propName);
 }
 
 void* XMLSerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::string& className, const std::string& propName)
 {
-	Element* root = (Element*)_1;
-	if(root->getTagName()!=propName)
+#ifdef HAVE_PUGI_XML
+	pugi::xml_node doc((pugi::xml_node_struct*)_1);
+	if(strcmp(doc.name(), "property")!=0 || strcmp(doc.attribute("name").value(), propName.c_str())!=0)
 		return NULL;
+	std::string tval(doc.text().get());
+#else
+	Element* root = (Element*)_1;
+	std::string tval = root->getText();
+	std::string tname = root->getTagName();
+	if(tname!="property" || root->getAttribute("name")!=propName)
+		return NULL;
+#endif
 
 	switch(serOpt) {
 		case 1:
 		{
 			std::string *vt = new std::string;
-			*vt = root->getText();
+			*vt = tval;
 			return vt;
 		}
 		case 2:
 		{
 			char *vt = new char;
-			*vt = root->getText().at(0);
+			*vt = tval.at(0);
 			return vt;
 		}
 		case 3:
 		{
 			unsigned char *vt = new unsigned char;
-			*vt = root->getText().at(0);
+			*vt = tval.at(0);
 			return vt;
 		}
 		case 4:
 		{
 			int *vt = new int;
-			*vt = CastUtil::toInt(root->getText());
+			*vt = CastUtil::toInt(tval);
 			return vt;
 		}
 		case 5:
 		{
 			unsigned int *vt = new unsigned int;
-			*vt = CastUtil::toUInt(root->getText());
+			*vt = CastUtil::toUInt(tval);
 			return vt;
 		}
 		case 6:
 		{
 			short *vt = new short;
-			*vt = CastUtil::toShort(root->getText());
+			*vt = CastUtil::toShort(tval);
 			return vt;
 		}
 		case 7:
 		{
 			unsigned short *vt = new unsigned short;
-			*vt = CastUtil::toUShort(root->getText());
+			*vt = CastUtil::toUShort(tval);
 			return vt;
 		}
 		case 8:
 		{
 			long *vt = new long;
-			*vt = CastUtil::toLong(root->getText());
+			*vt = CastUtil::toLong(tval);
 			return vt;
 		}
 		case 9:
 		{
 			unsigned long *vt = new unsigned long;
-			*vt = CastUtil::toLong(root->getText());
+			*vt = CastUtil::toLong(tval);
 			return vt;
 		}
 		case 10:
 		{
 			long long *vt = new long long;
-			*vt = CastUtil::toLonglong(root->getText());
+			*vt = CastUtil::toLonglong(tval);
 			return vt;
 		}
 		case 11:
 		{
 			unsigned long long *vt = new unsigned long long;
-			*vt = CastUtil::toLong(root->getText());
+			*vt = CastUtil::toLong(tval);
 			return vt;
 		}
 		case 12:
 		{
 			float *vt = new float;
-			*vt = CastUtil::toFloat(root->getText());
+			*vt = CastUtil::toFloat(tval);
 			return vt;
 		}
 		case 13:
 		{
 			double *vt = new double;
-			*vt = CastUtil::toDouble(root->getText());
+			*vt = CastUtil::toDouble(tval);
 			return vt;
 		}
 		case 14:
 		{
 			long double *vt = new long double;
-			*vt = CastUtil::toLongdouble(root->getText());
+			*vt = CastUtil::toLongdouble(tval);
 			return vt;
 		}
 		case 15:
 		{
 			bool *vt = new bool;
-			*vt = CastUtil::toBool(root->getText());
+			*vt = CastUtil::toBool(tval);
 			return vt;
 		}
 		case 16:
 		{
 			DateFormat formt;
-			return formt.parse(root->getText());
+			return formt.parse(tval);
 		}
 		case 17:
 		{
-			return BinaryData::unSerilaize(root->getText());
+			return BinaryData::unSerilaize(tval);
 		}
 	}
 	return NULL;
 }
 
+std::string XMLSerialize::serializeUnknownBaseInt(void* t, int serOpt, const std::string& className, const std::string& appName, void* serobject)
+{
+	return _handleAllSerialization(serOpt, className, t, appName, this, NULL, NULL, NULL, serobject);
+}
+
 std::string XMLSerialize::serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName, void* serobject)
 {
-	return _handleAllSerialization(serOpt,className,t,appName, this, NULL, NULL, NULL, serobject);
+	bool soe = serobject!=NULL;
+	if(soe) {
+		serobject = new SimpleStringXmlWriter((std::string*)serobject);
+		_handleAllSerialization(serOpt, className, t, appName, this, NULL, NULL, NULL, serobject);
+		cleanSerializableObject(serobject);
+		return CommonUtils::BLANK;
+	}
+	return _handleAllSerialization(serOpt, className, t, appName, this, NULL, NULL, NULL, serobject);
 }
 void* XMLSerialize::unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName)
 {
@@ -848,12 +971,26 @@ void* XMLSerialize::unSerializeUnknownBase(const std::string& serVal, int serOpt
 	return _handleAllUnSerialization(serVal,serOpt,className,appName,this,false,NULL);
 }
 
-std::string Serializer::toXml(const std::string &appName, std::string className, void *object, void *serOutput) {
-	return SerializeBase::_ser(object, className, appName, &XMLSerialize::_i, serOutput);
+std::string Serializer::toXml(const std::string &appName, std::string className, void *object, void *serobject) {
+	bool soe = serobject!=NULL;
+	if(soe) {
+		serobject = new SimpleStringXmlWriter((std::string*)serobject);
+		SerializeBase::_ser(object, className, appName, &XMLSerialize::_i, serobject);
+		XMLSerialize::_i.cleanSerializableObject(serobject);
+		return CommonUtils::BLANK;
+	}
+	return SerializeBase::_ser(object, className, appName, &XMLSerialize::_i, serobject);
 }
 
-std::string Serializer::toXml(const std::string &appName, std::string className, const std::string &container, void *object, void *serOutput) {
-	return SerializeBase::_serContainer(object, className, appName, container, &XMLSerialize::_i, serOutput);
+std::string Serializer::toXml(const std::string &appName, std::string className, const std::string &container, void *object, void *serobject) {
+	bool soe = serobject!=NULL;
+	if(soe) {
+		serobject = new SimpleStringXmlWriter((std::string*)serobject);
+		 SerializeBase::_serContainer(object, className, appName, container, &XMLSerialize::_i, serobject);
+		 XMLSerialize::_i.cleanSerializableObject(serobject);
+		return CommonUtils::BLANK;
+	}
+	return SerializeBase::_serContainer(object, className, appName, container, &XMLSerialize::_i, serobject);
 }
 
 void* Serializer::fromXml(const std::string &appName, std::string className, void *serObject) {

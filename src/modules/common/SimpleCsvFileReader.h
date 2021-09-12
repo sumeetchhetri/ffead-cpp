@@ -14,7 +14,7 @@
     limitations under the License.
 */
 /*
- * SimpleCsvFileReader.h
+ * SimpleCsvReader.h
  *
  *  Created on: 29-Jan-2013
  *      Author: sumeetc
@@ -22,6 +22,8 @@
 
 #ifndef CSVFILEREADER_H_
 #define CSVFILEREADER_H_
+#include "csv.hpp"
+#include "AppDefines.h"
 #include "iostream"
 #include "fstream"
 #include "sstream"
@@ -31,11 +33,16 @@
 
 typedef std::vector<std::vector<std::string> > strVecVec;
 
-class SimpleCsvFileReader {
+class SimpleCsvReader {
+	virtual ~SimpleCsvReader() {}
 public:
-	SimpleCsvFileReader();
-	virtual ~SimpleCsvFileReader();
-	strVecVec getRows(const std::string&);
+	static strVecVec getRows(const std::string&);
+};
+
+class AdvancedCsvReader {
+	virtual ~AdvancedCsvReader() {}
+public:
+	static strVecVec getRows(const std::string& filepath);
 };
 
 #endif /* CSVFILEREADER_H_ */

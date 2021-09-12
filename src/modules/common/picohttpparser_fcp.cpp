@@ -338,8 +338,14 @@ static const char *parse_headers(const char *buf, const char *buf_end, struct ph
         headers[*num_headers].value_len = value_end - value;
         //Code added by Sumeet Chhetri for content-length lookup
         if(headers[*num_headers].name_len==14 && strncasecmp(headers[*num_headers].name, "content-length", headers[*num_headers].name_len)==0) {
-        	std::string_view sv(headers[*num_headers].value, headers[*num_headers].value_len);
-			*content_length = CastUtil::toInt(std::string(sv));
+        	*content_length = 0;
+			for(int i = 0; i < headers[*num_headers].value_len; ++i)
+			{
+				if(!std::isdigit(headers[*num_headers].value[i])) break;
+				*content_length = *content_length * 10 + (headers[*num_headers].value[i] - '0');
+			}
+        	//std::string_view sv(headers[*num_headers].value, headers[*num_headers].value_len);
+			//*content_length = CastUtil::toInt(std::string(sv));
         }
         //Code added by Sumeet Chhetri for content-length lookup
     }

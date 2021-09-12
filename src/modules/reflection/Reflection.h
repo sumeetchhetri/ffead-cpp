@@ -37,6 +37,7 @@
 #include "TemplateEngine.h"
 #include "MarkerHandler.h"
 #include "CommonUtils.h"
+#include <regex>
 
 class Reflection {
 	//bool generateClassInfoFromDD(const std::string&);

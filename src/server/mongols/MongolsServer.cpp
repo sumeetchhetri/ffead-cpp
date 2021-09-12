@@ -49,8 +49,7 @@ void MongolsServer::runServer(std::string ipaddr, int port, std::vector<std::str
 
 		HttpRequest req(&headers, hc, url, qv, meth, 11, cont);
 		HttpResponse respo;
-		ServiceTask task;
-		task.handle(&req, &respo);
+		ServiceTask::handle(&req, &respo);
 
 		if(respo.isDone()) {
 			for (int var = 0; var < (int)respo.getCookies().size(); var++)

@@ -35,6 +35,8 @@
 #include "Thread.h"
 #include "SocketInterface.h"
 #include "RequestReaderHandler.h"
+#include "RequestHandler2.h"
+#include "Server.h"
 #include <variant>
 
 class LibpqParamsBase {
@@ -125,7 +127,14 @@ struct LibpqRes {
 	int l;
 };
 
+#ifdef HAVE_LIBPQ
 typedef void (*LipqCbFunc0) (void* ctx, PGresult* res);
+typedef void (*LipqCbFuncF) (void* ctx, bool status, std::vector<PGresult*>* results, const std::string& query, int counter);
+#else
+typedef void (*LipqCbFunc0) (void* ctx, void* res);
+typedef void (*LipqCbFuncF) (void* ctx, bool status, void* results, const std::string& query, int counter);
+#endif
+
 typedef void (*LipqCbFunc1) (void* ctx, bool endofdata, int row, int col, char* name, char* value, int vlen);
 typedef void (*LipqCbFunc2) (void* ctx, bool endofdata, int row, int col, char* value, int vlen);
 typedef void (*LipqCbFunc3) (void* ctx, bool endofdata, int row, int col, char* value);
@@ -133,8 +142,6 @@ typedef void (*LipqCbFunc3) (void* ctx, bool endofdata, int row, int col, char* 
 typedef void (*LipqCbFunc4) (void* ctx, int row, int col, char* name, char* value, int vlen);
 typedef void (*LipqCbFunc5) (void* ctx, int row, int col, char* value, int vlen);
 typedef void (*LipqCbFunc6) (void* ctx, int row, int col, char* value);
-
-typedef void (*LipqCbFuncF) (void* ctx, bool status, std::vector<PGresult*>* results, const std::string& query, int counter);
 
 class LibpqQuery {
 	std::list<LibpqParam> pvals;
@@ -224,7 +231,11 @@ class LibpqAsyncReq {
 	LipqCbFuncF fcb;
 	void* ctx;
 	int cnt;
+#ifdef HAVE_LIBPQ
 	std::vector<PGresult*> results;
+#else
+	std::vector<void*> results;
+#endif
 	std::deque<LibpqQuery> q;
 	friend class LibpqDataSourceImpl;
 	friend class PgReadTask;

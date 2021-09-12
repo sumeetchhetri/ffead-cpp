@@ -32,11 +32,11 @@ bool ServiceHandler::isActive() {
 void* ServiceHandler::closeConnections(void *arg) {
 	ServiceHandler* ths = (ServiceHandler*)arg;
 	std::map<std::string, long long> addrs;
-	std::map<std::string, SocketInterface*> sifMap;
+	std::map<std::string, BaseSocket*> sifMap;
 	std::map<std::string, long long>::iterator it;
 	while(ths->run) {
 		Thread::sSleep(5);
-		SocketInterface* si;
+		BaseSocket* si;
 		while(ths->toBeClosedConns.try_dequeue(si)) {
 			std::string as = si->address + CastUtil::fromNumber(si->fd);
 			if(addrs.find(as)==addrs.end()) {
@@ -91,7 +91,7 @@ std::string ServiceHandler::getDateStr() {
 	return std::string(CommonUtils::dateStr);
 }
 
-void ServiceHandler::closeConnection(SocketInterface* si) {
+void ServiceHandler::closeConnection(BaseSocket* si) {
 	this->toBeClosedConns.enqueue(si);
 }
 

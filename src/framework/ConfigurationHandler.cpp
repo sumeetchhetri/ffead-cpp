@@ -54,6 +54,10 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 
 	Reflection ref;
 	//First initialize framework markers
+	ref.addMarker(Marker("@CondBarrier", Marker::TYPE_CLASS, MarkerHandler::collectStr(2, "type", "value")));
+	ref.addMarker(Marker("@CondBarrier", Marker::TYPE_PROP, MarkerHandler::collectStr(2, "type", "value")));
+	ref.addMarker(Marker("@CondBarrier", Marker::TYPE_METH, MarkerHandler::collectStr(2, "type", "value")));
+
 	//Start Rest-full markers
 	ref.addMarker(Marker("@RestController", Marker::TYPE_CLASS, MarkerHandler::collectStr(1, "path")));
 	ref.addMarker(Marker("@GET", Marker::TYPE_METH, MarkerHandler::collectStr(5, "statusCode", "path", "icontentType", "ocontentType", "unmapped"),

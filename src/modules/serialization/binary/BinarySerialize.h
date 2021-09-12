@@ -28,10 +28,12 @@
 typedef std::string (*SerPtr) (void*);
 typedef void* (*UnSerPtr) (const std::string&);
 
+class BinarySerialize;
+
 class BinarySerialize : public SerializeBase {
 	static BinarySerialize _i;
 	std::string serializePrimitive(int serOpt, const std::string& className, void* t, void* serobject);
-	void* getSerializableObject();
+	void* getSerializableObject(void* exobj);
 	void cleanSerializableObject(void* _1);
 	void startContainerSerialization(void* _1, const std::string& className, const std::string& container);
 	void endContainerSerialization(void* _1, const std::string& className, const std::string& container);
@@ -194,7 +196,7 @@ public:
 
 	bool isValidClassNamespace(void* _1, const std::string& className, const std::string& namespc, const bool& iscontainer= false);
 	bool isValidObjectProperty(void* _1, const std::string& propname, const int& counter);
-	void* getObjectProperty(void* _1, const int& counter);
+	void* getObjectProperty(void* _1, const int& counter, const std::string& propname);
 	void startObjectSerialization(void* _1, const std::string& className);
 	void endObjectSerialization(void* _1, const std::string& className);
 	void afterAddObjectProperty(void* _1, const std::string& propName);
@@ -203,6 +205,9 @@ public:
 	void* getObjectPrimitiveValue(void* _1, int serOpt, const std::string& className, const std::string& propName);
 	static void* unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName = "");
 	std::string serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName, void* serobject);
+	std::string serializeUnknownBaseInt(void* t, int serOpt, const std::string& className, const std::string& appName, void* serobject){
+		return serializeUnknownBase(t, serOpt, className, appName, serobject);
+	}
 	void* unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName = "");
 	void* unSerializeUnknownBase(const std::string& serVal, int serOpt, const std::string& className, const std::string& appName = "");
 };

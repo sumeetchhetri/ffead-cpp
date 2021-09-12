@@ -26,6 +26,7 @@
 #include "Task.h"
 #include "CommonUtils.h"
 #include "WebSockHandler.h"
+#include "ServiceTask.h"
 
 class HttpServiceHandler;
 
@@ -43,8 +44,6 @@ public:
 	HttpServiceTask();
 	virtual std::string getCntEncoding();
 	HttpServiceTask(ReusableInstanceHolder* h);
-	virtual bool handle(HttpRequest* request, HttpResponse* response, SocketInterface* sif)=0;
-	virtual WebSockHandler* handleWebsockOpen(WebSocketData* request, WebSocketRespponseData* response, SocketInterface* sif, HttpRequest* hreq)=0;
 };
 
 class HttpReadTask : public Task {
@@ -79,8 +78,8 @@ typedef HttpReadTask* (*HttpReadTaskFactory) ();
 
 class HttpServiceHandler : public ServiceHandler {
 	std::string cntEncoding;
-	HttpServiceTaskFactory f;
-	HttpReadTaskFactory fr;
+	webSockHandle wh;
+	httpSockHandle hsh;
 	friend class HttpServiceTask;
 	friend class HttpReadTask;
 	void sockInit(SocketInterface* si);
@@ -88,7 +87,7 @@ class HttpServiceHandler : public ServiceHandler {
 	void handleRead(SocketInterface* sif);
 	void handleWrite(SocketInterface* sif);
 public:
-	HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, bool isSinglEVH, const HttpReadTaskFactory& fr);
+	HttpServiceHandler(const std::string& cntEncoding, const webSockHandle& f, const int& spoolSize, bool isSinglEVH, const httpSockHandle& fr);
 	virtual ~HttpServiceHandler();
 };
 

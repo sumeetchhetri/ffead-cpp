@@ -225,7 +225,7 @@ bool TeBkUmRouter::strToNum(const char* str, int len, int& ret) {
     return true;
 }
 
-bool TeBkUmRouter::route(HttpRequest* req, HttpResponse* res, SocketInterface* sif) {
+bool TeBkUmRouter::route(HttpRequest* req, HttpResponse* res, BaseSocket* sif) {
 	std::string_view path = req->getPath();
 	if(StringUtil::endsWith(path, "/plaintext")) {
 		res->setContent(HELLO_WORLD);

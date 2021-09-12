@@ -48,8 +48,7 @@ void UvCppServer::handler(uv::http::Request& req2, uv::http::Response* res)
 
 	HttpRequest req(&headers, hc, url, meth, 11, cont);
 	HttpResponse respo;
-	ServiceTask task;
-	task.handle(&req, &respo);
+	ServiceTask::handle(&req, &respo);
 
 	if(respo.isDone()) {
 		for (int var = 0; var < (int)respo.getCookies().size(); var++)

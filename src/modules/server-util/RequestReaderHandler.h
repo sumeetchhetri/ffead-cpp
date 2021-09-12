@@ -40,7 +40,6 @@
 #endif
 
 typedef SocketInterface* (*SocketInterfaceFactory) (SOCKET);
-typedef bool (*doRegisterListener) ();
 
 class RequestReaderHandler;
 
@@ -64,7 +63,7 @@ class RequestReaderHandler {
 	friend class LibpqDataSourceImpl;
 public:
 	static bool loopContinue(SelEpolKqEvPrt* ths);
-	static SocketInterface* loopEventCb(SelEpolKqEvPrt* ths, SocketInterface* sfd, int type, int fd, char* buf, size_t len, bool isClosed);
+	static BaseSocket* loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* sfd, int type, int fd, char* buf, size_t len, bool isClosed);
 	static void setInstance(RequestReaderHandler*);
 	static RequestReaderHandler* getInstance();
 	void start(unsigned int cid);

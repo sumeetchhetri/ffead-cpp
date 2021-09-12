@@ -22,11 +22,11 @@
 
 #include "HttpServiceHandler.h"
 
-HttpServiceHandler::HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, bool isSinglEVH, const HttpReadTaskFactory& fr)
+HttpServiceHandler::HttpServiceHandler(const std::string& cntEncoding, const webSockHandle& f, const int& spoolSize, bool isSinglEVH, const httpSockHandle& fr)
 	: ServiceHandler(spoolSize, isSinglEVH) {
 	this->cntEncoding = cntEncoding;
-	this->f = f;
-	this->fr = fr;
+	this->wh = f;
+	this->hsh = fr;
 }
 
 HttpServiceHandler::~HttpServiceHandler() {
@@ -41,12 +41,12 @@ void HttpServiceTask::setTid(int tid) {
 }
 
 void HttpServiceHandler::sockInit(SocketInterface* sif) {
-	sif->rdTsk = fr();
+	sif->rdTsk = new HttpReadTask();
 	HttpReadTask* task = (HttpReadTask*)sif->rdTsk;
 	task->sif = sif;
 	task->service = this;
 
-	sif->srvTsk = f();
+	sif->srvTsk = new HttpServiceTask();
 	HttpServiceTask* stask = (HttpServiceTask*)sif->srvTsk;
 	stask->service = this;
 	stask->handlerRequest.sh = this;
@@ -64,7 +64,7 @@ void HttpServiceHandler::sockInit(SocketInterface* sif) {
 
 void HttpServiceHandler::handleService(void* request, SocketInterface* sif, void* context, int reqPos)
 {
-	HttpServiceTask* task = f();
+	HttpServiceTask* task = new HttpServiceTask();
 	task->handlerRequest.sh = this;
 	task->service = this;
 	task->handlerRequest.request = request;
@@ -191,11 +191,14 @@ void HttpServiceTask::run() {
 				res->addHeader(HttpResponse::SecWebSocketAccept, servseckey);
 				res->setHTTPResponseStatus(HTTPResponseStatus::Switching);
 				res->setDone(true);
+#ifdef HAVE_SSLINC
 				Http11WebSocketHandler* hws = new Http11WebSocketHandler(handlerRequest.getSif()->fd, handlerRequest.getSif()->ssl, handlerRequest.getSif()->io, req->getUrl(), true);
-
+#else
+				Http11WebSocketHandler* hws = new Http11WebSocketHandler(handlerRequest.getSif()->fd, NULL, NULL, req->getUrl(), true);
+#endif
 				WebSocketData wreq;
 				WebSocketRespponseData wres;
-				hws->h = handleWebsockOpen(&wreq, &wres, handlerRequest.getSif(), req);
+				hws->h = service->wh(&wreq, &wres, handlerRequest.getSif(), req);
 				if(hws->h==NULL) {
 					res->headers[HttpResponse::Connection] = "close";
 					res->headers.erase(HttpResponse::Upgrade);
@@ -243,8 +246,12 @@ void HttpServiceTask::run() {
 				res->setHTTPResponseStatus(HTTPResponseStatus::Switching);
 				res->setDone(true);
 				Http2Handler* prev = (Http2Handler*)handlerRequest.getSif();
+#ifdef HAVE_SSLINC
 				handlerRequest.getSif()->addHandler(new Http2Handler(handlerRequest.getSif()->fd, handlerRequest.getSif()->ssl,
-						handlerRequest.getSif()->io, true, prev->getWebpath(), http2settings));
+										handlerRequest.getSif()->io, true, prev->getWebpath(), http2settings));
+#else
+				handlerRequest.getSif()->addHandler(new Http2Handler(handlerRequest.getSif()->fd, NULL, NULL, true, prev->getWebpath(), http2settings));
+#endif
 			}
 			else
 			{
@@ -253,7 +260,7 @@ void HttpServiceTask::run() {
 				res->setDone(true);
 			}
 		} else {
-			if(!handle(req, res, handlerRequest.getSif())) {
+			if(!service->hsh(req, res, handlerRequest.getSif())) {
 				//handlerRequest.getSif()->endRequest(handlerRequest.reqPos);
 				return;
 			}

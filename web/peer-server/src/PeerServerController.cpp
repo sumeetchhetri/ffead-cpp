@@ -22,7 +22,7 @@
 
 #include "PeerServerController.h"
 
-PeerState::PeerState(const std::string& id, const std::string& token, SocketInterface* sif) {
+PeerState::PeerState(const std::string& id, const std::string& token, BaseSocket* sif) {
 	this->id = id;
 	this->sif = sif;
 	this->token = token;
@@ -355,7 +355,7 @@ bool PeerServerRouter::isValidUser(const std::string &id, const std::string &tok
 	}
 }
 
-bool PeerServerRouter::route(HttpRequest* req, HttpResponse* res, SocketInterface* sif) {
+bool PeerServerRouter::route(HttpRequest* req, HttpResponse* res, BaseSocket* sif) {
 	req->normalizeUrl();
 	res->setDone(true);
 	std::string_view path = req->getPath();

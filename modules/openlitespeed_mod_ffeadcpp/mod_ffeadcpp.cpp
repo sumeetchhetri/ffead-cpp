@@ -289,8 +289,7 @@ static int on_read(const lsi_session_t *session)
 
 	g_api->log(NULL, LSI_LOG_INFO, "[Module:mod_ffeadcpp] on_read ffead-cpp handle start\n");
     HttpResponse respo;
-	ServiceTask task;
-	task.handle(req, &respo);
+    ServiceTask::handle(req, &respo);
 	g_api->log(NULL, LSI_LOG_INFO, "[Module:mod_ffeadcpp] on_read ffead-cpp handle end\n");
 
 	std::string furl = req->getUrl();

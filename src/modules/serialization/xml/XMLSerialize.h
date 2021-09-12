@@ -25,9 +25,28 @@
 #include "SerializeBase.h"
 #include "SimpleXmlParser.h"
 
+//#undef HAVE_PUGI_XML
+#ifdef HAVE_PUGI_XML
+#include "pugixml.hpp"
+
+struct xml_string_writer: pugi::xml_writer
+{
+    std::string result;
+    virtual void write(const void* data, size_t size)
+    {
+        result.append(static_cast<const char*>(data), size);
+    }
+};
+#endif
+
+class XMLSerialize;
+
 class XMLSerialize : public SerializeBase {
 	static XMLSerialize _i;
-	void* getSerializableObject();
+#ifdef HAVE_PUGI_XML
+	ThreadLocal pugiDoc;//This is needed to cleanup pugi::xml_document* doc
+#endif
+	void* getSerializableObject(void* exobj);
 	void cleanSerializableObject(void* _1);
 	void startContainerSerialization(void* _1, const std::string& className, const std::string& container);
 	void endContainerSerialization(void* _1, const std::string& className, const std::string& container);
@@ -267,7 +286,7 @@ public:
 
 	bool isValidClassNamespace(void* _1, const std::string& className, const std::string& namespc, const bool& iscontainer= false);
 	bool isValidObjectProperty(void* _1, const std::string& propname, const int& counter);
-	void* getObjectProperty(void* _1, const int& counter);
+	void* getObjectProperty(void* _1, const int& counter, const std::string& propname);
 	void startObjectSerialization(void* _1, const std::string& className);
 	void endObjectSerialization(void* _1, const std::string& className);
 	void afterAddObjectProperty(void* _1, const std::string& propName);
@@ -276,6 +295,7 @@ public:
 	void* getObjectPrimitiveValue(void* _1, int serOpt, const std::string& className, const std::string& propName);
 	static void* unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName = "");
 	std::string serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName, void* serobject);
+	std::string serializeUnknownBaseInt(void* t, int serOpt, const std::string& className, const std::string& appName, void* serobject);
 	void* unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName = "");
 	void* unSerializeUnknownBase(const std::string& serVal, int serOpt, const std::string& className, const std::string& appName = "");
 };

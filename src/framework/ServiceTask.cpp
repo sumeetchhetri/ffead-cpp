@@ -22,13 +22,6 @@
 
 #include "ServiceTask.h"
 
-ServiceTask::ServiceTask() {
-	//logger = LoggerFactory::getLogger("ServiceTask");
-}
-
-ServiceTask::~ServiceTask() {
-}
-
 void ServiceTask::saveSessionDataToFile(const std::string& sessionId, const std::string& value)
 {
 	std::string lockfil = ConfigurationData::getInstance()->coreServerProperties.serverRootDirectory+"/tmp/"+sessionId+".lck";
@@ -413,7 +406,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 	}
 }
 
-WebSockHandler* ServiceTask::handleWebsockOpen(WebSocketData* req, WebSocketRespponseData* res, SocketInterface* sif, HttpRequest* hreq) {
+WebSockHandler* ServiceTask::handleWebsockOpen(WebSocketData* req, WebSocketRespponseData* res, BaseSocket* sif, HttpRequest* hreq) {
 	if(!ConfigurationData::isServingContext(hreq->getCntxt_name())) {
 		if(ConfigurationData::getInstance()->appAliases.find(hreq->getCntxt_name())!=ConfigurationData::getInstance()->appAliases.end()) {
 			hreq->setCntxt_name(std::string_view{ConfigurationData::getInstance()->appAliases.find(hreq->getCntxt_name())->second});
@@ -461,7 +454,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res) {
 	handle(req, res, NULL);
 }
 
-bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, SocketInterface* sif)
+bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, BaseSocket* sif)
 {
 	//Timer t1;
 	//t1.start();
@@ -703,10 +696,10 @@ bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, SocketInterface* s
 						}
 						if(req->getExt().length()>0) {
 							std::string mimeType = CommonUtils::getMimeType(req->getExt());
-							std::string cntEncoding = getCntEncoding();
-							if(req->isAgentAcceptsCE() && (cntEncoding=="gzip" || cntEncoding=="deflate") && req->isNonBinary(mimeType)) {
+							//std::string cntEncoding = getCntEncoding();
+							//if(req->isAgentAcceptsCE() && (cntEncoding=="gzip" || cntEncoding=="deflate") && req->isNonBinary(mimeType)) {
 								//res->addHeader(HttpResponse::ContentEncoding, cntEncoding);
-							}
+							//}
 						}
 						res->setDone(false);
 						//logger << ("Static file requested") << std::endl;
@@ -733,13 +726,13 @@ bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, SocketInterface* s
 	return true;
 }
 
-void ServiceTask::handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, SocketInterface* sockUtil)
+void ServiceTask::handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, BaseSocket* sockUtil)
 {
 }
 
-std::string ServiceTask::getCntEncoding() {
+/*std::string ServiceTask::getCntEncoding() {
 	if(ConfigurationData::getServerType()==SERVER_BACKEND::EMBEDDED) {
 		return HttpServiceTask::getCntEncoding();
 	}
 	return "";
-}
+}*/
