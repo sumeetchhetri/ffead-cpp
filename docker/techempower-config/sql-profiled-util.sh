@@ -63,15 +63,19 @@ then
 	sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq)||g' CMakeLists.txt
 	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/te-benchmark-um-pq/libte-benchmark-um-pq${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 	sed -i 's|tfb-database|localhost|g' $IROOT/ffead-cpp-src/web/te-benchmark-um-pq-async/config/sdorm.xml
+	sed -i 's|tfb-database|localhost|g' $IROOT/ffead-cpp-src/web/te-benchmark-um-pq-async-qw/config/sdorm.xml
 	rm -rf web/te-benchmark-um-pq
 	if [ "$4" = "pool" ]
 	then
 		sed -i 's|"TeBkUmLpqAsyncRouter"|"TeBkUmLpqAsyncRouterPooled"|g' $IROOT/ffead-cpp-src/web/te-benchmark-um-pq-async/config/application.xml
 		sed -i 's|TeBkUmLpqAsyncRouter|TeBkUmLpqAsyncRouterPooled|g' $IROOT/ffead-cpp-src/web/te-benchmark-um-pq-async/config/cachememory.xml
+		sed -i 's|"TeBkUmLpqQwAsyncRouter"|"TeBkUmLpqQwAsyncRouterPooled"|g' $IROOT/ffead-cpp-src/web/te-benchmark-um-pq-async-qw/config/application.xml
 	fi
 else
 	sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq-async)||g' CMakeLists.txt
 	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/te-benchmark-um-pq-async/libte-benchmark-um-pq-async${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+	sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq-async-qw)||g' CMakeLists.txt
+	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/te-benchmark-um-pq-async-qw/libte-benchmark-um-pq-async-qw${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 	sed -i 's|tfb-database|localhost|g' $IROOT/ffead-cpp-src/web/te-benchmark-um-pq/config/sdorm.xml
-	rm -rf web/te-benchmark-um-pq-async
+	rm -rf web/te-benchmark-um-pq-async web/te-benchmark-um-pq-async-qw
 fi

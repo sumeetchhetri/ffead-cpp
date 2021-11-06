@@ -50,8 +50,21 @@
 #include <linux/bpf.h>
 #include <linux/filter.h>
 #endif
+#include "blockingconcurrentqueue.h"
 
 class BaseSocket;
+
+typedef void (*SockWriteRequestF) (BaseSocket* bs, void* arg);
+
+class SockWriteRequest {
+	SockWriteRequestF f;
+	BaseSocket* bs;
+	void* arg;
+	SockWriteRequest():f(NULL), bs(NULL), arg(NULL) {}
+	SockWriteRequest(SockWriteRequestF f, BaseSocket* bs, void* arg): f(f), bs(bs), arg(arg) {}
+	friend class RequestHandler2;
+	friend class EventHandler;
+};
 
 class ResponseData {
 public:
@@ -62,6 +75,13 @@ public:
 };
 
 class EventHandler {
+	moodycamel::BlockingConcurrentQueue<SockWriteRequest>* wQ;
+	template<typename Func1> void queueWrite(Func1 f, BaseSocket* bs, void* arg) {
+		wQ->enqueue(std::move(SockWriteRequest(f, bs, arg)));
+	}
+	friend class BaseSocket;
+	friend class RequestHandler2;
+	friend class RequestReaderHandler;
 public:
 	virtual bool unRegisterWrite(BaseSocket* obj)=0;
 	virtual bool unRegisterRead(const SOCKET& descriptor)=0;
@@ -71,7 +91,13 @@ public:
 	virtual void post_write(BaseSocket* sfd, const std::string& data)=0;
 	virtual void post_read(BaseSocket* sfd)=0;
 #endif
-	virtual ~EventHandler(){}
+	EventHandler(): wQ(NULL) {}
+	virtual ~EventHandler() {
+		if(wQ!=NULL) {
+			delete wQ;
+			wQ = NULL;
+		}
+	}
 };
 
 class BaseSocket {
@@ -117,6 +143,10 @@ public:
 	int writeDirect(const std::string& h, const std::string& d);
 	int writeDirect(const std::string& h, const char* d, size_t len);
 	int writeTo(ResponseData* d);
+	template<typename Func1>
+	void queueWrite(Func1 f, void* arg) {
+		eh->queueWrite(f, this, arg);
+	}
 
 	bool writeFile(int fdes, int remain_data);
 	bool isClosed();
@@ -141,7 +171,11 @@ public:
 	virtual int secureWriteDirect(const char* d, size_t len, int off = 0){return -1;};
 	virtual int secureWriteTo(ResponseData* d){return -1;};
 	virtual int secureReadFrom(){return -1;};
+
+	virtual void handle() {
+	}
 };
+
 
 class BaseSecureSocket: public BaseSocket {
 protected:

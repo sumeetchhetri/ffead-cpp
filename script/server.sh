@@ -4,10 +4,10 @@ export MALLOC_CHECK_=0
 IS_OS_DARWIN=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"darwin") != 0 {print "darwin"}'`
 IS_BSD=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"bsd") != 0 {print "bsd"}'`
 if [ "$IS_OS_DARWIN" != "" ]; then
-	alias nproc="sysctl -n hw.ncpu"
+	#alias nproc="sysctl -n hw.ncpu"
 	export FFEAD_CPP_PATH=`cd "$(dirname server.sh)" && ABSPATH=$(pwd) && cd -`
 elif [ "$IS_BSD" != "" ]; then
-	alias nproc="sysctl -n hw.ncpu"
+	#alias nproc="sysctl -n hw.ncpu"
 	export FFEAD_CPP_PATH=`echo $(dirname $(readlink -f $0))`
 else
 	export FFEAD_CPP_PATH=`echo $(dirname $(readlink -f $0))`

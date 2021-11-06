@@ -16,7 +16,6 @@
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 #include "Client.h"
-#include "concurrentqueue.h"
 #include "atomic"
 #ifdef HAVE_SSLINC
 #include "SSLClient.h"
@@ -58,6 +57,7 @@ class RequestHandler2 {
 	std::vector<Http11Socket*> clsdConns;
 	bool isActive();
 	static void* handle(void* inp);
+	static void* handleWrites(void* inp);
 	static RequestHandler2* _i;
 	httpSockHandle hsh;
 	friend class LibpqDataSourceImpl;
@@ -68,8 +68,8 @@ public:
 	static BaseSocket* loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* sfd, int type, int fd, char* buf, size_t len, bool isClosed);
 	static void setInstance(RequestHandler2*);
 	static RequestHandler2* getInstance();
-	void start(unsigned int cid);
-	void startNL(unsigned int cid);
+	void start(unsigned int cid, bool withWQ);
+	void startNL(unsigned int cid, bool withWQ);
 	void addListenerSocket(doRegisterListener drl, const SOCKET& listenerSock);
 	void stop(std::string, int, bool);
 	RequestHandler2(ServiceHandler* shi, const bool& isMain, bool isSSLEnabled, httpSockHandle hsh, const SOCKET& listenerSock = INVALID_SOCKET);

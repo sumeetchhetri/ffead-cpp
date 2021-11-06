@@ -10,6 +10,7 @@ RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/li
 	ln -s ${IROOT}/ffead-cpp-6.0/lib/libte-benchmark-um-pq.so /usr/local/lib/libte-benchmark-um-pq.so && \
 	ln -s ${IROOT}/ffead-cpp-6.0/lib/libte-benchmark-um-mgr.so /usr/local/lib/libte-benchmark-um-mgr.so && \
 	ln -s ${IROOT}/ffead-cpp-6.0/lib/libte-benchmark-um-pq-async.so /usr/local/lib/libte-benchmark-um-pq-async.so && \
+	ln -s ${IROOT}/ffead-cpp-6.0/lib/libte-benchmark-um-pq-async-qw.so /usr/local/lib/libte-benchmark-um-pq-async-qw.so && \
 	ln -s ${IROOT}/ffead-cpp-6.0/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
 	ln -s ${IROOT}/ffead-cpp-6.0/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
 	ln -s ${IROOT}/ffead-cpp-6.0/lib/libinter.so /usr/local/lib/libinter.so && \

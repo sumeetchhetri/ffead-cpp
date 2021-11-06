@@ -685,6 +685,7 @@ includes("web/te-benchmark-um")
 includes("web/te-benchmark-um-mgr")
 includes("web/te-benchmark-um-pq")
 includes("web/te-benchmark-um-pq-async")
+includes("web/te-benchmark-um-pq-async-qw")
 
 target("ffead-cpp")
 	set_languages("c++17")

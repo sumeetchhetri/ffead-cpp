@@ -46,6 +46,7 @@ sed -i 's|localhost|db|g' web/te-benchmark-um/config/sdormpostgresql.xml
 sed -i 's|localhost|db|g' web/te-benchmark-um-mgr/config/sdorm.xml
 sed -i 's|localhost|db|g' web/te-benchmark-um-pq/config/sdorm.xml
 sed -i 's|localhost|db|g' web/te-benchmark-um-pq-async/config/sdorm.xml
+sed -i 's|localhost|db|g' web/te-benchmark-um-pq-async-qw/config/sdorm.xml
 sed -i 's|127.0.0.1|db|g' resources/sample-odbcinst.ini
 sed -i 's|127.0.0.1|db|g' resources/sample-odbc.ini
 sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/default)||g' CMakeLists.txt

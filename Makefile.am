@@ -249,6 +249,7 @@ if MOD_SDORM_MONGO
 else
 	rm -rf ${prefix}/web/te-benchmark-um-pq
 	rm -rf ${prefix}/web/te-benchmark-um-pq-async
+	rm -rf ${prefix}/web/te-benchmark-um-pq-async-qw
 endif
 	cp -Rf script/* ${prefix}/
 	-rm -f ${prefix}/lib/*.la ${prefix}/lib/*.lai

@@ -89,10 +89,16 @@ SocketInterface::SocketInterface(const SOCKET& fd) : BaseSecureSocket(fd) {
 
 
 BaseSecureSocket::BaseSecureSocket(): BaseSocket() {
+#ifdef HAVE_SSLINC
+	io = NULL;
+	ssl = NULL;
+#endif
 }
 
 BaseSecureSocket::BaseSecureSocket(const SOCKET& fd): BaseSocket(fd) {
 #ifdef HAVE_SSLINC
+	io = NULL;
+	ssl = NULL;
 	init(fd, ssl, io);
 #endif
 }
@@ -271,6 +277,7 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 int SocketInterface::startRequest() {
 	int rp = ++reqPos;
 	//wm.lock();
+	//wtl.emplace(rp, ResponseData());
 	wtl[rp] = ResponseData();
 	//wm.unlock();
 	return rp;

@@ -146,6 +146,7 @@ typedef void (*LipqCbFunc6) (void* ctx, int row, int col, char* value);
 class LibpqQuery {
 	std::list<LibpqParam> pvals;
 	bool isPrepared;
+	bool prepared;
 	bool isSelect;
 	bool isMulti;
 	std::string query;
@@ -167,8 +168,8 @@ class LibpqQuery {
 #endif
 public:
 	void reset();
-	LibpqQuery& withSelectQuery(const std::string& query, bool isPrepared = false);
-	LibpqQuery& withUpdateQuery(const std::string& query, bool isPrepared = false);
+	LibpqQuery& withSelectQuery(const std::string& query, bool isPrepared = true);
+	LibpqQuery& withUpdateQuery(const std::string& query, bool isPrepared = true);
 	LibpqQuery& withPrepared();
 	LibpqQuery& withContext(void* ctx);
 	LibpqQuery& withMulti();//multi-statement non parameterized queries
@@ -353,6 +354,8 @@ public:
 	void postAsync(LibpqAsyncReq* vitem);
 	void postAsync(LibpqAsyncReq* vitem, int numQ);//post async request with n number of multi queries
 	//Asynchronous mode operations, NOT THREAD SAFE
+
+	void handle();
 };
 
 #endif /* LibpqDataSourceIMPL_H_ */

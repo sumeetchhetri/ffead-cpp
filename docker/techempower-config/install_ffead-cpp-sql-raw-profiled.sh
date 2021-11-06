@@ -53,6 +53,18 @@ service postgresql start
 
 sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' resources/server.prop
 #sed -i 's|LOGGING_ENABLED=false|LOGGING_ENABLED=true|g' resources/server.prop
+
+if [ "$1" = "async" ]
+then
+	sed -i 's|REQUEST_HANDLER=RequestReaderHandler|REQUEST_HANDLER=RequestHandler2|g' resources/server.prop
+fi
+
+if [ "$1" = "async-qw" ]
+then
+	sed -i 's|REQUEST_HANDLER=RequestReaderHandler|REQUEST_HANDLER=RequestHandler2|g' resources/server.prop
+	sed -i 's|QUEUED_WRITES=false|QUEUED_WRITES=true|g' resources/server.prop
+fi
+
 nohup bash -c "./server.sh > ffead.log &"
 sleep 10
 echo "ffead-cpp with sql-raw support launched"
@@ -76,6 +88,7 @@ wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,applicatio
 	-H 'Connection: keep-alive' --latency -d 5 -c 512 --timeout 8 -t 2 "http://localhost:8080/te-benchmark-um-pq${SUFFIX}/updatem?queries=20"
 wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
 	-H 'Connection: keep-alive' --latency -d 5 -c 512 --timeout 8 -t 2 "http://localhost:8080/te-benchmark-um-pq${SUFFIX}/update_?queries=20"
+
 echo "normal shutdown"
 rm -f serv.ctrl
 pkill ffead-cpp

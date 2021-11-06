@@ -11,6 +11,7 @@ ln -s ${FFEAD_CPP_PATH}/lib/libte-benchmark-um.so /usr/local/lib/libte-benchmark
 ln -s ${FFEAD_CPP_PATH}/lib/libte-benchmark-um-pq.so /usr/local/lib/libte-benchmark-um-pq.so
 ln -s ${FFEAD_CPP_PATH}/lib/libte-benchmark-um-mgr.so /usr/local/lib/libte-benchmark-um-mgr.so
 ln -s ${FFEAD_CPP_PATH}/lib/libte-benchmark-um-pq-async.so /usr/local/lib/libte-benchmark-um-pq-async.so
+ln -s ${FFEAD_CPP_PATH}/lib/libte-benchmark-um-pq-async-qw.so /usr/local/lib/libte-benchmark-um-pq-async-qw.so
 ln -s ${FFEAD_CPP_PATH}/lib/libffead-modules.so /usr/local/lib/libffead-modules.so
 ln -s ${FFEAD_CPP_PATH}/lib/libffead-framework.so /usr/local/lib/libffead-framework.so
 ln -s ${FFEAD_CPP_PATH}/lib/libinter.so /usr/local/lib/libinter.so
@@ -46,35 +47,40 @@ service memcached stop
 if [ "$3" = "mongo" ]
 then
 	WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um
-	rm -rf web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async
+	rm -rf web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async web/te-benchmark-um-pq-async-qw
 	cp -f ${WEB_DIR}/config/sdormmongo.xml ${WEB_DIR}/config/sdorm.xml
 elif [ "$3" = "mongo-raw" ]
 then
 	WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um-mgr
-	rm -rf web/te-benchmark-um web/te-benchmark-um-pq web/te-benchmark-um-pq-async
+	rm -rf web/te-benchmark-um web/te-benchmark-um-pq web/te-benchmark-um-pq-async web/te-benchmark-um-pq-async-qw
 elif [ "$3" = "mysql" ]
 then
 	WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um
-	rm -rf web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async
+	rm -rf web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async web/te-benchmark-um-pq-async-qw
 	cp -f ${WEB_DIR}/config/sdormmysql.xml ${WEB_DIR}/config/sdorm.xml
 elif [ "$3" = "postgresql" ]
 then
 	WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um
-	rm -rf web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async
+	rm -rf web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async web/te-benchmark-um-pq-async-qw
 	cp -f web/te-benchmark-um/config/sdormpostgresql.xml web/te-benchmark-um/config/sdorm.xml
 elif [ "$3" = "postgresql-raw" ]
 then
 	WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um-pq
-	rm -rf web/te-benchmark-um web/te-benchmark-um-mgr web/te-benchmark-um-pq-async
+	rm -rf web/te-benchmark-um web/te-benchmark-um-mgr web/te-benchmark-um-pq-async web/te-benchmark-um-pq-async-qw
 	sed -i 's|<async>true</async>|<async>false</async>|g' ${WEB_DIR}/config/sdorm.xml
 elif [ "$3" = "postgresql-raw-async" ]
 then
 	WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um-pq-async
-	rm -rf web/te-benchmark-um web/te-benchmark-um-mgr web/te-benchmark-um-pq
+	rm -rf web/te-benchmark-um web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async-qw
+	sed -i 's|<async>false</async>|<async>true</async>|g' ${WEB_DIR}/config/sdorm.xml
+elif [ "$3" = "postgresql-raw-async-qw" ]
+then
+	WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um-pq-async-qw
+	rm -rf web/te-benchmark-um web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async
 	sed -i 's|<async>false</async>|<async>true</async>|g' ${WEB_DIR}/config/sdorm.xml
 else
 	WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um
-	rm -rf web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async
+	rm -rf web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async web/te-benchmark-um-pq-async-qw
 fi
 
 if [ "$4" = "memory" ]
@@ -104,6 +110,11 @@ chmod 700 rtdcf/*
 if [ "$2" = "emb" ]
 then
 	sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' resources/server.prop
+	sed -i 's|REQUEST_HANDLER=RequestReaderHandler|REQUEST_HANDLER=RequestHandler2|g' $FFEAD_CPP_PATH/resources/server.prop
+	if [ "$3" = "postgresql-raw-async-qw" ]
+	then
+		sed -i 's|QUEUED_WRITES=false|QUEUED_WRITES=true|g' $FFEAD_CPP_PATH/resources/server.prop
+	fi
 	for i in $(seq 0 $(($(nproc --all)-1))); do
 		taskset -c $i ./ffead-cpp $FFEAD_CPP_PATH &
 	done
@@ -205,7 +216,6 @@ then
 	cd ${IROOT}
 	sed -i 's|"TeBkUmLpqRouter"|"TeBkUmLpqRouterPicoV"|g' ${WEB_DIR}/config/application.xml
 	sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' $FFEAD_CPP_PATH/resources/server.prop
-	sed -i 's|REQUEST_HANDLER=RequestReaderHandler|REQUEST_HANDLER=RequestHandler2|g' $FFEAD_CPP_PATH/resources/server.prop
 	for i in $(seq 0 $(($(nproc --all)-1))); do
 		taskset -c $i ./main --server_dir=$FFEAD_CPP_PATH --server_port=8080 &
 	done

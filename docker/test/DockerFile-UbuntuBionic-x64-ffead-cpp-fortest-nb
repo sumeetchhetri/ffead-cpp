@@ -197,6 +197,7 @@ RUN ninja install && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async-qw && \
 	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-mongo-raw
 
 WORKDIR /tmp/ffead-cpp-src/build
@@ -205,6 +206,7 @@ RUN ninja install && \
 	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um/config/cache.xml && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async-qw && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-mgr && \
 	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-mongo-orm
 
@@ -214,6 +216,7 @@ RUN ninja install && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-mgr && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async-qw && \
 	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw
 
 WORKDIR /tmp/ffead-cpp-src/build
@@ -226,6 +229,7 @@ RUN cp -f /tmp/ffead-cpp-src/web/te-benchmark-um/sql-src/TeBkUmWorldsql.h /tmp/f
 	cp /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/resources/sample-odbc.ini /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/resources/odbc.ini && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async-qw && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-mgr && \
 	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-orm
 

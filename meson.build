@@ -339,6 +339,7 @@ endif
 if get_option('MOD_SDORM_SQL') == true
 	subdir('web/te-benchmark-um-pq')
 	subdir('web/te-benchmark-um-pq-async')
+	subdir('web/te-benchmark-um-pq-async-qw')
 endif
 
 emb_includes = ['src/modules/common','src/modules/cache','src/modules/cache/memory','src/modules/cache/redis',
