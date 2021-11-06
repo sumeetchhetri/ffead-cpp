@@ -51,7 +51,7 @@ RequestHandler2* RequestHandler2::getInstance() {
 	return _i;
 }
 
-void RequestHandler2::startNL(unsigned int cid) {
+void RequestHandler2::startNL(unsigned int cid, bool withWQ) {
 	if(run) {
 		return;
 	}
@@ -60,6 +60,10 @@ void RequestHandler2::startNL(unsigned int cid) {
 		run = true;
 		Thread* pthread = new Thread(&handle, this);
 		pthread->execute(cid);
+		if(withWQ) {
+			Thread* pthread = new Thread(&handleWrites, this);
+			pthread->execute(cid);
+		}
 	}
 }
 
@@ -83,7 +87,7 @@ void RequestHandler2::addListenerSocket(doRegisterListener drl, const SOCKET& li
 	selector.addListeningSocket(this->listenerSock);
 }
 
-void RequestHandler2::start(unsigned int cid) {
+void RequestHandler2::start(unsigned int cid, bool withWQ) {
 	if(run) {
 		return;
 	}
@@ -92,6 +96,10 @@ void RequestHandler2::start(unsigned int cid) {
 		selector.initialize(listenerSock, -1);
 		Thread* pthread = new Thread(&handle, this);
 		pthread->execute(cid);
+		if(withWQ) {
+			Thread* pthread = new Thread(&handleWrites, this);
+			pthread->execute(cid);
+		}
 	}
 }
 
@@ -139,14 +147,12 @@ BaseSocket* RequestHandler2::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* bi, in
 			return si;
 		}
 		case READ_READY: {
-			Http11Socket* si = (Http11Socket*)bi;
-			si->handle();
+			bi->handle();
 			break;
 		}
 		case CLOSED: {
-			Http11Socket* si = (Http11Socket*)bi;
-			si->onClose();
-			ins->shi->closeConnection(si);
+			bi->onClose();
+			ins->shi->closeConnection(bi);
 			break;
 		}
 		case WRITE_READY: {
@@ -195,6 +201,17 @@ void* RequestHandler2::handle(void* inp) {
 	}
 	Thread::mSleep(500);
 	ins->complete += 1;
+	return 0;
+}
+
+void* RequestHandler2::handleWrites(void* inp) {
+	RequestHandler2* ins  = static_cast<RequestHandler2*>(inp);
+	SockWriteRequest swr;
+	ins->selector.wQ = new moodycamel::BlockingConcurrentQueue<SockWriteRequest>;
+	while(ins->shi->run) {
+		ins->selector.wQ->wait_dequeue(swr);
+		swr.f(swr.bs, swr.arg);
+	}
 	return 0;
 }
 

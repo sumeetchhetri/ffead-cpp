@@ -46,12 +46,16 @@ sed -i 's|web/markers/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/te-benchmark/src/autotools/Makefile||g' configure.ac
 
 cmake -DSRV_EMB=on -DDEBUG=on -DMOD_APACHE=on -DMOD_NGINX=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
-cp -f web/te-benchmark-um/sql-src/TeBkUmWorldmongo.h web/te-benchmark-um/include/TeBkUmWorld.h
-cp -f web/te-benchmark-um/sql-src/TeBkUmWorldmongo.cpp web/te-benchmark-um/src/TeBkUmWorld.cpp
+cp -f web/t1/sql-src/TeBkUmWorldmongo.h web/t1/include/TeBkUmWorld.h
+cp -f web/t1/sql-src/TeBkUmWorldmongo.cpp web/t1/src/TeBkUmWorld.cpp
 make install -j${MAX_THREADS}
 
 rm -f /usr/local/lib/libffead-*
-rm -f /usr/local/lib/libte_benc*
+rm -f /usr/local/lib/libt1.so*
+rm -f /usr/local/lib/libt2.so*
+rm -f /usr/local/lib/libt3.so*
+rm -f /usr/local/lib/libt4.so*
+rm -f /usr/local/lib/libt5.so*
 rm -f /usr/local/lib/libinter.so
 rm -f /usr/local/lib/libdinsxter.so
 
@@ -77,4 +81,4 @@ cp -f lib/* /usr/local/lib
 ldconfig
 
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
-#rm -f web/te-benchmark-um/config/cache.xml
+#rm -f web/t1/config/cache.xml

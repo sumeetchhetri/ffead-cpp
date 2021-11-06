@@ -243,12 +243,13 @@ endif
 	cp -Rf web/* ${prefix}/web
 if MOD_SDORM_SQL
 else
-	rm -rf ${prefix}/web/te-benchmark-um-mgr
+	rm -rf ${prefix}/web/t2
 endif
 if MOD_SDORM_MONGO
 else
-	rm -rf ${prefix}/web/te-benchmark-um-pq
-	rm -rf ${prefix}/web/te-benchmark-um-pq-async
+	rm -rf ${prefix}/web/t3
+	rm -rf ${prefix}/web/t4
+	rm -rf ${prefix}/web/t5
 endif
 	cp -Rf script/* ${prefix}/
 	-rm -f ${prefix}/lib/*.la ${prefix}/lib/*.lai

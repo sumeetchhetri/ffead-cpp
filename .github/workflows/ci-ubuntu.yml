@@ -16,11 +16,11 @@ jobs:
       run: |
         sudo apt update -yqq && sudo apt install --no-install-recommends -yqq ninja-build libpq-dev libcurl4-openssl-dev autoconf-archive unzip uuid-dev odbc-postgresql unixodbc unixodbc-dev apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev zlib1g-dev cmake make clang-format-9 ninja-build libjsoncpp-dev libboost-all-dev
         sudo apt remove -y libsqlite3-dev
-        sudo apt-get install libseccomp-dev
-        git clone https://github.com/opencontainers/runc
-        cd runc
-        make
-        sudo make install
+        #sudo apt-get install libseccomp-dev
+        #git clone https://github.com/opencontainers/runc
+        #cd runc
+        #make
+        #sudo make install
         pushd /tmp
         wget -q https://github.com/efficient/libcuckoo/archive/master.zip
         unzip master.zip
@@ -74,7 +74,7 @@ jobs:
         sudo ninja install
         cd ../ffead-cpp-6.0-bin
         sudo chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
-        #sudo sed -i'' -e "s|<init>TeBkUmRouter.updateCache</init>||g" web/te-benchmark-um/config/cache.xml
+        #sudo sed -i'' -e "s|<init>TeBkUmRouter.updateCache</init>||g" web/t1/config/cache.xml
         #sudo sed -i'' -e "s|<init>TeBkRestController.updateCache</init>||g" web/te-benchmark/config/cache.xml
         sudo ./server.sh &
         COUNTER=0
@@ -111,7 +111,7 @@ jobs:
         #sudo ninja install
         #cd ../ffead-cpp-6.0-bin
         #sudo chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
-        #sudo sed -i'' -e "s|<init>TeBkUmRouter.updateCache</init>||g" web/te-benchmark-um/config/cache.xml
+        #sudo sed -i'' -e "s|<init>TeBkUmRouter.updateCache</init>||g" web/t1/config/cache.xml
         #sudo sed -i'' -e "s|<init>TeBkRestController.updateCache</init>||g" web/te-benchmark/config/cache.xml
         #sudo ./server.sh &
         #COUNTER=0

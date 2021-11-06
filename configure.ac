@@ -1108,6 +1108,7 @@ if test "x$mod_sdormsql" = "xyes"; then
 	fi
 	AC_CHECK_HEADER([sql.h],,[AC_MSG_ERROR([ODBC sql.h header not found])])
 	AC_CHECK_HEADER([libpq-fe.h],,[])
+	AC_CHECK_LIB(pq, main, [AC_DEFINE(HAVE_LIBPQ, [1], [libpq presence])], [])
 	AC_CHECK_LIB(pq, PQenterBatchMode, [AC_DEFINE(HAVE_LIBPQ_BATCH, [1], [libpq batch mode])], [])
 	AC_CHECK_LIB(pq, PQenterPipelineMode, [AC_DEFINE(HAVE_LIBPQ_PIPELINE, [1], [libpq pipeline mode])], [])
 fi
@@ -1298,10 +1299,11 @@ AC_CONFIG_FILES([web/default/src/autotools/Makefile
 				web/markers/src/autotools/Makefile
 				web/peer-server/src/autotools/Makefile
 				web/te-benchmark/src/autotools/Makefile
-				web/te-benchmark-um/src/autotools/Makefile
-				web/te-benchmark-um-pq/src/autotools/Makefile
-				web/te-benchmark-um-pq-async/src/autotools/Makefile
-				web/te-benchmark-um-mgr/src/autotools/Makefile])
+				web/t1/src/autotools/Makefile
+				web/t2/src/autotools/Makefile
+				web/t3/src/autotools/Makefile
+				web/t4/src/autotools/Makefile
+				web/t5/src/autotools/Makefile])
 AC_OUTPUT
 
 echo "Host: $host"

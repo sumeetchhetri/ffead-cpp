@@ -13,13 +13,16 @@ cp -f $2/script/*.sh $2/script/*.pem $2/script/*.crt $2/script/*.key $1/
 rm -rf $1/bin
 
 if [ "$3" != "true" ]; then
-	rm -rf $1/web/te-benchmark-um-mgr || true
-	rm -f $1/lib/libte-benchmark-um-mgr.* || true
+	rm -rf $1/web/t2 || true
+	rm -f $1/lib/libt2.* || true
 fi
 if [ "$4" != "true" ]; then
-	rm -rf $1/web/te-benchmark-um-pq || true
-	rm -rf $1/web/te-benchmark-um-pq-async || true
-	rm -f $1/lib/libte-benchmark-um-pq-async.* || true
+	rm -rf $1/web/t3 || true
+	rm -rf $1/web/t4 || true
+	rm -rf $1/web/t5 || true
+	rm -f $1/lib/libt3.* || true
+	rm -f $1/lib/libt4.* || true
+	rm -f $1/lib/libt5.* || true
 fi
 
 for d in $1/web/* ; do

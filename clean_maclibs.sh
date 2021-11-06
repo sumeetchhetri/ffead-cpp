@@ -1,7 +1,11 @@
 rm -f /usr/local/lib/libffead-*
 rm -f /usr/local/lib/libinter.dylib
 rm -f /usr/local/lib/libdinter.dylib
-rm -f /usr/local/lib/libte-benchmark*
+rm -f /usr/local/lib/libt1.dylib
+rm -f /usr/local/lib/libt2.dylib
+rm -f /usr/local/lib/libt3.dylib
+rm -f /usr/local/lib/libt4.dylib
+rm -f /usr/local/lib/libt5.dylib
 rm -f /usr/local/lib/libdefault.dylib
 rm -f /usr/local/lib/libflexApp.dylib
 rm -f /usr/local/lib/liboauthApp.dylib

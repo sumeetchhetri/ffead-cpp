@@ -21,12 +21,13 @@ DSType LibpqDataSourceImpl::getType() {
 	return SD_RAW_SQLPG;
 }
 
-LibpqDataSourceImpl::LibpqDataSourceImpl(const std::string& url, bool isAsync) {
+LibpqDataSourceImpl::LibpqDataSourceImpl(const std::string& url, bool isAsync, bool isBatch) {
 	this->url = url;
 #ifdef HAVE_LIBPQ
 	conn = NULL;
 #endif
 	this->isAsync = isAsync;
+	this->isBatch = isBatch;
 	fd = -1;
 }
 
@@ -59,29 +60,39 @@ bool LibpqDataSourceImpl::init() {
 			pthread->execute();
 #else
 #ifdef HAVE_LIBPQ_BATCH
-			if (PQenterBatchMode(conn) == 0)
-			{
-				fprintf(stderr, "PQenterBatchMode error: %s\n?", PQerrorMessage(conn));
-				PQfinish(conn);
+			if(isBatch) {
+				if (PQenterBatchMode(conn) == 0)
+				{
+					fprintf(stderr, "PQenterBatchMode error: %s\n?", PQerrorMessage(conn));
+					PQfinish(conn);
+				}
+				else
+				{
+					fprintf(stdout, "PQenterBatchMode successful\n");
+				}
+				rdTsk = new PgBatchReadTask(this);
+				//logger = LoggerFactory::getLogger("LibpqDataSourceImpl");
+			} else {
+				fprintf(stdout, "PQconnectdb successful\n");
+				rdTsk = new PgReadTask(this);
 			}
-			else
-			{
-				fprintf(stdout, "PQenterBatchMode successful\n");
-			}
-			rdTsk = new PgBatchReadTask(this);
-			//logger = LoggerFactory::getLogger("LibpqDataSourceImpl");
 #elif defined(HAVE_LIBPQ_PIPELINE)
-			if (PQenterPipelineMode(conn) == 0)
-			{
-				fprintf(stderr, "PQenterPipelineMode error: %s\n?", PQerrorMessage(conn));
-				PQfinish(conn);
+			if(isBatch) {
+				if (PQenterPipelineMode(conn) == 0)
+				{
+					fprintf(stderr, "PQenterPipelineMode error: %s\n?", PQerrorMessage(conn));
+					PQfinish(conn);
+				}
+				else
+				{
+					fprintf(stdout, "PQenterPipelineMode successful\n");
+				}
+				rdTsk = new PgBatchReadTask(this);
+				//logger = LoggerFactory::getLogger("LibpqDataSourceImpl");
+			} else {
+				fprintf(stdout, "PQconnectdb successful\n");
+				rdTsk = new PgReadTask(this);
 			}
-			else
-			{
-				fprintf(stdout, "PQenterPipelineMode successful\n");
-			}
-			rdTsk = new PgBatchReadTask(this);
-			//logger = LoggerFactory::getLogger("LibpqDataSourceImpl");
 #else
 			fprintf(stdout, "PQconnectdb successful\n");
 			rdTsk = new PgReadTask(this);
@@ -104,6 +115,10 @@ bool LibpqDataSourceImpl::init() {
 	}
 #endif
 	return true;
+}
+
+void LibpqDataSourceImpl::handle() {
+	rdTsk->run();
 }
 
 void LibpqDataSourceImpl::beginAsync(LibpqAsyncReq* areq) {
@@ -458,7 +473,7 @@ void PgReadTask::run() {
 			PQclear(res);
 			continue;
 		}
-		if(q->isPrepared) {
+		if(q->isPrepared && !q->prepared) {
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 				fprintf(stderr, "PREPARE failed: %s\n", PQerrorMessage(ths->conn));
 				if(ritem->fcb!=NULL) {
@@ -473,17 +488,16 @@ void PgReadTask::run() {
 				counter = -1;
 			} else {
 				ritem->cnt--;
-				q->isPrepared = false;
 			}
 			PQclear(res);
 		} else if(q->isSelect) {
 			if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+				fprintf(stderr, "SELECT failed: %s\n", PQerrorMessage(ths->conn));
 				if(ritem->fcb!=NULL) {
 					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
 				} else if(q->fcb!=NULL) {
 					q->fcb(q->ctx, false, NULL, q->query, counter);
 				}
-				fprintf(stderr, "SELECT failed: %s\n", PQerrorMessage(ths->conn));
 				ritemDone = true;
 				ritem = NULL;
 				ths->pop();
@@ -593,12 +607,12 @@ void PgReadTask::run() {
 			}
 		} else {
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+				fprintf(stderr, "UPDATE failed: %s\n", PQerrorMessage(ths->conn));
 				if(ritem->fcb!=NULL) {
 					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
 				} else if(q->fcb!=NULL) {
 					q->fcb(q->ctx, false, NULL, q->query, counter);
 				}
-				fprintf(stderr, "UPDATE failed: %s\n", PQerrorMessage(ths->conn));
 				ritemDone = true;
 				ritem = NULL;
 				ths->pop();
@@ -660,40 +674,48 @@ void PgReadTask::submit(LibpqAsyncReq* nitem) {
 				q = ritem->peek();
 			}
 
+			if(q->isMulti) {
+				PQsendQuery(ths->conn, q->query.c_str());
+				flux = true;
+				PQflush(ths->conn);
+				return;
+			}
+
 			int psize = (int)q->pvals.size();
 
-			if(q->isPrepared && ths->prepStmtMap.find(q->query)==ths->prepStmtMap.end()) {
-				//fprintf(stdout, "Prepare query....\n");fflush(stdout);
-				ritem->cnt++;
-				ths->prepStmtMap[q->query] = CastUtil::fromNumber(ths->prepStmtMap.size()+1);
-				int qs = PQsendPrepare(ths->conn,ths->prepStmtMap[q->query].c_str(), q->query.c_str(), psize, NULL);
+			std::map<std::string, std::string>::iterator it;
+			if(q->isPrepared) {
+				if((it = ths->prepStmtMap.find(q->query))==ths->prepStmtMap.end()) {
+					//fprintf(stdout, "Prepare query....\n");fflush(stdout);
+					ritem->cnt++;
+					ths->prepStmtMap[q->query] = CastUtil::fromNumber(ths->prepStmtMap.size()+1);
+					int qs = PQsendPrepare(ths->conn,ths->prepStmtMap[q->query].c_str(), q->query.c_str(), psize, NULL);
 
-				if (!qs) {
-					fprintf(stderr, "Failed to prepare query %s\n", PQerrorMessage(ths->conn));
-					if(ritem->fcb!=NULL) {
-						ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
-					} else if(q->fcb!=NULL) {
-						q->fcb(q->ctx, false, NULL, q->query, counter);
+					if (!qs) {
+						fprintf(stderr, "Failed to prepare query %s\n", PQerrorMessage(ths->conn));
+						if(ritem->fcb!=NULL) {
+							ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
+						} else if(q->fcb!=NULL) {
+							q->fcb(q->ctx, false, NULL, q->query, counter);
+						}
+						q = NULL;
+						ritem = NULL;
+						ths->pop();
+					} else {
+						flux = true;
+						PQflush(ths->conn);
 					}
-					q = NULL;
-					ritem = NULL;
-					ths->pop();
+					return;
 				} else {
-					flux = true;
-					PQflush(ths->conn);
+					q->prepared = true;
 				}
-				return;
-			} else {
-				q->isPrepared = false;
 			}
 
 
 			int qs = -1;
-			if(q->isMulti) {
-				qs = PQsendQuery(ths->conn, q->query.c_str());
-			} else if(q->isPrepared) {
+			if(q->prepared) {
 				if(psize==0) {
-					qs = PQsendQueryPrepared(ths->conn, ths->prepStmtMap[q->query].c_str(), psize, NULL, NULL, NULL, 1);
+					qs = PQsendQueryPrepared(ths->conn, it->second.c_str(), psize, NULL, NULL, NULL, 1);
 				} else {
 					const char *paramValues[psize];
 					int paramLengths[psize];
@@ -715,7 +737,7 @@ void PgReadTask::submit(LibpqAsyncReq* nitem) {
 						}
 						paramBinary[var] = 1;
 					}
-					qs = PQsendQueryPrepared(ths->conn, ths->prepStmtMap[q->query].c_str(), psize, paramValues, paramLengths, paramBinary, 1);
+					qs = PQsendQueryPrepared(ths->conn, it->second.c_str(), psize, paramValues, paramLengths, paramBinary, 1);
 				}
 			} else{
 				if(psize==0) {
@@ -771,7 +793,11 @@ void LibpqDataSourceImpl::postAsync(LibpqAsyncReq* item) {
 	if(item!=NULL) {
 		if(rdTsk!=NULL) {
 #if defined(HAVE_LIBPQ_BATCH) || defined(HAVE_LIBPQ_PIPELINE)
-			((PgBatchReadTask*)rdTsk)->submit(item);
+			if(isBatch) {
+				((PgBatchReadTask*)rdTsk)->submit(item);
+			} else {
+				((PgReadTask*)rdTsk)->submit(item);
+			}
 #else
 			((PgReadTask*)rdTsk)->submit(item);
 #endif
@@ -791,7 +817,11 @@ void LibpqDataSourceImpl::postAsync(LibpqAsyncReq* item, int numQ) {
 
 		if(rdTsk!=NULL) {
 #if defined(HAVE_LIBPQ_BATCH) || defined(HAVE_LIBPQ_PIPELINE)
-			((PgBatchReadTask*)rdTsk)->submit(item);
+			if(isBatch) {
+				((PgBatchReadTask*)rdTsk)->submit(item);
+			} else {
+				((PgReadTask*)rdTsk)->submit(item);
+			}
 #else
 			((PgReadTask*)rdTsk)->submit(item);
 #endif
@@ -814,8 +844,11 @@ PGresult* LibpqDataSourceImpl::executeSync(LibpqQuery* q) {
 
 	int paramSize = q->pvals.size();
 	if(q->isPrepared) {
-		if(prepStmtMap.find(q->query)==prepStmtMap.end()) {
-			prepStmtMap[q->query] = CastUtil::fromNumber(prepStmtMap.size()+1);
+		std::map<std::string, std::string>::iterator it;
+		if((it=prepStmtMap.find(q->query))==prepStmtMap.end()) {
+			it = prepStmtMap.insert(std::pair<std::string, std::string>(q->query, CastUtil::fromNumber(prepStmtMap.size()+1))).first;
+			//prepStmtMap[q->query] = CastUtil::fromNumber(prepStmtMap.size()+1);
+			//it = prepStmtMap.find(q->query);
 			PGresult* res = PQprepare(conn, prepStmtMap[q->query].c_str(), q->query.c_str(), paramSize, NULL);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 				fprintf(stderr, "PREPARE failed: %s\n", PQerrorMessage(conn));
@@ -825,7 +858,7 @@ PGresult* LibpqDataSourceImpl::executeSync(LibpqQuery* q) {
 		}
 
 		if(paramSize==0) {
-			PGresult* res = PQexecPrepared(conn, prepStmtMap[q->query].c_str(), 0, NULL, NULL, NULL, 1);
+			PGresult* res = PQexecPrepared(conn, it->second.c_str(), 0, NULL, NULL, NULL, 1);
 			return res;
 		} else {
 			const char *paramValues[paramSize];
@@ -848,7 +881,7 @@ PGresult* LibpqDataSourceImpl::executeSync(LibpqQuery* q) {
 				}
 				paramBinary[var] = 1;
 			}
-			PGresult* res = PQexecPrepared(conn, prepStmtMap[q->query].c_str(), paramSize, paramValues, paramLengths, paramBinary, 1);
+			PGresult* res = PQexecPrepared(conn, it->second.c_str(), paramSize, paramValues, paramLengths, paramBinary, 1);
 			return res;
 		}
 	} else {
@@ -889,7 +922,11 @@ LibpqAsyncReq* LibpqDataSourceImpl::getAsyncRequest() {
 	if(isAsync) {
 		if(rdTsk!=NULL) {
 #if defined(HAVE_LIBPQ_BATCH) || defined(HAVE_LIBPQ_PIPELINE)
-			item = ((PgBatchReadTask*)rdTsk)->get();
+			if(isBatch) {
+				item = ((PgBatchReadTask*)rdTsk)->get();
+			} else {
+				item = ((PgReadTask*)rdTsk)->get();
+			}
 #else
 			item = ((PgReadTask*)rdTsk)->get();
 #endif
@@ -909,6 +946,7 @@ void LibpqDataSourceImpl::executeMultiQuery(LibpqQuery* q) {
 #ifdef HAVE_LIBPQ
 	q->isSelect = true;
 	q->isMulti = true;
+	q->isPrepared = false;
 	executeSync(q);
 	PGresult* res = NULL;
 	bool stat = true;
@@ -1019,6 +1057,7 @@ void LibpqDataSourceImpl::executeMultiQuery(LibpqQuery* q) {
 void LibpqDataSourceImpl::executeUpdateMultiQuery(LibpqQuery* q) {
 #ifdef HAVE_LIBPQ
 	q->isMulti = true;
+	q->isPrepared = false;
 	executeSync(q);
 	PGresult* res = NULL;
 	int counter = -1;
@@ -1249,7 +1288,7 @@ void PgBatchReadTask::run() {
 		counter++;
 		q = ritem->peek();
 
-		if(q->isPrepared) {
+		if(q->isPrepared && !q->prepared) {
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 				fprintf(stderr, "PREPARE failed: %s\n", PQerrorMessage(ths->conn));
 				if(ritem->fcb!=NULL) {
@@ -1262,18 +1301,18 @@ void PgBatchReadTask::run() {
 				ths->pop();
 				counter = -1;
 			} else {
-				q->isPrepared = false;
+				q->prepared = true;
 				ritem->cnt--;
 			}
 			PQclear(res);
 		} else if(q->isSelect) {
 			if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+				fprintf(stderr, "SELECT failed: %s\n", PQerrorMessage(ths->conn));
 				if(ritem->fcb!=NULL) {
 					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
 				} else if(q->fcb!=NULL) {
 					q->fcb(q->ctx, false, NULL, q->query, counter);
 				}
-				fprintf(stderr, "SELECT failed: %s\n", PQerrorMessage(ths->conn));
 				ritem = NULL;
 				ths->pop();
 				counter = -1;
@@ -1381,12 +1420,12 @@ void PgBatchReadTask::run() {
 			}
 		} else {
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+				fprintf(stderr, "UPDATE failed: %s\n", PQerrorMessage(ths->conn));
 				if(ritem->fcb!=NULL) {
 					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
 				} else if(q->fcb!=NULL) {
 					q->fcb(q->ctx, false, NULL, q->query, counter);
 				}
-				fprintf(stderr, "UPDATE failed: %s\n", PQerrorMessage(ths->conn));
 				ths->pop();
 				ritem = NULL;
 				counter = -1;
@@ -1515,34 +1554,34 @@ void PgBatchReadTask::batchQueries(LibpqAsyncReq* nitem, int& numQueriesInBatch)
 			return;
 		}
 
-		if(q->isPrepared && ths->prepStmtMap.find(q->query)==ths->prepStmtMap.end()) {
-			//ths->logger << ("batchQueries:PQsendPrepare\n");
-			nitem->cnt++;
-			ths->prepStmtMap[q->query] = CastUtil::fromNumber(ths->prepStmtMap.size()+1);
-			int qs = PQsendPrepare(ths->conn,ths->prepStmtMap[q->query].c_str(), q->query.c_str(), psize, NULL);
-			//printf("ADD PQsendPrepare to batch\n");
-			numQueriesInBatch++;
+		std::map<std::string, std::string>::iterator it;
+		if(q->isPrepared) {
+			if((it = ths->prepStmtMap.find(q->query))==ths->prepStmtMap.end()) {
+				//ths->logger << ("batchQueries:PQsendPrepare\n");
+				nitem->cnt++;
+				ths->prepStmtMap[q->query] = CastUtil::fromNumber(ths->prepStmtMap.size()+1);
+				int qs = PQsendPrepare(ths->conn,ths->prepStmtMap[q->query].c_str(), q->query.c_str(), psize, NULL);
+				//printf("ADD PQsendPrepare to batch\n");
+				numQueriesInBatch++;
 
-			if (!qs) {
-				fprintf(stderr, "Failed to prepare query %s\n", PQerrorMessage(ths->conn));
-				if(nitem->fcb!=NULL) {
-					nitem->fcb(nitem->ctx, false, NULL, q->query, i+1);
-				} else if(q->fcb!=NULL) {
-					q->fcb(q->ctx, false, NULL, q->query, i+1);
+				if (!qs) {
+					fprintf(stderr, "Failed to prepare query %s\n", PQerrorMessage(ths->conn));
+					if(nitem->fcb!=NULL) {
+						nitem->fcb(nitem->ctx, false, NULL, q->query, i+1);
+					} else if(q->fcb!=NULL) {
+						q->fcb(q->ctx, false, NULL, q->query, i+1);
+					}
+					return;
 				}
-				return;
+			} else {
+				q->prepared = true;
 			}
-		} else {
-			q->isPrepared = false;
 		}
 
 		int qs = -1;
-		if(q->isMulti) {
-			qs = PQsendQueryParams(ths->conn, q->query.c_str(), 0, NULL, NULL, NULL, NULL, 1);
-			//ths->logger << ("batchQueries:ADD PQsendQueryParams to batch\n");
-		} else if(q->isPrepared) {
+		if(q->prepared) {
 			if(psize==0) {
-				qs = PQsendQueryPrepared(ths->conn, ths->prepStmtMap[q->query].c_str(), psize, NULL, NULL, NULL, 1);
+				qs = PQsendQueryPrepared(ths->conn, it->second.c_str(), psize, NULL, NULL, NULL, 1);
 			} else {
 				const char *paramValues[psize];
 				int paramLengths[psize];
@@ -1564,7 +1603,7 @@ void PgBatchReadTask::batchQueries(LibpqAsyncReq* nitem, int& numQueriesInBatch)
 					}
 					paramBinary[var] = 1;
 				}
-				qs = PQsendQueryPrepared(ths->conn, ths->prepStmtMap[q->query].c_str(), psize, paramValues, paramLengths, paramBinary, 1);
+				qs = PQsendQueryPrepared(ths->conn, it->second.c_str(), psize, paramValues, paramLengths, paramBinary, 1);
 			}
 		} else{
 			if(psize==0) {
@@ -1725,6 +1764,7 @@ void LibpqQuery::reset() {
 	cbType = 0;
 	isSelect = false;
 	isPrepared = false;
+	prepared = false;
 	isMulti = false;
 	pvals.clear();
 	ctx = NULL;
@@ -1742,6 +1782,7 @@ LibpqQuery::LibpqQuery() {
 	cbType = -1;
 	isSelect = false;
 	isPrepared = false;
+	prepared = false;
 	isMulti = false;
 	ctx = NULL;
 }

@@ -34,8 +34,7 @@ ENV LC_ALL en_US.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
 
 # install postgresql on database machine
-RUN apt-get -yqq update && apt-get -yqq install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" postgresql postgresql-contrib && \
-	rm -rf /var/lib/apt/lists/*
+RUN apt-get -yqq update && apt-get -yqq install postgresql-13 postgresql-contrib-13 &&  rm -rf /var/lib/apt/lists/*
 
 # Make sure all the configuration files in main belong to postgres
 RUN mv postgresql.conf /etc/postgresql/${PG_VERSION}/main/postgresql.conf
@@ -159,9 +158,9 @@ RUN mkdir build
 WORKDIR /tmp/ffead-cpp-src/build
 RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DDEBUG=on ..
 RUN ninja install && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-mgr && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2 && \
 	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw-async
 
 WORKDIR /

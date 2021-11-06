@@ -1226,6 +1226,13 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	bool isrHandler1 = rHandler=="RequestReaderHandler";
 
+	std::string qw = "false";
+	try {
+		qw = ConfigurationData::getInstance()->coreServerProperties.sprops["QUEUED_WRITES"];
+	} catch(const std::exception& e) {
+	}
+	bool isQueuedWrites = StringUtil::toLowerCopy(qw)=="true";
+
 	//Load all the FFEADContext beans so that the same copy is shared by all process
 	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
 	logger << ("Initializing ffeadContext....") << std::endl;
@@ -1237,7 +1244,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	ConfigurationHandler::initializeWsdls();
 	logger << ("Initializing WSDL files done....") << std::endl;
 
-	if(isrHandler1) {
+	if(!isrHandler1) {
 		isSinglEVH = true;
 	}
 
@@ -1259,7 +1266,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		RequestHandler2::setInstance(reader);
 		handler->start();
 		reader->registerSocketInterfaceFactory(&CHServer::createSocketInterface2);
-		reader->startNL(-1);
+		reader->startNL(-1, isQueuedWrites);
 		rHandleIns = reader;
 		logger << ("Initializing RequestHandler2....") << std::endl;
 	}

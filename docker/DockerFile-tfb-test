@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 ENV IROOT=/installs
 
 RUN mkdir /installs
-COPY te-benchmark-um/ /installs/te-benchmark-um/
+COPY t1/ /installs/t1/
 
 WORKDIR ${IROOT}
 

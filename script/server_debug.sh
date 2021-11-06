@@ -39,17 +39,20 @@ if [ "$IS_OS_DARWIN" != "" ]; then
 	if [ -d "${FFEAD_CPP_PATH}/web/te-benchmark" ]; then
 		install_name_tool -change "@rpath/libte_benchmark.dylib" "${FFEAD_CPP_PATH}/lib/libte_benchmark.dylib" ffead-cpp
 	fi
-	if [ -d "${FFEAD_CPP_PATH}/web/te-benchmark-um" ]; then
-		install_name_tool -change "@rpath/libte_benchmark_um.dylib" "${FFEAD_CPP_PATH}/lib/libte_benchmark_um.dylib" ffead-cpp
+	if [ -d "${FFEAD_CPP_PATH}/web/t1" ]; then
+		install_name_tool -change "@rpath/libt1.dylib" "${FFEAD_CPP_PATH}/lib/libt1.dylib" ffead-cpp
 	fi
-	if [ -d "${FFEAD_CPP_PATH}/web/te-benchmark-um-mgr" ]; then
-		install_name_tool -change "@rpath/libte_benchmark_um_mgr.dylib" "${FFEAD_CPP_PATH}/lib/libte_benchmark_um_mgr.dylib" ffead-cpp
+	if [ -d "${FFEAD_CPP_PATH}/web/t2" ]; then
+		install_name_tool -change "@rpath/libt2.dylib" "${FFEAD_CPP_PATH}/lib/libt2.dylib" ffead-cpp
 	fi
-	if [ -d "${FFEAD_CPP_PATH}/web/te-benchmark-um-pq" ]; then
-		install_name_tool -change "@rpath/libte_benchmark_um_pq.dylib" "${FFEAD_CPP_PATH}/lib/libte_benchmark_um_pq.dylib" ffead-cpp
+	if [ -d "${FFEAD_CPP_PATH}/web/t3" ]; then
+		install_name_tool -change "@rpath/libt3.dylib" "${FFEAD_CPP_PATH}/lib/libt3.dylib" ffead-cpp
 	fi
-	if [ -d "${FFEAD_CPP_PATH}/web/te-benchmark-um-pq-async" ]; then
-		install_name_tool -change "@rpath/libte_benchmark_um_pq_async.dylib" "${FFEAD_CPP_PATH}/lib/libte_benchmark_um_pq_async.dylib" ffead-cpp
+	if [ -d "${FFEAD_CPP_PATH}/web/t4" ]; then
+		install_name_tool -change "@rpath/libt4.dylib" "${FFEAD_CPP_PATH}/lib/libt4.dylib" ffead-cpp
+	fi
+	if [ -d "${FFEAD_CPP_PATH}/web/t5" ]; then
+		install_name_tool -change "@rpath/libt5.dylib" "${FFEAD_CPP_PATH}/lib/libt5.dylib" ffead-cpp
 	fi
 	export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$LD_LIBRARY_PATH
 	export DYLD_FALLBACK_LIBRARY_PATH=$DYLD_LIBRARY_PATH

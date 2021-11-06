@@ -66,7 +66,7 @@ jobs:
         sudo ninja install
         cd ffead-cpp-6.0-bin
         sudo chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
-        #sed -i'' -e "s|<init>TeBkUmRouter.updateCache</init>||g" web/te-benchmark-um/config/cache.xml
+        #sed -i'' -e "s|<init>TeBkUmRouter.updateCache</init>||g" web/t1/config/cache.xml
         #sed -i'' -e "s|<init>TeBkRestController.updateCache</init>||g" web/te-benchmark/config/cache.xml
         sudo ./server.sh &
         COUNTER=0

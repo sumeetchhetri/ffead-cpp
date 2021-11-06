@@ -244,4 +244,5 @@ void SSLCommon::closeSSL(const int& fd, SSL *ssl, BIO* bio)
 		SSL_free(ssl);
 	}
 	close(fd);
+	BIO_free_all(bio);
 }

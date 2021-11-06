@@ -12,13 +12,13 @@ script:
   - cd ../../
   - git clone https://github.com/TechEmpower/FrameworkBenchmarks
   - cp -rf sumeetchhetri/ffead-cpp/docker/techempower-config/* FrameworkBenchmarks/frameworks/C++/ffead-cpp
-  - cp -f sumeetchhetri/ffead-cpp/web/te-benchmark-um/include/*.h FrameworkBenchmarks/frameworks/C++/ffead-cpp/te-benchmark-um/include/
-  - cp -f sumeetchhetri/ffead-cpp/web/te-benchmark-um/src/*.cpp FrameworkBenchmarks/frameworks/C++/ffead-cpp/te-benchmark-um/src/
-  - cp -f sumeetchhetri/ffead-cpp/web/te-benchmark-um-mgr/include/*.h FrameworkBenchmarks/frameworks/C++/ffead-cpp/te-benchmark-um-mgr/include/
-  - cp -f sumeetchhetri/ffead-cpp/web/te-benchmark-um-mgr/src/*.cpp FrameworkBenchmarks/frameworks/C++/ffead-cpp/te-benchmark-um-mgr/src/
-  - cp -f sumeetchhetri/ffead-cpp/web/te-benchmark-um-pq/include/*.h FrameworkBenchmarks/frameworks/C++/ffead-cpp/te-benchmark-um-pq/include/
-  - cp -f sumeetchhetri/ffead-cpp/web/te-benchmark-um-pq/src/*.cpp FrameworkBenchmarks/frameworks/C++/ffead-cpp/te-benchmark-um-pq/src/
-  - cp -f sumeetchhetri/ffead-cpp/web/te-benchmark-um-pq-async/include/*.h FrameworkBenchmarks/frameworks/C++/ffead-cpp/te-benchmark-um-pq-async/include/
-  - cp -f sumeetchhetri/ffead-cpp/web/te-benchmark-um-pq-async/src/*.cpp FrameworkBenchmarks/frameworks/C++/ffead-cpp/te-benchmark-um-pq-async/src/
+  - cp -f sumeetchhetri/ffead-cpp/web/t1/include/*.h FrameworkBenchmarks/frameworks/C++/ffead-cpp/t1/include/
+  - cp -f sumeetchhetri/ffead-cpp/web/t1/src/*.cpp FrameworkBenchmarks/frameworks/C++/ffead-cpp/t1/src/
+  - cp -f sumeetchhetri/ffead-cpp/web/t2/include/*.h FrameworkBenchmarks/frameworks/C++/ffead-cpp/t2/include/
+  - cp -f sumeetchhetri/ffead-cpp/web/t2/src/*.cpp FrameworkBenchmarks/frameworks/C++/ffead-cpp/t2/src/
+  - cp -f sumeetchhetri/ffead-cpp/web/t3/include/*.h FrameworkBenchmarks/frameworks/C++/ffead-cpp/t3/include/
+  - cp -f sumeetchhetri/ffead-cpp/web/t3/src/*.cpp FrameworkBenchmarks/frameworks/C++/ffead-cpp/t3/src/
+  - cp -f sumeetchhetri/ffead-cpp/web/t4/include/*.h FrameworkBenchmarks/frameworks/C++/ffead-cpp/t4/include/
+  - cp -f sumeetchhetri/ffead-cpp/web/t4/src/*.cpp FrameworkBenchmarks/frameworks/C++/ffead-cpp/t4/src/
   - cd FrameworkBenchmarks && ./tfb --mode verify --test-dir C++/ffead-cpp
   

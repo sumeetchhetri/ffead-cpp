@@ -34,8 +34,7 @@ ENV LC_ALL en_US.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
 
 # install postgresql on database machine
-RUN apt-get -yqq update && apt-get -yqq install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" postgresql postgresql-contrib && \
-	rm -rf /var/lib/apt/lists/*
+RUN apt-get -yqq update && apt-get -yqq install postgresql-13 postgresql-contrib-13 &&  rm -rf /var/lib/apt/lists/*
 
 # Make sure all the configuration files in main belong to postgres
 RUN mv postgresql.conf /etc/postgresql/${PG_VERSION}/main/postgresql.conf
@@ -208,54 +207,58 @@ RUN mkdir build
 WORKDIR /tmp/ffead-cpp-src/build
 RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DDEBUG=on ..
 RUN ninja install && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-mgr/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-mgr/config/cache.xml && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async && \
+	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2/config/cache.xml && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t4 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t5 && \
 	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-mongo-raw
 
 WORKDIR /tmp/ffead-cpp-src/build
 RUN ninja install && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um/config/sdormmongo.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um/config/sdorm.xml && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um/config/cache.xml && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-mgr && \
+	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1/config/sdormmongo.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1/config/sdorm.xml && \
+	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1/config/cache.xml && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t4 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t5 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2 && \
 	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-mongo-orm
 
 WORKDIR /tmp/ffead-cpp-src/build
 RUN ninja install && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq/config/cache.xml && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-mgr && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async && \
+	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3/config/cache.xml && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t4 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t5 && \
 	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw
 
 WORKDIR /tmp/ffead-cpp-src/build
-RUN cp -f /tmp/ffead-cpp-src/web/te-benchmark-um/sql-src/TeBkUmWorldsql.h /tmp/ffead-cpp-src/web/te-benchmark-um/include/TeBkUmWorld.h && \
-	cp -f /tmp/ffead-cpp-src/web/te-benchmark-um/sql-src/TeBkUmWorldsql.cpp /tmp/ffead-cpp-src/web/te-benchmark-um/src/TeBkUmWorld.cpp && \
+RUN cp -f /tmp/ffead-cpp-src/web/t1/sql-src/TeBkUmWorldsql.h /tmp/ffead-cpp-src/web/t1/include/TeBkUmWorld.h && \
+	cp -f /tmp/ffead-cpp-src/web/t1/sql-src/TeBkUmWorldsql.cpp /tmp/ffead-cpp-src/web/t1/src/TeBkUmWorld.cpp && \
 	ninja install && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um/config/sdormpostgresql.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um/config/sdorm.xml && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um/config/cache.xml && \
+	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1/config/sdormpostgresql.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1/config/sdorm.xml && \
+	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1/config/cache.xml && \
 	cp /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/resources/sample-odbcinst.ini /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/resources/odbcinst.ini && \
 	cp /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/resources/sample-odbc.ini /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/resources/odbc.ini && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-mgr && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t4 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t5 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2 && \
 	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-orm
 
 WORKDIR /tmp/ffead-cpp-src/build
 RUN ninja install && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-pq && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/te-benchmark-um-mgr && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2 && \
 	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw-async
 
 RUN wget -q https://github.com/vlang/v/releases/download/0.1.29/v_linux.zip && unzip -q v_linux.zip && cd v && chmod +x v && ./v symlink && cd .. && rm -f v_linux.zip
 COPY pico.v /tmp/pico.v
 WORKDIR /tmp/pico.v
 RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* && \
-	ln -s /tmp/ffead-cpp-sql-raw/lib/libte-benchmark-um-pq.so /usr/local/lib/libte-benchmark-um-pq.so && \
+	ln -s /tmp/ffead-cpp-sql-raw/lib/libt3.so /usr/local/lib/libt3.so && \
 	ln -s /tmp/ffead-cpp-sql-raw/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
 	ln -s /tmp/ffead-cpp-sql-raw/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
 	ldconfig && chmod +x *.sh && ./build-debug.sh && cp main /tmp/ && rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc*

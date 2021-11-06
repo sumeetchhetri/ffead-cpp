@@ -332,13 +332,14 @@ subdir('web/markers')
 subdir('web/oauthApp')
 subdir('web/peer-server')
 subdir('web/te-benchmark')
-subdir('web/te-benchmark-um')
+subdir('web/t1')
 if get_option('MOD_SDORM_MONGO') == true
-	subdir('web/te-benchmark-um-mgr')
+	subdir('web/t2')
 endif
 if get_option('MOD_SDORM_SQL') == true
-	subdir('web/te-benchmark-um-pq')
-	subdir('web/te-benchmark-um-pq-async')
+	subdir('web/t3')
+	subdir('web/t4')
+	subdir('web/t5')
 endif
 
 emb_includes = ['src/modules/common','src/modules/cache','src/modules/cache/memory','src/modules/cache/redis',

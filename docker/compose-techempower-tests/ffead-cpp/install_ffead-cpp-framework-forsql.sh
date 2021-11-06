@@ -38,13 +38,14 @@ sed -i 's|localhost|db|g' web/te-benchmark/config/sdorm.xml
 sed -i 's|localhost|db|g' web/te-benchmark/config/sdormmongo.xml
 sed -i 's|localhost|db|g' web/te-benchmark/config/sdormmysql.xml
 sed -i 's|localhost|db|g' web/te-benchmark/config/sdormpostgresql.xml
-sed -i 's|localhost|db|g' web/te-benchmark-um/config/sdorm.xml
-sed -i 's|localhost|db|g' web/te-benchmark-um/config/sdormmongo.xml
-sed -i 's|localhost|db|g' web/te-benchmark-um/config/sdormmysql.xml
-sed -i 's|localhost|db|g' web/te-benchmark-um/config/sdormpostgresql.xml
-sed -i 's|localhost|db|g' web/te-benchmark-um-mgr/config/sdorm.xml
-sed -i 's|localhost|db|g' web/te-benchmark-um-pq/config/sdorm.xml
-sed -i 's|localhost|db|g' web/te-benchmark-um-pq-async/config/sdorm.xml
+sed -i 's|localhost|db|g' web/t1/config/sdorm.xml
+sed -i 's|localhost|db|g' web/t1/config/sdormmongo.xml
+sed -i 's|localhost|db|g' web/t1/config/sdormmysql.xml
+sed -i 's|localhost|db|g' web/t1/config/sdormpostgresql.xml
+sed -i 's|localhost|db|g' web/t2/config/sdorm.xml
+sed -i 's|localhost|db|g' web/t3/config/sdorm.xml
+sed -i 's|localhost|db|g' web/t4/config/sdorm.xml
+sed -i 's|localhost|db|g' web/t5/config/sdorm.xml
 sed -i 's|127.0.0.1|db|g' resources/sample-odbcinst.ini
 sed -i 's|127.0.0.1|db|g' resources/sample-odbc.ini
 sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/default)||g' CMakeLists.txt
@@ -73,8 +74,8 @@ cd ${IROOT}/ffead-cpp-src/
 #Build for sql now
 cp -f web/te-benchmark/sql-src/TeBkWorldsql.h web/te-benchmark/include/TeBkWorld.h
 cp -f web/te-benchmark/sql-src/TeBkWorldsql.cpp web/te-benchmark/src/TeBkWorld.cpp
-cp -f web/te-benchmark-um/sql-src/TeBkUmWorldsql.h web/te-benchmark-um/include/TeBkUmWorld.h
-cp -f web/te-benchmark-um/sql-src/TeBkUmWorldsql.cpp web/te-benchmark-um/src/TeBkUmWorld.cpp
+cp -f web/t1/sql-src/TeBkUmWorldsql.h web/t1/include/TeBkUmWorld.h
+cp -f web/t1/sql-src/TeBkUmWorldsql.cpp web/t1/src/TeBkUmWorld.cpp
 make install -j4
 cd ffead-cpp-6.0-bin
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
@@ -102,4 +103,4 @@ rm -f $FFEAD_CPP_PATH/*.cntrl
 rm -f $FFEAD_CPP_PATH/tmp/*.sess
 #cache related dockerfiles will add the cache.xml accordingly whenever needed
 rm -f web/te-benchmark/config/cache.xml
-rm -f web/te-benchmark-um/config/cache.xml
+rm -f web/t1/config/cache.xml

@@ -9,8 +9,8 @@ export ODBCSYSINI=$FFEAD_CPP_PATH/resources
 export LD_LIBRARY_PATH=$FFEAD_CPP_PATH/lib:/usr/local/lib:$LD_LIBRARY_PATH
 export PATH=$FFEAD_CPP_PATH/lib:$PATH
 cd /tmp/ffead-cpp-sql-raw
-cp -f web/te-benchmark-um-pq/config/cachememory.xml web/te-benchmark-um-pq/config/cache.xml
-sed -i 's|"TeBkUmLpqRouter"|"TeBkUmLpqRouterPicoV"|g' web/te-benchmark-um-pq/config/application.xml
+cp -f web/t3/config/cachememory.xml web/t3/config/cache.xml
+sed -i 's|"TeBkUmLpqRouter"|"TeBkUmLpqRouterPicoV"|g' web/t3/config/application.xml
 sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' resources/server.prop
 if [ $# -eq 0 ]; then
 	cd /tmp
@@ -18,23 +18,23 @@ if [ $# -eq 0 ]; then
 	sleep 10
 	echo "ffead-cpp with sql-raw support launched"
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
--H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9783/te-benchmark-um-pq/json"
+-H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9783/t3/j"
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
--H 'Connection: keep-alive' --latency -d 15 -c 256 --timeout 8 -t 2 "http://localhost:9783/te-benchmark-um-pq/plaintext" -s /pipeline.lua -- 16
+-H 'Connection: keep-alive' --latency -d 15 -c 256 --timeout 8 -t 2 "http://localhost:9783/t3/plaint" -s /pipeline.lua -- 16
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
--H 'Connection: keep-alive' --latency -d 15 -c 256 --timeout 8 -t 2 "http://localhost:9783/te-benchmark-um-pq/fortunes"
+-H 'Connection: keep-alive' --latency -d 15 -c 256 --timeout 8 -t 2 "http://localhost:9783/t3/fortu"
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
--H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9783/te-benchmark-um-pq/db"
+-H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9783/t3/d"
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
--H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9783/te-benchmark-um-pq/queries?queries=20"
+-H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9783/t3/quer?queries=20"
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
--H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9783/te-benchmark-um-pq/querie_?queries=20"
+-H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9783/t3/que_?queries=20"
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
--H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9783/te-benchmark-um-pq/updates?queries=20"
+-H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9783/t3/updt?queries=20"
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
--H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9783/te-benchmark-um-pq/update_?queries=20"
+-H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9783/t3/upd_?queries=20"
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
--H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9783/te-benchmark-um-pq/cached-worlds?count=100"
+-H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9783/t3/cached-wld?count=100"
 	sleep 10
 	pkill main
 fi

@@ -8,10 +8,10 @@ SERV_THREADS=$(( $MAX_THREADS - $WRIT_THREADS ))
 sed -i 's|THRD_PSIZ=6|THRD_PSIZ='${SERV_THREADS}'|g' /tmp/ffead-cpp-6.0-bin/resources/server.prop
 sed -i 's|W_THRD_PSIZ=2|W_THRD_PSIZ='${WRIT_THREADS}'|g' /tmp/ffead-cpp-6.0-bin/resources/server.prop
 #sed -i'' -e "s|<init>TeBkRestController.updateCache</init>||g" /tmp/ffead-cpp-6.0-bin/web/te-benchmark/config/cache.xml
-#sed -i'' -e "s|<init>TeBkUmRouter.updateCache</init>||g" /tmp/ffead-cpp-6.0-bin/web/te-benchmark-um/config/cache.xml
-#sed -i'' -e "s|<init>TeBkUmLpqRouter.updateCache</init>||g" /tmp/ffead-cpp-6.0-bin/web/te-benchmark-um-pq/config/cache.xml
-#sed -i'' -e "s|<init>TeBkUmMgrRouter.updateCache</init>||g" /tmp/ffead-cpp-6.0-bin/web/te-benchmark-um-mgr/config/cache.xml
-#sed -i'' -e "s|<init>TeBkUmLpqAsync.updateCache</init>||g" /tmp/ffead-cpp-6.0-bin/web/te-benchmark-um-pq-async/config/cache.xml
+#sed -i'' -e "s|<init>TeBkUmRouter.updateCache</init>||g" /tmp/ffead-cpp-6.0-bin/web/t1/config/cache.xml
+#sed -i'' -e "s|<init>TeBkUmLpqRouter.updateCache</init>||g" /tmp/ffead-cpp-6.0-bin/web/t3/config/cache.xml
+#sed -i'' -e "s|<init>TeBkUmMgrRouter.updateCache</init>||g" /tmp/ffead-cpp-6.0-bin/web/t2/config/cache.xml
+#sed -i'' -e "s|<init>TeBkUmLpqAsync.updateCache</init>||g" /tmp/ffead-cpp-6.0-bin/web/t4/config/cache.xml
 
 mv /tmp/ffead-cpp-6.0-bin /opt/ffead-cpp-6.0
 chmod +x /opt/ffead-cpp-6.0/*.sh

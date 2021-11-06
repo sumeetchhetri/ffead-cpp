@@ -428,7 +428,7 @@ int pthread_setaffinity_np(pthread_t thread, size_t cpu_size,
 #endif
 
 #ifdef EMSCRIPTEN
-FILE * popen (const char *command, const char *mode) {
+FILE * popen_na (const char *command, const char *mode) {
 	return NULL;
 }
 #endif

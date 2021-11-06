@@ -9,30 +9,30 @@ export ODBCSYSINI=$FFEAD_CPP_PATH/resources
 export LD_LIBRARY_PATH=$FFEAD_CPP_PATH/lib:/usr/local/lib:$LD_LIBRARY_PATH
 export PATH=$FFEAD_CPP_PATH/lib:$PATH
 cd /tmp/ffead-cpp-mongo-orm
-cp -f web/te-benchmark-um/config/cachememory.xml web/te-benchmark-um/config/cache.xml
+cp -f web/t1/config/cachememory.xml web/t1/config/cache.xml
 if [ $# -eq 0 ]; then
 	cp /server_orig.sh server.sh
 	nohup bash -c "./server.sh > ffead.log &"
 	sleep 10
 	echo "ffead-cpp with mongo-orm support launched"
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
--H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9782/te-benchmark-um/json"
+-H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9782/t1/j"
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
--H 'Connection: keep-alive' --latency -d 15 -c 256 --timeout 8 -t 2 "http://localhost:9782/te-benchmark-um/plaintext" -s /pipeline.lua -- 16
+-H 'Connection: keep-alive' --latency -d 15 -c 256 --timeout 8 -t 2 "http://localhost:9782/t1/plaint" -s /pipeline.lua -- 16
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
--H 'Connection: keep-alive' --latency -d 15 -c 256 --timeout 8 -t 2 "http://localhost:9782/te-benchmark-um/fortunes"
+-H 'Connection: keep-alive' --latency -d 15 -c 256 --timeout 8 -t 2 "http://localhost:9782/t1/fortu"
 	mongo admin --eval 'var stats = db.runCommand( { serverStatus: 1});print(stats["opcounters"]["query"])'
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
--H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9782/te-benchmark-um/db"
+-H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9782/t1/d"
 	mongo admin --eval 'var stats = db.runCommand( { serverStatus: 1});print(stats["opcounters"]["query"])'
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
--H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9782/te-benchmark-um/queries?queries=20"
+-H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9782/t1/quer?queries=20"
 	mongo admin --eval 'var stats = db.runCommand( { serverStatus: 1});print(stats["opcounters"]["query"])'
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
--H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9782/te-benchmark-um/updates?queries=20"
+-H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9782/t1/updt?queries=20"
 	mongo admin --eval 'var stats = db.runCommand( { serverStatus: 1});print(stats["opcounters"]["update"])'
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
--H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9782/te-benchmark-um/cached-worlds?count=100"
+-H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9782/t1/cached-wld?count=100"
 	sleep 10
 	pkill ffead-cpp
 fi

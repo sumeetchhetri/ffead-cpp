@@ -239,7 +239,7 @@ typedef int NUMEVENTS;
 #define closesocket(s) close(s);  // Unix uses file descriptors, WinSock doesn't...
 
 #ifdef EMSCRIPTEN
-FILE * popen (const char *command, const char *mode);
+FILE * popen_na (const char *command, const char *mode);
 #endif
 
 #if defined(OS_DARWIN)
