@@ -53,21 +53,6 @@ public:
 	virtual ~LibpqParamsBase(){}
 };
 
-struct _string_view {
-	const char* p;
-	size_t l;
-};
-
-struct LibpqParam {
-	union {
-		unsigned short s;
-		unsigned int i;
-		long long l;
-		_string_view sv;
-	};
-	int t;
-};
-
 template <int LEN> class LibpqParams : public LibpqParamsBase
 {
 	const char *paramValues[LEN];
@@ -226,6 +211,7 @@ public:
 	void withParamInt8(long long i);
 	void withParamStr(const char* i);
 	void withParamBin(const char *i, size_t len);
+	//void withParamStr(std::string& str);
 };
 
 class LibpqAsyncReq {

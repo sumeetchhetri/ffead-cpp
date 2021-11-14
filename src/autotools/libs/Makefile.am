@@ -413,6 +413,12 @@ libffead_modules_la_SOURCES += \
 						../../modules/sdorm/mongo/MongoDBConnectionPool.cpp \
 						../../modules/sdorm/mongo/raw/MongoDBRawDataSourceImpl.cpp
 endif
+if MOD_SDORM_SCYLLA
+AM_CPPFLAGS += \
+				-I"../../modules/sdorm/scylla/raw"
+libffead_modules_la_SOURCES += \
+						../../modules/sdorm/scylla/raw/ScyllaDBRawDataSourceImpl.cpp
+endif
 if MOD_DISTOCACHE
 AM_CPPFLAGS += \
 				-I"../../modules/serialization/binary" \
@@ -543,6 +549,12 @@ libffead_modules_la_SOURCES += \
 						../../modules/sdorm/mongo/MongoDBDataSourceImpl.cpp \
 						../../modules/sdorm/mongo/MongoDBConnectionPool.cpp \
 						../../modules/sdorm/mongo/raw/MongoDBRawDataSourceImpl.cpp
+endif
+if MOD_SDORM_SCYLLA
+AM_CPPFLAGS += \
+				-I"../../modules/sdorm/scylla/raw"
+libffead_modules_la_SOURCES += \
+						../../modules/sdorm/scylla/raw/ScyllaDBRawDataSourceImpl.cpp
 endif
 if MOD_MEMCACHED
 AM_CPPFLAGS += \

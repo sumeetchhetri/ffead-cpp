@@ -38,6 +38,7 @@ class ConnectionPooler {
 	void* _env;
 	ConnectionProperties properties;
 	Connection* checkoutInternal();
+	friend class ScyllaDBRawDataSourceImpl;
 protected:
 	void setProperties(const ConnectionProperties& properties);
 	void destroyPool();

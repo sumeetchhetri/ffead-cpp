@@ -37,6 +37,22 @@
 #include "ConnectionPooler.h"
 #include "IDGenerator.h"
 
+struct _string_view {
+	const char* p;
+	size_t l;
+	//std::string st;
+};
+
+struct LibpqParam {
+	union {
+		unsigned short s;
+		unsigned int i;
+		long long l;
+		_string_view sv;
+	};
+	int t;
+};
+
 enum DSType {
 	SD_ORM_MONGO, SD_ORM_SQL, SD_RAW_MONGO, SD_RAW_SQLPG, SD_RAW_CASS
 };

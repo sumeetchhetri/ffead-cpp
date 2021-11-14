@@ -96,6 +96,10 @@ includedirsall += \
 includedirsall += \
 				src/modules/sdorm/mongo/raw/*.h
 endif
+if MOD_SDORM_SCYLLA
+includedirsall += \
+				src/modules/sdorm/scylla/raw/*.h
+endif
 if MOD_DISTOCACHE
 includedirsall += \
 				src/modules/serialization/binary/*.h \
@@ -148,6 +152,10 @@ includedirsall += \
 				src/modules/sdorm/mongo/*.h
 includedirsall += \
 				src/modules/sdorm/mongo/raw/*.h
+endif
+if MOD_SDORM_SCYLLA
+includedirsall += \
+				src/modules/sdorm/scylla/raw/*.h
 endif
 if MOD_MEMCACHED
 includedirsall += \

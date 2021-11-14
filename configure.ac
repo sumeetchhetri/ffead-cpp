@@ -365,6 +365,22 @@ if test "x$mod_sdormmongo" = "xyes"; then
     AC_DEFINE(INC_SDORM, [], [enable data-source-orm module])
 fi
 
+AC_ARG_ENABLE(mod_sdormscylla,
+AS_HELP_STRING([--enable-mod_sdormscylla],
+               [enable mod_sdormscylla, default: no]),
+[case "${enableval}" in
+             yes) mod_sdormscylla=yes ;;
+             no)  mod_sdormscylla=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_sdormscylla]) ;;
+esac],
+[mod_sdormscylla=no])
+AM_CONDITIONAL(MOD_SDORM_SCYLLA, test "x$mod_sdormscylla" = "xyes")
+AM_CONDITIONAL(MOD_SDORM, test "x$mod_sdormscylla" = "xyes")
+if test "x$mod_sdormscylla" = "xyes"; then
+    AC_DEFINE(INC_SDORM_SCYLLA, [], [enable data-source-scylla module])
+    AC_DEFINE(INC_SDORM, [], [enable data-source-orm module])
+fi
+
 AC_ARG_ENABLE(mod_gtm,
 AS_HELP_STRING([--enable-mod_gtm],
                [enable mod_gtm, default: no]),
@@ -1128,6 +1144,10 @@ if test "x$mod_sdormmongo" = "xyes"; then
 	AC_CHECK_HEADER([bson.h],,[AC_MSG_ERROR([mongodb bson.h header not found])])
 fi
 
+if test "x$mod_sdormscylla" = "xyes"; then
+     AC_CHECK_HEADER([cassandra.h],[AC_DEFINE(HAVE_SCYLLAINC, [1], [scylla headers])],[AC_MSG_ERROR([cassandra.h header not found])])
+fi
+
 if test "x$mod_gtm" = "xyes"; then
      if test -f /usr/local/include/gtmxc_types.h; then
 		echo 'gtm gtmxc_types.h header found..'
@@ -1229,6 +1249,10 @@ if test "x$mod_sdormmongo" = "xyes"; then
 	fi
 	AC_CHECK_LIB(bson-1.0, bson_new, , [AC_MSG_ERROR([Not found libbson library])])
     AC_CHECK_LIB(mongoc-1.0, mongoc_init, , [AC_MSG_ERROR([Not found libmongo library])])
+fi
+
+if test "x$mod_sdormscylla" = "xyes"; then
+	AC_CHECK_LIB(scylla-cpp-driver, cass_cluster_new, , [AC_MSG_ERROR([Not found scylla-cpp-driver library])])
 fi
 
 #if test "x$is_librt_available" = "xyes"; then	

@@ -44,6 +44,13 @@ target("ffead-modules")
     	add_files("$(projectdir)/src/modules/sdorm/mongo/raw/*.cpp")
     	add_links("bson-1.0","mongoc-1.0","uuid")
 	end
+    if has_config("MOD_SDORM_SCYLLA") then
+    	add_files("$(projectdir)/src/modules/sdorm/scylla/raw/*.cpp")
+    	add_links("scylla-cpp-driver")
+	end
+    if has_config("WITH_PUGIXML") then
+    	add_links("pugixml")
+	end
 	add_files("$(projectdir)/src/modules/serialization/*.cpp")
 	add_files("$(projectdir)/src/modules/serialization/xml/*.cpp")
 	add_files("$(projectdir)/src/modules/serialization/json/*.cpp")

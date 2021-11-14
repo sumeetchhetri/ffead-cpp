@@ -3,7 +3,8 @@ module_includes = ['/usr/local/include','../modules/common','../modules/cache','
 	'../modules/cache/memcached','../modules/client-util','../modules/http','../modules/http/http11','../modules/http/http20',
 	'../modules/ioc','../modules/jobs','../modules/reflection','../modules/sdorm','../modules/sdorm/sql','../modules/sdorm/sql/libpq',
 	'../modules/client-util/ssl','../modules/sdorm/mongo','../modules/sdorm/mongo/raw','../modules/search','../modules/serialization',
-	'../modules/serialization/xml','../modules/serialization/json','../modules/server-util','../modules/ssl','../modules/threads']
+	'../modules/serialization/xml','../modules/serialization/json','../modules/server-util','../modules/ssl','../modules/threads',
+	'../modules/sdorm/scylla/raw']
 module_includes += global_includes
 module_libs = [global_libs]
 

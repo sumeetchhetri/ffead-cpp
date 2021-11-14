@@ -198,6 +198,21 @@ if get_option('MOD_SDORM_MONGO') == true
 	endif
 endif
 
+if get_option('MOD_SDORM_SCYLLA') == true
+	if cc.has_header('cassandra.h')
+		conf_data.set('HAVE_SCYLLAINC', 1)
+	else
+		error('scylla-cpp-driver headers not found')
+	endif
+	libscylla = cc.find_library('scylla-cpp-driver')
+	if libscylla.found()
+		conf_data.set('HAVE_SCYLLALIB', 1)
+		global_libs += [libscylla]
+	else
+		error('scylla-cpp-driver lib not found')
+	endif
+endif
+
 libdl = cc.find_library('dl')
 if libdl.found()
 	global_libs += [libdl]
@@ -224,13 +239,17 @@ if get_option('WITH_RAPIDJSON') == true and cc.has_header('rapidjson/document.h'
 	conf_data.set('HAVE_RAPID_JSON', 1)
 endif
 
-if get_option('WITH_PUGIXML') == true and cc.has_header('pugixml.hpp', args : '-I/usr/local/include/')
-	conf_data.set('HAVE_PUGI_XML', 1)
+if get_option('WITH_PUGIXML') == true
+	if cc.has_header('pugixml.hpp', args : '-I/usr/local/include/')
+		conf_data.set('HAVE_PUGI_XML', 1)
+	else
+		error('pugixml headers not found')
+	endif
 	libpxml = cc.find_library('pugixml')
 	if libpxml.found()
 		global_libs += [libpxml]
 	else
-		error('pugixml headers not found')
+		error('pugixml lib not found')
 	endif
 endif
 

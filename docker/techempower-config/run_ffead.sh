@@ -89,26 +89,23 @@ fi
 
 if [ "$5" = "batch" ]
 then
-	if [ "$3" = "postgresql-raw" ]
-	then
-		sed -i 's|<batch>false</batch>|<batch>true</batch>|g' ${WEB_DIR}/config/sdorm.xml
-	elif [ "$3" = "postgresql-raw-async" ]
-	then
-		sed -i 's|<batch>false</batch>|<batch>true</batch>|g' ${WEB_DIR}/config/sdorm.xml
-	fi
+	sed -i 's|<batch>false</batch>|<batch>true</batch>|g' ${WEB_DIR}/config/sdorm.xml
 fi
 
-if [ "$4" = "memory" ]
+if [ "$3" != "postgresql-raw-async-qw" ]
 then
-	cp -f ${WEB_DIR}/config/cachememory.xml ${WEB_DIR}/config/cache.xml
-elif [ "$4" = "redis" ]
-then
-	service redis-server start
-	cp -f ${WEB_DIR}/config/cacheredis.xml ${WEB_DIR}/config/cache.xml
-elif [ "$4" = "memcached" ]
-then
-	service memcached start
-	cp -f ${WEB_DIR}/config/cachememcached.xml ${WEB_DIR}/config/cache.xml
+	if [ "$4" = "memory" ]
+	then
+		cp -f ${WEB_DIR}/config/cachememory.xml ${WEB_DIR}/config/cache.xml
+	elif [ "$4" = "redis" ]
+	then
+		service redis-server start
+		cp -f ${WEB_DIR}/config/cacheredis.xml ${WEB_DIR}/config/cache.xml
+	elif [ "$4" = "memcached" ]
+	then
+		service memcached start
+		cp -f ${WEB_DIR}/config/cachememcached.xml ${WEB_DIR}/config/cache.xml
+	fi
 fi
 
 rm -f rtdcf/*.d rtdcf/*.o 

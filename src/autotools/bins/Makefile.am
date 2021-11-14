@@ -89,6 +89,10 @@ if MOD_SDORM_MONGO
 AM_CPPFLAGS += \
 				-I"../../modules/sdorm/mongo" -I"../../modules/sdorm/mongo/raw"
 endif
+if MOD_SDORM_SCYLLA
+AM_CPPFLAGS += \
+				-I"../../modules/sdorm/scylla/raw"
+endif
 if MOD_DISTOCACHE
 AM_CPPFLAGS += \
 				-I"../../modules/serialization/binary" \
@@ -135,6 +139,10 @@ endif
 if MOD_SDORM_MONGO
 AM_CPPFLAGS += \
 				-I"../../modules/sdorm/mongo" -I"../../modules/sdorm/mongo/raw"
+endif
+if MOD_SDORM_SCYLLA
+AM_CPPFLAGS += \
+				-I"../../modules/sdorm/scylla/raw"
 endif
 if MOD_MEMCACHED
 AM_CPPFLAGS += \

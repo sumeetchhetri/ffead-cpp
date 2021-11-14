@@ -349,6 +349,30 @@ option("MOD_SDORM_MONGO")
     end)
 option_end()
 
+option("MOD_SDORM_SCYLLA")
+	set_default(false)
+	set_showmenu(true)
+	set_description("Enable ScyllaDB Raw module")
+	after_check(function (option)
+		if option:enabled() then
+			import("lib.detect.has_cxxincludes")
+			local ok = has_cxxincludes({"cassandra.h"}, {target = target})
+			if ok then
+				import("lib.detect.find_package")
+				local l = find_package("scylla-cpp-driver")
+				if not l then
+					raise('scylla-cpp-driver library not found')
+				end
+				option:set("configvar", "HAVE_SCYLLAINC", 1)
+				option:set("configvar", "HAVE_SCYLLALIB", 1)
+		        option:add(l)
+		    else
+		    	raise('scylla-cpp-driver includes not found')
+			end
+		end
+	end)
+option_end()
+
 option("LIBCUCKOO")
 	set_default(true)
 	set_showmenu(false)
@@ -366,10 +390,14 @@ option("WITH_RAPIDJSON")
 	set_default(true)
 	set_showmenu(false)
 	after_check(function (option)
-		import("lib.detect.has_cxxincludes")
-		local ok = has_cxxincludes({"rapidjson/document.h"}, {target = target})
-		if ok then
-			option:set("configvar", "HAVE_RAPID_JSON", 1)
+		if option:enabled() then
+			import("lib.detect.has_cxxincludes")
+			local ok = has_cxxincludes({"rapidjson/document.h"}, {target = target})
+			if ok then
+				option:set("configvar", "HAVE_RAPID_JSON", 1)
+			else
+				raise('rapidjson includes not found')
+			end
 		end
 	end)
 option_end()
@@ -378,16 +406,20 @@ option("WITH_PUGIXML")
 	set_default(true)
 	set_showmenu(false)
 	after_check(function (option)
-		import("lib.detect.has_cxxincludes")
-		local ok = has_cxxincludes({"pugixml.hpp"}, {target = target})
-		if ok then
-			import("lib.detect.find_package")
-			local l = find_package("pugixml")
-			if not l then
-				raise('pugixml library not found')
+		if option:enabled() then
+			import("lib.detect.has_cxxincludes")
+			local ok = has_cxxincludes({"pugixml.hpp"}, {target = target})
+			if ok then
+				import("lib.detect.find_package")
+				local l = find_package("pugixml")
+				if not l then
+					raise('pugixml library not found')
+				end
+				option:set("configvar", "HAVE_PUGI_XML", 1)
+		        option:add(l)
+		    else
+		    	raise('pugixml includes not found')
 			end
-			option:set("configvar", "HAVE_PUGI_XML", 1)
-	        option:add(l)
 		end
 	end)
 option_end()
@@ -667,7 +699,7 @@ function getOptions()
 	return {"CHECK_UUID", "LIBPQ", "CHECK_REGEX", "SSL", "ZLIB", "CURL", "GENERIC", "LIBCUCKOO", 
 			 "SELECT", "POLL", "DEVPOLL", "IOURING", "EPOLL", "KQUEUE", "EVPORT", "ACCEPT4", "TCP_QUICKACK", 
 			 "TCP_DEFER_ACCEPT", "TCP_FASTOPEN", "MOD_MEMORY","MOD_MEMCACHED", "MOD_REDIS", "MOD_SDORM_SQL", 
-			 "MOD_SDORM_MONGO", "MOD_SER_BIN", "MOD_JOBS", "SRV_EMB", "WITH_RAPIDJSON", "WITH_PUGIXML"}
+			 "MOD_SDORM_MONGO", "MOD_SDORM_SCYLLA", "MOD_SER_BIN", "MOD_JOBS", "SRV_EMB", "WITH_RAPIDJSON", "WITH_PUGIXML"}
 end
 
 includes("src/modules")
@@ -717,6 +749,7 @@ target("ffead-cpp")
 	add_installfiles("src/modules/client-util/ssl/*.h", {prefixdir = "include"})
 	add_installfiles("src/modules/sdorm/mongo/*.h", {prefixdir = "include"})
 	add_installfiles("src/modules/sdorm/mongo/raw/*.h", {prefixdir = "include"})
+	add_installfiles("src/modules/sdorm/scylla/raw/*.h", {prefixdir = "include"})
 	add_installfiles("src/modules/search/*.h", {prefixdir = "include"})
 	add_installfiles("src/modules/serialization/*.h", {prefixdir = "include"})
 	add_installfiles("src/modules/serialization/xml/*.h", {prefixdir = "include"})

@@ -1688,6 +1688,13 @@ void LibpqQuery::withParamBin(const char *i, size_t len) {
 	par.t = 5;
 }
 
+/*void LibpqQuery::withParamStr(std::string& str) {
+	pvals.emplace_back();
+	LibpqParam& par = pvals.back();
+	par.sv.st = str;
+	par.t = 6;
+}*/
+
 LibpqQuery& LibpqQuery::withSelectQuery(const std::string &query, bool isPrepared) {
 	this->query = query;
 	this->isSelect = true;

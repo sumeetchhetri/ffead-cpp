@@ -4,7 +4,7 @@ module_includes = ['/usr/local/include','common','cache','cache/memory','cache/r
 	'cache/memcached','client-util','http','http/http11','http/http20',
 	'ioc','jobs','reflection','sdorm','sdorm/sql','sdorm/sql/libpq','../framework',
 	'client-util/ssl','sdorm/mongo','sdorm/mongo/raw','search','serialization',
-	'serialization/xml','serialization/json','server-util','ssl','threads']
+	'serialization/xml','serialization/json','server-util','ssl','threads', 'sdorm/scylla/raw']
 module_includes += global_includes
 
 c = run_command(meson_grabber, 'common')
@@ -77,6 +77,12 @@ endif
 
 if get_option('MOD_SDORM_MONGO') == true
 	c = run_command(meson_grabber, 'sdorm/mongo', 'all')
+	tmp = c.stdout().strip().split('\n')
+	module_sources += tmp
+endif
+
+if get_option('MOD_SDORM_SCYLLA') == true
+	c = run_command(meson_grabber, 'sdorm/scylla', 'all')
 	tmp = c.stdout().strip().split('\n')
 	module_sources += tmp
 endif

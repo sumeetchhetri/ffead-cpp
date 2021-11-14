@@ -254,7 +254,7 @@ void JSONSerialize::cleanSerializableObject(void* _1)
 #ifdef HAVE_RAPID_JSON
 	RapiJsonState* object = (RapiJsonState*)_1;
 	if(object->str!=NULL) {
-		object->str->append(object->s.GetString(), object->s.GetLength());
+		object->str->append(object->s.GetString(), object->s.GetSize());
 	}
 	delete object;
 #else
