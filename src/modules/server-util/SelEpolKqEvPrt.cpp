@@ -27,12 +27,16 @@ SelEpolKqEvPrt::SelEpolKqEvPrt() {
 	sockfd = -1;
 	curfds = 0;
 	timeoutMilis = -1;
-#if defined USE_EPOLL
+	elcCb = NULL;
+	eCb = NULL;
+#if defined(USE_EPOLL)
 	epoll_handle = -1;
-#elif defined USE_WIN_IOCP
+#elif defined(USE_WIN_IOCP)
 	epoll_handle = NULL;
-#endif
-#if USE_KQUEUE == 1
+#elif defined(USE_PICOEV)
+	picoevl = NULL;
+	timeoutsec = 1;
+#elif defined(USE_KQUEUE)
 	kq = -1;
 #endif
 	dsi = NULL;
@@ -52,8 +56,10 @@ SelEpolKqEvPrt::~SelEpolKqEvPrt() {
 #endif
 }
 
-void SelEpolKqEvPrt::initialize(const int& timeout)
+void SelEpolKqEvPrt::initialize(const int& timeout, eventLoopContinue elcCb, onEvent eCb)
 {
+	this->elcCb = elcCb;
+	this->eCb = eCb;
 	this->timeoutMilis = timeout;
 	curfds = 1;
 	#if defined(USE_MINGW_SELECT)
@@ -138,6 +144,14 @@ void SelEpolKqEvPrt::initialize(const int& timeout)
 			return;
 		}
 		io_uring_cqe_seen(&ring, cqe);*/
+	#elif defined(USE_PICOEV)
+		picoev_init(MAXDESCRIPTORS);
+		timeoutsec = timeout/1000;
+		if(timeout<=0) {
+			timeoutsec = 1000;
+		}
+		picoevl = picoev_create_loop(MAX_TIMEOUT);
+		picoevl->arg = this;
 	#endif
 }
 
@@ -171,8 +185,10 @@ void SelEpolKqEvPrt::addListeningSocket(SOCKET sockfd) {
 	if(sockfd>0)registerRead(dsi, true);
 }
 
-void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
+void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout, eventLoopContinue elcCb, onEvent eCb)
 {
+	this->elcCb = elcCb;
+	this->eCb = eCb;
 	this->timeoutMilis = timeout;
 	this->sockfd = sockfd;
 	if(sockfd<=0)
@@ -280,6 +296,14 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
 		dsi->io_uring_type = ACCEPT;
 		io_uring_sqe_set_data(sqe1, dsi);
 		return;
+	#elif defined(USE_PICOEV)
+		picoev_init(MAXDESCRIPTORS);
+		timeoutsec = timeout/1000;
+		if(timeout<=0) {
+			timeoutsec = 1000;
+		}
+		picoevl = picoev_create_loop(MAX_TIMEOUT);
+		picoevl->arg = this;
 	#endif
 	if(sockfd>0)registerRead(dsi, true);
 }
@@ -391,6 +415,8 @@ int SelEpolKqEvPrt::getEvents()
 		} else {
 			return curfds+1;
 		}
+	#elif defined(USE_PICOEV)
+		picoev_loop_once(picoevl, timeoutMilis/1000);
 	#endif
 	return numEvents;
 }
@@ -562,7 +588,6 @@ bool SelEpolKqEvPrt::registerRead(BaseSocket* obj, const bool& isListeningSock, 
 		//setsockopt(descriptor, IPPROTO_TCP, TCP_CORK, (void *)&i, sizeof(i));
 #endif
 	}
-
 
 	#if defined(USE_MINGW_SELECT)
 		FD_SET(descriptor, &master);
@@ -739,6 +764,8 @@ bool SelEpolKqEvPrt::unRegisterRead(const SOCKET& descriptor)
 			}
 		}
 		//l.unlock();
+	#elif defined(USE_PICOEV)
+		picoev_del(picoevl, descriptor);
 	#endif
 	return true;
 }
@@ -752,11 +779,67 @@ void SelEpolKqEvPrt::reRegisterServerSock(void* obj)
 	#endif
 }
 
+#ifdef USE_PICOEV
+void SelEpolKqEvPrt::picoevAcb(picoev_loop* loop, int descriptor, int events, void* cb_arg) {
+	SelEpolKqEvPrt* ths = (SelEpolKqEvPrt*)loop->arg;
+
+	struct sockaddr_storage their_addr;
+	socklen_t sin_size;
+	while (true) {
+		sin_size = sizeof their_addr;
+#ifdef HAVE_ACCEPT4
+#ifdef HAVE_SSLINC
+		SOCKET newSocket = accept4(descriptor, (struct sockaddr *)&(their_addr), &sin_size,
+				SSLHandler::getInstance()->getIsSSL()?0:SOCK_NONBLOCK);
+#else
+		SOCKET newSocket = accept4(descriptor, (struct sockaddr *)&(their_addr), &sin_size, SOCK_NONBLOCK);
+#endif
+#else
+		SOCKET newSocket = accept(descriptor, (struct sockaddr *)&(their_addr), &sin_size);
+#endif
+		if(newSocket < 0)
+		{
+			if ((errno == EAGAIN) || (errno == EWOULDBLOCK))
+			{
+				break;
+			}
+		}
+		BaseSocket* sifd = ths->eCb(ths, (BaseSocket*)cb_arg, ACCEPTED, newSocket, NULL, -1, false);
+		ths->registerRead(sifd);
+		picoev_add(loop, newSocket, PICOEV_READ, 10, picoevRwcb, sifd);
+	}
+	ths->reRegisterServerSock(cb_arg);
+}
+
+void SelEpolKqEvPrt::picoevRwcb(picoev_loop* loop, int descriptor, int events, void* cb_arg) {
+	SelEpolKqEvPrt* ths = (SelEpolKqEvPrt*)loop->arg;
+	BaseSocket* sock = (BaseSocket*)cb_arg;
+	if ((events & PICOEV_TIMEOUT) != 0) {
+		sock->closeSocket();
+		picoev_del(loop, descriptor);
+	} else if ((events & PICOEV_READ) != 0) {
+		picoev_set_timeout(loop, descriptor, 10);
+		ths->eCb(ths, sock, READ_READY, descriptor, NULL, -1, false);
+	}
+}
+#endif
+
 void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
 	BaseSocket df;
 	df.io_uring_type = PROV_BUF;
 
-	while (evlc(this)) {
+	if(evlc!=NULL) {
+		this->elcCb = evlc;
+	}
+	if(ev!=NULL) {
+		this->eCb = ev;
+	}
+
+#ifdef USE_PICOEV
+	picoev_add(picoevl, sockfd, PICOEV_READ, 0, picoevAcb, dsi);
+#endif
+
+	while (elcCb(this)) {
 #ifdef USE_IO_URING
 		io_uring_submit_and_wait(&ring, 1);
 		struct io_uring_cqe *cqe;
@@ -805,12 +888,12 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
 				if (cqe->res <= 0) {
 					// connection closed or error
 					shutdown(udata->fd, SHUT_RDWR);
-					ev(this, udata, CLOSED, udata->fd, NULL, -1, true);
+					eCb(this, udata, CLOSED, udata->fd, NULL, -1, true);
 				} else {
 					// bytes have been read into bufs, now add write to socket sqe
 					//int bid = cqe->flags >> 16;
 					//udata->io_uring_bid = bid;
-					ev(this, udata, ON_DATA_READ, udata->fd, udata->buff, bytes_read, false);
+					eCb(this, udata, ON_DATA_READ, udata->fd, udata->buff, bytes_read, false);
 					//add_socket_write(&ring, conn_i.fd, bid, bytes_read, 0);
 				}
 			} else if (udata->io_uring_type == WRITE) {
@@ -827,7 +910,7 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
 				//sqe1->buf_group = group_id;
 				udata->io_uring_type = READ;
 				io_uring_sqe_set_data(sqe1, udata);
-				ev(this, udata, ON_DATA_WRITE, udata->fd, NULL, -1, false);
+				eCb(this, udata, ON_DATA_WRITE, udata->fd, NULL, -1, false);
 				//add_socket_read(&ring, conn_i.fd, group_id, MAX_MESSAGE_LEN, IOSQE_BUFFER_SELECT);
 			}
 		}
@@ -886,7 +969,7 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
 						unRegisterRead(descriptor);
 #endif
 					}
-					ev(this, udata, isRead?READ_READY:WRITE_READY, descriptor, NULL, -1, false);
+					eCb(this, udata, isRead?READ_READY:WRITE_READY, descriptor, NULL, -1, false);
 				}
 			}
 		}

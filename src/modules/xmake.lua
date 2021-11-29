@@ -7,6 +7,9 @@ target("ffead-modules")
 	add_options(getOptions())
 	on_load(setIncludes)
 	add_files("$(projectdir)/src/modules/common/*.cpp")
+	if has_config("WITH_PICOEV") then
+		add_files("$(projectdir)/src/modules/common/picoev/*.cpp")
+	end
 	add_files("$(projectdir)/src/modules/client-util/*.cpp")
 	add_files("$(projectdir)/src/modules/server-util/*.cpp")
 	add_files("$(projectdir)/src/modules/http/*.cpp")

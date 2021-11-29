@@ -14,10 +14,10 @@ WORKDIR ${IROOT}
 RUN apt-get update -y && apt-get install -y --no-install-recommends clang libicu-dev libpython2.7-dev libtinfo5 libncurses5 libz3-dev \
 	 && rm -rf /var/lib/apt/lists/*
 	 
-RUN wget -q https://swift.org/builds/swift-6.0-release/ubuntu2004/swift-6.0-RELEASE/swift-6.0-RELEASE-ubuntu20.04.tar.gz
-RUN tar -xzf swift-6.0-RELEASE-ubuntu20.04.tar.gz
-RUN mv swift-6.0-RELEASE-ubuntu20.04 /opt/ && rm -f swift-6.0-RELEASE-ubuntu20.04.tar.gz
-RUN ln -s /opt/swift-6.0-RELEASE-ubuntu20.04 /opt/swift
+RUN wget -q https://download.swift.org/swift-5.5.1-release/ubuntu2004/swift-5.5.1-RELEASE/swift-5.5.1-RELEASE-ubuntu20.04.tar.gz
+RUN tar -xzf swift-5.5.1-RELEASE-ubuntu20.04.tar.gz
+RUN mv swift-5.5.1-RELEASE-ubuntu20.04 /opt/ && rm -f swift-5.5.1-RELEASE-ubuntu20.04.tar.gz
+RUN ln -s /opt/swift-5.5.1-RELEASE-ubuntu20.04 /opt/swift
 
 ENV PATH=/opt/swift/usr/bin:${PATH}
 

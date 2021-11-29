@@ -225,7 +225,7 @@
 			"display_name": "ffead-cpp [c++-seastar]",
 			"notes": "",
 			"versus": "",
-			"tags": []
+			"tags": ["broken"]
 		},
 		"julia-http": {
 			"json_url": "/t1/j",

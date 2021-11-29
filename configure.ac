@@ -953,6 +953,7 @@ AS_HELP_STRING([--enable-with_rapidjson],
              *)   AC_MSG_ERROR([bad value ${enableval} for --enable-with_rapidjson]) ;;
 esac],
 [with_rapidjson=yes])
+AM_CONDITIONAL(WITH_RAPIDJSON, test "x$with_rapidjson" = "xyes")
 
 AC_ARG_ENABLE(with_pugixml,
 AS_HELP_STRING([--enable-with_pugixml],
@@ -963,6 +964,18 @@ AS_HELP_STRING([--enable-with_pugixml],
              *)   AC_MSG_ERROR([bad value ${enableval} for --enable-with_pugixml]) ;;
 esac],
 [with_pugixml=yes])
+AM_CONDITIONAL(WITH_PUGIXML, test "x$with_pugixml" = "xyes")
+
+AC_ARG_ENABLE(with_picoev,
+AS_HELP_STRING([--enable-with_picoev],
+               [enable with_picoev, default: no]),
+[case "${enableval}" in
+             yes) with_picoev=yes ;;
+             no)  with_picoev=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-with_picoev]) ;;
+esac],
+[with_picoev=no])
+AM_CONDITIONAL(WITH_PICOEV, test "x$with_picoev" = "xyes")
 
 # store current user given compiler flags to avoid default setup via AC_PROG_CXX
 OLD_CXXFLAGS=$CXXFLAGS
@@ -1052,30 +1065,30 @@ AM_CONDITIONAL(BUILT_WITH_CONFGURE, test "x1" = "x1")
 
 AC_CHECK_HEADER([_mingw_mac.h], 
 					 [AC_DEFINE(OS_MINGW_W64, [1], [Define to 1 if you have _mingw_mac.h])], 
-					 [AC_DEFINE(OS_MINGW_W64, [0], [Define to 0 if you don't have _mingw_mac.h])])
+					 [])
 AC_CHECK_HEADER([sys/sendfile.h], 
 					 [AC_DEFINE(IS_SENDFILE, [1], [Define to 1 if you have sys/sendfile.h])], 
-					 [AC_DEFINE(IS_SENDFILE, [0], [Define to 0 if you don't have sys/sendfile.h])])
+					 [])
 dnl# Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])
 AC_CHECK_HEADER([sys/epoll.h],
                      [AC_DEFINE(USE_EPOLL, [1], [Define to 1 if you have <sys/epoll.h>.])],
-                     [AC_DEFINE(USE_EPOLL, [0], [epoll support not found])])
+                     [])
 AC_CHECK_HEADER([sys/event.h],
                      [AC_DEFINE(USE_KQUEUE, [1], [Define to 1 if you have <sys/event.h>.])],
-                     [AC_DEFINE(USE_KQUEUE, [0], [kqueue support not found])])
+                     [])
 AC_CHECK_HEADER([port.h],
                      [AC_DEFINE(USE_EVPORT, [1], [Define to 1 if you have <port.h>.])],
-                     [AC_DEFINE(USE_EVPORT, [0], [event port support not found])])
+                     [])
 AC_CHECK_HEADER([sys/devpoll.h],
                      [AC_DEFINE(USE_DEVPOLL, [1], [Define to 1 if you have <sys/devpoll.h>.])],
-                     [AC_DEFINE(USE_DEVPOLL, [0], [devpoll support not found])])
+                     [])
 AC_CHECK_HEADER([sys/poll.h],
                      [AC_DEFINE(USE_POLL, [1], [Define to 1 if you have <sys/poll.h>.])],
-                     [AC_DEFINE(USE_POLL, [0], [poll support not found])])
+                     [])
 AC_CHECK_HEADER([sys/select.h],
                      [AC_DEFINE(USE_SELECT, [1], [Define to 1 if you have <sys/select.h>.])],
-                     [AC_DEFINE(USE_SELECT, [0], [select support not found])])
+                     [])
 AC_CHECK_HEADER([regex.h],
                      [AC_DEFINE(HAVE_REGEX, [1], [regex.h presence])],
                      [
@@ -1090,22 +1103,27 @@ if test "x$with_rapidjson" = "xyes"; then
 fi
 
 if test "x$with_pugixml" = "xyes"; then                   
-AC_CHECK_HEADER([pugixml.hpp], [AC_DEFINE(HAVE_PUGI_XML, [1], [pugixml.hpp presence])], [])
-AC_CHECK_HEADER([pugixml.hpp],
+	AC_CHECK_HEADER([pugixml.hpp], [AC_DEFINE(HAVE_PUGI_XML, [1], [pugixml.hpp presence])], [])
+	AC_CHECK_HEADER([pugixml.hpp],
                      [
                      	AC_CHECK_LIB(pugixml, main, [AC_DEFINE(HAVE_PUGI_XML, [1], [pugixml.hpp presence])], [AC_MSG_ERROR([pugixml library not found])])
                      	
                      ], [])
 fi
 
+if test "x$with_picoev" = "xyes"; then
+	AC_DEFINE(USE_PICOEV, [], [enable picoev engine])
+	AM_CONDITIONAL(WITH_PICOEV, test "x$with_picoev" = "xyes")
+fi
+
 OLD_CPP=$CPP
 CPP="$CXXCPP $STDCXX_SWITCH"
 AC_CHECK_HEADER([atomic],
                      [AC_DEFINE(USE_ATOMIC_H, [1], [Define to 1 if you have <atomic.h>.])],
-                     [AC_DEFINE(USE_ATOMIC_H, [0], [atomic support not found])], [-])
+                     [], [-])
 AC_CHECK_HEADER([cstdatomic],
                      [AC_DEFINE(USE_CSTDATOMIC_H, [1], [Define to 1 if you have <cstdatomic.h>.])],
-                     [AC_DEFINE(USE_CSTDATOMIC_H, [0], [cstdatomic support not found])], [-])
+                     [], [-])
 CPP=$OLD_CPP
 
 AC_CHECK_HEADER([openssl/ssl.h], AC_DEFINE(HAVE_SSLINC, 1, [Define if ssl is present]),[])

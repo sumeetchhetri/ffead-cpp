@@ -1,7 +1,7 @@
 
 module_sources = []
 module_includes = ['/usr/local/include','common','cache','cache/memory','cache/redis',
-	'cache/memcached','client-util','http','http/http11','http/http20',
+	'cache/memcached','client-util','http','http/http11','http/http20', 'common/picoev',
 	'ioc','jobs','reflection','sdorm','sdorm/sql','sdorm/sql/libpq','../framework',
 	'client-util/ssl','sdorm/mongo','sdorm/mongo/raw','search','serialization',
 	'serialization/xml','serialization/json','server-util','ssl','threads', 'sdorm/scylla/raw']
@@ -108,6 +108,12 @@ endif
 
 if get_option('MOD_JOBS') == true
 	c = run_command(meson_grabber, 'jobs')
+	tmp = c.stdout().strip().split('\n')
+	module_sources += tmp
+endif
+
+if get_option('WITH_PICOEV') == true
+	c = run_command(meson_grabber, 'common/picoev', 'all')
 	tmp = c.stdout().strip().split('\n')
 	module_sources += tmp
 endif

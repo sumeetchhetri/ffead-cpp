@@ -13,11 +13,11 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-
+#![deny(warnings)]
 extern crate libc;
 
-use hyper::{Body,Request,StatusCode, Version, Response, Server};
 use hyper::service::{make_service_fn, service_fn};
+use hyper::{Body, Request, StatusCode, Version, Response, Server};
 use libc::{c_char, c_int, size_t, c_void};
 use std::ptr;
 use std::mem;

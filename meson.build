@@ -253,6 +253,10 @@ if get_option('WITH_PUGIXML') == true
 	endif
 endif
 
+if get_option('WITH_PICOEV') == true
+	conf_data.set('USE_PICOEV', 1)
+endif
+
 if get_option('SRV_EMB') == true
 	conf_data.set('SRV_EMB', 1)
 endif

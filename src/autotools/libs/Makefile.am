@@ -42,6 +42,11 @@ libffead_modules_la_SOURCES =  ../../modules/common/Bigdecimal.cpp \
 						../../modules/common/picohttpparser_fcp.cpp \
 						../../modules/common/yuarel.cpp \
 						../../modules/common/hescape.cpp
+if WITH_PICOEV
+libffead_modules_la_SOURCES +=  ../../modules/common/picoev/picoev_epoll.cpp \
+						../../modules/common/picoev/picoev_kqueue.cpp \
+						../../modules/common/picoev/picoev_select.cpp
+endif
 
 if MOD_ALL
 lib_LTLIBRARIES +=  libffead-framework.la

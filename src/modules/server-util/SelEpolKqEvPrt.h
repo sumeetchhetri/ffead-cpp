@@ -33,8 +33,31 @@
 #define MAXDESCRIPTORS 1024
 #define OP_READ     0
 #define OP_WRITE    1
+#define MAX_TIMEOUT 10
 
-#if USE_EVPORT == 1
+#if defined(USE_PICOEV)
+#ifdef OS_LINUX
+	#include <sys/epoll.h>
+	#define USE_PICOEV_EPOLL 1
+#elif defined(OS_BSD) || defined(APPLE)
+	#include <sys/event.h>
+	#define USE_PICOEV_KQUEUE 1
+#elif defined(USE_WIN_IOCP)
+	#include "wepoll.h"
+	#define USE_PICOEV_IOCP 1
+#elif defined(OS_MINGW) || defined(CYGWIN)
+	#define USE_PICOEV_SELECT
+#endif
+	#undef USE_EPOLL
+	#undef USE_KQUEUE
+	#undef USE_DEVPOLL
+	#undef USE_POLL
+	#undef USE_SELECT
+	#undef USE_WIN_IOCP
+	#undef USE_IO_URING
+	#undef USE_EVPORT
+#include "picoev.h"
+#elif defined(USE_EVPORT)
 	#undef USE_EPOLL
 	#undef USE_KQUEUE
 	#undef USE_DEVPOLL
@@ -44,7 +67,7 @@
 	#undef USE_IO_URING
 #include <port.h>
 #include <poll.h>
-#elif USE_EPOLL == 1
+#elif defined(USE_EPOLL)
 	#define USE_EPOLL_ET
 	#undef USE_EVPORT
 	#undef USE_KQUEUE
@@ -57,7 +80,7 @@
 	#undef USE_WIN_IOCP
 	#undef USE_IO_URING
 #include <sys/epoll.h>
-#elif USE_KQUEUE == 1
+#elif defined(USE_KQUEUE)
 	#undef USE_EVPORT
 	#undef USE_EPOLL
 	#undef USE_DEVPOLL
@@ -66,7 +89,7 @@
 	#undef USE_WIN_IOCP
 	#undef USE_IO_URING
 #include <sys/event.h>
-#elif USE_DEVPOLL == 1
+#elif defined(USE_DEVPOLL)
 	#undef USE_EPOLL
 	#undef USE_KQUEUE
 	#undef USE_EVPORT
@@ -75,7 +98,7 @@
 	#undef USE_WIN_IOCP
 	#undef USE_IO_URING
 #include <sys/devpoll.h>
-#elif USE_POLL == 1 && !defined(OS_CYGWIN)
+#elif defined(USE_POLL) && !defined(OS_CYGWIN)
 	#undef USE_EPOLL
 	#undef USE_KQUEUE
 	#undef USE_EVPORT
@@ -84,7 +107,7 @@
 	#undef USE_WIN_IOCP
 	#undef USE_IO_URING
 #include <poll.h>
-#elif USE_POLL == 1
+#elif defined(USE_POLL)
 	#define USE_SELECT 1
 	#undef USE_EPOLL
 	#undef USE_KQUEUE
@@ -94,7 +117,7 @@
 	#undef USE_WIN_IOCP
 	#undef USE_IO_URING
 #include <sys/select.h>
-#elif USE_WIN_IOCP == 1
+#elif defined(USE_WIN_IOCP)
 	#undef USE_WIN_IOCP
 	#undef USE_SELECT
 	#undef USE_EPOLL
@@ -107,7 +130,7 @@
 	#undef USE_EPOLL_ET
 	#undef USE_IO_URING
 #include "wepoll.h"
-#elif USE_MINGW_SELECT == 1
+#elif defined(USE_MINGW_SELECT)
 	#undef USE_EPOLL
 	#undef USE_KQUEUE
 	#undef USE_EVPORT
@@ -116,7 +139,7 @@
 	#undef USE_SELECT
 	#undef USE_WIN_IOCP
 	#undef USE_IO_URING
-#elif USE_SELECT == 1
+#elif defined(USE_SELECT)
 	#undef USE_EPOLL
 	#undef USE_KQUEUE
 	#undef USE_EVPORT
@@ -125,7 +148,7 @@
 	#undef USE_WIN_IOCP
 	#undef USE_IO_URING
 #include <sys/select.h>
-#elif USE_IO_URING == 1
+#elif defined(USE_IO_URING)
 	#undef USE_EPOLL
 	#undef USE_KQUEUE
 	#undef USE_EVPORT
@@ -176,6 +199,8 @@ class SelEpolKqEvPrt : public EventHandler {
 	void* context;
 	Mutex l;
 	BaseSocket* dsi;
+	eventLoopContinue elcCb;
+	onEvent eCb;
 	#if !defined(USE_EPOLL) && !defined(USE_KQUEUE) && !defined(USE_WIN_IOCP) && !defined(USE_EVPORT)
 		libcuckoo::cuckoohash_map<int, void*> connections;
 	#endif
@@ -214,6 +239,9 @@ class SelEpolKqEvPrt : public EventHandler {
 	    struct io_uring ring;
 	    //char** bufs;
 	    //int group_id;
+	#elif defined(USE_PICOEV)
+	    picoev_loop* picoevl;
+	    int timeoutsec;
 	#endif
 public:
 	SelEpolKqEvPrt();
@@ -225,8 +253,8 @@ public:
 	void setCtx(void* ctx);
 	void* getCtx();
 	void loop(eventLoopContinue evlc, onEvent ev);
-	void initialize(const int& timeout);
-	void initialize(SOCKET sockfd, const int& timeout);
+	void initialize(const int& timeout, eventLoopContinue elcCb = NULL, onEvent eCb = NULL);
+	void initialize(SOCKET sockfd, const int& timeout, eventLoopContinue elcCb = NULL, onEvent eCb = NULL);
 	int getEvents();
 	void addListeningSocket(SOCKET sockfd);
 	SOCKET getDescriptor(const SOCKET& index, void*& obj, bool& isRead);
@@ -240,6 +268,10 @@ public:
 	bool isInvalidDescriptor(const SOCKET& index);
 	void lock();
 	void unlock();
+#ifdef USE_PICOEV
+	static void picoevAcb(picoev_loop* loop, int fd, int events, void* cb_arg);
+	static void picoevRwcb(picoev_loop* loop, int fd, int events, void* cb_arg);
+#endif
 };
 
 #endif /* SELEPOLKQEVPRT_H_ */

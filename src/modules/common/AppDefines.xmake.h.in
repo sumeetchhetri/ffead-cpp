@@ -38,6 +38,7 @@ ${define USE_POLL}
 ${define USE_SELECT}
 ${define USE_WIN_IOCP}
 ${define USE_IO_URING}
+${define USE_PICOEV}
 
 ${define HAVE_LIBPQ}
 ${define HAVE_REGEX}

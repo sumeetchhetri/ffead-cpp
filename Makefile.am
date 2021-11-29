@@ -273,11 +273,11 @@ if MOD_APACHEMOD
 	cd modules/apache_mod_ffeadcpp/autotools && make install
 endif
 if IS_EXE
-	cp -f tests/autotools/.libs/tests.exe tests/test.csv \
+	cp -f tests/autotools/tests.exe tests/test.csv \
 		tests/testValues.prop tests/runTests.sh \
 		tests/*.pem tests/security.prop ${prefix}/tests
 else
-	cp -f tests/autotools/.libs/tests tests/test.csv \
+	cp -f tests/autotools/tests tests/test.csv \
 		tests/testValues.prop tests/runTests.sh \
 		tests/*.pem tests/security.prop ${prefix}/tests
 endif

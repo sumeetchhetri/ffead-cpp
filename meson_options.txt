@@ -10,3 +10,4 @@ option('SRV_ALL', type: 'boolean', description: 'Build All inbuilt HTTP Server E
 option('SRV_EMB', type: 'boolean', description: 'Embedded Http Server Engine', value: true)
 option('WITH_RAPIDJSON', type: 'boolean', description: 'Use rapidjson for json handling', value: true)
 option('WITH_PUGIXML', type: 'boolean', description: 'Use pugixml for xml handling', value: true)
+option('WITH_PICOEV', type: 'boolean', description: 'Enable picoev engine', value: false)

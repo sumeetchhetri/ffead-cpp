@@ -25,10 +25,9 @@ use std::slice;
 use std::env;
 use std::path::Path;
 use std::cell::RefCell;
-use thruster::{Response, Context, async_middleware, middleware_fn};
-use thruster::{App, Request, Server, ThrusterServer};
+use thruster::{Context, async_middleware, middleware_fn};
+use thruster::{App, Request, Server, ThrusterServer, BasicContext as Ctx};
 use thruster::{MiddlewareNext, MiddlewareResult};
-use bytes::Bytes;
 use std::fs::File;
 use std::io::Read;
 
@@ -133,49 +132,6 @@ extern "C" {
     pub fn ffead_cpp_resp_cleanup(ptr: *mut c_void);
 }
 
-pub struct Ctx {
-    response: Response,
-    pub request: Request,
-    pub scode: StatusCode
-}
-
-impl Context for Ctx {
-    type Response = Response;
-
-    fn get_response(mut self) -> Response {
-        self.response.status_code(self.scode.as_u16() as u32, self.scode.as_str());
-        self.response
-    }
-
-    fn set_body(&mut self, body: Vec<u8>) {
-        self.response.response = body;
-    }
-
-    fn set_body_bytes(&mut self, _: Bytes) {
-    }
-
-    fn route(&self) -> &str {
-        ""
-    }
-
-    fn set(&mut self, key: &str, value: &str) {
-        self.response.header(key, value);
-    }
-
-    fn remove(&mut self, _: &str) {
-    }
-}
-
-pub fn generate_context(request: Request, _: &(), _: &str) -> Ctx {
-    let ctx = Ctx {
-        request: request,
-        response: Response::new(),
-        scode: StatusCode::NOT_FOUND
-    };
-
-    ctx
-}
-
 fn slice_from_raw<'a>(pointer: *const c_char, len: size_t) -> &'a [u8] {
     unsafe { mem::transmute(slice::from_raw_parts(pointer, len)) }
 }
@@ -206,8 +162,8 @@ async fn index(mut ctx: Ctx, _next: MiddlewareNext<Ctx>) -> MiddlewareResult<Ctx
         let klen = k.len();
         phrheaders[num_headers].name = std::ffi::CString::new(k).unwrap().into_raw();
         phrheaders[num_headers].name_len = klen;
-        let vlen = v.len();
-        phrheaders[num_headers].value = std::ffi::CString::new(v).unwrap().into_raw();
+        let vlen = v[0].len();
+        phrheaders[num_headers].value = std::ffi::CString::new(v[0].as_str()).unwrap().into_raw();
         phrheaders[num_headers].value_len = vlen;
         num_headers = num_headers + 1;
     }
@@ -247,12 +203,12 @@ async fn index(mut ctx: Ctx, _next: MiddlewareNext<Ctx>) -> MiddlewareResult<Ctx
             let mut data = Vec::new();
             file.read_to_end(&mut data).unwrap();
             ctx.set_body(data);
-            ctx.scode = StatusCode::OK;
+            ctx.status = StatusCode::OK.as_u16() as u32;
         } else {
-            ctx.scode = StatusCode::NOT_FOUND;
+            ctx.status = StatusCode::NOT_FOUND.as_u16() as u32;
         }
     } else {
-        ctx.scode = StatusCode::from_u16(response.status_code as u16).unwrap();
+        ctx.status = response.status_code as u32;
         let resp_headers_len = response.headers_len;
         for i in 0..resp_headers_len as usize {
             let k = slice_from_raw(response.headers[i].name, response.headers[i].name_len);
@@ -287,7 +243,8 @@ fn main() {
     }
 	println!("Initializing ffead-cpp end...");
 
-    let mut app = App::<Request, Ctx, ()>::create(generate_context, ());
+    //let mut app = App::<Request, Ctx, ()>::create(generate_context, ());
+	let mut app = App::<Request, Ctx, ()>::new_basic();
 
     app.set404(async_middleware!(Ctx, [index]));
 

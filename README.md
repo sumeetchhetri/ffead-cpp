@@ -45,7 +45,7 @@ Features
     |embedded (HTTP1.1)|nghttp2 (HTTP2)|quiche (HTTP3)|seastar|
     |apache|cinatra (c++)|lithium (c++)|drogon (c++)|
     |libreactor \(c\)|h2o \(c\)|vweb (vlang)|picov (vlang)|
-    |actix (rust)|hyper (rust)|thruster (rust)|rocket (rust)|
+    |actix (rust)|hyper (rust)|thruster (rust)||
     |h2o\.cr (crystal)|crystal-http (crystal)|fasthttp (golang)|gnet (golang)|
     |firenio (java)|rapidoid (java)|wizzardo-http (java)|hunt (d)|
     |swift-nio (swift)|http.jl (julia)|mongols (c++)|uv-cpp (c++)|

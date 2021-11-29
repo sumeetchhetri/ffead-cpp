@@ -424,6 +424,14 @@ option("WITH_PUGIXML")
 	end)
 option_end()
 
+option("WITH_PICOEV")
+	set_default(false)
+	set_showmenu(false)
+	after_check(function (option)
+		option:set("configvar", "USE_PICOEV", 1)
+	end)
+option_end()
+
 option("GENERIC")
 	set_default(true)
 	set_showmenu(false)
@@ -699,7 +707,8 @@ function getOptions()
 	return {"CHECK_UUID", "LIBPQ", "CHECK_REGEX", "SSL", "ZLIB", "CURL", "GENERIC", "LIBCUCKOO", 
 			 "SELECT", "POLL", "DEVPOLL", "IOURING", "EPOLL", "KQUEUE", "EVPORT", "ACCEPT4", "TCP_QUICKACK", 
 			 "TCP_DEFER_ACCEPT", "TCP_FASTOPEN", "MOD_MEMORY","MOD_MEMCACHED", "MOD_REDIS", "MOD_SDORM_SQL", 
-			 "MOD_SDORM_MONGO", "MOD_SDORM_SCYLLA", "MOD_SER_BIN", "MOD_JOBS", "SRV_EMB", "WITH_RAPIDJSON", "WITH_PUGIXML"}
+			 "MOD_SDORM_MONGO", "MOD_SDORM_SCYLLA", "MOD_SER_BIN", "MOD_JOBS", "SRV_EMB", "WITH_RAPIDJSON", 
+			 "WITH_PUGIXML", "WITH_PICOEV"}
 end
 
 includes("src/modules")

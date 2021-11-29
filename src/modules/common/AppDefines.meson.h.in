@@ -38,6 +38,7 @@
 #mesondefine USE_SELECT
 #mesondefine USE_WIN_IOCP
 #mesondefine USE_IO_URING
+#mesondefine USE_PICOEV
 
 #mesondefine HAVE_LIBPQ
 #mesondefine HAVE_REGEX
