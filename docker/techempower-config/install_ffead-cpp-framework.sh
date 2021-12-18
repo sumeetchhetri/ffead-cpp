@@ -1,6 +1,6 @@
 #!/bin/bash
 
-apt update -yqq && apt install --no-install-recommends -yqq rapidjson-dev libpugixml-dev
+apt update -yqq && apt install --no-install-recommends -yqq libpugixml-dev
 
 #From https://github.com/TechEmpower/FrameworkBenchmarks/blob/master/frameworks/C%2B%2B/ulib/setup_json.sh
 MAX_THREADS=$(( 3 * `nproc` / 2 ))
@@ -15,6 +15,11 @@ rm -rf .git
 cd ..
 mv ffead-cpp ffead-cpp-src
 mv ffead-cpp-src/lang-server-backends ${IROOT}/
+
+cd /tmp
+git clone https://github.com/Tencent/rapidjson
+cp -rf rapidjson/include/rapidjson /usr/include/
+rm -rf rapidjson
 
 cd $IROOT/ffead-cpp-src/
 

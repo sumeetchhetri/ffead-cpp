@@ -74,6 +74,8 @@
 			"tags": []
 		},
 		"postgresql-raw-async-clibpqb-profiled": {
+			"plaintext_url": "/t4/plaint",
+			"json_url": "/t4/j",
 			"db_url": "/t4/d",
 			"query_url": "/t4/quer?queries=",
 			"fortune_url": "/t4/fortu",

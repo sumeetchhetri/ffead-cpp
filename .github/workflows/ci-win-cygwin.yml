@@ -20,7 +20,7 @@ jobs:
       run: |
         choco install -y cygwin
         choco install -y cyg-get
-        cyg-get gcc gcc-g++ autmake patch bzip2 perl tar xz autoconf automake m4 libtool make zlib-devel zlib cmake git libpq-devel curl libcurl-devel libuuid-devel gdb libssl-devel wget dos2unix unzip
+        cyg-get gcc gcc-g++ autmake libonig-devel patch bzip2 perl tar xz autoconf automake m4 libtool make zlib-devel zlib cmake git libpq-devel curl libcurl-devel libuuid-devel gdb libssl-devel wget dos2unix unzip
     - name: Set ENV
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true

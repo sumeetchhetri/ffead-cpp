@@ -417,6 +417,7 @@ int SelEpolKqEvPrt::getEvents()
 		}
 	#elif defined(USE_PICOEV)
 		picoev_loop_once(picoevl, timeoutMilis/1000);
+		numEvents = -1;
 	#endif
 	return numEvents;
 }
@@ -805,7 +806,6 @@ void SelEpolKqEvPrt::picoevAcb(picoev_loop* loop, int descriptor, int events, vo
 			}
 		}
 		BaseSocket* sifd = ths->eCb(ths, (BaseSocket*)cb_arg, ACCEPTED, newSocket, NULL, -1, false);
-		ths->registerRead(sifd);
 		picoev_add(loop, newSocket, PICOEV_READ, 10, picoevRwcb, sifd);
 	}
 	ths->reRegisterServerSock(cb_arg);
@@ -918,6 +918,9 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
 		io_uring_cq_advance(&ring, count);
 #else
 		int num = getEvents();
+#ifdef USE_PICOEV
+		continue;
+#endif
 		if (num<=0)
 		{
 			if(num==-1) {
