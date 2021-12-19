@@ -8,9 +8,16 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "@TO_REPLACE_CPPFLAGS@ -Wno-unused-variable -Wno-return-type-c-linkage -Wno-sometimes-uninitialized")
+
+if(MINGW)
+	set(CMAKE_CXX_FLAGS "@TO_REPLACE_CPPFLAGS@ -Wno-unused-variable -Wno-return-type-c-linkage -Wno-sometimes-uninitialized -Wa,-mbig-obj -O1")
+else()
+	set(CMAKE_CXX_FLAGS "@TO_REPLACE_CPPFLAGS@ -Wno-unused-variable -Wno-return-type-c-linkage -Wno-sometimes-uninitialized")
+endif()
+
 set(CMAKE_EXE_LINKER_FLAGS "@TO_REPLACE_LDFLAGS@ -avoid-version -shared -no-undefined -module -export-dynamic")
 include_directories("/usr/local/include" "@TO_CMAKE_SOURCE_DIR@/../include")
+
 
 @TO_INTER_DINTER_INCLUDES@
 find_library(HAVE_FFEAD_MODULES_LIB ffead-modules HINTS "@TO_CMAKE_SOURCE_DIR@/../lib")

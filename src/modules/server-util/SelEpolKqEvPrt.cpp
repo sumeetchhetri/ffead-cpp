@@ -62,7 +62,15 @@ void SelEpolKqEvPrt::initialize(const int& timeout, eventLoopContinue elcCb, onE
 	this->eCb = eCb;
 	this->timeoutMilis = timeout;
 	curfds = 1;
-	#if defined(USE_MINGW_SELECT)
+	#if defined(USE_PICOEV)
+		picoev_init(MAXDESCRIPTORS);
+		timeoutsec = timeout/1000;
+		if(timeout<=0) {
+			timeoutsec = 1000;
+		}
+		picoevl = picoev_create_loop(MAX_TIMEOUT);
+		picoevl->arg = this;
+	#elif defined(USE_MINGW_SELECT)
 		FD_ZERO(&readfds);
 		FD_ZERO(&master);
 	#elif defined(USE_SELECT)
@@ -144,14 +152,6 @@ void SelEpolKqEvPrt::initialize(const int& timeout, eventLoopContinue elcCb, onE
 			return;
 		}
 		io_uring_cqe_seen(&ring, cqe);*/
-	#elif defined(USE_PICOEV)
-		picoev_init(MAXDESCRIPTORS);
-		timeoutsec = timeout/1000;
-		if(timeout<=0) {
-			timeoutsec = 1000;
-		}
-		picoevl = picoev_create_loop(MAX_TIMEOUT);
-		picoevl->arg = this;
 	#endif
 }
 
@@ -201,7 +201,15 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout, eventLoopCont
 		listenerMode = true;
 	}
 	curfds = 1;
-	#if defined(USE_MINGW_SELECT)
+	#if defined(USE_PICOEV)
+		picoev_init(MAXDESCRIPTORS);
+		timeoutsec = timeout/1000;
+		if(timeout<=0) {
+			timeoutsec = 1000;
+		}
+		picoevl = picoev_create_loop(MAX_TIMEOUT);
+		picoevl->arg = this;
+	#elif defined(USE_MINGW_SELECT)
 		fdMax = sockfd;
 		FD_ZERO(&readfds);
 		FD_ZERO(&master);
@@ -296,14 +304,6 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout, eventLoopCont
 		dsi->io_uring_type = ACCEPT;
 		io_uring_sqe_set_data(sqe1, dsi);
 		return;
-	#elif defined(USE_PICOEV)
-		picoev_init(MAXDESCRIPTORS);
-		timeoutsec = timeout/1000;
-		if(timeout<=0) {
-			timeoutsec = 1000;
-		}
-		picoevl = picoev_create_loop(MAX_TIMEOUT);
-		picoevl->arg = this;
 	#endif
 	if(sockfd>0)registerRead(dsi, true);
 }
@@ -590,7 +590,9 @@ bool SelEpolKqEvPrt::registerRead(BaseSocket* obj, const bool& isListeningSock, 
 #endif
 	}
 
-	#if defined(USE_MINGW_SELECT)
+	#ifdef USE_PICOEV
+		picoev_add(picoevl, descriptor, PICOEV_READ, 0, isListeningSock?picoevAcb:picoevRwcb, obj);
+	#elif defined(USE_MINGW_SELECT)
 		FD_SET(descriptor, &master);
 		if(descriptor > fdMax)
 			fdMax = descriptor;
@@ -834,10 +836,6 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
 	if(ev!=NULL) {
 		this->eCb = ev;
 	}
-
-#ifdef USE_PICOEV
-	picoev_add(picoevl, sockfd, PICOEV_READ, 0, picoevAcb, dsi);
-#endif
 
 	while (elcCb(this)) {
 #ifdef USE_IO_URING

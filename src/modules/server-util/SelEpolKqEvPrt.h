@@ -113,13 +113,10 @@
 	#undef USE_KQUEUE
 	#undef USE_EVPORT
 	#undef USE_DEVPOLL
-	#undef USE_POLL
 	#undef USE_WIN_IOCP
 	#undef USE_IO_URING
 #include <sys/select.h>
 #elif defined(USE_WIN_IOCP)
-	#undef USE_WIN_IOCP
-	#undef USE_SELECT
 	#undef USE_EPOLL
 	#undef USE_KQUEUE
 	#undef USE_EVPORT

@@ -20,10 +20,42 @@ jobs:
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       run: |
-        echo '::set-env name=PATH::C:\msys64\mingw64\bin;C:\msys64\usr\bin'
-    - name: Install toolchain
+        echo "::add-path::C:\msys64\mingw64\bin"
+        echo "::add-path::C:\msys64\usr\bin"
+    - name: Update msys package db
       run: |
-        pacman -Syuu --noconfirm make git wget curl gdb mingw-w64-x86_64-oniguruma mingw-w64-x86_64-gcc mingw-w64-x86_64-make mingw-w64-x86_64-curl mingw-w64-x86_64-openssl mingw-w64-x86_64-zlib mingw-w64-x86_64-jsoncpp mingw-w64-x86_64-crt mingw-w64-x86_64-headers mingw-w64-x86_64-readline mingw-w64-x86_64-cmake mingw-w64-x86_64-dlfcn mingw-w64-x86_64-unixodbc mingw-w64-x86_64-extra-cmake-modules mingw64/mingw-w64-x86_64-cyrus-sasl mingw-w64-x86_64-postgresql mingw-w64-x86_64-ninja diffutils unzip
+        pacman -Syu --noconfirm
+#    - name: Update base packages
+#      run: |
+#        pacman -Su --noconfirm
+    - name: Install packages
+      run: |    
+        pacman -S --noconfirm make
+        pacman -S --noconfirm procps
+        pacman -S --noconfirm git
+        pacman -S --noconfirm wget
+        pacman -S --noconfirm curl
+        pacman -S --noconfirm gdb
+        pacman -S --noconfirm mingw-w64-x86_64-oniguruma
+        pacman -S --noconfirm mingw-w64-x86_64-gcc
+        pacman -S --noconfirm mingw-w64-x86_64-make
+        pacman -S --noconfirm mingw-w64-x86_64-curl
+        pacman -S --noconfirm mingw-w64-x86_64-openssl
+        pacman -S --noconfirm mingw-w64-x86_64-zlib
+        pacman -S --noconfirm mingw-w64-x86_64-jsoncpp
+        pacman -S --noconfirm mingw-w64-x86_64-crt
+        pacman -S --noconfirm mingw-w64-x86_64-headers
+        pacman -S --noconfirm mingw-w64-x86_64-readline
+        pacman -S --noconfirm mingw-w64-x86_64-cmake
+        pacman -S --noconfirm mingw-w64-x86_64-dlfcn
+        pacman -S --noconfirm mingw-w64-x86_64-unixodbc
+        pacman -S --noconfirm mingw-w64-x86_64-extra-cmake-modules
+        pacman -S --noconfirm mingw64/mingw-w64-x86_64-cyrus-sasl
+        pacman -S --noconfirm mingw-w64-x86_64-postgresql
+        pacman -S --noconfirm mingw-w64-x86_64-ninja
+        pacman -S --noconfirm mingw-w64-x86_64-hiredis
+        pacman -S --noconfirm diffutils
+        pacman -S --noconfirm unzip
         echo 'Installed all dependencies'
     - name: Install dependencies and ffead-cpp
       run: |

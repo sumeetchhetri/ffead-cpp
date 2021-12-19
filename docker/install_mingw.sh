@@ -1,25 +1,26 @@
-ls -ltr /mingw64/include/
 wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
 unzip -qq master.zip
 mv ffead-cpp-master ffead-cpp-src
 rm -f master.zip
-cd /tmp/ffead-cpp-src/docker/files
-unzip -qq mingw64-dlfcn.zip
-cd mingw64
-cp bin/* /mingw64/bin/
-cp include/* /mingw64/include/
-cp lib/* /mingw64/lib/
-cd /tmp/ffead-cpp-src/docker/files
-rm -rf mingw64
-unzip -qq mingw64-unixodbc.zip
-cd mingw64
-cp bin/* /mingw64/bin/
-cp include/* /mingw64/include/
-cp -rf lib/* /mingw64/lib/
-cp -rf share/* /mingw64/share/
-cp -rf etc/* /mingw64/etc/
+
+#cd /tmp/ffead-cpp-src/docker/files
+#unzip -qq mingw64-dlfcn.zip
+#cd mingw64
+#cp bin/* /mingw64/bin/
+#cp include/* /mingw64/include/
+#cp lib/* /mingw64/lib/
+#cd /tmp/ffead-cpp-src/docker/files
+#rm -rf mingw64
+#unzip -qq mingw64-unixodbc.zip
+#cd mingw64
+#cp bin/* /mingw64/bin/
+#cp include/* /mingw64/include/
+#cp -rf lib/* /mingw64/lib/
+#cp -rf share/* /mingw64/share/
+#cp -rf etc/* /mingw64/etc/
 
 TARGET=x86_64-w64-mingw32
+
 cd /tmp
 wget -q https://github.com/sean-/ossp-uuid/archive/master.zip
 unzip -qq master.zip
@@ -57,21 +58,21 @@ mingw32-make install
 cd /tmp
 rm -rf libcuckoo-master
 
-wget -q https://github.com/kkos/oniguruma/releases/download/v6.9.6/onig-6.9.6.tar.gz
-tar xf onig-6.9.6.tar.gz
-cd onig-6.9.6
-cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64/ -DENABLE_BINARY_COMPATIBLE_POSIX_API=on .
-mingw32-make -j4 install
-cd /tmp
-rm -rf onig-6.9.6
+#wget -q https://github.com/kkos/oniguruma/releases/download/v6.9.6/onig-6.9.6.tar.gz
+#tar xf onig-6.9.6.tar.gz
+#cd onig-6.9.6
+#cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64/ -DENABLE_BINARY_COMPATIBLE_POSIX_API=on .
+#mingw32-make -j4 install
+#cd /tmp
+#rm -rf onig-6.9.6
 
-wget -q https://github.com/redis/hiredis/archive/8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
-unzip 8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
-rm -f 8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
-cd hiredis-8e0264cfd6889b73c241b60736fe96ba1322ee6e
-cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64/ . && mingw32-make -j4 install
-cd /tmp
-rm -rf hiredis-8e0264cfd6889b73c241b60736fe96ba1322ee6e
+#wget -q https://github.com/redis/hiredis/archive/8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
+#unzip 8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
+#rm -f 8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
+#cd hiredis-8e0264cfd6889b73c241b60736fe96ba1322ee6e
+#cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64/ . && mingw32-make -j4 install
+#cd /tmp
+#rm -rf hiredis-8e0264cfd6889b73c241b60736fe96ba1322ee6e
 
 wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.16.2/mongo-c-driver-1.16.2.tar.gz
 tar xf mongo-c-driver-1.16.2.tar.gz
@@ -119,9 +120,9 @@ do
   fi
 done
 echo "ffead-cpp start successful"
-sleep 5
-cd tests && chmod +x *.sh && ./runTests.sh
-cd -
+#sleep 5
+#cd tests && chmod +x *.sh && ./runTests.sh
+#cd -
 echo "ffead-cpp normal shutdown"
 rm -f serv.ctrl
 pkill ffead-cpp

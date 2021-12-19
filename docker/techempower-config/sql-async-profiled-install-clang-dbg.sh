@@ -3,7 +3,7 @@ cd $IROOT/ffead-cpp-src/
 rm -rf build
 mkdir build
 cd build
-CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake -DSRV_EMB=on -DMOD_REDIS=on -DDEBUG=on ..
+CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake -DSRV_EMB=on -DMOD_REDIS=on -DDEBUG=on ${BUILD_EXT_OPTS} ..
 make install && mv $IROOT/ffead-cpp-src/ffead-cpp-6.0-bin $IROOT/ffead-cpp-sql-raw
 
 #Start postgresql

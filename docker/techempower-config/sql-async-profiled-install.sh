@@ -3,7 +3,7 @@ cd $IROOT/ffead-cpp-src/
 rm -rf build
 mkdir build
 cd build
-CXXFLAGS="-march=native -flto -fprofile-dir=/tmp/profile-data -fprofile-generate" cmake -DSRV_EMB=on -DMOD_REDIS=on ..
+CXXFLAGS="-march=native -flto -fprofile-dir=/tmp/profile-data -fprofile-generate" cmake -DSRV_EMB=on -DMOD_REDIS=on ${BUILD_EXT_OPTS} ..
 make install && mv $IROOT/ffead-cpp-src/ffead-cpp-6.0-bin $IROOT/ffead-cpp-sql-raw
 
 #Start postgresql
@@ -20,7 +20,7 @@ cd $IROOT/ffead-cpp-src
 rm -rf build
 mkdir build
 cd build
-CXXFLAGS="-march=native -flto -fprofile-dir=/tmp/profile-data -fprofile-use=/tmp/profile-data -fprofile-correction" cmake -DSRV_EMB=on -DMOD_REDIS=on ..
+CXXFLAGS="-march=native -flto -fprofile-dir=/tmp/profile-data -fprofile-use=/tmp/profile-data -fprofile-correction" cmake -DSRV_EMB=on -DMOD_REDIS=on ${BUILD_EXT_OPTS} ..
 make install && mv $IROOT/ffead-cpp-src/ffead-cpp-6.0-bin $IROOT/ffead-cpp-sql-raw
 
 #Start postgresql

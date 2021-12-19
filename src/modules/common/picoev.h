@@ -213,6 +213,11 @@ extern "C" {
     }
   }
   
+  //added for ffead-cpp, auto removal of old fd
+  PICOEV_INLINE
+    int picoev_del(picoev_loop* loop, int fd);
+  //added for ffead-cpp, auto removal of old fd
+
   /* registers a file descriptor and callback argument to a event loop */
   PICOEV_INLINE
   int picoev_add(picoev_loop* loop, int fd, int events, int timeout_in_secs,
@@ -220,6 +225,11 @@ extern "C" {
     picoev_fd* target;
     assert(PICOEV_IS_INITED_AND_FD_IN_RANGE(fd));
     target = picoev.fds + fd;
+
+    //added for ffead-cpp, auto removal of old fd
+    if(target->loop_id != 0) picoev_del(loop, fd);
+    //added for ffead-cpp, auto removal of old fd
+
     assert(target->loop_id == 0);
     target->callback = callback;
     target->cb_arg = cb_arg;

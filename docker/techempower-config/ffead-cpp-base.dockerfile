@@ -16,6 +16,7 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 #COPY t5/ /installs/t5/
 
 WORKDIR ${IROOT}
+ENV BUILD_EXT_OPTS -DWITH_PICOEV=off
 
 COPY install_ffead-cpp-framework.sh install_ffead-cpp-httpd.sh install_ffead-cpp-nginx.sh server.sh ${IROOT}/
 RUN chmod 755 ${IROOT}/*.sh

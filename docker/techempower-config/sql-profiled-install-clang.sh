@@ -3,7 +3,7 @@ cd $IROOT/ffead-cpp-src/
 rm -rf build
 mkdir build
 cd build
-CC=/usr/bin/clang CXX=/usr/bin/clang++ CXXFLAGS="-march=native -flto -fprofile-instr-generate=/tmp/cprof.prof" cmake -DSRV_EMB=on -DMOD_REDIS=on ..
+CC=/usr/bin/clang CXX=/usr/bin/clang++ CXXFLAGS="-march=native -flto -fprofile-instr-generate=/tmp/cprof.prof" cmake -DSRV_EMB=on -DMOD_REDIS=on ${BUILD_EXT_OPTS} ..
 make install && mv $IROOT/ffead-cpp-src/ffead-cpp-6.0-bin $IROOT/ffead-cpp-sql-raw
 
 #Start postgresql
@@ -23,7 +23,7 @@ cd build
 llvm-profdata-10 merge -output=/tmp/cprof.pgo  /tmp/cprof.prof
 #llvm-profdata-10 merge -output=/tmp/cprofdi.pgo  /tmp/cprofdi.prof
 ls -ltr /tmp/cprof*
-CC=/usr/bin/clang CXX=/usr/bin/clang++ CXXFLAGS="-march=native -flto -fprofile-instr-use=/tmp/cprof.pgo" cmake -DSRV_EMB=on -DMOD_REDIS=on ..
+CC=/usr/bin/clang CXX=/usr/bin/clang++ CXXFLAGS="-march=native -flto -fprofile-instr-use=/tmp/cprof.pgo" cmake -DSRV_EMB=on -DMOD_REDIS=on ${BUILD_EXT_OPTS} ..
 make install && mv $IROOT/ffead-cpp-src/ffead-cpp-6.0-bin $IROOT/ffead-cpp-sql-raw
 
 #Start postgresql
