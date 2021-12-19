@@ -33,6 +33,7 @@ is_librt_available="yes"
 case "$host" in
 *-cygwin*)
     AC_DEFINE(OS_CYGWIN, [], [set OS to cygwin])
+    AC_DEFINE(CYGWIN, [1], [set OS to cygwin])
     local_os_type="cygwin"
     AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
     ;;

@@ -98,7 +98,7 @@
 	#undef USE_WIN_IOCP
 	#undef USE_IO_URING
 #include <sys/devpoll.h>
-#elif defined(USE_POLL) && !defined(OS_CYGWIN)
+#elif defined(USE_POLL) && !defined(CYGWIN)
 	#undef USE_EPOLL
 	#undef USE_KQUEUE
 	#undef USE_EVPORT

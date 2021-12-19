@@ -24,7 +24,7 @@
 #define CONSTANTS_H_
 #include "AppDefines.h"
 
-#if defined(OS_CYGWIN)
+#if defined(CYGWIN)
 	#define INTER_LIB_FILE "cyginter.dll"
 	#define DINTER_LIB_FILE "cygdinter.dll"
 	#define SYS_FORK_AVAIL false

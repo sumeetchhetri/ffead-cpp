@@ -1,3 +1,4 @@
+ls -ltr /mingw64/include/
 wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
 unzip -qq master.zip
 mv ffead-cpp-master ffead-cpp-src
@@ -55,6 +56,14 @@ cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64/ .
 mingw32-make install
 cd /tmp
 rm -rf libcuckoo-master
+
+wget -q https://github.com/kkos/oniguruma/releases/download/v6.9.6/onig-6.9.6.tar.gz
+tar xf onig-6.9.6.tar.gz
+cd onig-6.9.6
+cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64/ -DENABLE_BINARY_COMPATIBLE_POSIX_API=on .
+mingw32-make -j4 install
+cd /tmp
+rm -rf onig-6.9.6
 
 wget -q https://github.com/redis/hiredis/archive/8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
 unzip 8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip

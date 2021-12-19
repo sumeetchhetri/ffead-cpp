@@ -35,42 +35,42 @@ cmake -DSRV_EMB=on -DMOD_REDIS=on ..
 make install -j4
 mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
 cd /tmp/ffead-cpp-6.0-bin && chmod +x *.sh
-export PATH=/tmp/ffead-cpp-6.0-bin/lib:/mingw64/bin:/mingw64/lib:$PATH
-nohup bash -c "./server.sh > ffead.log &"
-echo "Waiting for ffead-cpp to launch on port 8080..."
-COUNTER=0
-while [ ! -f lib/cyginter.dll ]
-do
-  sleep 1
-  COUNTER=$((COUNTER+1))
-  if [ "$COUNTER" = 600 ]
-  then
-  	cat ffead.log
-  	cat logs/jobs.log
-    echo "ffead-cpp exiting due to failure...."
-    exit 1
-  fi
-done
-COUNTER=0
-while [ ! -f lib/cygdinter.dll ]
-do
-  sleep 1
-  COUNTER=$((COUNTER+1))
-  if [ "$COUNTER" = 120 ]
-  then
-  	cat ffead.log
-  	cat logs/jobs.log
-    echo "ffead-cpp exiting due to failure....dlib"
-    exit 1
-  fi
-done
-echo "ffead-cpp start successful"
-sleep 5
-cd tests && chmod +x *.sh && ./runTests.sh
-cd -
-echo "ffead-cpp normal shutdown"
-rm -f serv.ctrl
-pkill ffead-cpp
+export PATH=/tmp/ffead-cpp-6.0-bin/lib:$PATH
+#nohup bash -c "./server.sh > ffead.log &"
+#echo "Waiting for ffead-cpp to launch on port 8080..."
+#COUNTER=0
+#while [ ! -f lib/cyginter.dll ]
+#do
+#  sleep 1
+#  COUNTER=$((COUNTER+1))
+#  if [ "$COUNTER" = 600 ]
+#  then
+#  	cat ffead.log
+#  	cat logs/jobs.log
+#    echo "ffead-cpp exiting due to failure...."
+#    exit 1
+#  fi
+#done
+#COUNTER=0
+#while [ ! -f lib/cygdinter.dll ]
+#do
+#  sleep 1
+#  COUNTER=$((COUNTER+1))
+#  if [ "$COUNTER" = 120 ]
+#  then
+#  	cat ffead.log
+#  	cat logs/jobs.log
+#    echo "ffead-cpp exiting due to failure....dlib"
+#    exit 1
+#  fi
+#done
+#echo "ffead-cpp start successful"
+#sleep 5
+#cd tests && chmod +x *.sh && ./runTests.sh
+#cd -
+#echo "ffead-cpp normal shutdown"
+#rm -f serv.ctrl
+#pkill ffead-cpp
 #cd /tmp/ffead-cpp-src
 #chmod +x autogen.sh
 #sed -i'' -e "s|m4_include|#m4_include|g" configure.ac
