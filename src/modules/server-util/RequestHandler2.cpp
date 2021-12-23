@@ -228,6 +228,10 @@ Http11Socket::Http11Socket(const SOCKET& fd, const int& chunkSize, const int& co
 Http11Socket::~Http11Socket() {
 }
 
+int Http11Socket::getTimeout() {
+	return connKeepAlive;
+}
+
 bool Http11Socket::read() {
 	size_t ix = buffer.find(HttpResponse::HDR_FIN);
 	if(!isHeadersDone && ix!=std::string::npos)

@@ -1437,15 +1437,15 @@ SocketInterface* CHServer::createSocketInterface(SOCKET fd) {
 	if(BaseSecureSocket::init(fd, ssl, io)) {
 		return new Http2Handler(fd, ssl, io, true, ConfigurationData::getInstance()->coreServerProperties.webPath);
 	} else {
-		return new Http11Handler(fd, ssl, io, techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
+		return new Http11Handler(fd, ssl, io, techunkSiz, connKeepAlive, maxReqHdrCnt, maxEntitySize);
 	}
 #else
-	return new Http11Handler(fd, NULL, NULL, techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
+	return new Http11Handler(fd, NULL, NULL, techunkSiz, connKeepAlive, maxReqHdrCnt, maxEntitySize);
 #endif
 }
 
 Http11Socket* CHServer::createSocketInterface2(SOCKET fd) {
-	return new Http11Socket(fd, techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
+	return new Http11Socket(fd, techunkSiz, connKeepAlive, maxReqHdrCnt, maxEntitySize);
 }
 
 bool CHServer::doRegisterListenerFunc() {

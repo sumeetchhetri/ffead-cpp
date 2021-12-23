@@ -112,6 +112,7 @@ extern "C" {
     int num_loops;
     size_t timeout_vec_size; /* # of elements in picoev_loop.timeout.vec[0] */
     size_t timeout_vec_of_vec_size; /* ... in timeout.vec_of_vec[0] */
+    bool enableTimeouts;
   } picoev_globals;
   
   extern picoev_globals picoev;
@@ -147,7 +148,7 @@ extern "C" {
   
   /* initializes picoev */
   PICOEV_INLINE
-  int picoev_init(int max_fd) {
+  int picoev_init(int max_fd, bool enableTimeouts = false) {
     assert(! PICOEV_IS_INITED);
     assert(max_fd > 0);
     if ((picoev.fds = (picoev_fd*)picoev_memalign(sizeof(picoev_fd) * max_fd,
@@ -162,6 +163,11 @@ extern "C" {
     picoev.timeout_vec_of_vec_size
       = PICOEV_RND_UP(picoev.timeout_vec_size, PICOEV_SIMD_BITS)
       / PICOEV_SHORT_BITS;
+
+    //added for ffead-cpp
+    picoev.enableTimeouts = enableTimeouts;
+    //added for ffead-cpp
+
     return 0;
   }
   
@@ -174,6 +180,7 @@ extern "C" {
     picoev._fds_free_addr = NULL;
     picoev.max_fd = 0;
     picoev.num_loops = 0;
+    picoev.enableTimeouts = false;
     return 0;
   }
   
@@ -240,7 +247,7 @@ extern "C" {
       target->loop_id = 0;
       return -1;
     }
-    picoev_set_timeout(loop, fd, timeout_in_secs);
+    if(picoev.enableTimeouts) picoev_set_timeout(loop, fd, timeout_in_secs);
     return 0;
   }
   
@@ -253,7 +260,7 @@ extern "C" {
     if (picoev_update_events_internal(loop, fd, PICOEV_DEL) != 0) {
       return -1;
     }
-    picoev_set_timeout(loop, fd, 0);
+    if(picoev.enableTimeouts) picoev_set_timeout(loop, fd, 0);
     target->loop_id = 0;
     return 0;
   }
@@ -402,7 +409,7 @@ extern "C" {
     if (max_wait != 0) {
       loop->now = time(NULL);
     }
-    picoev_handle_timeout_internal(loop);
+    if(picoev.enableTimeouts) picoev_handle_timeout_internal(loop);
     return 0;
   }
   

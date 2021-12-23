@@ -40,6 +40,7 @@ public:
 	Http11Socket(const SOCKET& fd, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize);
 	virtual ~Http11Socket();
 	void handle();
+	int getTimeout();
 };
 
 typedef Http11Socket* (*SocketInterfaceFactory2) (SOCKET);

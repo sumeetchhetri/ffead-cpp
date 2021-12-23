@@ -591,7 +591,7 @@ bool SelEpolKqEvPrt::registerRead(BaseSocket* obj, const bool& isListeningSock, 
 	}
 
 	#ifdef USE_PICOEV
-		picoev_add(picoevl, descriptor, PICOEV_READ, 0, isListeningSock?picoevAcb:picoevRwcb, obj);
+		picoev_add(picoevl, descriptor, PICOEV_READ, isListeningSock?0:obj->getTimeout(), isListeningSock?picoevAcb:picoevRwcb, obj);
 	#elif defined(USE_MINGW_SELECT)
 		FD_SET(descriptor, &master);
 		if(descriptor > fdMax)
@@ -808,7 +808,7 @@ void SelEpolKqEvPrt::picoevAcb(picoev_loop* loop, int descriptor, int events, vo
 			}
 		}
 		BaseSocket* sifd = ths->eCb(ths, (BaseSocket*)cb_arg, ACCEPTED, newSocket, NULL, -1, false);
-		picoev_add(loop, newSocket, PICOEV_READ, 10, picoevRwcb, sifd);
+		picoev_add(loop, newSocket, PICOEV_READ, sifd->getTimeout(), picoevRwcb, sifd);
 	}
 	ths->reRegisterServerSock(cb_arg);
 }
@@ -817,8 +817,10 @@ void SelEpolKqEvPrt::picoevRwcb(picoev_loop* loop, int descriptor, int events, v
 	SelEpolKqEvPrt* ths = (SelEpolKqEvPrt*)loop->arg;
 	BaseSocket* sock = (BaseSocket*)cb_arg;
 	if ((events & PICOEV_TIMEOUT) != 0) {
-		sock->closeSocket();
-		picoev_del(loop, descriptor);
+		if(sock->getTimeout()>0) {
+			sock->closeSocket();
+			picoev_del(loop, descriptor);
+		}
 	} else if ((events & PICOEV_READ) != 0) {
 		picoev_set_timeout(loop, descriptor, 10);
 		ths->eCb(ths, sock, READ_READY, descriptor, NULL, -1, false);

@@ -193,7 +193,7 @@
 			"display_name": "ffead-cpp [rust-actix]",
 			"notes": "",
 			"versus": "",
-			"tags": []
+			"tags": ["broken"]
 		},
 		"java-firenio": {
 			"json_url": "/t1/j",
