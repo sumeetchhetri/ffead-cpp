@@ -35,12 +35,11 @@ IndexQuery& IndexQuery::setError(const std::string& error) {
 	return *this;
 }
 
-const std::map<std::string, std::string>& IndexQuery::getMappings() const {
+std::map<std::string, std::string>& IndexQuery::getMappings() {
 	return mappings;
 }
 
-IndexQuery& IndexQuery::setMappings(
-		const std::map<std::string, std::string>& mappings) {
+IndexQuery& IndexQuery::setMappings(const std::map<std::string, std::string>& mappings) {
 	this->mappings = mappings;
 	return *this;
 }
@@ -54,13 +53,21 @@ IndexQuery& IndexQuery::setName(const std::string& name) {
 	return *this;
 }
 
-const std::map<std::string, std::string>& IndexQuery::getProperties() const {
+std::map<std::string, std::string>& IndexQuery::getProperties() {
 	return properties;
 }
 
-IndexQuery& IndexQuery::setProperties(
-		const std::map<std::string, std::string>& properties) {
+IndexQuery& IndexQuery::setProperties(const std::map<std::string, std::string>& properties) {
 	this->properties = properties;
+	return *this;
+}
+
+std::map<std::string, std::string>& IndexQuery::getExtras() {
+	return extras;
+}
+
+IndexQuery& IndexQuery::setExtras(const std::map<std::string, std::string>& extras) {
+	this->extras = extras;
 	return *this;
 }
 
@@ -71,6 +78,14 @@ int IndexQuery::getStatus() const {
 IndexQuery& IndexQuery::setStatus(int status) {
 	this->status = status;
 	return *this;
+}
+
+const std::string& IndexQuery::getOpType() const {
+	return opType;
+}
+
+void IndexQuery::setOpType(const std::string &opType) {
+	this->opType = opType;
 }
 
 IndexQuery::~IndexQuery() {

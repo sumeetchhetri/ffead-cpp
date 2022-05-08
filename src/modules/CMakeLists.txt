@@ -149,11 +149,29 @@ file(GLOB serialization_module_sources
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/modules/serialization/ DESTINATION ${PROJECT_NAME}-bin/include FILES_MATCHING PATTERN "*.h")
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/modules/serialization/xml/ DESTINATION ${PROJECT_NAME}-bin/include FILES_MATCHING PATTERN "*.h")
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/modules/serialization/json/ DESTINATION ${PROJECT_NAME}-bin/include FILES_MATCHING PATTERN "*.h")
-#file(GLOB search_module_sources
-#    "search/*.h"
-#    "search/*.cpp"
-#)
-#install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/modules/search/ DESTINATION ${PROJECT_NAME}-bin/include FILES_MATCHING PATTERN "*.h")
+
+file (GLOB search_module_sources
+    "search/*.h"
+    "search/*.cpp"
+)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/modules/search/ DESTINATION ${PROJECT_NAME}-bin/include FILES_MATCHING PATTERN "*.h")
+if(MOD_SOLR)
+	file (GLOB search_module_sources_solr
+	    "search/solr/*.h"
+	    "search/solr/*.cpp"
+	)
+	list (APPEND search_module_sources ${search_module_sources_solr})
+	install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/modules/search/solr/ DESTINATION ${PROJECT_NAME}-bin/include FILES_MATCHING PATTERN "*.h")
+endif()
+if(MOD_ELASTIC)
+	file (GLOB search_module_sources_elas
+	    "search/elasticsearch/*.h"
+	    "search/elasticsearch/*.cpp"
+	)
+	list (APPEND search_module_sources ${search_module_sources_elas})
+	install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/modules/search/elasticsearch/ DESTINATION ${PROJECT_NAME}-bin/include FILES_MATCHING PATTERN "*.h")
+endif()
+
 file(GLOB serv_module_sources
     "server-util/*.h"
     "server-util/*.cpp"
@@ -178,4 +196,4 @@ if(BUILD_STATIC_LIBS OR EMSCRIPTEN)
 else()
 	add_library(ffead-modules ${sql_pq_module_sources} ${mongo_raw_module_sources} ${scylla_raw_module_sources} ${wepoll_sources} ${comm_module_sources} ${comm_module_picoev_sources} ${ssl_client_module_sources} ${client_module_sources} ${cache_module_sources} ${sdorm_module_sources} ${http_module_sources} ${ioc_module_sources} ${reflection_module_sources} ${serialization_module_sources} ${search_module_sources} ${serv_module_sources} ${ssl_module_sources} ${threads_module_sources} ${mem_module_sources} ${red_module_sources} ${memc_module_sources} ${sql_module_sources} ${mongo_module_sources} ${serb_module_sources} ${job_module_sources})
 endif()
-target_link_libraries(ffead-modules ${HAVE_LIBPQ} ${HAVE_LIBURING} ${HAVE_ONIG_REGEX_LIB} ${HAVE_WINREGEX} ${HAVE_WSOCK32} ${HAVE_WS232} ${HAVE_DLLIB} ${HAVE_UUIDLIB} ${HAVE_CURLLIB} ${HAVE_SSLLIB} ${HAVE_REDISLIB} ${HAVE_MEMCACHEDLIB} ${HAVE_MEMCACHEDUTILLIB} ${HAVE_ODBCLIB} ${HAVE_MONGOCLIB} ${HAVE_SCYLLALIB} ${HAVE_PUGI_XML_LIB} ${HAVE_BSONLIB} ${HAVE_ZLIB} ${HAVE_CRYPTOLIB})
+target_link_libraries(ffead-modules ${HAVE_LIBPQ} ${HAVE_LIBURING} ${HAVE_ONIG_REGEX_LIB} ${HAVE_WINREGEX} ${HAVE_WSOCK32} ${HAVE_WS232} ${HAVE_DLLIB} ${HAVE_UUIDLIB} ${HAVE_CURLLIB} ${HAVE_SSLLIB} ${HAVE_REDISLIB} ${HAVE_REDIS_CLUSTERLIB} ${HAVE_MEMCACHEDLIB} ${HAVE_MEMCACHEDUTILLIB} ${HAVE_ODBCLIB} ${HAVE_MONGOCLIB} ${HAVE_SCYLLALIB} ${HAVE_PUGI_XML_LIB} ${HAVE_BSONLIB} ${HAVE_ZLIB} ${HAVE_CRYPTOLIB})

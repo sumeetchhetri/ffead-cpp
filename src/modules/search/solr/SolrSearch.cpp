@@ -26,17 +26,15 @@ std::string SolrSearch::COLL_C_PARAMS = ",router.name,numShards,shards,replicati
 		"maxShardsPerNode,createNodeSet,createNodeSet.shuffle,collection.configName,router.field,autoAddReplicas,async,rule,snitch,policy,waitForFinalState,";
 std::string SolrSearch::COLL_M_PARAMS = ",maxShardsPerNode,replicationFactor,autoAddReplicas,collection.configName,rule,snitch,policy,";
 
-SolrSearch::SolrSearch() {
-	isCloud = StringUtil::toLowerCopy(pool->getProperties().getProperty("isCloud"))=="true";
+SolrSearch::SolrSearch(ConnectionPooler* pool) {
+	this->pool = pool;
+	v2 = StringUtil::toLowerCopy(pool->getProperties().getProperty("v2"))=="true";
 }
 
 SolrSearch::~SolrSearch() {
 }
 
-void SolrSearch::createIndex(IndexQuery& iq) {
-	if(!isCloud) {
-		return;
-	}
+void SolrSearch::indexOp(IndexQuery& iq) {
 	Connection* connection = pool->checkout();
 	HttpClient* hc = (HttpClient*)connection->getConn();
 	HttpRequest rq;
@@ -46,60 +44,47 @@ void SolrSearch::createIndex(IndexQuery& iq) {
 
 	std::string uri;
 	uri.append("/admin/collections");
-	uri.append("?action=CREATE");
-	uri.append("&name=" + iq.getName());
+	uri.append("?wt=json&action=");
+	uri.append(iq.getOpType());
 	for(it=iq.properties.begin();it!=iq.properties.end();++it) {
-		if(COLL_C_PARAMS.find(","+it->first+",")!=std::string::npos) {
+		//if(COLL_C_PARAMS.find(","+it->first+",")!=std::string::npos) {
+			if(it->first.find("____")==0) continue;
 			uri.append("&" + it->first + "=" + it->second);
-		}
+		//}
 	}
 
 	rq.setUrl(uri);
 	rq.setMethod("GET");
 
 	hc->execute(&rq, &rs, p);
+	pool->release(connection);
 	if(rs.getStatusCode()!="200") {
 		if(rs.getContent()!="") {
-			throw std::runtime_error("Unable to create index " + rs.getContent());
+			throw std::runtime_error("Error during index op " + rs.getContent());
 		}
-		throw std::runtime_error("Unable to create index");
+		throw std::runtime_error("Error during index op ");
 	}
+}
+
+void SolrSearch::createIndex(IndexQuery& iq) {
+	iq.getProperties().emplace("action", "CREATE");
+	iq.getProperties().emplace("name", iq.getName());
+	return indexOp(iq);
 }
 
 void SolrSearch::updateIndex(IndexQuery& iq) {
-	if(!isCloud) {
-		return;
-	}
-	Connection* connection = pool->checkout();
-	HttpClient* hc = (HttpClient*)connection->getConn();
-	HttpRequest rq;
-	HttpResponse rs;
-	propMap p;
-	std::map<std::string, std::string>::iterator it;
-
-	std::string uri;
-	uri.append("/admin/collections/" + iq.getName() + "/update/json?split=/");
-	uri.append("?action=MODIFYCOLLECTION");
-	uri.append("&collection=" + iq.getName());
-	for(it=iq.properties.begin();it!=iq.properties.end();++it) {
-		if(COLL_M_PARAMS.find(","+it->first+",")!=std::string::npos) {
-			uri.append("&" + it->first + "=" + it->second);
-		}
-	}
-
-	rq.setUrl(uri);
-	rq.setMethod("GET");
-
-	hc->execute(&rq, &rs, p);
-	if(rs.getStatusCode()!="200") {
-		if(rs.getContent()!="") {
-			throw std::runtime_error("Unable to update index " + rs.getContent());
-		}
-		throw std::runtime_error("Unable to update index");
-	}
+	iq.getProperties().emplace("action", "MODIFYCOLLECTION");
+	iq.getProperties().emplace("name", iq.getName());
+	return indexOp(iq);
 }
 
 void SolrSearch::removeIndex(IndexQuery& iq) {
+	iq.getProperties().emplace("action", "DELETE");
+	iq.getProperties().emplace("name", iq.getName());
+	return indexOp(iq);
+}
+
+void SolrSearch::docOp(DocumentQuery& iq) {
 	Connection* connection = pool->checkout();
 	HttpClient* hc = (HttpClient*)connection->getConn();
 	HttpRequest rq;
@@ -108,72 +93,62 @@ void SolrSearch::removeIndex(IndexQuery& iq) {
 	std::map<std::string, std::string>::iterator it;
 
 	std::string uri;
-	if(!isCloud) {
-		uri.append("/admin/cores");
-		uri.append("?action=UNLOAD");
-		uri.append("&core=" + iq.getName());
-		if(iq.properties.find("deleteInstanceDir")!=iq.properties.end()) {
-			uri.append("&deleteInstanceDir=" + iq.properties["deleteInstanceDir"]);
-		}
+	if(!v2) {
+		uri.append("/" + iq.getIndexName() + "/update" + iq.getProperties()["____urprefix"] + "?");
 	} else {
-		uri.append("/admin/collections");
-		uri.append("?action=DELETE");
-		uri.append("&name=" + iq.getName());
-		if(iq.properties.find("async")!=iq.properties.end()) {
-			uri.append("&async=" + iq.properties["async"]);
-		}
+		uri.append("/api/c/" + iq.getIndexName() + "/update" + iq.getProperties()["____urprefix"] + "?");
+	}
+
+	for(it=iq.properties.begin();it!=iq.properties.end();++it) {
+		//if(COLL_C_PARAMS.find(","+it->first+",")!=std::string::npos) {
+			if(it->first.find("____")==0) continue;
+			uri.append("&" + it->first + "=" + it->second);
+		//}
 	}
 
 	rq.setUrl(uri);
-	rq.setMethod("GET");
+	rq.setMethod("POST");
+	rq.setContent(std::move(iq.getData()));
+	rq.addHeader(HttpRequest::ContentType, "application/json");
 
 	hc->execute(&rq, &rs, p);
+	pool->release(connection);
 	if(rs.getStatusCode()!="200") {
 		if(rs.getContent()!="") {
-			throw std::runtime_error("Unable to delete index " + rs.getContent());
+			throw std::runtime_error("Error during document op " + rs.getContent());
 		}
-		throw std::runtime_error("Unable to delete index");
+		throw std::runtime_error("Error during document op ");
 	}
 }
 
 void SolrSearch::add(DocumentQuery& iq) {
-	Connection* connection = pool->checkout();
-	HttpClient* hc = (HttpClient*)connection->getConn();
-	HttpRequest rq;
-	HttpResponse rs;
-	propMap p;
-	std::map<std::string, std::string>::iterator it;
-
-	std::string uri;
-	if(!isCloud) {
-		uri.append("/api/cores/" + iq.getIndexName() + "/update/json?split=/");
+	if(!v2) {
+		iq.getProperties().emplace("____urprefix", "/json/docs");
 	} else {
-		uri.append("/api/collections/" + iq.getIndexName() + "/update/json?split=/");
+		iq.getProperties().emplace("____urprefix", "/json");
 	}
-
-	if(iq.properties.find("commit")!=iq.properties.end()) {
-		uri.append("&commit=" + iq.properties["commit"]);
-	}
-
-	rq.setUrl(uri);
-	rq.setMethod("POST");
-	rq.setContent(iq.getData());
-	rq.addHeader(HttpRequest::ContentType, "application/json");
-
-	hc->execute(&rq, &rs, p);
-	if(rs.getStatusCode()!="200") {
-		if(rs.getContent()!="") {
-			throw std::runtime_error("Unable to add document " + rs.getContent());
-		}
-		throw std::runtime_error("Unable to add document");
-	}
+	docOp(iq);
 }
 
 void SolrSearch::update(DocumentQuery& iq) {
-	add(iq);
+	if(!v2) {
+		iq.getProperties().emplace("____urprefix", "/json/docs");
+	} else {
+		iq.getProperties().emplace("____urprefix", "/json");
+	}
+	docOp(iq);
 }
 
 void SolrSearch::remove(DocumentQuery& iq) {
+	if(iq.getId().length()>0) {
+		iq.setData("{\"delete\":{\"query\":\"id:"+iq.getId()+"\"}}");
+	} else {
+		iq.setData("{\"delete\":{\"query\":\""+iq.getData()+"\"}}");
+	}
+	docOp(iq);
+}
+
+std::string SolrSearch::query(SearchQuery& iq) {
 	Connection* connection = pool->checkout();
 	HttpClient* hc = (HttpClient*)connection->getConn();
 	HttpRequest rq;
@@ -182,30 +157,34 @@ void SolrSearch::remove(DocumentQuery& iq) {
 	std::map<std::string, std::string>::iterator it;
 
 	std::string uri;
-	if(!isCloud) {
-		uri.append("/api/cores/" + iq.getIndexName() + "/update/json?");
+	if(!v2) {
+		uri.append("/" + iq.getIndexName() + "/query?");
 	} else {
-		uri.append("/api/collections/" + iq.getIndexName() + "/update/json?");
+		uri.append("/api/c/" + iq.getIndexName() + "/query?");
 	}
 
-	if(iq.properties.find("commit")!=iq.properties.end()) {
-		uri.append("&commit=" + iq.properties["commit"]);
+	for(it=iq.properties.begin();it!=iq.properties.end();++it) {
+		//if(COLL_C_PARAMS.find(","+it->first+",")!=std::string::npos) {
+			if(it->first.find("____")==0) continue;
+			uri.append("&" + it->first + "=" + it->second);
+		//}
 	}
 
 	rq.setUrl(uri);
 	rq.setMethod("POST");
-	rq.setContent("{\"delete\": {\"id\":\""+iq.getId()+"\"}}");
+	if(iq.getData().length()>0) {
+		rq.setContent(std::move(iq.getData()));
+	}
 	rq.addHeader(HttpRequest::ContentType, "application/json");
 
 	hc->execute(&rq, &rs, p);
+	pool->release(connection);
 	if(rs.getStatusCode()!="200") {
 		if(rs.getContent()!="") {
-			throw std::runtime_error("Unable to add document " + rs.getContent());
+			throw std::runtime_error("Error during search op " + rs.getContent());
 		}
-		throw std::runtime_error("Unable to add document");
+		throw std::runtime_error("Error during search op ");
 	}
-}
 
-std::string SolrSearch::query(SearchQuery& q) {
-	return std::string();
+	return rs.getContent();
 }

@@ -78,3 +78,7 @@ docker/test/web
 buildnin
 ffead-cpp-interface-test-lib/\.*
 **/node_modules
+.bzltemp
+.sconf_temp
+shellb_out
+.shellb

@@ -34,6 +34,9 @@ AM_CPPFLAGS +=  -I"../../framework" \
 				-I"../../modules/serialization/xml" \
 				-I"../../modules/server-util" \
 				-I"../../modules/ssl" \
+				-I"../../modules/search" \
+				-I"../../modules/search/solr" \
+				-I"../../modules/search/elasticsearch" \
 				-I"../../modules/threads"
 if HAVE_SSL
 AM_CPPFLAGS += \
@@ -59,6 +62,9 @@ AM_CPPFLAGS +=  -I"../../framework" \
 		-I"../../modules/serialization/xml" \
 		-I"../../modules/server-util" \
 		-I"../../modules/ssl" \
+		-I"../../modules/search" \
+		-I"../../modules/search/solr" \
+		-I"../../modules/search/elasticsearch" \
 		-I"../../modules/threads"
 if HAVE_SSL
 AM_CPPFLAGS +=  \

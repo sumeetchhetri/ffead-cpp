@@ -4,6 +4,8 @@ option('MOD_REDIS', type: 'boolean', description: 'Enable Redis Cache module', v
 option('MOD_SDORM_SQL', type: 'boolean', description: 'Enable SQL Sdorm module', value: true)
 option('MOD_SDORM_MONGO', type: 'boolean', description: 'Enable Mongo Sdorm module', value: true)
 option('MOD_SDORM_SCYLLA', type: 'boolean', description: 'Enable Scylla Sdorm module', value: false)
+option('MOD_SOLR', type: 'boolean', description: 'Enable SOLR Search module', value: true)
+option('MOD_ELASTIC', type: 'boolean', description: 'Enable Elasticsearch Search module', value: false)
 option('MOD_SER_BIN', type: 'boolean', description: 'Enable Binary Serialization module', value: true)
 option('MOD_JOBS', type: 'boolean', description: 'Enable Jobs module', value: true)
 option('SRV_ALL', type: 'boolean', description: 'Build All inbuilt HTTP Server Engines', value: true)

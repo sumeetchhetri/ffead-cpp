@@ -55,6 +55,7 @@
 #include "iostream"
 #include "DataSourceManager.h"
 #include "CacheManager.h"
+#include "SearchEngineManager.h"
 #include "CommonUtils.h"
 
 class ConfigurationHandler {
@@ -68,12 +69,19 @@ public:
 	ConfigurationHandler();
 	virtual ~ConfigurationHandler();
 	static void handle(strVec webdirs, const strVec& webdirs1, const std::string& incpath, const std::string& rtdcfpath, const std::string& serverRootDirectory, const std::string& respath);
+
 	static void configureDataSources(const std::string& name, const std::string& configFile, std::map<std::string, ClassStructure, std::less<> >& allclsmap);
-	static void destroyDataSources();
-	static void configureCaches(const std::string& name, const std::string& configFile);
-	static void destroyCaches();
 	static void initializeDataSources();
+	static void destroyDataSources();
+
+	static void configureCaches(const std::string& name, const std::string& configFile);
 	static void initializeCaches();
+	static void destroyCaches();
+
+	static void configureSearches(const std::string& name, const std::string& configFile);
+	static void initializeSearches();
+	static void destroySearches();
+
 	static void initializeWsdls();
 	static void populateClassBeanInstanceCb(std::string& clsn, std::string appn, ClassBeanIns* cbi);
 };

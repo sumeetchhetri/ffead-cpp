@@ -1,0 +1,49 @@
+import os
+
+Import('env')
+Import('mod_mongo')
+Import('mod_scylla')
+Import('mod_solr')
+Import('mod_elastic')
+
+# copy parent environment so our alterations don't affect it
+env = env.Clone()
+
+env.Append(CPPPATH=['../framework'])
+
+# add source directories (at all levels) to the include path
+# and add their contents are build targets
+matches = []
+for root, dirnames, filenames in os.walk('./'):
+	filenames = [f for f in filenames if not f[0] == '.']
+	dirnames[:] = [d for d in dirnames if not d[0] == '.']
+	for dirname in dirnames:
+		dirPath = os.path.join(root,dirname)
+		if env['PLATFORM'] != 'mingw' and 'wepoll' in dirPath:
+			continue
+		if 'gtm' in dirPath:
+			continue
+		if 'mongo' in dirPath:
+			if not mod_mongo:
+				continue
+		if 'scylla' in dirPath:
+			if not mod_scylla:
+				continue
+		if 'solr' in dirPath:
+			if not mod_solr:
+				continue
+		if 'elasticsearch' in dirPath:
+			if not mod_elastic:
+				continue
+		
+		#print('adding dir to path: %s' % dirPath)
+		env.Append(CPPPATH=[dirPath])
+		globStr = "%s/*.cpp" % dirPath
+		matches.append(Glob(globStr))
+
+# debug output
+#print('modules env CPPPATH:')
+#print(env['CPPPATH'])
+
+# build a shared library
+env.SharedLibrary('../../bin/ffead-modules', matches)

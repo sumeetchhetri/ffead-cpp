@@ -29,9 +29,14 @@
 #include "Mutex.h"
 #include "SearchEngineInterface.h"
 #include "HttpClient.h"
+#ifdef HAVE_SOLR
+#include "SolrSearch.h"
+#endif
+#ifdef HAVE_ELASTIC
+#include "ElasticSearch.h"
+#endif
 
 class SearchEngineConnectionPool: public ConnectionPooler {
-	Logger logger;
 	void initEnv();
 	void* newConnection(const bool& isWrite, const ConnectionNode& node);
 	void closeConnection(void* conn);
@@ -43,17 +48,19 @@ public:
 
 class SearchEngineManager {
 	static std::map<std::string, SearchEngineManager*> engines;
-	static std::string defEngineName;
+	static std::map<std::string, std::string> defEngineNames;
+	static std::map<std::string, bool> appInitCompletionStatus;
 	ConnectionProperties props;
 	ConnectionPooler* pool;
-	Reflector* reflector;
-	static void initCache(const ConnectionProperties& props, const std::string& appName);
+	static void initSearch(const ConnectionProperties& props, const std::string& appName, GetClassBeanIns f);
 	static void destroy();
 	SearchEngineManager(const ConnectionProperties& props);
 	friend class ConfigurationHandler;
 public:
 	virtual ~SearchEngineManager();
 	static SearchEngineInterface* getImpl(std::string name = "");
+	static void triggerAppInitCompletion(std::string appName = "");
+	static bool isInitCompleted();
 };
 
 #endif /* SEARCHENGINEMANAGER_H_ */

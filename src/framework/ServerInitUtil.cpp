@@ -220,8 +220,14 @@ void ServerInitUtil::bootstrap(std::string serverRootDirectory, Logger& logger, 
 			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " xmake";
 #elif defined(BUILD_MESON)
 			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " meson";
+#elif defined(BUILD_SCONS)
+			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " scons";
+#elif defined(BUILD_BAZEL)
+			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " bazel";
+#elif defined(BUILD_SHELLB)
+			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " shellb";
 #else
-			logger << "Invalid Build Type specified, only cmake, xmake and meson supported...\n" << std::endl;
+			logger << "Invalid Build Type specified, only autotools, cmake, xmake, meson, scons and bazel supported...\n" << std::endl;
 #endif
 			std::string output = ScriptHandler::execute(compres, true);
 			logger << "Intermediate code generation task\n\n" << std::endl;
@@ -401,6 +407,10 @@ void ServerInitUtil::init(Logger& logger) {
 	ConfigurationHandler::initializeCaches();
 	logger << ("Initializing Caches done....") << std::endl;
 
+	logger << ("Initializing Searches....") << std::endl;
+	ConfigurationHandler::initializeSearches();
+	logger << ("Initializing Searches done....") << std::endl;
+
 #ifdef INC_JOBS
 	if(ConfigurationData::getInstance()->isJobsEnabled()) {
 		JobScheduler::start();
@@ -422,6 +432,8 @@ void ServerInitUtil::cleanUp() {
 #endif
 
 	ConfigurationHandler::destroyCaches();
+
+	ConfigurationHandler::destroySearches();
 
 	ConfigurationData::getInstance()->clearAllSingletonBeans();
 

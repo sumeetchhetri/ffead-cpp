@@ -46,7 +46,7 @@ do
   fi
 done
 echo "ffead-cpp start successful"
-sleep 5
+sleep 10
 cd tests && chmod +x *.sh && ./runTests.sh
 cd -
 echo "ffead-cpp normal shutdown"

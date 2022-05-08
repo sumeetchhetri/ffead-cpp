@@ -22,11 +22,26 @@
 
 #ifndef SEARCHQUERY_H_
 #define SEARCHQUERY_H_
+#include "CastUtil.h"
 
 class SearchQuery {
+	std::string id;
+	std::string indexName;
+	std::map<std::string, std::string> properties;
+	std::string data;
+	friend class SolrSearch;
 public:
 	SearchQuery();
 	virtual ~SearchQuery();
+
+	void setData(const std::string &data);
+	std::string& getData();
+	const std::string& getIndexName() const;
+	void setIndexName(const std::string &indexName);
+	std::map<std::string, std::string>& getProperties();
+	void setProperties(const std::map<std::string, std::string> &properties);
+	const std::string& getId() const;
+	void setId(const std::string &id);
 };
 
 #endif /* SEARCHQUERY_H_ */

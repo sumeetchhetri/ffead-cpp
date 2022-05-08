@@ -38,6 +38,7 @@ includedirsall += \
 	src/modules/server-util/*.h \
 	src/modules/ssl/*.h \
 	src/modules/threads/*.h \
+	src/modules/search/*.h \
 	src/framework/*.h
 if HAVE_SSL
 includedirsall += \
@@ -64,6 +65,7 @@ includedirsall +=  \
 	src/modules/server-util/*.h \
 	src/modules/ssl/*.h \
 	src/modules/threads/*.h \
+	src/modules/search/*.h \
 	src/framework/*.h
 if HAVE_SSL
 includedirsall += \
@@ -129,6 +131,14 @@ if MOD_REDISCACHE
 includedirsall += \
 				src/modules/cache/redis/*.h
 endif
+if MOD_SOLR
+includedirsall += \
+				src/modules/search/solr/*.h
+endif
+if MOD_ELASTIC
+includedirsall += \
+				src/modules/search/elasticsearch/*.h
+endif
 if MOD_GTM
 includedirsall += \
 				src/modules/sdorm/gtm/*.h
@@ -164,6 +174,14 @@ endif
 if MOD_REDISCACHE
 includedirsall += \
 				src/modules/cache/redis/*.h
+endif
+if MOD_SOLR
+includedirsall += \
+				src/modules/search/solr/*.h
+endif
+if MOD_ELASTIC
+includedirsall += \
+				src/modules/search/elasticsearch/*.h
 endif
 if MOD_GTM
 includedirsall += \

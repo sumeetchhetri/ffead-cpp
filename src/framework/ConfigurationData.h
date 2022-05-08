@@ -276,6 +276,7 @@ class ConfigurationData {
 	std::map<std::string, std::map<std::string, ConnectionProperties, std::less<> >, std::less<> > sdormConnProperties;
 	std::map<std::string, std::map<std::string, Mapping, std::less<> >, std::less<> > sdormEntityMappings;
 	std::map<std::string, std::map<std::string, ConnectionProperties, std::less<> >, std::less<> > cacheConnProperties;
+	std::map<std::string, std::map<std::string, ConnectionProperties, std::less<> >, std::less<> > searchConnProperties;
 	std::map<std::string, std::vector<WsDetails>, std::less<> > webserviceDetailMap;
 	std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> > classStructureMap;
 	std::map<std::string, propMap, std::less<> > appPropertiesMap;
@@ -327,6 +328,7 @@ class ConfigurationData {
 	friend class JobScheduler;
 	friend class DataSourceManager;
 	friend class CacheManager;
+	friend class SearchEngineManager;
 	friend class ServerInitUtil;
 public:
 	static void enableFeatures(bool enableCors, bool enableSecurity, bool enableFilters, bool enableControllers,

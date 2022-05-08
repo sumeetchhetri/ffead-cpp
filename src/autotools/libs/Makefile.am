@@ -77,6 +77,9 @@ AM_CPPFLAGS +=  -I"../../framework" \
 				-I"../../modules/serialization/xml" \
 				-I"../../modules/server-util" \
 				-I"../../modules/ssl" \
+				-I"../../modules/search" \
+				-I"../../modules/search/solr" \
+				-I"../../modules/search/elasticsearch" \
 				-I"../../modules/threads"
 if HAVE_SSL
 AM_CPPFLAGS += \
@@ -88,7 +91,6 @@ libffead_framework_la_SOURCES = \
 				../../framework/AuthController.cpp \
 				../../framework/ConfigurationData.cpp \
 				../../framework/ConfigurationHandler.cpp \
-				../../framework/ConnectionSettings.cpp \
 				../../framework/ControllerHandler.cpp \
 				../../framework/DBAuthController.cpp \
 				../../framework/DCPGenerator.cpp \
@@ -113,6 +115,13 @@ libffead_modules_la_SOURCES += \
 						../../modules/cache/memcached/MemcachedImpl.cpp \
 						../../modules/cache/memory/MemoryCacheImpl.cpp \
 						../../modules/cache/redis/RedisCacheImpl.cpp \
+						../../modules/search/SearchQuery.cpp \
+						../../modules/search/IndexQuery.cpp \
+						../../modules/search/DocumentQuery.cpp \
+						../../modules/search/SearchEngineManager.cpp \
+						../../modules/search/SearchEngineInterface.cpp \
+						../../modules/search/solr/SolrSearch.cpp \
+						../../modules/search/elasticsearch/ElasticSearch.cpp \
 						../../modules/client-util/Client.cpp \
 						../../modules/client-util/ClientInterface.cpp \
 						../../modules/client-util/HttpClient.cpp \
@@ -241,6 +250,9 @@ AM_CPPFLAGS +=  -I"../../framework" \
 		-I"../../modules/serialization/xml" \
 		-I"../../modules/server-util" \
 		-I"../../modules/ssl" \
+		-I"../../modules/search" \
+		-I"../../modules/search/solr" \
+		-I"../../modules/search/elasticsearch" \
 		-I"../../modules/threads"
 if HAVE_SSL
 AM_CPPFLAGS += \
@@ -252,7 +264,6 @@ libffead_framework_la_SOURCES = \
 		../../framework/AuthController.cpp \
 		../../framework/ConfigurationData.cpp \
 		../../framework/ConfigurationHandler.cpp \
-		../../framework/ConnectionSettings.cpp \
 		../../framework/ControllerHandler.cpp \
 		../../framework/DBAuthController.cpp \
 		../../framework/DCPGenerator.cpp \
@@ -275,6 +286,11 @@ libffead_modules_la_SOURCES += \
 				../../modules/cache/CacheInterface.cpp \
 				../../modules/cache/CacheManager.cpp \
 				../../modules/cache/memory/MemoryCacheImpl.cpp \
+				../../modules/search/SearchQuery.cpp \
+				../../modules/search/IndexQuery.cpp \
+				../../modules/search/DocumentQuery.cpp \
+				../../modules/search/SearchEngineManager.cpp \
+				../../modules/search/SearchEngineInterface.cpp \
 				../../modules/client-util/Client.cpp \
 				../../modules/client-util/ClientInterface.cpp \
 				../../modules/client-util/HttpClient.cpp \
@@ -488,6 +504,19 @@ AM_CPPFLAGS += \
 libffead_modules_la_SOURCES += \
 						../../modules/sdorm/gtm/GTM.cpp
 endif
+if MOD_SOLR
+AM_CPPFLAGS += \
+				-I"../../modules/search/solr"
+libffead_modules_la_SOURCES += \
+						../../modules/search/solr/SolrSearch.cpp
+endif
+if MOD_ELASTIC
+AM_CPPFLAGS += \
+				-I"../../modules/search/elasticsearch"
+libffead_modules_la_SOURCES += \
+						../../modules/elasticsearch/ElasticSearch.cpp
+endif
+
 if MOD_HTTPSERVER
 lib_LTLIBRARIES +=  libffead-framework.la
 AM_CPPFLAGS += \
@@ -497,7 +526,6 @@ libffead_framework_la_SOURCES = \
 		../../framework/AuthController.cpp \
 		../../framework/ConfigurationData.cpp \
 		../../framework/ConfigurationHandler.cpp \
-		../../framework/ConnectionSettings.cpp \
 		../../framework/ControllerHandler.cpp \
 		../../framework/DBAuthController.cpp \
 		../../framework/ExtHandler.cpp \

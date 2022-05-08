@@ -23,11 +23,13 @@
 #ifndef ELASTICSEARCH_H_
 #define ELASTICSEARCH_H_
 #include "SearchEngineInterface.h"
+#ifdef HAVE_ELASTIC
+#include <elasticlient/client.h>
 
 class ElasticSearch: public SearchEngineInterface {
 	static std::string COLL_URL;
 public:
-	ElasticSearch();
+	ElasticSearch(ConnectionPooler* pool);
 	virtual ~ElasticSearch();
 
 	void createIndex(IndexQuery& iq);
@@ -42,3 +44,4 @@ public:
 };
 
 #endif /* ELASTICSEARCH_H_ */
+#endif

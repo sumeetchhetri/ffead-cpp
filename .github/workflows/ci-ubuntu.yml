@@ -100,7 +100,7 @@ jobs:
           fi
         done
         echo "ffead-cpp start successful"
-        #sleep 5
+        sleep 5
         cd tests && sudo chmod +x *.sh tests && sudo ./runTests.sh
         echo "ffead-cpp normal shutdown"
         sudo pkill ffead-cpp

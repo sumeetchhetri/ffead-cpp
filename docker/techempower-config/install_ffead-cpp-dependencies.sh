@@ -56,6 +56,16 @@ cmake . && make install
 cd $IROOT
 rm -rf hiredis-1.0.0
 
+wget -q https://github.com/sewenew/redis-plus-plus/archive/refs/tags/1.3.3.tar.gz
+tar xf 1.3.3.tar.gz
+rm -f 1.3.3.tar.gz
+cd redis-plus-plus-1.3.3/
+mkdir build
+cd build
+cmake -DREDIS_PLUS_PLUS_CXX_STANDARD=17 .. && make && make install
+cd $IROOT
+rm -rf redis-plus-plus-1.3.3
+
 cd $IROOT
 wget -q https://github.com/microsoft/mimalloc/archive/v2.0.2.tar.gz
 tar xf v2.0.2.tar.gz

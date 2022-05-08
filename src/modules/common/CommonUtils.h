@@ -73,6 +73,9 @@ class CommonUtils {
 	friend class ConfigurationHandler;
 	friend class CHServer;
 	friend class ServiceHandler;
+	friend class RequestHandler2;
+	friend class RequestReaderHandler;
+	static void setDate();
 	static void addContext(std::string appName);
 	static int g_seed;
 public:
