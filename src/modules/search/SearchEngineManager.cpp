@@ -23,9 +23,35 @@
 #include "SearchEngineManager.h"
 
 std::map<std::string, SearchEngineManager*> SearchEngineManager::engines;
-std::string SearchEngineManager::defEngineName;
+std::map<std::string, std::string> SearchEngineManager::defEngineNames;
+std::map<std::string, bool> SearchEngineManager::appInitCompletionStatus;
 
-void SearchEngineManager::initCache(const ConnectionProperties& props, const std::string& appName) {
+void SearchEngineManager::triggerAppInitCompletion(std::string appNameN) {
+	std::string appName = appNameN;
+	if(appName=="") {
+		appName = CommonUtils::getAppName();
+	} else {
+		StringUtil::replaceAll(appName, "-", "_");
+		RegexUtil::replace(appName, "[^a-zA-Z0-9_]+", "");
+	}
+	if(appInitCompletionStatus.find(appName)!=appInitCompletionStatus.end()) {
+		appInitCompletionStatus[appName] = true;
+	}
+}
+
+bool SearchEngineManager::isInitCompleted() {
+	bool flag = true;
+	if(appInitCompletionStatus.size()>0) {
+		std::map<std::string, bool>::iterator it = appInitCompletionStatus.begin();
+		for(;it!=appInitCompletionStatus.end();++it) {
+			flag &= it->second;
+		}
+	}
+	return flag;
+}
+
+void SearchEngineManager::initSearch(const ConnectionProperties& props, const std::string& appName, GetClassBeanIns f) {
+	Logger logger = LoggerFactory::getLogger("SearchEngineManager");
 	std::string name = StringUtil::trimCopy(props.getName());
 	if(name=="")
 	{
@@ -38,7 +64,7 @@ void SearchEngineManager::initCache(const ConnectionProperties& props, const std
 		throw std::runtime_error("Search Engine Already exists");
 	}
 	if(props.getProperty("_isdefault_")=="true") {
-		defEngineName = StringUtil::trimCopy(props.getName());
+		defEngineNames[appName] = StringUtil::trimCopy(props.getName());
 	}
 	SearchEngineManager* mgr = new SearchEngineManager(props);
 	engines[name] = mgr;
@@ -49,26 +75,25 @@ void SearchEngineManager::initCache(const ConnectionProperties& props, const std
 		std::vector<std::string> v;
 		StringUtil::split(v, meth, ".");
 		if(v.size()==2) {
-			std::string scappName = appName;
-			StringUtil::replaceAll(scappName, "-", "_");
-			RegexUtil::replace(scappName, "[^a-zA-Z0-9_]+", "");
-			CommonUtils::setAppName(scappName);
-			ClassInfo* clas = ref->getClassInfo(v.at(0), appName);
-			if(clas->getClassName()!="") {
-				args argus;
-				vals valus;
-				const Constructor& ctor = clas->getConstructor(argus);
-				void* _temp = ref->newInstanceGVP(ctor);
-				try {
-					if(_temp!=NULL) {
-						const Method& meth = clas->getMethod(v.at(1), argus);
-						if(meth.getMethodName()!="")
-						{
-							ref->invokeMethodGVP(_temp, meth, valus);
-						}
+			CommonUtils::setAppName(appName);
+			ClassBeanIns cbi;
+			f(v.at(0), appNameN, &cbi);
+			void* _temp = cbi.instance;
+			try {
+				if(_temp!=NULL) {
+					args argus;
+					vals valus;
+					const Method& meth = cbi.clas->getMethod(v.at(1), argus);
+					if(meth.getMethodName()!="")
+					{
+						appInitCompletionStatus[appName] = false;
+						ref->invokeMethodGVP(_temp, meth, valus);
 					}
-				} catch(const std::exception& e) {
 				}
+			} catch(const std::exception& e) {
+				logger.info("Error during init call for Seacrh " + appNameN + "@" + props.getName() + " " + std::string(e.what()));
+			}
+			if(cbi.cleanUp) {
 				ref->destroy(_temp, v.at(0), appName);
 			}
 		}
@@ -93,7 +118,7 @@ SearchEngineInterface* SearchEngineManager::getImpl(std::string name) {
 	std::string appName = CommonUtils::getAppName();
 	StringUtil::trim(name);
 	if(name=="") {
-		name = defEngineName;
+		name = defEngineNames[appName];
 	}
 	name = appName + name;
 	if(engines.find(name)==engines.end())
@@ -104,14 +129,14 @@ SearchEngineInterface* SearchEngineManager::getImpl(std::string name) {
 	SearchEngineInterface* t = NULL;
 	if(StringUtil::toLowerCopy(engine->props.getType())=="elasticsearch")
 	{
-#ifdef INC_MEMCACHED
+#ifdef HAVE_ELASTIC
 		t = NULL;
 #endif
 	}
 	else if(StringUtil::toLowerCopy(engine->props.getType())=="solr")
 	{
-#ifdef INC_REDISCACHE
-		t = NULL;
+#ifdef HAVE_SOLR
+		t = new SolrSearch(engine->pool);
 #endif
 	}
 	if(t == NULL)
@@ -125,7 +150,6 @@ SearchEngineInterface* SearchEngineManager::getImpl(std::string name) {
 
 SearchEngineManager::SearchEngineManager(const ConnectionProperties& props) {
 	this->props = props;
-	reflector = NULL;
 	this->pool = new SearchEngineConnectionPool(props);
 }
 
@@ -133,7 +157,6 @@ SearchEngineManager::~SearchEngineManager() {
 }
 
 void SearchEngineConnectionPool::initEnv() {
-	HttpClient::init();
 }
 
 void* SearchEngineConnectionPool::newConnection(const bool& isWrite, const ConnectionNode& node) {
@@ -148,7 +171,6 @@ void SearchEngineConnectionPool::destroy() {
 }
 
 SearchEngineConnectionPool::SearchEngineConnectionPool(const ConnectionProperties& props) {
-	logger = LoggerFactory::getLogger("SearchEngineConnectionPool");
 	createPool(props);
 }
 

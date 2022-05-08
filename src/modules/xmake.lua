@@ -36,6 +36,13 @@ target("ffead-modules")
 		add_files("$(projectdir)/src/modules/cache/memcached/*.cpp")
 		add_links("memcached","memcachedutil")
 	end
+	add_files("$(projectdir)/src/modules/search/*.cpp")
+	if has_config("MOD_SOLR") then
+		add_files("$(projectdir)/src/modules/search/solr/*.cpp")
+	end
+	if has_config("MOD_ELASTIC") then
+		add_files("$(projectdir)/src/modules/search/elasticsearch/*.cpp")
+	end
 	add_files("$(projectdir)/src/modules/sdorm/*.cpp")
     if has_config("MOD_SDORM_SQL") then
 		add_files("$(projectdir)/src/modules/sdorm/sql/*.cpp")

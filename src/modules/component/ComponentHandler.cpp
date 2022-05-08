@@ -119,8 +119,8 @@ void* ComponentHandler::service(void* arg)
 				}
 				if(argts.at(var).getAttribute("type")!="")
 				{
-					std::string objxml = argts.at(var).getChildElements().at(0).render(); // @suppress("Invalid arguments")
-					std::string objClassName = argts.at(var).getChildElements().at(0).getTagName();
+					std::string objxml = argts.at(var).render(); // @suppress("Invalid arguments")
+					std::string objClassName = argts.at(var).getTagName();
 					int serOpt = SerializeBase::identifySerOption(argts.at(var).getAttribute("type"));
 					value = ser.unSerializeUnknown(objxml, serOpt, argts.at(var).getAttribute("type"));
 				}
@@ -200,7 +200,7 @@ void* ComponentHandler::service(void* arg)
 					{
 						void* retobj = reflector.invokeMethodUnknownReturn(_temp,meth,valus,true);
 						int serOpt = SerializeBase::identifySerOption(returnType);
-						std::string oxml = ser.serializeUnknown(retobj,serOpt,returnType);
+						std::string oxml = ser.serializeUnknown(retobj,serOpt,returnType,NULL);
 						retValue = ("<return:"+returnType+">"+oxml+"</return:"+returnType+">");
 					}
 				}

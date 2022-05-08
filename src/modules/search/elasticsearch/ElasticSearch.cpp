@@ -22,9 +22,11 @@
 
 #include "ElasticSearch.h"
 
+#ifdef HAVE_ELASTIC
 std::string ElasticSearch::COLL_URL = "/admin/collections";
 
-ElasticSearch::ElasticSearch() {
+ElasticSearch::ElasticSearch(ConnectionPooler* pool) {
+	this->pool = pool;
 }
 
 ElasticSearch::~ElasticSearch() {
@@ -68,3 +70,4 @@ void ElasticSearch::remove(DocumentQuery& iq) {
 std::string ElasticSearch::query(SearchQuery& q) {
 	return std::string();
 }
+#endif

@@ -29,16 +29,8 @@ DocumentQuery::DocumentQuery() {
 DocumentQuery::~DocumentQuery() {
 }
 
-const std::string& DocumentQuery::getData() const {
+std::string& DocumentQuery::getData() {
 	return data;
-}
-
-const std::map<std::string, std::string>& DocumentQuery::getFields() const {
-	return fields;
-}
-
-void DocumentQuery::setFields(const std::map<std::string, std::string>& fields) {
-	this->fields = fields;
 }
 
 const std::string& DocumentQuery::getId() const {
@@ -57,10 +49,22 @@ void DocumentQuery::setIndexName(const std::string& indexName) {
 	this->indexName = indexName;
 }
 
-const std::map<std::string, std::string>& DocumentQuery::getProperties() const {
+std::map<std::string, std::string>& DocumentQuery::getProperties() {
 	return properties;
 }
 
 void DocumentQuery::setProperties(const std::map<std::string, std::string>& properties) {
 	this->properties = properties;
+}
+
+void DocumentQuery::setData(const std::string &data) {
+	this->data = data;
+}
+
+const std::string& DocumentQuery::getOpType() const {
+	return opType;
+}
+
+void DocumentQuery::setOpType(const std::string &opType) {
+	this->opType = opType;
 }

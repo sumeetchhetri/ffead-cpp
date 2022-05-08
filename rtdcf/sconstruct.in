@@ -1,0 +1,36 @@
+import os
+import shutil
+
+# Set our required libraries
+libraries 		= @LIBS@
+library_paths 	= @LIBPATH@
+cppDefines 		= @CPPDEFINES@
+cppFlags 		= @CPPFLAGS@
+cxxFlags 		= @CXXFLAGS@
+cppPath			= @CPPPATH@
+
+library_paths.append("../lib")
+cppPath.append("../include")
+libraries.append('-lffead-modules')
+libraries.append('-lffead-framework')
+
+dirnames=next(os.walk('../web'))[1]
+dirnames[:] = [d for d in dirnames if not d[0] == '.']
+for dirname in dirnames:
+	dirPath = os.path.join('../web', dirname, 'include')
+	cppPath.append(dirPath)
+	libraries.append('-l'+dirname)
+
+env = Environment()
+env.Append(CPPPATH 		= cppPath)
+env.Append(LIBPATH 		= library_paths)
+env.Append(CXXFLAGS 	= cxxFlags)
+env.Append(LIBS 		= libraries)
+env.Append(CPPDEFINES 	= cppDefines)
+env.Append(CPPFLAGS 	= cppFlags)
+
+inter_sources = ['ReflectorInterface.cpp' ,'SerializeInterface.cpp', 'AjaxInterface.cpp' ,'WsInterface.cpp']
+env.SharedLibrary('inter', inter_sources)
+
+dinter_sources = ['DCPInterface.cpp' ,'TemplateInterface.cpp']
+env.SharedLibrary('dinter', dinter_sources)

@@ -29,6 +29,16 @@ cmake . && make install
 cd $IROOT
 rm -rf hiredis-1.0.0
 
+wget -q https://github.com/sewenew/redis-plus-plus/archive/refs/tags/1.3.3.tar.gz
+tar xf 1.3.3.tar.gz
+rm -f 1.3.3.tar.gz
+cd redis-plus-plus-1.3.3/
+mkdir build
+cd build
+cmake -DREDIS_PLUS_PLUS_CXX_STANDARD=17 .. && make && make install
+cd $IROOT
+rm -rf redis-plus-plus-1.3.3
+
 mkdir -p /usr/lib/x86_64-linux-gnu/odbc
 wget -q https://downloads.mysql.com/archives/get/p/10/file/mysql-connector-odbc-8.0.19-linux-ubuntu18.04-x86-64bit.tar.gz
 tar xf mysql-connector-odbc-8.0.19-linux-ubuntu18.04-x86-64bit.tar.gz

@@ -82,6 +82,12 @@
 #mesondefine HAVE_RAPID_JSON
 #mesondefine HAVE_PUGI_XML
 #mesondefine HAVE_SYSINFO
+#mesondefine HAVE_PUGI_XML
+#mesondefine HAVE_SYSINFO
+#mesondefine HAVE_SOLR
+#mesondefine HAVE_ELASTIC
+#mesondefine HAVE_REDIS_CLUSTERINC
+#mesondefine HAVE_REDIS_CLUSTERLIB
 
 #ifdef HAVE_ODBCLIB
 #define HAVE_LIBODBC 1

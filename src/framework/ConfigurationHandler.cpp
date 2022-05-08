@@ -967,6 +967,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 
 		configureDataSources(name, defpath+"config/sdorm.xml", allclsmap);
 		configureCaches(name, defpath+"config/cache.xml");
+		configureSearches(name, defpath+"config/search.xml");
 
 		logger << "started reading fviews.xml " << std::endl;
 		Document doc1;
@@ -2604,6 +2605,139 @@ void ConfigurationHandler::initializeDataSources()
 			}
 		}
 	}
+}
+
+void ConfigurationHandler::configureSearches(const std::string &name, const std::string &configFile) {
+	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
+	SimpleXmlParser parser("Parser");
+	logger << ("started reading search config file " + configFile) << std::endl;
+
+	Document doc;
+	parser.readDocument(configFile, doc);
+	const Element& dbroot = doc.getRootElement();
+
+	if(dbroot.getTagName()=="searches")
+	{
+		ElementList datasrcs = dbroot.getChildElements();
+		bool found_default = false;
+		for (unsigned int dsnu = 0; dsnu < datasrcs.size(); dsnu++)
+		{
+			if(datasrcs.at(dsnu).getTagName()=="search")
+			{
+				ConnectionProperties cprops;
+				if(!found_default && (datasrcs.at(dsnu).getAttribute("default")=="true" || datasrcs.size()==1)) {
+					cprops.addProperty("_isdefault_", "true");
+					found_default = true;
+				}
+				int psize = 1;
+				ElementList confs = datasrcs.at(dsnu).getChildElements();
+				for (unsigned int cns = 0; cns < confs.size(); cns++)
+				{
+					if(confs.at(cns).getTagName()=="nodes")
+					{
+						ElementList nodec = confs.at(cns).getChildElements();
+						for (unsigned int nn = 0; nn < nodec.size(); nn++)
+						{
+							if(nodec.at(nn).getTagName()!="node")continue;
+							ConnectionNode cnode;
+							ElementList nodes = nodec.at(nn).getChildElements();
+							for (unsigned int ncc = 0; ncc < nodes.size(); ncc++)
+							{
+								if(nodes.at(ncc).getTagName()=="url")
+								{
+									cnode.url = nodes.at(ncc).getText();
+								}
+								else if(nodes.at(ncc).getTagName()=="username")
+								{
+									cnode.username = nodes.at(ncc).getText();
+								}
+								else if(nodes.at(ncc).getTagName()=="password")
+								{
+									cnode.password = nodes.at(ncc).getText();
+								}
+								else if(nodes.at(ncc).getTagName()=="host")
+								{
+									cnode.host = nodes.at(ncc).getText();
+								}
+								else if(nodes.at(ncc).getTagName()=="port")
+								{
+									try {
+										cnode.port = CastUtil::toInt(nodes.at(ncc).getText());
+									} catch(const std::exception& e) {
+									}
+								}
+								else if(nodes.at(ncc).getTagName()=="readTimeout")
+								{
+									try {
+										cnode.readTimeout = CastUtil::toFloat(nodes.at(ncc).getText());
+									} catch(const std::exception& e) {
+									}
+								}
+								else if(nodes.at(ncc).getTagName()=="connectionTimeout")
+								{
+									try {
+										cnode.connectionTimeout = CastUtil::toFloat(nodes.at(ncc).getText());
+									} catch(const std::exception& e) {
+									}
+								}
+							}
+							cprops.addNode(cnode);
+						}
+					}
+					else if(confs.at(cns).getTagName()=="pool-size")
+					{
+						if(confs.at(cns).getText()!="")
+						{
+							try {
+								psize = CastUtil::toInt(confs.at(cns).getText());
+							} catch(const std::exception& e) {
+							}
+						}
+						cprops.poolWriteSize = psize;
+					}
+					else if(confs.at(cns).getTagName()=="name")
+					{
+						cprops.name = confs.at(cns).getText();
+					}
+					else if(confs.at(cns).getTagName()=="type")
+					{
+						cprops.type = confs.at(cns).getText();
+					}
+					else
+					{
+						cprops.addProperty(confs.at(cns).getTagName(), confs.at(cns).getText());
+					}
+				}
+
+				if(cprops.getName()!="")
+				{
+					ConfigurationData::getInstance()->searchConnProperties[name][cprops.getName()] = cprops;
+				}
+			}
+		}
+	}
+
+	logger << "done reading search config file " + configFile << std::endl;
+}
+
+void ConfigurationHandler::initializeSearches() {
+	std::map<std::string, bool, std::less<> > mycntxts = ConfigurationData::getInstance()->servingContexts;
+	std::map<std::string, std::map<std::string, ConnectionProperties, std::less<> >, std::less<> > searchConnProperties = ConfigurationData::getInstance()->searchConnProperties;
+	std::map<std::string, bool, std::less<> >::iterator mit;
+	for (mit=mycntxts.begin();mit!=mycntxts.end();++mit) {
+		if(searchConnProperties.find(mit->first)!=searchConnProperties.end())
+		{
+			std::map<std::string, ConnectionProperties, std::less<> > allProps = searchConnProperties[mit->first];
+			std::map<std::string, ConnectionProperties, std::less<>>::iterator it;
+			for (it=allProps.begin();it!=allProps.end();++it) {
+				SearchEngineManager::initSearch(allProps[it->first], mit->first, &ConfigurationHandler::populateClassBeanInstanceCb);
+			}
+		}
+	}
+}
+
+void ConfigurationHandler::destroySearches() {
+	SearchEngineManager::destroy();
 }
 
 void ConfigurationHandler::populateClassBeanInstanceCb(std::string& clsn, std::string appn, ClassBeanIns* cbi) {

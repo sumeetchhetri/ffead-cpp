@@ -20,6 +20,10 @@
  *      Author: sumeet
  */
 
+//https://github.com/libcpr/cpr
+//https://github.com/seznam/elasticlient
+//https://github.com/sewenew/redis-plus-plus#install-redis-plus-plus
+
 #ifndef SRC_MODULES_CLIENT_UTIL_HTTP_HTTPCLIENT_H_
 #define SRC_MODULES_CLIENT_UTIL_HTTP_HTTPCLIENT_H_
 

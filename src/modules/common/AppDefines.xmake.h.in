@@ -82,6 +82,10 @@ ${define IS_SENDFILE}
 ${define HAVE_RAPID_JSON}
 ${define HAVE_PUGI_XML}
 ${define HAVE_SYSINFO}
+${define HAVE_SOLR}
+${define HAVE_ELASTIC}
+${define HAVE_REDIS_CLUSTERINC}
+${define HAVE_REDIS_CLUSTERLIB}
 
 #ifdef HAVE_ODBCLIB
 #define HAVE_LIBODBC 1

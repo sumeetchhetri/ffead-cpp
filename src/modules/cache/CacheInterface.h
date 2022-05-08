@@ -38,6 +38,10 @@ public:
 	virtual ~CacheInterface();
 	virtual void init()=0;
 
+	ConnectionPooler* getPool() {
+		return pool;
+	}
+
 	bool set(const std::string& key, const char* value, int expireSeconds = -1);
 	bool add(const std::string& key, const char* value, int expireSeconds = -1);
 	bool replace(const std::string& key, const char* value, int expireSeconds = -1);

@@ -92,7 +92,7 @@ void* MethodInvoc::service(void* arg)
 			for (unsigned var = 0; var < argts.size();  var++)
 			{
 				void *value = NULL;
-				Element* arg = argts.at(var);
+				Element* arg = &argts.at(var);
 				if(arg->getTagName()!="argument" || arg->getAttribute("type")=="")
 					throw MethodInvokerException("every argument tag should have a name and type attribute\n",retValue);
 				if(arg->getText()=="" && arg->getChildElements().size()==0)
@@ -135,9 +135,9 @@ void* MethodInvoc::service(void* arg)
 				}
 				else if(arg->getAttribute("type")!="")
 				{
-					Element* obj = arg->getChildElements().at(0);
-					std::string objxml = obj->render();
-					std::string objClassName = obj->getTagName();
+					Element obj = arg->getChildElements().at(0);
+					std::string objxml = obj.render();
+					std::string objClassName = obj.getTagName();
 					int serOpt = SerializeBase::identifySerOption(arg->getAttribute("type"));
 					value = ser.unSerializeUnknown(objxml,serOpt,arg->getAttribute("type"));
 				}
@@ -210,7 +210,7 @@ void* MethodInvoc::service(void* arg)
 					{
 						void* retobj = reflector.invokeMethodUnknownReturn(_temp,meth,valus,true);
 						int serOpt = SerializeBase::identifySerOption(returnType);
-						std::string oxml = ser.serializeUnknown(retobj,serOpt,returnType);
+						std::string oxml = ser.serializeUnknown(retobj,serOpt,returnType,NULL);
 						retValue = ("<return:"+returnType+">"+oxml+"</return:"+returnType+">");
 					}
 				}

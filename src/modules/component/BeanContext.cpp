@@ -105,7 +105,8 @@ void* BeanContext::invoke(const std::string& name, std::vector<GenericObject> ar
 		{
 			for (unsigned int var = 0; var < args.size(); ++var)
 			{
-				argus += "<argument type=\""+rettyp+"\">"+ser.serializeUnknown(args.at(var).getPointer(),rettyp)+"</argument>";
+				int serOpt = SerializeBase::identifySerOption(rettyp);
+				argus += "<argument type=\""+rettyp+"\">"+ser.serializeUnknown(args.at(var).getPointer(),serOpt,rettyp,NULL)+"</argument>";
 			}
 		}
 		std::string call = "<service name=\""+name+"\" beanName=\""+bname+"\" lang=\"c++\" returnType=\""+rettyp+"\"><args>"+argus+"</args></service>";
@@ -126,7 +127,8 @@ void* BeanContext::invoke(const std::string& name, std::vector<GenericObject> ar
 			message.setTagName(tag);
 			call = message.render();
 			//logger << call << std::flush;
-			retval = ser.unSerializeUnknown(call,tag);
+			int serOpt = SerializeBase::identifySerOption(tag);
+			retval = ser.unSerializeUnknown(call,serOpt,tag);
 		}
 		else
 		{
