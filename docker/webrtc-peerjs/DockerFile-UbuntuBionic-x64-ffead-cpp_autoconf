@@ -20,6 +20,16 @@ RUN cd hiredis-1.0.0/ && cmake . && make install
 WORKDIR /tmp
 RUN rm -rf hiredis-1.0.0
 
+RUN wget -q https://github.com/sewenew/redis-plus-plus/archive/refs/tags/1.3.3.tar.gz
+RUN tar xf 1.3.3.tar.gz
+RUN rm -f 1.3.3.tar.gz
+WORKDIR redis-plus-plus-1.3.3/
+RUN mkdir build
+WORKDIR build
+RUN cmake -DREDIS_PLUS_PLUS_CXX_STANDARD=17 .. && make && make install
+WORKDIR /tmp
+RUN rm -rf redis-plus-plus-1.3.3
+
 #Install ffead-cpp
 WORKDIR /tmp
 RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip

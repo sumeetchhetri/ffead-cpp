@@ -76,9 +76,49 @@ option("MOD_REDIS")
 				raise('hiredis library not found')
 			end
 	        option:add(l)
+			l = find_package("redis++")
+			if l then
+				option:add(l)
+				option:set("configvar", "HAVE_REDIS_CLUSTERINC", 1)
+				option:set("configvar", "HAVE_REDIS_CLUSTERLIB", 1)
+			end
 	        option:set("configvar", "HAVE_REDISINC", 1)
 			option:set("configvar", "HAVE_REDISLIB", 1)
 			option:set("configvar", "INC_REDISCACHE", 1)
+	    end
+    end)
+option_end()
+
+option("MOD_SOLR")
+	set_default(false)
+	set_showmenu(true)
+	set_description("Enable SOLR Search module")
+	after_check(function (option)
+		if option:enabled() then
+	        option:set("configvar", "HAVE_SOLR", 1)
+	    end
+    end)
+option_end()
+
+option("MOD_ELASTIC")
+	set_default(false)
+	set_showmenu(true)
+	set_description("Enable Elasticsearch Search module")
+	after_check(function (option)
+		if option:enabled() then
+			import("lib.detect.find_package")
+			local l = find_package("elasticlient")
+			if not l then
+				raise('elasticlient library not found')
+			end
+			option:add(l)
+			import("lib.detect.has_cxxincludes")
+			local ok = has_cxxincludes({"elasticlient/client.h"}, {target = target})
+			if ok then
+				option:set("configvar", "HAVE_ELASTIC", 1)
+		    else
+		    	raise('elasticlient includes not found')
+			end
 	    end
     end)
 option_end()
@@ -708,7 +748,7 @@ function getOptions()
 			 "SELECT", "POLL", "DEVPOLL", "IOURING", "EPOLL", "KQUEUE", "EVPORT", "ACCEPT4", "TCP_QUICKACK", 
 			 "TCP_DEFER_ACCEPT", "TCP_FASTOPEN", "MOD_MEMORY","MOD_MEMCACHED", "MOD_REDIS", "MOD_SDORM_SQL", 
 			 "MOD_SDORM_MONGO", "MOD_SDORM_SCYLLA", "MOD_SER_BIN", "MOD_JOBS", "SRV_EMB", "WITH_RAPIDJSON", 
-			 "WITH_PUGIXML", "WITH_PICOEV"}
+			 "WITH_PUGIXML", "WITH_PICOEV", "MOD_ELASTIC", "MOD_SOLR"}
 end
 
 includes("src/modules")

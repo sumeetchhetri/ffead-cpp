@@ -23,11 +23,38 @@
 #include "SearchQuery.h"
 
 SearchQuery::SearchQuery() {
-	
-
 }
 
 SearchQuery::~SearchQuery() {
-	
 }
 
+const std::string& SearchQuery::getIndexName() const {
+	return indexName;
+}
+
+void SearchQuery::setIndexName(const std::string &indexName) {
+	this->indexName = indexName;
+}
+
+std::map<std::string, std::string>& SearchQuery::getProperties() {
+	return properties;
+}
+
+const std::string& SearchQuery::getId() const {
+	return id;
+}
+
+void SearchQuery::setData(const std::string &data) {
+}
+
+std::string& SearchQuery::getData() {
+	return data;
+}
+
+void SearchQuery::setId(const std::string &id) {
+	this->id = id;
+}
+
+void SearchQuery::setProperties(const std::map<std::string, std::string> &properties) {
+	this->properties = properties;
+}

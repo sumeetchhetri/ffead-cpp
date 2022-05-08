@@ -58,26 +58,11 @@ void* ServiceHandler::closeConnections(void *arg) {
 	return NULL;
 }
 
-static const char* get_date() {
-	time_t t;
-	struct tm tm;
-	static const char *days[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-	static const char *months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-	static __thread char date[59] = "Date: Thu, 01 Jan 1970 00:00:00 GMT\r\nServer: FFEAD 2.0\r\n";
-
-	time(&t);
-	gmtime_r(&t, &tm);
-	strftime(date, 58, "Date: ---, %d --- %Y %H:%M:%S GMT\r\nServer: FFEAD 2.0\r\n", &tm);
-	memcpy(date + 6, days[tm.tm_wday], 3);
-	memcpy(date + 14, months[tm.tm_mon], 3);
-
-	return date;
-}
 
 void* ServiceHandler::timer(void *arg) {
 	ServiceHandler* ths = (ServiceHandler*)arg;
 	while(ths->run) {
-		CommonUtils::dateStr = get_date();
+		CommonUtils::setDate();
 		Thread::sSleep(1);
 	}
 	return NULL;
@@ -128,8 +113,8 @@ void ServiceHandler::start() {
 		run = true;
 		Thread* mthread = new Thread(&closeConnections, this);
 		mthread->execute(-1);
-		Thread* tthread = new Thread(&timer, this);
-		tthread->execute();
+		//Thread* tthread = new Thread(&timer, this);
+		//tthread->execute();
 	}
 }
 

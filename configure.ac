@@ -994,18 +994,20 @@ AX_CXX_COMPILE_STDCXX(17,,mandatory)
 #fi
 
 if test "x$mod_rediscache" = "xyes"; then
-	AC_CHECK_HEADER([hiredis/hiredis.h],,[AC_MSG_ERROR([hiredis header files not found, please install hiredis])])
-	AC_SEARCH_LIBS(redisCommand, hiredis, [],[AC_MSG_ERROR([redis library "hiredis" not found])])
+	AC_CHECK_HEADER([hiredis/hiredis.h],[AC_DEFINE(HAVE_REDISINC, [1], [])],[AC_MSG_ERROR([hiredis header files not found, please install hiredis])])
+	AC_SEARCH_LIBS(redisCommand, hiredis, [AC_DEFINE(HAVE_REDISLIB, [1], [])],[AC_MSG_ERROR([redis library "hiredis" not found])])
 fi
 
 if test "x$mod_memcached" = "xyes"; then
-	AC_CHECK_HEADER([libmemcached/memcached.h],,[AC_MSG_ERROR([libmemcached header files not found, please install libmemcached])])
-	AC_SEARCH_LIBS(memcached_pool, memcachedutil, [],[AC_MSG_ERROR([memcached library "libmemcachedutil" not found])])
-	AC_SEARCH_LIBS(memcached_add, memcached, [],[AC_MSG_ERROR([memcached library "libmemcached" not found])])
+	AC_CHECK_HEADER([libmemcached/memcached.h],[AC_DEFINE(HAVE_MEMCACHEDINC, [1], [])],[AC_MSG_ERROR([libmemcached header files not found, please install libmemcached])])
+	AC_CHECK_LIB(memcached, main, [AC_DEFINE(HAVE_MEMCACHEDLIB, [1], [])], [])
+	AC_CHECK_LIB(memcachedutil, main, , [])
+	#AC_SEARCH_LIBS(memcached_pool, memcachedutil, [],[AC_MSG_ERROR([memcached library "libmemcachedutil" not found])])
+	#AC_SEARCH_LIBS(memcached_add, memcached, [AC_DEFINE(HAVE_MEMCACHEDLIB, [1], [])],[AC_MSG_ERROR([memcached library "libmemcached" not found])])
 fi
 
 AC_LANG_PUSH(C++)
-AC_CHECK_HEADER([libcuckoo/cuckoohash_map.hh],,[AC_MSG_ERROR([libcuckoo header files not found, please install libcuckoo])])
+AC_CHECK_HEADER([libcuckoo/cuckoohash_map.hh],[AC_DEFINE(HAVE_CKOHMINC, [1], [])],[AC_MSG_ERROR([libcuckoo header files not found, please install libcuckoo])])
 AC_LANG_POP(C++)
 
 AM_CONDITIONAL(MOD_APACHEMOD, test "x$generate_apache_module" = "xyes")
@@ -1140,8 +1142,8 @@ if test "x$mod_sdormsql" = "xyes"; then
 				])
 			])
 	fi
-	AC_CHECK_HEADER([sql.h],,[AC_MSG_ERROR([ODBC sql.h header not found])])
-	AC_CHECK_HEADER([libpq-fe.h],,[])
+	AC_CHECK_HEADER([sql.h],[AC_DEFINE(HAVE_SQLINC, [1], [])],[AC_MSG_ERROR([ODBC sql.h header not found])])
+	AC_CHECK_HEADER([libpq-fe.h],[AC_DEFINE(HAVE_PQHDR, [1], [])],[])
 	AC_CHECK_LIB(pq, main, [AC_DEFINE(HAVE_LIBPQ, [1], [libpq presence])], [])
 	AC_CHECK_LIB(pq, PQenterBatchMode, [AC_DEFINE(HAVE_LIBPQ_BATCH, [1], [libpq batch mode])], [])
 	AC_CHECK_LIB(pq, PQenterPipelineMode, [AC_DEFINE(HAVE_LIBPQ_PIPELINE, [1], [libpq pipeline mode])], [])
@@ -1158,8 +1160,8 @@ if test "x$mod_sdormmongo" = "xyes"; then
 				])
 			])
 	fi
-	AC_CHECK_HEADER([mongoc.h],,[AC_MSG_ERROR([mongodb mongoc.h header not found])])
-	AC_CHECK_HEADER([bson.h],,[AC_MSG_ERROR([mongodb bson.h header not found])])
+	AC_CHECK_HEADER([mongoc.h],[AC_DEFINE(HAVE_MONGOINC, [1], [])],[AC_MSG_ERROR([mongodb mongoc.h header not found])])
+	AC_CHECK_HEADER([bson.h],[AC_DEFINE(HAVE_BSONINC, [1], [])],[AC_MSG_ERROR([mongodb bson.h header not found])])
 fi
 
 if test "x$mod_sdormscylla" = "xyes"; then

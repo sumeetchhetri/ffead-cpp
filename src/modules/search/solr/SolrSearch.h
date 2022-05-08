@@ -26,18 +26,21 @@
 
 class SolrSearch: public SearchEngineInterface {
 	static std::string COLL_C_PARAMS, COLL_M_PARAMS;
-	bool isCloud;
+	bool v2;
+
 public:
-	SolrSearch();
+	SolrSearch(ConnectionPooler* pool);
 	virtual ~SolrSearch();
 
 	void createIndex(IndexQuery& iq);
 	void updateIndex(IndexQuery& iq);
 	void removeIndex(IndexQuery& iq);
+	void indexOp(IndexQuery& iq);
 
 	void add(DocumentQuery& iq);
 	void update(DocumentQuery& iq);
 	void remove(DocumentQuery& iq);
+	void docOp(DocumentQuery& iq);
 
 	std::string query(SearchQuery& q);
 };

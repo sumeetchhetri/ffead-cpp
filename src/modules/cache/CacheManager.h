@@ -26,7 +26,10 @@
 #ifdef INC_MEMCACHED
 #include"MemcachedImpl.h"
 #endif
-#ifdef INC_REDISCACHE
+#ifdef HAVE_REDIS_CLUSTERINC
+#include "RedisClusterCacheImpl.h"
+#endif
+#if HAVE_REDISINC
 #include "RedisCacheImpl.h"
 #endif
 #include "GenericObject.h"
@@ -40,7 +43,6 @@ class CacheManager {
 	static std::map<std::string, bool> appInitCompletionStatus;
 	ConnectionProperties props;
 	ConnectionPooler* pool;
-	Reflector* reflector;
 	static void initCache(const ConnectionProperties& props, const std::string& appName, GetClassBeanIns f);
 	static void destroy();
 	CacheManager(const ConnectionProperties& props);

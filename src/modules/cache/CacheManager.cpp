@@ -153,8 +153,16 @@ void CacheManager::cleanImpl(CacheInterface* ccImpl) {
 		}
 		else if(StringUtil::toLowerCopy(ccImpl->pool->getProperties().getType())=="redis")
 		{
-#ifdef INC_REDISCACHE
-			delete (RedisCacheImpl*)ccImpl;
+#if defined(HAVE_REDISINC)
+			if(StringUtil::toLowerCopy(ccImpl->pool->getProperties().getProperty("cluster"))=="true") {
+#if defined(HAVE_REDIS_CLUSTERINC)
+				delete (RedisClusterCacheImpl*)ccImpl;
+#else
+				delete (RedisCacheImpl*)ccImpl;
+#endif
+			} else {
+				delete (RedisCacheImpl*)ccImpl;
+			}
 #endif
 		}
 	}
@@ -196,7 +204,13 @@ CacheInterface* CacheManager::getImpl(std::string name, std::string appName) {
 	else if(StringUtil::toLowerCopy(cchMgr->props.getType())=="redis")
 	{
 #ifdef INC_REDISCACHE
-		t = new RedisCacheImpl(cchMgr->pool);
+		if(StringUtil::toLowerCopy(cchMgr->props.getProperty("cluster"))=="true") {
+#ifdef HAVE_REDIS_CLUSTERINC
+			t = new RedisClusterCacheImpl(cchMgr->pool);
+#endif
+		} else {
+			t = new RedisCacheImpl(cchMgr->pool);
+		}
 #endif
 	}
 	t->init();
@@ -209,7 +223,6 @@ CacheInterface* CacheManager::getImpl(std::string name, std::string appName) {
 
 CacheManager::CacheManager(const ConnectionProperties& props) {
 	logger = LoggerFactory::getLogger("CacheManager");
-	this->reflector = NULL;
 	this->pool = NULL;
 	this->props = props;
 	if(StringUtil::toLowerCopy(props.getType()) == "memory") {
@@ -220,7 +233,13 @@ CacheManager::CacheManager(const ConnectionProperties& props) {
 #endif
 	} else if(StringUtil::toLowerCopy(props.getType()) == "redis") {
 #ifdef INC_REDISCACHE
-		this->pool = new RedisCacheConnectionPool(props);
+		if(StringUtil::toLowerCopy(props.getProperty("cluster"))=="true") {
+#ifdef HAVE_REDIS_CLUSTERINC
+			this->pool = new RedisClusterCacheConnectionPool(props);
+#endif
+		} else {
+			this->pool = new RedisCacheConnectionPool(props);
+		}
 #endif
 	}
 }

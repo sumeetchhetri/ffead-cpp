@@ -55,8 +55,19 @@ then
 	rm -rf build_meson || true
 	meson setup build_meson && cd build_meson
 	ninja install
+elif [ "$TYPE" = "scons" ]
+then
+	 rm -rf .scons_temp
+	 scons
+elif [ "$TYPE" = "bazel" ]
+then
+	:
+elif [ "$TYPE" = "shellb" ]
+then
+	rm -rf .bin || true
+	./shellb.sh inter-shellb
 else
-	echo "Invalid Build Type specified, only cmake, xmake and meson supported..."
+	echo "Invalid Build Type specified, only cmake, xmake, meson, scons, bazel and shellb supported..."
 fi
 
 cp -f *inter* $FFEAD_CPP_PATH/lib/

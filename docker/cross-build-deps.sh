@@ -27,7 +27,7 @@ ANDROID_ARCH=
 
 build_zlib() {
 	echo "=== Building zlib-${ZLIB_VERSION} (${TARGET})..."
-	curl -sLo- https://zlib.net/zlib-${ZLIB_VERSION}.tar.gz | tar xz -C ${BUILD_DIR}
+	curl -sLo- https://zlib.net/fossils/zlib-${ZLIB_VERSION}.tar.gz | tar xz -C ${BUILD_DIR}
 	pushd ${BUILD_DIR}/zlib-${ZLIB_VERSION}
 		if [ "$1" = "mingw-w64" ]
     	then

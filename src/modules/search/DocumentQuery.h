@@ -32,22 +32,26 @@ class DocumentQuery {
 private:
 	std::string id;
 	std::string indexName;
+	std::string opType;
 	std::map<std::string, std::string> properties;
-	std::map<std::string, std::string> fields;
 	std::string data;
+	friend class SolrSearch;
 public:
 	DocumentQuery();
 	virtual ~DocumentQuery();
 
-	const std::string& getData() const;
-	const std::map<std::string, std::string>& getFields() const;
+	void setData(const std::string &data);
+	std::string& getData();
+	std::map<std::string, std::string>& getFields();
 	void setFields(const std::map<std::string, std::string>& fields);
 	const std::string& getId() const;
 	void setId(const std::string& id);
 	const std::string& getIndexName() const;
 	void setIndexName(const std::string& indexName);
-	const std::map<std::string, std::string>& getProperties() const;
+	std::map<std::string, std::string>& getProperties();
 	void setProperties(const std::map<std::string, std::string>& properties);
+	const std::string& getOpType() const;
+	void setOpType(const std::string &opType);
 
 	template<class T> bool add(T& t) {
 		if(data=="") {
@@ -65,7 +69,7 @@ public:
 		}
 		return false;
 	}
-	template<class T> std::map<int, std::string> addMulti(std::vector<T>& vecT) {
+	template<class T> bool addMulti(std::vector<T>& vecT) {
 		if(data=="") {
 			std::string cn = CastUtil::getClassName(vecT);
 			int serOpt = SerializeBase::identifySerOption(cn);

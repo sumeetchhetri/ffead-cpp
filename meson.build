@@ -110,6 +110,15 @@ if get_option('MOD_REDIS') == true
 		endif
 		global_libs += [libhiredis]
 	endif
+	librredispp = cc.find_library('redis++', dirs: ['/usr/local/lib'])
+	if librredispp.found()
+		conf_data.set('HAVE_REDIS_CLUSTERLIB', 1)
+		if cc.has_header('sw/redis++/redis++.h')
+			conf_data.set('HAVE_REDIS_CLUSTERINC', 1)
+			conf_data.set('INC_REDISCACHE', 1)
+		endif
+		global_libs += [librredispp]
+	endif
 endif
 
 global_includes = ['/usr/local/include']
@@ -231,6 +240,24 @@ if get_option('MOD_JOBS') == true
 	conf_data.set('INC_JOBS', 1)
 endif
 
+if get_option('MOD_SOLR') == true
+	conf_data.set('HAVE_SOLR', 1)
+endif
+
+if get_option('MOD_ELASTIC') == true
+	if cc.has_header('elasticlient/client.h', args : '-I/usr/local/include/')
+		conf_data.set('HAVE_ELASTIC', 1)
+	else
+		error('elasticlient headers not found')
+	endif
+	libelastic = cc.find_library('elasticlient')
+	if libelastic.found()
+		global_libs += [libelastic]
+	else
+		error('elastic lib not found')
+	endif
+endif
+
 if not cc.has_header('libcuckoo/cuckoohash_map.hh', args : '-I/usr/local/include/')
 	error('libcuckoo headers not found')
 endif
@@ -251,6 +278,10 @@ if get_option('WITH_PUGIXML') == true
 	else
 		error('pugixml lib not found')
 	endif
+endif
+
+if get_option('MOD_MEMORY') == true
+	conf_data.set('INC_MEMORYCACHE', 1)
 endif
 
 if get_option('WITH_PICOEV') == true
@@ -333,16 +364,16 @@ endif
 configure_file(input : 'src/modules/common/AppDefines.meson.h.in', output : 'AppDefines.h', configuration : conf_data)
 
 conf_file_path = meson.current_build_dir() + '/AppDefines.h'
-run_command('mv', conf_file_path, 'src/modules/common/')
-run_command('chmod', '+x', 'meson_grabber.sh')
-run_command('chmod', '+x', 'meson_postinstall.sh')
+run_command('mv', conf_file_path, 'src/modules/common/', check: true)
+run_command('chmod', '+x', 'meson_grabber.sh', check: true)
+run_command('chmod', '+x', 'meson_postinstall.sh', check: true)
 
 meson_grabber = meson.source_root() + '/meson_grabber.sh'
 meson_post_install = meson.source_root() + '/meson_postinstall.sh'
 
 bin_dir = meson.current_source_dir()+'/'+meson.project_name()+'-'+meson.project_version()+'-bin/'
-run_command('rm', '-rf', bin_dir)
-run_command('mkdir', bin_dir)
+run_command('rm', '-rf', bin_dir, check: true)
+run_command('mkdir', bin_dir, check: true)
 
 subdir('src/modules')
 subdir('src/framework')
@@ -370,10 +401,10 @@ emb_includes = ['src/modules/common','src/modules/cache','src/modules/cache/memo
 	'src/modules/ioc','src/modules/jobs','src/modules/reflection','src/modules/sdorm','src/modules/sdorm/sql','src/modules/sdorm/sql/libpq',
 	'src/modules/client-util/ssl','src/modules/sdorm/mongo','src/modules/sdorm/mongo/raw','src/modules/search','src/modules/serialization',
 	'src/modules/serialization/xml','src/modules/serialization/json','src/modules/server-util','src/modules/ssl','src/modules/threads',
-	'src/framework']
+	'src/framework','src/modules/search/solr','src/modules/search/elasticsearch']
 	
 foreach inc: emb_includes
-	c = run_command(meson_grabber, inc, 'all', '*.h')
+	c = run_command(meson_grabber, inc, 'all', '*.h', check: true)
 	incs = c.stdout().strip().split('\n')
 	install_headers(incs, install_dir: bin_dir+'include')
 endforeach

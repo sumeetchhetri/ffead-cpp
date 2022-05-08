@@ -1,0 +1,378 @@
+import os
+import shutil
+import json
+
+vars = Variables('scons_options.py')
+vars.Add(BoolVariable('MOD_DEBUG', 'Enable Debug', False))
+vars.Add(BoolVariable('MOD_MEMORY', 'Enable Memory Cache module', True))
+vars.Add(BoolVariable('MOD_MEMCACHED', 'Enable Memcached Cache module', True))
+vars.Add(BoolVariable('MOD_REDIS', 'Enable Redis Cache module', True))
+vars.Add(BoolVariable('MOD_SDORM_SQL', 'Enable SQL Sdorm module', True))
+vars.Add(BoolVariable('MOD_SDORM_MONGO', 'Enable Mongo Sdorm module', True))
+vars.Add(BoolVariable('MOD_SDORM_SCYLLA', 'Enable Scylla Sdorm module', False))
+vars.Add(BoolVariable('MOD_SER_BIN', 'Enable Binary Serialization module', True))
+vars.Add(BoolVariable('MOD_JOBS', 'Enable Jobs module', True))
+vars.Add(BoolVariable('MOD_SOLR', 'Enable SOLR Search module', True))
+vars.Add(BoolVariable('MOD_ELASTIC', 'Enable Elasticsearch Search module', False))
+vars.Add(BoolVariable('SRV_EMB', 'Embedded Http Server Engine', True))
+vars.Add(BoolVariable('WITH_RAPIDJSON', 'Use rapidjson for json handling', True))
+vars.Add(BoolVariable('WITH_PUGIXML', 'Use pugixml for xml handling', True))
+vars.Add(BoolVariable('WITH_PICOEV', 'Enable picoev engine', False))
+
+#print(vars)
+# Set our required libraries
+libraries 		= ['z']
+library_paths 	= []
+cppDefines 		= {}
+cppFlags 		= ['-Wall']
+cxxFlags 		= ['-std=c++17']
+cppPath			= []
+
+shutil.copy2('src/modules/common/AppDefines.scons.h.in', 'src/modules/common/AppDefines.h')
+
+# define the attributes of the build environment shared between
+# both the debug and release builds
+common_env = Environment(variables = vars)
+Help(vars.GenerateHelpText(common_env))
+
+platform = common_env['PLATFORM']
+if platform == 'darwin':
+	if os.path.isdir('/usr/local/opt/openssl/lib/'):
+		library_paths.append("/usr/local/opt/openssl/lib/")
+		cppPath.append("/usr/local/opt/openssl/include")
+
+library_paths.append("/usr/local/lib")
+cppPath.append("/usr/local/include")
+#print("library_paths = %s" % library_paths)
+
+common_env.Append(CPPPATH 		= cppPath)
+common_env.Append(LIBPATH 		= library_paths)
+common_env.Append(CXXFLAGS 		= cxxFlags)
+
+conf = Configure(common_env)
+
+platform = common_env['PLATFORM']
+if platform == 'darwin':
+	conf.env.Append(CPPDEFINES=['OS_DARWIN', 'APPLE'])
+elif platform == 'mingw':
+	conf.env.Append(CPPDEFINES=['MINGW', 'OS_MINGW', 'USE_WIN_IOCP'])
+elif platform == 'cygwin':
+	conf.env.Append(CPPDEFINES=['CYGWIN'])
+elif platform == 'posix':
+	conf.env.Append(CPPDEFINES=['OS_LINUX'])
+else:
+	print('Incompatible platform %s, exiting!' % platform)
+	Exit(1)
+
+if conf.CheckCHeader('sys/sysinfo.h'):
+	conf.env.Append(CPPDEFINES=['HAVE_SYSINFO'])
+
+if conf.CheckLib('uuid'):
+    conf.env.Append(CPPDEFINES=['HAVE_UUIDLIB'])
+elif conf.CheckLib('ossp-uuid'):
+	conf.env.Append(CPPDEFINES=['HAVE_UUIDLIB'])
+else:
+	print('Did not find uuid library!')
+	Exit(1)
+	
+if conf.CheckCHeader('uuid/uuid.h'):
+	conf.env.Append(CPPDEFINES=['HAVE_UUIDINC'])
+elif conf.CheckCHeader('ossp/uuid.h'):
+	conf.env.Append(CPPDEFINES=['HAVE_OSSPUUIDINC'])
+elif conf.CheckCHeader('ossp/uuid.h'):
+	conf.env.Append(CPPDEFINES=['HAVE_OSSPUUIDINC_2'])
+else:
+	print('Did not find uuid headers!')
+	Exit(1)
+	
+if not conf.CheckLibWithHeader('curl', 'curl/curl.h', 'c'):
+    print('Did not find curl library!')
+else:
+	conf.env.Append(CPPDEFINES=['HAVE_CURLLIB', 'HAVE_CURLINC'])
+
+if conf.CheckCHeader('regex.h'):
+	conf.env.Append(CPPDEFINES=['HAVE_REGEX'])
+else:
+	if not conf.CheckLibWithHeader('onig', 'onigposix.h', 'c'):
+	    print('Did not find oniguruma library!')
+	else:
+		conf.env.Append(CPPDEFINES=['HAVE_ONIG_REGEX', 'HAVE_ONIG_REGEX_LIB'])
+
+mod_scylla = ARGUMENTS.get('MOD_SDORM_SCYLLA', False)
+if bool(mod_scylla):
+	if not conf.CheckLibWithHeader('scylla-cpp-driver', 'cassandra.h', 'cxx'):
+		print('Did not find scylla development files!')
+		Exit(1)
+
+mod_sql = ARGUMENTS.get('MOD_SDORM_SQL', True)
+if bool(mod_sql):
+	if conf.CheckLibWithHeader('odbc', 'sql.h', 'c'):
+		conf.env.Append(CPPDEFINES=['HAVE_SQLINC', 'INC_SDORM', 'INC_SDORM_SQL', 'HAVE_ODBCLIB'])
+	if conf.CheckLib('pq'):
+		pqhdr = False
+		if conf.CheckCHeader('libpq-fe.h'):
+			pqhdr = True
+		if FindFile('libpq-fe.h', '/usr/include/postgresql'):
+			pqhdr = True
+			conf.env.Append(CPPPATH=['/usr/include/postgresql'])
+		if FindFile('libpq-fe.h', '/usr/include/pgsql'):
+			pqhdr = True
+			conf.env.Append(CPPPATH=['/usr/include/pgsql'])
+		if FindFile('libpq-fe.h', '/usr/local/include/postgresql'):
+			pqhdr = True
+			conf.env.Append(CPPPATH=['/usr/local/include/postgresql'])
+		if FindFile('libpq-fe.h', '/usr/local/include/pgsql'):
+			pqhdr = True
+			conf.env.Append(CPPPATH=['/usr/local/include/pgsql'])
+		if pqhdr:
+			conf.env.Append(CPPDEFINES=['HAVE_PQHDR', 'HAVE_LIBPQ'])
+			if conf.CheckFunc('PQenterBatchMode', '#include <libpq-fe.h>'):
+				conf.env.Append(CPPDEFINES=['HAVE_LIBPQ_BATCH'])
+			
+
+mod_mongo = ARGUMENTS.get('MOD_SDORM_MONGO', True)
+if bool(mod_mongo):
+	if conf.CheckLib('bson-1.0') and conf.CheckLib('mongoc-1.0'):
+		oi = FindFile('bson.h', '/usr/include/libbson-1.0')
+		li = FindFile('bson.h', '/usr/local/include/libbson-1.0')
+		if oi:
+			conf.env.Append(CPPPATH=['/usr/include/libbson-1.0'])
+			conf.env.Append(CPPPATH=['/usr/include/libmongoc-1.0'])
+		elif li:
+			conf.env.Append(CPPPATH=['/usr/local/include/libbson-1.0'])
+			conf.env.Append(CPPPATH=['/usr/local/include/libmongoc-1.0'])
+			
+		if oi or li:
+			conf.env.Append(CPPDEFINES=['HAVE_BSONLIB', 'HAVE_MONGOCLIB', 'HAVE_BSONINC', 'HAVE_MONGOINC', 'INC_SDORM', 'INC_SDORM_MONGO'])
+	else:
+		print('Did not find mongo development files!')
+		Exit(1)
+
+if conf.CheckLib('ssl') and conf.CheckLib('crypto') and conf.CheckCHeader('openssl/ssl.h'):
+	conf.env.Append(CPPDEFINES=['HAVE_SSLINC', 'HAVE_CRYPTOLIB', 'HAVE_SSLLIB'])
+	
+mod_memcached = ARGUMENTS.get('MOD_MEMCACHED', True)
+if bool(mod_memcached):
+	if conf.CheckLib('memcachedutil') and conf.CheckLibWithHeader('memcached', 'libmemcached/memcached.h', 'c'):
+		conf.env.Append(CPPDEFINES=['HAVE_MEMCACHEDINC', 'INC_MEMCACHED', 'HAVE_MEMCACHEDLIB'])
+	else:
+		mod_memcached = False
+	
+mod_redis = ARGUMENTS.get('MOD_REDIS', True)
+if bool(mod_redis):
+	if conf.CheckLibWithHeader('hiredis', 'hiredis/hiredis.h', 'c'):
+		conf.env.Append(CPPDEFINES=['HAVE_REDISINC', 'INC_REDISCACHE', 'HAVE_REDISLIB'])
+		if conf.CheckLibWithHeader('redis++', 'sw/redis++/redis++.h', 'cxx'):
+			conf.env.Append(CPPDEFINES=['HAVE_REDIS_CLUSTERINC', 'HAVE_REDIS_CLUSTERLIB'])
+	else:
+		mod_redis = False
+	
+mod_solr = ARGUMENTS.get('MOD_SOLR', True)
+if bool(mod_solr):
+	conf.env.Append(CPPDEFINES=['HAVE_SOLR'])
+	
+mod_elastic = ARGUMENTS.get('MOD_ELASTIC', False)
+if bool(mod_elastic):
+	if conf.CheckLibWithHeader('elasticlient', 'elasticlient/client.h', 'cxx'):
+			conf.env.Append(CPPDEFINES=['HAVE_ELASTIC'])
+
+if conf.CheckLib('dl'):
+	pass
+
+if conf.CheckLib('pthread'):
+	pass
+
+if not conf.CheckCXXHeader('libcuckoo/cuckoohash_map.hh'):
+	if not FindFile('libcuckoo/cuckoohash_map.hh', '/usr/include') and not FindFile('libcuckoo/cuckoohash_map.hh', '/usr/local/include'):
+		print('Did not find libcuckoo header files!')
+		Exit(1)
+
+mod_ser_bin = ARGUMENTS.get('MOD_SER_BIN', True)
+if bool(mod_ser_bin):
+	conf.env.Append(CPPDEFINES=['INC_BINSER'])
+
+mod_jobs = ARGUMENTS.get('MOD_JOBS', True)
+if bool(mod_jobs):
+	conf.env.Append(CPPDEFINES=['INC_JOBS'])
+
+mod_withpicoev = ARGUMENTS.get('WITH_PICOEV', False)
+if bool(mod_withpicoev):
+	conf.env.Append(CPPDEFINES=['USE_PICOEV'])
+
+mod_memory = ARGUMENTS.get('MOD_MEMORY', True)
+if bool(mod_memory):
+	conf.env.Append(CPPDEFINES=['INC_MEMORYCACHE'])
+
+mod_srvenb = ARGUMENTS.get('SRV_EMB', True)
+if bool(mod_srvenb):
+	conf.env.Append(CPPDEFINES=['SRV_EMB'])
+
+mod_withrj = ARGUMENTS.get('WITH_RAPIDJSON', True)
+if bool(mod_withrj) and conf.CheckCXXHeader('rapidjson/document.h'):
+	conf.env.Append(CPPDEFINES=['HAVE_RAPID_JSON'])
+
+mod_withpx = ARGUMENTS.get('WITH_PUGIXML', True)
+if bool(mod_withrj) and conf.CheckLibWithHeader('pugixml', 'pugixml.hpp', 'cxx'):
+	conf.env.Append(CPPDEFINES=['HAVE_PUGI_XML'])
+
+if conf.CheckCHeader('liburing'):
+	conf.env.Append(CPPDEFINES=['USE_IO_URING'])
+elif conf.CheckCHeader('sys/epoll.h'):
+	conf.env.Append(CPPDEFINES=['USE_EPOLL'])
+elif conf.CheckCHeader('sys/event.h'):
+	conf.env.Append(CPPDEFINES=['USE_KQUEUE'])
+elif conf.CheckCHeader('port.h'):
+	conf.env.Append(CPPDEFINES=['USE_EVPORT'])
+elif conf.CheckCHeader('sys/devpoll.h'):
+	conf.env.Append(CPPDEFINES=['USE_DEVPOLL'])
+elif conf.CheckCHeader('sys/poll.h'):
+	conf.env.Append(CPPDEFINES=['USE_POLL'])
+elif conf.CheckCHeader('sys/select.h'):
+	conf.env.Append(CPPDEFINES=['USE_SELECT'])
+	
+if conf.CheckCHeader('execinfo.h'):
+	conf.env.Append(CPPDEFINES=['HAVE_EXECINFOINC'])
+	
+if conf.CheckCHeader('sys/sendfile.h'):
+	conf.env.Append(CPPDEFINES=['IS_SENDFILE'])
+	
+if not conf.CheckFunc('accept4'):
+    print('Did not find accept4(), using local version')
+
+common_env = conf.Finish()
+
+mod_debug = ARGUMENTS.get('MOD_DEBUG', False)
+if bool(mod_debug):
+	cppFlags.Append('-g');
+
+common_env.Append(CPPPATH 		= cppPath)
+common_env.Append(LIBPATH 		= library_paths)
+#common_env.Append(CXXFLAGS 		= cxxFlags)
+common_env.Append(LIBS 			= libraries)
+common_env.Append(CPPDEFINES 	= cppDefines)
+common_env.Append(CPPFLAGS 		= cppFlags)
+
+# uncomment to force g++ for c code also--creates warnings but
+# avoids need for extern "C"
+# env['CC'] = 'g++'
+
+all_libs=[]
+libs=common_env.get('LIBS')
+for lb in libs:
+	all_libs.append('-l'+lb)
+
+#print all_libs
+
+Delete("rtdcf/sconstruct")
+subst = Environment(tools = ['textfile'])
+substitutions = {'@CPPPATH@': json.dumps(common_env.get('CPPPATH')), '@LIBPATH@': json.dumps(common_env.get('LIBPATH')), '@CPPFLAGS@': json.dumps(cppFlags),
+	'@CXXFLAGS@': json.dumps(cxxFlags), '@LIBS@': json.dumps(all_libs), '@CPPDEFINES@': json.dumps(common_env.get('CPPDEFINES'))}
+subst.Substfile('rtdcf/sconstruct.in', SUBST_DICT = substitutions)
+
+
+# Our release build is derived from the common build environment...
+release_env = common_env.Clone()
+release_env.Append(CPPDEFINES=['RELEASE'])
+release_env.VariantDir('build/release/src/modules', 'src/modules', duplicate=0)
+release_env.VariantDir('build/release/src/framework', 'src/framework', duplicate=0)
+release_env.VariantDir('build/release/tests', 'tests', duplicate=0)
+release_env.VariantDir('build/release/src/server', 'src/server', duplicate=0)
+release_env.VariantDir('build/release/web/default', 'web/default', duplicate=0)
+release_env.VariantDir('build/release/web/oauthApp', 'web/oauthApp', duplicate=0)
+release_env.VariantDir('build/release/web/flexApp', 'web/flexApp', duplicate=0)
+release_env.VariantDir('build/release/web/peer-server', 'web/peer-server', duplicate=0)
+release_env.VariantDir('build/release/web/markers', 'web/markers', duplicate=0)
+release_env.VariantDir('build/release/web/te-benchmark', 'web/te-benchmark', duplicate=0)
+release_env.VariantDir('build/release/web/t1', 'web/t1', duplicate=0)
+release_env.VariantDir('build/release/web/t2', 'web/t2', duplicate=0)
+release_env.VariantDir('build/release/web/t3', 'web/t3', duplicate=0)
+release_env.VariantDir('build/release/web/t4', 'web/t4', duplicate=0)
+release_env.VariantDir('build/release/web/t5', 'web/t5', duplicate=0)
+
+# We define our debug build environment in a similar fashion...
+debug_env = common_env.Clone()
+debug_env.Append(CPPDEFINES=['DEBUG'])
+debug_env.VariantDir('build/debug/src/modules', 'src/modules', duplicate=0)
+debug_env.VariantDir('build/debug/src/framework', 'src/framework', duplicate=0)
+debug_env.VariantDir('build/debug/tests', 'tests', duplicate=0)
+debug_env.VariantDir('build/debug/src/server', 'src/server', duplicate=0)
+debug_env.VariantDir('build/debug/web/default', 'web/default', duplicate=0)
+debug_env.VariantDir('build/debug/web/oauthApp', 'web/oauthApp', duplicate=0)
+debug_env.VariantDir('build/debug/web/flexApp', 'web/flexApp', duplicate=0)
+debug_env.VariantDir('build/debug/web/peer-server', 'web/peer-server', duplicate=0)
+debug_env.VariantDir('build/debug/web/markers', 'web/markers', duplicate=0)
+debug_env.VariantDir('build/debug/web/te-benchmark', 'web/te-benchmark', duplicate=0)
+debug_env.VariantDir('build/debug/web/t1', 'web/t1', duplicate=0)
+debug_env.VariantDir('build/debug/web/t2', 'web/t2', duplicate=0)
+debug_env.VariantDir('build/debug/web/t3', 'web/t3', duplicate=0)
+debug_env.VariantDir('build/debug/web/t4', 'web/t4', duplicate=0)
+debug_env.VariantDir('build/debug/web/t5', 'web/t5', duplicate=0)
+
+build_env=release_env
+mode='release'
+if bool(mod_debug):
+	mode='debug'
+	build_env=debug_env
+
+modeDir = 'build/%s' % mode
+build_env.SConscript('%s/src/modules/sconscript' % modeDir, {'env': build_env, 'mod_mongo': bool(mod_mongo), 'mod_scylla': bool(mod_scylla), 'mod_solr': bool(mod_solr), 'mod_elastic': bool(mod_elastic)})
+build_env.SConscript('%s/src/framework/sconscript' % modeDir, {'env': build_env, 'mod_mongo': bool(mod_mongo), 'mod_scylla': bool(mod_scylla), 'mod_solr': bool(mod_solr), 'mod_elastic': bool(mod_elastic)})
+build_env.SConscript('%s/src/server/sconscript' % modeDir, {'env': build_env})
+build_env.SConscript('%s/tests/sconscript' % modeDir, {'env': build_env})
+build_env.SConscript('%s/web/default/sconscript' % modeDir, {'env': build_env})
+build_env.SConscript('%s/web/oauthApp/sconscript' % modeDir, {'env': build_env})
+build_env.SConscript('%s/web/flexApp/sconscript' % modeDir, {'env': build_env})
+build_env.SConscript('%s/web/peer-server/sconscript' % modeDir, {'env': build_env})
+build_env.SConscript('%s/web/markers/sconscript' % modeDir, {'env': build_env})
+build_env.SConscript('%s/web/te-benchmark/sconscript' % modeDir, {'env': build_env})
+build_env.SConscript('%s/web/t1/sconscript' % modeDir, {'env': build_env})
+if bool(mod_mongo):
+	build_env.SConscript('%s/web/t2/sconscript' % modeDir, {'env': build_env})
+if bool(mod_sql):
+	build_env.SConscript('%s/web/t3/sconscript' % modeDir, {'env': build_env})
+	build_env.SConscript('%s/web/t4/sconscript' % modeDir, {'env': build_env})
+	build_env.SConscript('%s/web/t5/sconscript' % modeDir, {'env': build_env})
+
+Delete("ffead-cpp-6.0-bin")
+Mkdir("ffead-cpp-6.0-bin")
+Mkdir("ffead-cpp-6.0-bin/include")
+Mkdir("ffead-cpp-6.0-bin/lib")
+Mkdir("ffead-cpp-6.0-bin/tests")
+Mkdir("ffead-cpp-6.0-bin/logs")
+build_env.Install('ffead-cpp-6.0-bin', source = ['resources', 'public', 'web', 'rtdcf', modeDir+'/bin/ffead-cpp'])
+build_env.Install('ffead-cpp-6.0-bin', source = Glob('script/*.sh') + Glob('script/*.key') + Glob('script/*.pem') + Glob('script/*.crt'))
+build_env.Install('ffead-cpp-6.0-bin/include', source = Glob('src/framework/*.h') + Glob('src/modules/*.h'))
+for root, dirnames, filenames in os.walk('src/modules'):
+	filenames = [f for f in filenames if not f[0] == '.']
+	dirnames[:] = [d for d in dirnames if not d[0] == '.']
+	for dirname in dirnames:
+		dirPath = os.path.join(root,dirname)
+		if build_env['PLATFORM'] != 'mingw' and 'wepoll' in dirPath:
+			continue
+		if 'gtm' in dirPath:
+			continue
+		if 'mongo' in dirPath:
+			if not mod_mongo:
+				continue
+		if 'scylla' in dirPath:
+			if not mod_scylla:
+				continue
+		if 'solr' in dirPath:
+			if not mod_solr:
+				continue
+		if 'elasticsearch' in dirPath:
+			if not mod_elastic:
+				continue
+		build_env.Install('ffead-cpp-6.0-bin/include', source = Glob("%s/*.h" % dirPath))
+for root, dirnames, filenames in os.walk('web'):
+	filenames = [f for f in filenames if not f[0] == '.']
+	dirnames[:] = [d for d in dirnames if not d[0] == '.']
+	for dirname in dirnames:
+		dirPath = os.path.join(root, dirname, 'include')
+		if bool(mod_mongo) and 't1' in dirPath:
+			continue
+		if bool(mod_sql) and ('t3' in dirPath or 't4' in dirPath or 't5' in dirPath):
+			continue
+		#delete src and other build files from web directories
+build_env.Install('ffead-cpp-6.0-bin/lib', source = Glob(modeDir+'/bin/lib*'))
+build_env.Install('ffead-cpp-6.0-bin/tests', source = Glob('tests/*.sh') + Glob('tests/*.csv') + Glob('tests/*.prop') + Glob('tests/*.pem') + [modeDir+'/bin/tests'])

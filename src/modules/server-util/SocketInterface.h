@@ -30,13 +30,11 @@
 #include "string"
 #include "Mutex.h"
 #include <fcntl.h>
-#include "LoggerFactory.h"
 #ifdef HAVE_SSLINC
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include "SSLHandler.h"
 #endif
-#include "Timer.h"
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "vector"
@@ -51,6 +49,7 @@
 #include <linux/filter.h>
 #endif
 #include "blockingconcurrentqueue.h"
+#include "StringUtil.h"
 
 class BaseSocket;
 
@@ -77,7 +76,7 @@ public:
 class EventHandler {
 	moodycamel::BlockingConcurrentQueue<SockWriteRequest>* wQ;
 	template<typename Func1> void queueWrite(Func1 f, BaseSocket* bs, void* arg) {
-		wQ->enqueue(std::move(SockWriteRequest(f, bs, arg)));
+		wQ->enqueue(SockWriteRequest(f, bs, arg));
 	}
 	friend class BaseSocket;
 	friend class RequestHandler2;

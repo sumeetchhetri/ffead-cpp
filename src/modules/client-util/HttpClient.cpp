@@ -199,13 +199,13 @@ void HttpClient::execute(HttpRequest* request, HttpResponse* response, propMap& 
 
 size_t HttpClient::onContent(void *res, size_t len, size_t mb, void *data) {
 	std::string* _bd = (std::string*) data;
-	_bd->append(reinterpret_cast<char*>(data), len * mb);
+	_bd->append(reinterpret_cast<char*>(res), len * mb);
 	return len * mb;
 }
 
 size_t HttpClient::onHeaders(void *res, size_t len, size_t mb, void *data) {
 	std::string* _hd = (std::string*) data;
-	_hd->append(reinterpret_cast<char*>(data), len * mb);
+	_hd->append(reinterpret_cast<char*>(res), len * mb);
 	return len * mb;
 }
 

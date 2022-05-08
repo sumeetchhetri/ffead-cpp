@@ -837,8 +837,14 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " xmake";
 #elif defined(BUILD_MESON)
 			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " meson";
+#elif defined(BUILD_SCONS)
+			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " scons";
+#elif defined(BUILD_BAZEL)
+			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " bazel";
+#elif defined(BUILD_SHELLB)
+			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " shellb";
 #else
-			logger << "Invalid Build Type specified, only cmake, xmake and meson supported...\n" << std::endl;
+			logger << "Invalid Build Type specified, only cmake, xmake, meson, scons, bazel and shellb supported...\n" << std::endl;
 #endif
 			std::string output = ScriptHandler::execute(compres, true);
 			logger << "Intermediate code generation task\n\n" << std::endl;
@@ -1286,6 +1292,10 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	ConfigurationHandler::initializeCaches();
 	logger << ("Initializing Caches done....") << std::endl;
 
+	logger << ("Initializing Searches....") << std::endl;
+	ConfigurationHandler::initializeSearches();
+	logger << ("Initializing Searches done....") << std::endl;
+
 	//struct sockaddr_storage their_addr; // connector's address information
 	//socklen_t sin_size;
 	SOCKET sockfd = Server::createListener(ipaddr, CastUtil::toInt(port), true, isSinglEVH);
@@ -1342,7 +1352,8 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	struct stat buffer;
 	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 	{
-		Thread::sSleep(10);
+		CommonUtils::setDate();
+		Thread::sSleep(1);
 		//CommonUtils::printStats();
 	}
 
@@ -1368,6 +1379,8 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	SSLHandler::clear();
 #endif
 	ConfigurationHandler::destroyCaches();
+
+	ConfigurationHandler::destroySearches();
 
 	ConfigurationData::getInstance()->clearAllSingletonBeans();
 
@@ -1450,5 +1463,5 @@ Http11Socket* CHServer::createSocketInterface2(SOCKET fd) {
 
 bool CHServer::doRegisterListenerFunc() {
 	struct stat buffer;
-	return stat (serverCntrlFileNm.c_str(), &buffer)==0 && CacheManager::isInitCompleted() && DataSourceManager::isInitCompleted();
+	return stat (serverCntrlFileNm.c_str(), &buffer)==0 && CacheManager::isInitCompleted() && DataSourceManager::isInitCompleted() && SearchEngineManager::isInitCompleted();
 }
