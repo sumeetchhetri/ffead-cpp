@@ -34,7 +34,6 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 	{
 		if(ddlib != NULL)
 		{
-			fcpstream tstream;
 			bool done = false;
 			std::string tpefilename = tmplMap->find(req->getCurl())->second.substr(tmplMap->find(req->getCurl())->second.find(";")+1);
 			std::string tpeclasname = tmplMap->find(req->getCurl())->second.substr(0, tmplMap->find(req->getCurl())->second.find(";"));
@@ -56,12 +55,12 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 						valus.push_back(&cnt);
 						reflector.invokeMethodGVP(_temp,meth,valus);
 
-						std::string fname = "_" + tpefilename + "emittTemplateHTML";
+						std::string fname = CommonUtils::getTpeFnName(tpefilename, std::string(req->getCntxt_name()));
 						void* mkr = dlsym(ddlib, fname.c_str());
 						if(mkr!=NULL)
 						{
 							TemplatePtr f =  (TemplatePtr)mkr;
-							f(&cnt, tstream);
+							f(&cnt, res->getContent());
 							done = true;
 						}
 						else
@@ -85,7 +84,6 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 				res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_HTML);
-				res->setContent(tstream.str());
 			}
 		}
 		if(cntrlit && res->getStatusCode()!="404") {

@@ -244,8 +244,10 @@ public:
 };
 
 class PgReadTask : public Task {
+protected:
 	LibpqAsyncReq* ritem;
 	int counter = 0;
+	int type;
 	LibpqQuery* q;
 	SocketInterface* sif;
 	bool flux;
@@ -261,12 +263,8 @@ public:
 class LibpqDataSourceImpl;
 
 #if defined(HAVE_LIBPQ_BATCH) || defined(HAVE_LIBPQ_PIPELINE)
-class PgBatchReadTask : public Task {
+class PgBatchReadTask : public PgReadTask {
 protected:
-	LibpqAsyncReq* ritem;
-	int counter = 0;
-	LibpqQuery* q;
-	SocketInterface* sif;
 	std::atomic<bool> queueEntries;
 	std::atomic<bool> sendBatch;
 	std::deque<LibpqAsyncReq> lQ;
@@ -284,12 +282,16 @@ public:
 };
 #endif
 
+class TriggerBaseSocket: public BaseSocket {
+};
+
 class LibpqDataSourceImpl : public DataSourceType, public SocketInterface {
 	std::map<std::string, std::string> prepStmtMap;
 	Logger logger;
 	std::string url;
 	bool isAsync;
 	bool isBatch;
+	bool stEvhMode;//seperate event handler thread mode
 	std::deque<LibpqAsyncReq> Q;
 	static std::atomic<bool> done;
 	ConditionMutex c_mutex;
@@ -298,6 +300,7 @@ class LibpqDataSourceImpl : public DataSourceType, public SocketInterface {
 	PGconn* conn; //statement
 	PGresult* executeSync(LibpqQuery* q);
 #endif
+	TriggerBaseSocket tbs;
 	static void* handle(void* inp);
 
 	LibpqAsyncReq* peek();
@@ -342,7 +345,7 @@ public:
 	void postAsync(LibpqAsyncReq* vitem, int numQ);//post async request with n number of multi queries
 	//Asynchronous mode operations, NOT THREAD SAFE
 
-	void handle();
+	bool handle();
 };
 
 #endif /* LibpqDataSourceIMPL_H_ */

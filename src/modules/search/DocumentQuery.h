@@ -35,9 +35,10 @@ private:
 	std::string opType;
 	std::map<std::string, std::string> properties;
 	std::string data;
+	bool commit;
 	friend class SolrSearch;
 public:
-	DocumentQuery();
+	DocumentQuery(bool commit = false);
 	virtual ~DocumentQuery();
 
 	void setData(const std::string &data);

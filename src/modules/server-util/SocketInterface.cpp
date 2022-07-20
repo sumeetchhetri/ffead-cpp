@@ -31,6 +31,8 @@ BaseSocket::BaseSocket() {
 	useCounter = 0;
 	io_uring_type = -1;
 	//io_uring_bid = -1;
+	data = NULL;
+	cf = NULL;
 }
 
 SocketInterface::SocketInterface(): BaseSecureSocket() {
@@ -56,6 +58,8 @@ BaseSocket::BaseSocket(const SOCKET& fd) {
 	useCounter = 0;
 	io_uring_type = -1;
 	//io_uring_bid = -1;
+	data = NULL;
+	cf = NULL;
 }
 
 #ifdef HAVE_SSLINC
@@ -87,6 +91,9 @@ SocketInterface::SocketInterface(const SOCKET& fd) : BaseSecureSocket(fd) {
 	srvTsk = NULL;
 }
 
+void* BaseSocket::getData() {
+	return data;
+}
 
 BaseSecureSocket::BaseSecureSocket(): BaseSocket() {
 #ifdef HAVE_SSLINC
@@ -175,6 +182,9 @@ bool BaseSecureSocket::init(const SOCKET& fd, SSL*& ssl, BIO*& io) {
 
 BaseSocket::~BaseSocket() {
 	closeSocket();
+	if(data!=NULL) {
+		cf(data);
+	}
 }
 
 SocketInterface::~SocketInterface() {
@@ -303,19 +313,27 @@ bool SocketInterface::isCurrentRequest(int reqp) {
 }
 
 int BaseSocket::writeDirect(const std::string& h, const std::string& d) {
-	int res = writeDirect(h);
+#if defined(USE_IO_URING)
+	eh->post_write_2(this, h, d);
+	return 1;
+#endif
+	int res = writeDirect(h, 0, true);
 	if(res>0) {
-		res = writeDirect(d);
+		res = writeDirect(d, 0, false);
 		return 1;
 	}
 	return res;
 }
 
-int BaseSocket::writeDirect(const std::string& h, const char* d, size_t len) {
-	int res = writeDirect(h);
+int BaseSocket::writeDirect(const std::string& h, const char* d, size_t len, bool cont) {
+	int res = writeDirect(h, 0, cont);
 	if(res>0) {
 		if(!isSecure()) {
-			int er = send(fd, d , len, 0);
+#if defined(USE_IO_URING)
+			eh->post_write(this, d, len);
+			return 1;
+#endif
+			int er = send(fd, d, len, 0);
 			switch(er) {
 				case -1:
 				case 0:
@@ -337,9 +355,13 @@ int BaseSocket::writeDirect(const std::string& h, const char* d, size_t len) {
 	return res;
 }
 
-int BaseSocket::writeDirect(const std::string& d, int off) {
+int BaseSocket::writeDirect(const std::string& d, int off, bool cont) {
 	if(!isSecure()) {
-		int er = send(fd, &d[off] , d.length()-off, 0);
+#if defined(USE_IO_URING)
+		eh->post_write(this, d, off);
+		return 1;
+#endif
+		int er = send(fd, &d[off], d.length()-off, 0);
 		switch(er) {
 			case -1:
 			case 0:
@@ -755,10 +777,6 @@ bool BaseSecureSocket::isSecure() {
 #else
 	return false;
 #endif
-}
-
-bool SocketInterface::hasPendingRead() {
-	return false;
 }
 
 void BaseSocket::doneRead() {

@@ -14,8 +14,20 @@ sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' resources/server.prop
 if [ $# -eq 0 ]; then
 	cp /server_orig.sh server.sh
 	nohup bash -c "./server.sh > ffead.log &"
-	sleep 10
+	sleep 30
 	echo "ffead-cpp with sql-raw-async support launched"
+	curl -vvv http://localhost:9785/t4/j
+	curl -vvv http://localhost:9785/t4/plaint
+	curl -vvv http://localhost:9785/t4/fortu
+	curl -vvv http://localhost:9785/t4/d
+	curl -vvv http://localhost:9785/t4/quer?queries=20
+	curl -vvv http://localhost:9785/t4/quem?queries=20
+	curl -vvv http://localhost:9785/t4/updt?queries=20
+	curl -vvv http://localhost:9785/t4/updm?queries=20
+	curl -vvv http://localhost:9785/t4/upd_?queries=20
+	curl -vvv http://localhost:9785/t4/cached-wld?count=100
+	echo "ffead-cpp with sql-raw-async verification complete"
+	sleep 30
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
 -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:9785/t4/j" > j.txt
 	wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
@@ -47,7 +59,7 @@ if [ $# -eq 0 ]; then
 	UMP=`grep "Requests/sec:" um.txt |sed -e 's|Requests/sec:\s*||g'`
 	U_P=`grep "Requests/sec:" u_.txt |sed -e 's|Requests/sec:\s*||g'`
 	CP=`grep "Requests/sec:" c.txt |sed -e 's|Requests/sec:\s*||g'`
-	echo "Async,${JP},${PP},${FP},${DP},${QP},${QMP},${UP},${UMP},${U_P},${CP}"
+	echo "sql-raw-async,${JP},${PP},${FP},${DP},${QP},${QMP},${UP},${UMP},${U_P},${CP}"
 	pkill ffead-cpp
 fi
 if [ "$1" == "g" ]; then

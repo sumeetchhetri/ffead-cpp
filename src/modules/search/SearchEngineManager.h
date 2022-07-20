@@ -36,15 +36,6 @@
 #include "ElasticSearch.h"
 #endif
 
-class SearchEngineConnectionPool: public ConnectionPooler {
-	void initEnv();
-	void* newConnection(const bool& isWrite, const ConnectionNode& node);
-	void closeConnection(void* conn);
-	void destroy();
-public:
-	SearchEngineConnectionPool(const ConnectionProperties& props);
-	virtual ~SearchEngineConnectionPool();
-};
 
 class SearchEngineManager {
 	static std::map<std::string, SearchEngineManager*> engines;

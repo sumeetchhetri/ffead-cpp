@@ -150,30 +150,21 @@ SearchEngineInterface* SearchEngineManager::getImpl(std::string name) {
 
 SearchEngineManager::SearchEngineManager(const ConnectionProperties& props) {
 	this->props = props;
-	this->pool = new SearchEngineConnectionPool(props);
+	this->pool = NULL;
+	if(StringUtil::toLowerCopy(props.getType())=="elasticsearch")
+	{
+#ifdef HAVE_ELASTIC
+		this->pool = new ElasticSearchConnectionPool(props);
+#endif
+	}
+	else if(StringUtil::toLowerCopy(props.getType())=="solr")
+	{
+#ifdef HAVE_SOLR
+		this->pool = new SolrSearchConnectionPool(props);
+#endif
+	}
 }
 
 SearchEngineManager::~SearchEngineManager() {
 }
 
-void SearchEngineConnectionPool::initEnv() {
-}
-
-void* SearchEngineConnectionPool::newConnection(const bool& isWrite, const ConnectionNode& node) {
-	return new HttpClient(node.getBaseUrl());
-}
-
-void SearchEngineConnectionPool::closeConnection(void* conn) {
-	delete ((HttpClient*)conn);
-}
-
-void SearchEngineConnectionPool::destroy() {
-}
-
-SearchEngineConnectionPool::SearchEngineConnectionPool(const ConnectionProperties& props) {
-	createPool(props);
-}
-
-SearchEngineConnectionPool::~SearchEngineConnectionPool() {
-	destroyPool();
-}

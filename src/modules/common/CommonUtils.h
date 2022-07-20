@@ -81,6 +81,7 @@ class CommonUtils {
 public:
 	static const std::string BLANK;
 	static std::string getDateStr();
+	static const char* getDateStrP();
 	static void getDateStr(std::string&);
 	static void clearInstance();
 	static int getProcessorCount();
@@ -143,7 +144,7 @@ public:
 	virtual ~CommonUtils();
 	static void printStats();
 	static std::string normalizeAppName(const std::string& appName);
-	static std::string getTpeFnName(const std::string& tpe, const std::string& appName);
+	static std::string getTpeFnName(const std::string& tpe, const std::string& appName, bool fast = true);
 	//Copied from https://stackoverflow.com/questions/1640258/need-a-fast-random-generator-for-c
 	static inline int fastrand() {
 		g_seed = (214013*g_seed+2531011);
@@ -160,6 +161,20 @@ public:
 	    {
 	    	if(!isdigit(str[i])) return false;
 	        ret = ret * 10 + (str[i] - '0');
+	    }
+	    return true;
+	}
+	//https://tinodidriksen.com/2010/02/cpp-convert-string-to-int-speed/
+	static inline bool naiveStrToNum(const char* p, int len, int& ret) {
+	    ret = 0;
+	    int c = 0;
+	    while (*p >= '0' && *p <= '9') {
+	        ret = (ret*10) + (*p - '0');
+	        ++p;
+	        if(++c==len) break;
+	    }
+	    if (c!=len) {
+	        return false;
 	    }
 	    return true;
 	}

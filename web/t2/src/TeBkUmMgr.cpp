@@ -370,9 +370,7 @@ bool TeBkUmMgrRouter::route(HttpRequest* req, HttpResponse* res, BaseSocket* sif
 
 		if(tmplFunc!=NULL)
 		{
-			fcpstream str;
-			tmplFunc(&ctx, str);
-			res->setContent(str.str());
+			tmplFunc(&ctx, res->getContent());
 			res->setContentType(ContentTypes::CONTENT_TYPE_TEXT_HTML);
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		}

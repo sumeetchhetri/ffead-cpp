@@ -37,14 +37,26 @@ void HttpClient::cleanup() {
 #endif
 }
 
-HttpClient::HttpClient(std::string baseUrl) {
+HttpClient::HttpClient() {
 #ifdef HAVE_CURLLIB
 	_h = curl_easy_init();
 	if (!_h) {
 		throw std::runtime_error("Unable to initialize curl handle");
 	}
+#endif
+}
+
+HttpClient::HttpClient(std::string baseUrl) : HttpClient() {
+#ifdef HAVE_CURLLIB
 	this->baseUrl = baseUrl;
 #endif
+}
+
+HttpClient& HttpClient::withBaseUrl(std::string baseUrl){
+#ifdef HAVE_CURLLIB
+	this->baseUrl = baseUrl;
+#endif
+	return *this;
 }
 
 HttpClient::~HttpClient() {
@@ -58,15 +70,23 @@ HttpClient::~HttpClient() {
 void HttpClient::execute(HttpRequest* request, HttpResponse* response, propMap& props) {
 #ifdef HAVE_CURLLIB
 	curl_slist* headerList = NULL;
+	std::string _bd;
 
+	curl_easy_setopt(_h, CURLOPT_CUSTOMREQUEST, request->getMethod());
 	std::string url = baseUrl + request->url;
 	curl_easy_setopt(_h, CURLOPT_URL, url.c_str());
-
+	if(request->getContent()!="") {
+		//curl_easy_setopt(_h, CURLOPT_POSTFIELDSIZE_LARGE, request->getContent().length());
+		//curl_easy_setopt(_h, CURLOPT_POSTFIELDS, (char *)request->getContent().c_str());
+		curl_easy_setopt(_h, CURLOPT_POST, 1L);
+		curl_easy_setopt(_h, CURLOPT_READFUNCTION, readContent);
+		curl_easy_setopt(_h, CURLOPT_READDATA, request);
+	}
 	curl_easy_setopt(_h, CURLOPT_WRITEFUNCTION, onContent);
 	curl_easy_setopt(_h, CURLOPT_WRITEDATA, &_bd);
 
 	curl_easy_setopt(_h, CURLOPT_HEADERFUNCTION, onHeaders);
-	curl_easy_setopt(_h, CURLOPT_HEADERDATA, &_hd);
+	curl_easy_setopt(_h, CURLOPT_HEADERDATA, response);
 
 	std::string _t;
 	for (RMap::const_iterator it = request->headers.begin(); it != request->headers.end(); ++it) {
@@ -98,6 +118,14 @@ void HttpClient::execute(HttpRequest* request, HttpResponse* response, propMap& 
 		curl_easy_setopt(_h, CURLOPT_USERAGENT, request->headers[HttpRequest::UserAgent].c_str());
 	} else {
 		curl_easy_setopt(_h, CURLOPT_USERAGENT, "ffead-cpp client v2.0");
+	}
+
+	if (props["VERBOSE"].length()>0) {
+		curl_easy_setopt(_h, CURLOPT_VERBOSE, 1);
+	}
+
+	if (props["NO_TRANSFER_ENCODING"].length()>0) {
+		curl_easy_setopt(_h, CURLOPT_TRANSFER_ENCODING, 0);
 	}
 
 	if (props["TIMEOUT"].length()>0) {
@@ -159,42 +187,44 @@ void HttpClient::execute(HttpRequest* request, HttpResponse* response, propMap& 
 	} else {
 		int64_t http_code = 0;
 		curl_easy_getinfo(_h, CURLINFO_RESPONSE_CODE, &http_code);
-		response->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(CastUtil::fromNumber(static_cast<int>(http_code))));
+		response->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(std::to_string(static_cast<int>(http_code))));
 		response->content = _bd;
-		if(_hd.size()!=0)
-		{
-			for(unsigned int i=0;i<_hd.size();i++)
-			{
-				if(_hd.at(i).find_first_of(":")!=std::string::npos)
-				{
-					response->addHeaderValue(_hd.at(i).substr(0, _hd.at(i).find_first_of(":")), _hd.at(i).substr(_hd.at(i).find_first_of(":")+1));
-				}
-			}
-		}
 	}
 
-	double val;
-	curl_easy_getinfo(_h, CURLINFO_TOTAL_TIME, &val);
-	props["TOTAL_TIME"] = CastUtil::fromDouble(val);
-	curl_easy_getinfo(_h, CURLINFO_NAMELOOKUP_TIME, &val);
-	props["NAMELOOKUP_TIME"] = CastUtil::fromDouble(val);
-	curl_easy_getinfo(_h, CURLINFO_CONNECT_TIME, &val);
-	props["CONNECT_TIME"] = CastUtil::fromDouble(val);
-	curl_easy_getinfo(_h, CURLINFO_APPCONNECT_TIME, &val);
-	props["APPCONNECT_TIME"] = CastUtil::fromDouble(val);
-	curl_easy_getinfo(_h, CURLINFO_PRETRANSFER_TIME, &val);
-	props["PRETRANSFER_TIME"] = CastUtil::fromDouble(val);
-	curl_easy_getinfo(_h, CURLINFO_STARTTRANSFER_TIME, &val);
-	props["STARTTRANSFER_TIME"] = CastUtil::fromDouble(val);
-	curl_easy_getinfo(_h, CURLINFO_REDIRECT_TIME, &val);
-	props["REDIRECT_TIME"] = CastUtil::fromDouble(val);
-	curl_easy_getinfo(_h, CURLINFO_REDIRECT_COUNT, &val);
-	props["REDIRECT_COUNT"] = CastUtil::fromDouble(val);
+	if (props["STATS"].length()>0) {
+		double val;
+		curl_easy_getinfo(_h, CURLINFO_TOTAL_TIME, &val);
+		props["TOTAL_TIME"] = std::to_string(val);
+		curl_easy_getinfo(_h, CURLINFO_NAMELOOKUP_TIME, &val);
+		props["NAMELOOKUP_TIME"] = std::to_string(val);
+		curl_easy_getinfo(_h, CURLINFO_CONNECT_TIME, &val);
+		props["CONNECT_TIME"] = std::to_string(val);
+		curl_easy_getinfo(_h, CURLINFO_APPCONNECT_TIME, &val);
+		props["APPCONNECT_TIME"] = std::to_string(val);
+		curl_easy_getinfo(_h, CURLINFO_PRETRANSFER_TIME, &val);
+		props["PRETRANSFER_TIME"] = std::to_string(val);
+		curl_easy_getinfo(_h, CURLINFO_STARTTRANSFER_TIME, &val);
+		props["STARTTRANSFER_TIME"] = std::to_string(val);
+		curl_easy_getinfo(_h, CURLINFO_REDIRECT_TIME, &val);
+		props["REDIRECT_TIME"] = std::to_string(val);
+		curl_easy_getinfo(_h, CURLINFO_REDIRECT_COUNT, &val);
+		props["REDIRECT_COUNT"] = std::to_string(val);
+	}
 	// free header list
 	curl_slist_free_all(headerList);
 	// reset curl handle
 	curl_easy_reset(_h);
 #endif
+}
+
+size_t HttpClient::readContent(char *ptr, size_t size, size_t nmemb, void *data) {
+	HttpRequest* request = (HttpRequest*)data;
+	size_t ret = request->getContent().length();
+	if(ret>0) {
+        memcpy(ptr, (char *)request->getContent().c_str(), request->getContent().length());
+		request->setContent("");
+	}
+	return ret;
 }
 
 size_t HttpClient::onContent(void *res, size_t len, size_t mb, void *data) {
@@ -204,8 +234,13 @@ size_t HttpClient::onContent(void *res, size_t len, size_t mb, void *data) {
 }
 
 size_t HttpClient::onHeaders(void *res, size_t len, size_t mb, void *data) {
-	std::string* _hd = (std::string*) data;
-	_hd->append(reinterpret_cast<char*>(res), len * mb);
+	HttpResponse* response = (HttpResponse*)data;
+	std::string hdr(reinterpret_cast<char*>(res), len * mb);
+	if(hdr.find_first_of(":")!=std::string::npos)
+	{
+		std::string v = hdr.substr(hdr.find_first_of(":")+1);
+		response->addHeaderValue(hdr.substr(0, hdr.find_first_of(":")), v.substr(0, v.length()-2));
+	}
 	return len * mb;
 }
 

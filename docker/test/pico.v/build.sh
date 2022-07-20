@@ -1,0 +1,1 @@
+v -prod -cflags '-std=gnu11 -Wall -O3 -march=native -mtune=native -no-pie -flto' main.v

@@ -1,1 +1,1 @@
-docker run --rm -it --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -p 9781:9781 -p 9782:9782 -p 9783:9783 -p 9784:9784 -p 9785:9785 ffeadcpptest:1.0
+docker run --rm -it --ulimit memlock=102400000:102400000 --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -p 9784:9784 -p 9785:9785 -p 9786:9786 -p 9787:9787 ffeadcpptest:1.0

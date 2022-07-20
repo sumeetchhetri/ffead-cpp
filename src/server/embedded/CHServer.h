@@ -180,8 +180,8 @@ class CHServer {
 	static void* gracefullShutdown_monitor(void* args);
 public:
 	static bool doRegisterListenerFunc();
-	static SocketInterface* createSocketInterface(SOCKET);
-	static Http11Socket* createSocketInterface2(SOCKET);
+	static BaseSocket* createSocketInterface(SOCKET);
+	static void clearSocketInterface(BaseSocket*);
 	static void* dynamic_page_monitor(void* arg);
 	static void serve(std::string port, std::string ipaddr, int thrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber);
 	static int entryPoint(int vhostNum, bool isMain, std::string serverRootDirectory, std::string port, std::string ipaddr, std::vector<std::string> servedAppNames);

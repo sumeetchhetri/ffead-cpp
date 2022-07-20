@@ -1038,6 +1038,9 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 	{
 		int opcounter = 1, methcounter = 1, fldcounter = 1;
 		ClassStructure classStructure = it->second;
+		if(classStructure.markers.find("@IgnoreRef")!=classStructure.markers.end()) {
+			continue;
+		}
 		bool ispurecs = false;
 		if(methallpvstats.find(classStructure.getTreatedClassName(true))!=methallpvstats.end()) {
 			if(methallpvstats.find(classStructure.getTreatedClassName(true))->second) {
@@ -1750,6 +1753,15 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						}
 						else
 						{
+							bool skip = false;
+							for(std::map<int, std::string >::iterator it=ms.argstypes.begin();it!=ms.argstypes.end();++it) {
+								if(it->second.find(classStructure.getTreatedClassName(true)+"&")==0) {
+									refDef += ("argu.clear();\n");
+									skip = true;
+									break;
+								}
+							}
+							if(skip) continue;
 							std::string mmn = app+ "_" + classStructure.getTreatedClassName(true) + "_m" +
 									CastUtil::fromNumber(methcounter++);
 							typedefs += (") ("+typdefName+");\n");
@@ -2427,6 +2439,9 @@ std::string Reflection::generateSerDefinitions(std::map<std::string, ClassStruct
 	std::map<std::string, ClassStructure, std::less<> >::iterator it;
 	for (it=allclsmap.begin();it!=allclsmap.end();++it)
 	{
+		if(it->second.markers.find("@IgnoreSer")!=it->second.markers.end()) {
+			continue;
+		}
 		std::vector<std::string> pinfo;
 		bool isOpForSet = false;
 		std::vector<std::string> minfo = getAfcObjectData(it->second,false,pinfo,isOpForSet);
@@ -2461,6 +2476,9 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 	for (it=allclsmap.begin();it!=allclsmap.end();++it)
 	{
 		ClassStructure classStructure = it->second;
+		if(classStructure.markers.find("@IgnoreSer")!=classStructure.markers.end()) {
+			continue;
+		}
 		if(methallpvstats.find(classStructure.getTreatedClassName(true))!=methallpvstats.end()) {
 			if(methallpvstats.find(classStructure.getTreatedClassName(true))->second) {
 				continue;

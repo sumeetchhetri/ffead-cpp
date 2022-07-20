@@ -218,7 +218,7 @@ enum SERVER_BACKEND {
 	CINATRA, LITHIUM, DROGON, //All C++ http server engines [4, 5, 6]
 	C_LIBREACTOR, C_H2O, //All C http server engines [7, 8]
 	V_WEB, V_PICO, //All V http server engines [9, 10]
-	RUST_ACTIX, RUST_HYPER, RUST_ROCKET, RUST_THRUSTER, //All Rust http server engines [11, 12, 13, 14]
+	RUST_ACTIX, RUST_HYPER, RUST_FAF, RUST_THRUSTER, //All Rust http server engines [11, 12, 13, 14]
 	GO_FASTHTTP, GO_ATRUEGO, GO_GNET, //All Go http server engines [15, 16, 17]
 	CRYSTAL_HTTP, CRYSTAL_H2O, //All Crystal http server engines [18, 19]
 	JAVA_FIRENIO, JAVA_RAPIDOID, JAVA_WIZZARDO_HTTP, //All Java http server engines [20, 21, 22]

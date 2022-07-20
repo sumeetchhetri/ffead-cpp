@@ -34,7 +34,8 @@
 
 typedef std::basic_ostringstream<char> fcpstream;
 typedef std::map<std::string, void*> Context;
-typedef void (*TemplatePtr) (Context*, fcpstream&);
+typedef void (*TemplatePtr) (Context*, std::string&);
+typedef void (*TemplatePtrStream) (Context*, fcpstream&);
 
 class CastUtil {
 	static ThreadLocal _mcMap;

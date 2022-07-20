@@ -50,6 +50,7 @@ class TeBkUmLpqAsyncWorld;
 class TeBkUmLpqAsyncWorld {
 	int id;
 	int randomNumber;
+	static TemplateJson tJ;
 public:
 	TeBkUmLpqAsyncWorld();
 	TeBkUmLpqAsyncWorld(int id);
@@ -59,6 +60,31 @@ public:
 	void setId(int id);
 	int getRandomNumber() const;
 	void setRandomNumber(int randomNumber);
+	static void tmplJson(int id, int randomNumber, std::string* ou) {
+		size_t il = ou->length();
+		ou->append(tJ.t);
+		std::string ids = std::to_string(id);
+		ou->insert(il+tJ.tpos.at(0), ids);
+		ou->insert(il+tJ.tpos.at(1)+ids.length(), std::to_string(randomNumber));
+	}
+	void tmplJson(std::string* ou) {
+		size_t il = ou->length();
+		ou->append(tJ.t);
+		std::string ids = std::to_string(id);
+		ou->insert(il+tJ.tpos.at(0), ids);
+		ou->insert(il+tJ.tpos.at(1)+ids.length(), std::to_string(randomNumber));
+	}
+	static void tmplJson(std::vector<TeBkUmLpqAsyncWorld>& vec, std::string* ou) {
+		ou->append("[");
+		for(auto el: vec) {
+			size_t il = ou->length();
+			ou->append(tJ.t);
+			std::string ids = std::to_string(el.id);
+			ou->insert(il+tJ.tpos.at(0), ids);
+			ou->insert(il+tJ.tpos.at(1)+ids.length(), std::to_string(el.randomNumber));
+		}
+		ou->append("]");
+	}
 #ifdef HAVE_RAPID_JSON
 	void toJson(rapidjson::Writer<rapidjson::StringBuffer>& w) {
 		w.StartObject();
@@ -88,21 +114,31 @@ public:
 	bool allocd;
 	TeBkUmLpqAsyncFortune(int id);
 	TeBkUmLpqAsyncFortune(int id, std::string message);
-	TeBkUmLpqAsyncFortune();
+	TeBkUmLpqAsyncFortune(int id, const uint8_t * buf, size_t len);
 	virtual ~TeBkUmLpqAsyncFortune();
 	int getId() const;
 	void setId(int id);
 	bool operator < (const TeBkUmLpqAsyncFortune& other) const;
+	TeBkUmLpqAsyncFortune() {
+    	allocd = false;
+    	id = 0;
+    }
 };
 
 class TeBkUmLpqAsyncMessage {
 	std::string message;
+	static TemplateJson tJ;
 public:
 	TeBkUmLpqAsyncMessage();
 	TeBkUmLpqAsyncMessage(std::string message);
 	virtual ~TeBkUmLpqAsyncMessage();
 	const std::string& getMessage() const;
 	void setMessage(const std::string& message);
+	void tmplJson(std::string* ou) {
+		size_t il = ou->length();
+		ou->append(tJ.t);
+		ou->insert(il+tJ.tpos.at(0), message);
+	}
 #ifdef HAVE_RAPID_JSON
 	void toJson(rapidjson::Writer<rapidjson::StringBuffer>& w) {
 		w.StartObject();
@@ -113,33 +149,29 @@ public:
 #endif
 };
 
-struct AsyncDbReq {
-	float httpVers;
-	bool conn_clos;
-	BaseSocket* sif;
-	TeBkUmLpqAsyncWorld w;
-};
-
-struct AsyncQueriesReq {
-	float httpVers;
-	bool conn_clos;
-	BaseSocket* sif;
-	std::vector<TeBkUmLpqAsyncWorld> vec;
+#pragma @IgnoreSer
+#pragma @IgnoreRef
+class AsyncReqData {
+public:
+	std::string h;
+	HttpResponse r;
+#ifdef HAVE_RAPID_JSON
+	rapidjson::StringBuffer sb;
+	rapidjson::Writer<rapidjson::StringBuffer> wr;
+#endif
+	void reset() {
+		h.clear();
+#ifdef HAVE_RAPID_JSON
+		sb.Clear();
+		wr.Reset(sb);
+#endif
+	}
 };
 
 struct AsyncUpdatesReq {
-	float httpVers;
-	bool conn_clos;
 	BaseSocket* sif;
 	LibpqDataSourceImpl* sqli;
 	std::vector<TeBkUmLpqAsyncWorld> vec;
-};
-
-struct AsyncFortuneReq {
-	float httpVers;
-	bool conn_clos;
-	BaseSocket* sif;
-	std::list<TeBkUmLpqAsyncFortune> flst;
 };
 
 struct AsyncCacheReq {
@@ -161,7 +193,6 @@ class TeBkUmLpqAsyncRouter : public Router {
 	static Ser w_ser;
 	static SerCont wcont_ser;
 
-	static std::string& getUpdQuery(int count);
 	void dbAsync(BaseSocket* sif);
 	void queriesAsync(const char* q, int ql, BaseSocket* sif);
 	void updatesAsync(const char* q, int ql, AsyncUpdatesReq* req);
@@ -172,7 +203,11 @@ class TeBkUmLpqAsyncRouter : public Router {
 	void queriesMultiAsync(const char*, int, BaseSocket* sif);
 	void updatesMulti(const char*, int, AsyncUpdatesReq*);
 
+	static std::string& getUpdQuery(int count);
+	static std::string& getMultiQuery(int count);
+
 	static std::unordered_map<int, std::string> _qC;
+	static std::unordered_map<int, std::string> _mqC;
 	LibpqDataSourceImpl* sqli;
 protected:
 	virtual LibpqDataSourceImpl* getDb(int max = 0);

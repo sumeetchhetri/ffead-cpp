@@ -39,11 +39,10 @@ class Http11Socket: public BaseSecureSocket {
 public:
 	Http11Socket(const SOCKET& fd, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize);
 	virtual ~Http11Socket();
-	void handle();
+	bool handle();
 	int getTimeout();
+	bool hasPendingRead();
 };
-
-typedef Http11Socket* (*SocketInterfaceFactory2) (SOCKET);
 
 class RequestHandler2 {
 	SelEpolKqEvPrt selector;
@@ -54,7 +53,7 @@ class RequestHandler2 {
 	bool isNotRegisteredListener;
 	SOCKET listenerSock;
 	ServiceHandler* shi;
-	SocketInterfaceFactory2 sf;
+	SocketInterfaceFactory sf;
 	std::vector<Http11Socket*> clsdConns;
 	bool isActive();
 	static void* handle(void* inp);
@@ -64,7 +63,7 @@ class RequestHandler2 {
 	friend class LibpqDataSourceImpl;
 	friend class Http11Socket;
 public:
-	void registerSocketInterfaceFactory(const SocketInterfaceFactory2& f);
+	void registerSocketInterfaceFactory(const SocketInterfaceFactory& f);
 	static bool loopContinue(SelEpolKqEvPrt* ths);
 	static BaseSocket* loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* sfd, int type, int fd, char* buf, size_t len, bool isClosed);
 	static void setInstance(RequestHandler2*);

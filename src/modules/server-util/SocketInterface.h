@@ -59,8 +59,10 @@ class SockWriteRequest {
 	SockWriteRequestF f;
 	BaseSocket* bs;
 	void* arg;
-	SockWriteRequest():f(NULL), bs(NULL), arg(NULL) {}
-	SockWriteRequest(SockWriteRequestF f, BaseSocket* bs, void* arg): f(f), bs(bs), arg(arg) {}
+	void* arg1;
+	SockWriteRequest():f(NULL), bs(NULL), arg(NULL), arg1(NULL) {}
+	SockWriteRequest(SockWriteRequestF f, BaseSocket* bs, void* arg): f(f), bs(bs), arg(arg), arg1(NULL) {}
+	SockWriteRequest(SockWriteRequestF f, BaseSocket* bs, void* arg, void* arg1): f(f), bs(bs), arg(arg), arg1(arg1) {}
 	friend class RequestHandler2;
 	friend class EventHandler;
 };
@@ -87,7 +89,10 @@ public:
 	virtual bool registerWrite(BaseSocket* obj)=0;
 	virtual bool registerRead(BaseSocket* obj, const bool& isListeningSock = false, bool epoll_et = true, bool isNonBlocking = false)=0;
 #if defined(USE_IO_URING)
-	virtual void post_write(BaseSocket* sfd, const std::string& data)=0;
+	virtual void interrupt_wait()=0;
+	virtual void post_write(BaseSocket* sfd, const std::string& data, int off = 0)=0;
+	virtual void post_write_2(BaseSocket* sfd, const std::string& data, const std::string& data1)=0;
+	virtual void post_write(BaseSocket* sfd, const char* data, int len)=0;
 	virtual void post_read(BaseSocket* sfd)=0;
 #endif
 	EventHandler(): wQ(NULL) {}
@@ -98,6 +103,7 @@ public:
 		}
 	}
 };
+typedef void (*CleanerFunc) (void* data);
 
 class BaseSocket {
 protected:
@@ -114,6 +120,8 @@ protected:
 	std::string address;
 	int io_uring_type;
 	EventHandler* eh;
+	void* data;
+	CleanerFunc cf;
 	bool isBlocking();
 	void init(const SOCKET& fd);
 	friend class RequestReaderHandler;
@@ -133,14 +141,22 @@ protected:
 	friend class RequestHandler2;
 	friend class Http11Socket;
 public:
+	void* getData();
+	template<typename CleanerF>
+	void setData(void* data, CleanerF f) {
+		if(data!=NULL && f!=NULL) {
+			this->data = data;
+			this->cf = f;
+		}
+	}
 	BaseSocket();
 	BaseSocket(const SOCKET& fd);
 	virtual ~BaseSocket();
 
 	int readFrom();
-	int writeDirect(const std::string& d, int off = 0);
+	int writeDirect(const std::string& d, int off = 0, bool cont = false);
 	int writeDirect(const std::string& h, const std::string& d);
-	int writeDirect(const std::string& h, const char* d, size_t len);
+	int writeDirect(const std::string& h, const char* d, size_t len, bool cont = false);
 	int writeTo(ResponseData* d);
 	template<typename Func1>
 	void queueWrite(Func1 f, void* arg) {
@@ -154,6 +170,9 @@ public:
 	void use();
 	void unUse();
 	void doneRead();
+	virtual bool hasPendingRead() {
+		return false;
+	}
 	bool checkSocketWaitForTimeout(const int& writing, const int& seconds, const int& micros= 0);
 	virtual bool flush();
 	virtual void closeSocket();
@@ -171,7 +190,8 @@ public:
 	virtual int secureWriteTo(ResponseData* d){return -1;};
 	virtual int secureReadFrom(){return -1;};
 
-	virtual void handle() {
+	virtual bool handle() {
+		return false;
 	}
 };
 
@@ -261,7 +281,9 @@ public:
 	virtual bool readRequest(void* request, void*& context, int& pending, int& reqPos)=0;
 	virtual bool writeResponse(void* req, void* res, void* context, std::string& data, int reqPos)=0;
 	virtual void addHandler(SocketInterface* handler)=0;
-	virtual bool hasPendingRead();
 };
+
+typedef BaseSocket* (*SocketInterfaceFactory) (SOCKET);
+typedef void (*CleanSocket) (BaseSocket*);
 
 #endif /* SOCKETINTERFACE_H_ */

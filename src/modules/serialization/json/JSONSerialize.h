@@ -42,6 +42,15 @@ public:
 
 class JSONSerialize;
 
+class TemplateJson {
+public:
+    std::string const t;
+    std::vector<int> const tpos;
+public:
+    TemplateJson(std::string t, std::initializer_list<int> pos): t(t), tpos(pos) {
+    }
+};
+
 #ifdef HAVE_RAPID_JSON
 class RapiJsonState {
 	std::string* str;
@@ -98,7 +107,7 @@ public:
 	}
 	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, void* serobject, const std::string& appName = "");
 	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, Ser f1, SerCont f2, SerCont f3, void* serobject, const std::string& appName);
-	static std::string serializeObject(void* t, Ser f1, void* serobject);
+	static std::string serializeObject(void* t, Ser f1, void* serobject, bool withTmpl = false);
 	static std::string serializeObjectCont(void* t, SerCont f, const std::string &container, void* serobject);
 
 	/*template <class K,class V> static std::string serialize(const std::map<K,V>& mp, const std::string& appName = "")

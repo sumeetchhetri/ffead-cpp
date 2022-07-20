@@ -36,13 +36,14 @@ export LD_LIBRARY_PATH=${IROOT}/:${IROOT}/lib:${FFEAD_CPP_PATH}/lib:/usr/local/l
 export ODBCINI=${IROOT}/odbc.ini
 export ODBCSYSINI=${IROOT}
 export LD_PRELOAD=/usr/local/lib/libmimalloc.so
-#export LD_PRELOAD=$IROOT/snmalloc-0.5.3/build/libsnmallocshim.so
+#export LD_PRELOAD=$IROOT/snmalloc-0.6.0/build/libsnmallocshim.so
 
 cd $FFEAD_CPP_PATH
 
 #use below settings only for debugging
 #echo '/tmp/core.%h.%e.%t' > /proc/sys/kernel/core_pattern
 #ulimit -c unlimited
+ulimit -l unlimited
 
 service redis-server stop
 service apache2 stop
@@ -107,6 +108,16 @@ then
 		cp -f ${WEB_DIR}/config/cachememcached.xml ${WEB_DIR}/config/cache.xml
 	fi
 fi
+if [ "$6" = "pool" ]
+	if [[ $string == *"-async"* ]]; then
+		sed -i 's|"TeBkUmLpqAsyncRouter"|"TeBkUmLpqAsyncRouterPooled"|g' ${WEB_DIR}/config/application.xml
+		sed -i 's|TeBkUmLpqAsyncRouter|TeBkUmLpqAsyncRouterPooled|g' ${WEB_DIR}/config/cachememory.xml
+		if [ "$3" = "postgresql-raw-async-qw" ]
+		then
+			sed -i 's|"TeBkUmLpqQwAsyncRouter"|"TeBkUmLpqQwAsyncRouterPooled"|g' ${WEB_DIR}/config/application.xml
+		fi
+	fi
+fi
 
 rm -f rtdcf/*.d rtdcf/*.o 
 rm -f *.cntrl
@@ -133,6 +144,7 @@ if [ "$2" = "emb" ]
 then
 	sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' resources/server.prop
 	sed -i 's|REQUEST_HANDLER=RequestReaderHandler|REQUEST_HANDLER=RequestHandler2|g' $FFEAD_CPP_PATH/resources/server.prop
+	sed -i 's|LAZY_HEADER_PARSE=false|LAZY_HEADER_PARSE=true|g' $FFEAD_CPP_PATH/resources/server.prop
 	if [ "$3" = "postgresql-raw-async-qw" ]
 	then
 		sed -i 's|QUEUED_WRITES=false|QUEUED_WRITES=true|g' $FFEAD_CPP_PATH/resources/server.prop

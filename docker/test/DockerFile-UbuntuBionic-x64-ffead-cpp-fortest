@@ -1,4 +1,4 @@
-FROM buildpack-deps:bionic
+FROM buildpack-deps:jammy
 
 COPY postgresql/* ./
 ADD mysql/* ./
@@ -13,15 +13,12 @@ RUN cp pgdg.list /etc/apt/sources.list.d/
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
 # prepare mysql APT repository
-RUN cp mysql.list /etc/apt/sources.list.d/
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8C718D3B5072E1F5
+#RUN cp mysql.list /etc/apt/sources.list.d/
+#RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 9578539176BAFBC6
 
-# prepare mongodb APT repository
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 4B7C549A058F8B6B
-RUN echo "deb https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org.list
 
 RUN apt-get -yqq update > /dev/null
-RUN apt-get -yqq install locales autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpcre3-dev zlib1g-dev \
+RUN apt-get -yqq install dirmngr gnupg apt-transport-https ca-certificates software-properties-common locales autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpcre3-dev zlib1g-dev \
 	libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat \
 	memcached redis-server gdb ninja-build telnet net-tools vim
 
@@ -65,48 +62,7 @@ RUN service postgresql start && \
     service postgresql stop
 #POSTGRESQL
 
-#MYSQL
 USER root
-# https://bugs.mysql.com/bug.php?id=90695
-RUN ["/bin/bash", "-c", "debconf-set-selections <<< \"mysql-server mysql-server/lowercase-table-names select Enabled\""]
-RUN ["/bin/bash", "-c", "debconf-set-selections <<< \"mysql-community-server mysql-community-server/data-dir select 'Y'\""]
-RUN ["/bin/bash", "-c", "debconf-set-selections <<< \"mysql-community-server mysql-community-server/root-pass password secret\""]
-RUN ["/bin/bash", "-c", "debconf-set-selections <<< \"mysql-community-server mysql-community-server/re-root-pass password secret\""]
-RUN echo "Installing mysql-server version: $(apt-cache policy mysql-server | grep -oP "(?<=Candidate: )(.*)$")"
-RUN DEBIAN_FRONTEND=noninteractive apt-get -yqq update && apt-get -y install mysql-server > /dev/null
-
-RUN mv /etc/mysql/my.cnf /etc/mysql/my.cnf.orig
-RUN cp my.cnf /etc/mysql/my.cnf
-
-RUN rm -rf /ssd/mysql
-RUN rm -rf /ssd/log/mysql
-RUN cp -R -p /var/lib/mysql /ssd/
-RUN cp -R -p /var/log/mysql /ssd/log
-RUN mkdir -p /var/run/mysqld
-
-# It may seem weird that we call `service mysql start` several times, but the RUN
-# directive is a 1-time operation for building this image. Subsequent RUN calls
-# do not see running processes from prior RUN calls; therefor, each command here
-# that relies on the mysql server running will explicitly start the server and
-# perform the work required.
-RUN chown -R mysql:mysql /var/lib/mysql /var/log/mysql /var/run/mysqld /ssd && \
-    mysqld & \
-    until mysql -uroot -psecret -e "exit"; do sleep 1; done && \
-    mysqladmin -uroot -psecret flush-hosts && \
-    mysql -uroot -psecret < create.sql
-
-RUN chown -R mysql:mysql /var/lib/mysql /var/log/mysql /var/run/mysqld /ssd
-#MYSQL
-
-
-#MONGODB
-RUN DEBIAN_FRONTEND=noninteractive apt-get -yqq update && apt-get -yqq install apt-transport-https mongodb-org=4.2.10  mongodb-org-mongos=4.2.10 mongodb-org-server=4.2.10 mongodb-org-shell=4.2.10 mongodb-org-tools=4.2.10 > /dev/null
-
-RUN mkdir -p /data/db
-RUN chmod 777 /data/db
-
-RUN mongod --fork --logpath /var/log/mongodb.log --bind_ip_all && sleep 10 && mongo < create.js && sleep 10
-#MONGODB
 
 #Install libcuckoo headers
 WORKDIR /tmp
@@ -136,14 +92,6 @@ RUN cmake -DREDIS_PLUS_PLUS_CXX_STANDARD=17 .. && make && make install
 WORKDIR /tmp
 RUN rm -rf redis-plus-plus-1.3.3
 
-#Install mongodb c driver
-RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
-RUN tar xf mongo-c-driver-1.4.2.tar.gz
-RUN rm -f mongo-c-driver-1.4.2.tar.gz
-RUN cd mongo-c-driver-1.4.2/ && ./configure --disable-automatic-init-and-cleanup --disable-tests --disable-ssl --disable-sasl && make && make install
-WORKDIR /tmp
-RUN rm -rf mongo-c-driver-1.4.2
-
 #WRK
 WORKDIR /tmp/wrk
 RUN apt-get -yqq update && apt-get -yqq install libluajit-5.1-dev libssl-dev luajit && rm -rf /var/lib/apt/lists/* && \
@@ -164,11 +112,11 @@ ENV accept accept
 #WRK
 
 WORKDIR /tmp
-RUN wget -q https://github.com/axboe/liburing/archive/liburing-0.7.tar.gz
-RUN tar xf liburing-0.7.tar.gz
-RUN rm -f liburing-0.7.tar.gz
-RUN cd liburing-liburing-0.7 && ./configure --prefix=/usr/local && make install
-RUN cd /tmp && rm -rf liburing-liburing-0.7
+RUN wget -q https://github.com/axboe/liburing/archive/liburing-2.2.tar.gz
+RUN tar xf liburing-2.2.tar.gz
+RUN rm -f liburing-2.2.tar.gz
+RUN cd liburing-liburing-2.2 && ./configure --prefix=/usr/local && make install
+RUN cd /tmp && rm -rf liburing-liburing-2.2
 
 #Install ffead-cpp
 WORKDIR /tmp
@@ -177,28 +125,16 @@ RUN unzip -qq master.zip
 RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 
-RUN apt remove -yqq libpq-dev
-RUN apt autoremove -yqq
-RUN rm -f /usr/local/lib/libpq.* /usr/lib/x86_64-linux-gnu/libpq.*
-RUN apt update && apt install -y bison flex libreadline-dev
-WORKDIR /tmp
-RUN wget -nv https://github.com/postgres/postgres/archive/514b4c11d24701d2cc90ad75ed787bf1380af673.zip
-RUN unzip -q 514b4c11d24701d2cc90ad75ed787bf1380af673.zip
-WORKDIR /tmp/postgres-514b4c11d24701d2cc90ad75ed787bf1380af673
-#RUN wget -nv https://www.postgresql.org/message-id/attachment/115223/v22-0001-libpq-batch.patch
-#RUN git apply ./v22-0001-libpq-batch.patch
-RUN ./configure --prefix=/usr CFLAGS='-O3 -march=native -flto'
-WORKDIR src/interfaces/libpq
-RUN make all install -j4
-RUN cp ../../../src/include/postgres_ext.h ../../../src/include/pg_config_ext.h libpq-fe.h /usr/include
-
 WORKDIR /tmp/ffead-cpp-src
 RUN rm -rf src web rtdcf script
 COPY src /tmp/ffead-cpp-src/src
 COPY web /tmp/ffead-cpp-src/web
 COPY rtdcf /tmp/ffead-cpp-src/rtdcf
 COPY script /tmp/ffead-cpp-src/script
+COPY resources /tmp/ffead-cpp-src/resources
 COPY CMakeLists.txt /tmp/ffead-cpp-src/
+COPY server.sh /server_orig.sh
+COPY *.sh pipeline.lua /
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/default)||g' CMakeLists.txt && \
 	sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/flexApp)||g' CMakeLists.txt && \
 	sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/oauthApp)||g' CMakeLists.txt && \
@@ -215,62 +151,38 @@ RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/default)||g' CMakeLists
 
 RUN mkdir build
 WORKDIR /tmp/ffead-cpp-src/build
-RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DDEBUG=on ..
+RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DDEBUG=on -DWITH_IOURING=on ..
 RUN ninja install && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2/config/cache.xml && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1 && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t4 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t5 && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-mongo-raw
-
-WORKDIR /tmp/ffead-cpp-src/build
-RUN ninja install && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1/config/sdormmongo.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1/config/sdorm.xml && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1/config/cache.xml && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t4 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t5 && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2 && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-mongo-orm
+	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw-async-iouring && cd .. && rm -rf build && mkdir build
 
 WORKDIR /tmp/ffead-cpp-src/build
+RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DDEBUG=on ..
+RUN ninja install && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2 && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw-async && cd .. && rm -rf build && mkdir build
+
+WORKDIR /tmp/ffead-cpp-src/build
+RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DDEBUG=on -DWITH_PICOEV=on ..
+RUN ninja install && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2 && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw-async-picoev && cd .. && rm -rf build && mkdir build
+
+WORKDIR /tmp/ffead-cpp-src/build
+RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DDEBUG=on ..
 RUN ninja install && \
 	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3/config/cache.xml && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1 && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2 && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t4 && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t5 && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw
-
-WORKDIR /tmp/ffead-cpp-src/build
-RUN cp -f /tmp/ffead-cpp-src/web/t1/sql-src/TeBkUmWorldsql.h /tmp/ffead-cpp-src/web/t1/include/TeBkUmWorld.h && \
-	cp -f /tmp/ffead-cpp-src/web/t1/sql-src/TeBkUmWorldsql.cpp /tmp/ffead-cpp-src/web/t1/src/TeBkUmWorld.cpp && \
-	ninja install && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1/config/sdormpostgresql.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1/config/sdorm.xml && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1/config/cache.xml && \
-	cp /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/resources/sample-odbcinst.ini /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/resources/odbcinst.ini && \
-	cp /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/resources/sample-odbc.ini /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/resources/odbc.ini && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t4 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t5 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2 && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-orm
-	
-WORKDIR /tmp/ffead-cpp-src/build
-RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DDEBUG=on -DWITH_PICOEV=on -DWITH_RAPIDJSON=on -DWITH_PUGIXML=on ..
-RUN ninja install && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2 && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw-async-picoev
-
-WORKDIR /tmp/ffead-cpp-src/build
-RUN ninja install && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2 && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw-async
+	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw && cd .. && rm -rf build
 
 RUN wget -q https://github.com/vlang/v/releases/download/0.1.29/v_linux.zip && unzip -q v_linux.zip && cd v && chmod +x v && ./v symlink && cd .. && rm -f v_linux.zip
 COPY pico.v /tmp/pico.v
@@ -281,21 +193,17 @@ RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* && \
 	ln -s /tmp/ffead-cpp-sql-raw/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
 	ldconfig && chmod +x *.sh && ./build-debug.sh && cp main /tmp/ && rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc*
 
-COPY *.sh pipeline.lua /
-
 WORKDIR /
 
-RUN chown -Rf root:root /ssd && chown -Rf postgres:postgres /ssd/postgresql && chown -Rf mysql:mysql /ssd/mysql && chmod 777 pipeline.lua concurrency.sh pipeline.sh query.sh
+RUN chown -Rf root:root /ssd && chown -Rf postgres:postgres /ssd/postgresql && chmod 777 pipeline.lua concurrency.sh pipeline.sh query.sh
 
-EXPOSE 9781 9782 9783 9784 9785 9786
+EXPOSE 9784 9785 9786 9787
 
 RUN rm -rf /tmp/ffead-cpp-src && chmod +x *.sh && ./install_ffead-cpp.sh
 
-RUN sed -i 's|PORT_NO=8080|PORT_NO=9781|g' /tmp/ffead-cpp-mongo-raw/resources/server.prop && \
-	sed -i 's|PORT_NO=8080|PORT_NO=9782|g' /tmp/ffead-cpp-mongo-orm/resources/server.prop && \
-	sed -i 's|PORT_NO=8080|PORT_NO=9783|g' /tmp/ffead-cpp-sql-raw/resources/server.prop && \
-	sed -i 's|PORT_NO=8080|PORT_NO=9784|g' /tmp/ffead-cpp-sql-orm/resources/server.prop && \
+RUN sed -i 's|PORT_NO=8080|PORT_NO=9784|g' /tmp/ffead-cpp-sql-raw/resources/server.prop && \
 	sed -i 's|PORT_NO=8080|PORT_NO=9785|g' /tmp/ffead-cpp-sql-raw-async/resources/server.prop && \
-	sed -i 's|PORT_NO=8080|PORT_NO=9786|g' /tmp/ffead-cpp-sql-raw-async-picoev/resources/server.prop
+	sed -i 's|PORT_NO=8080|PORT_NO=9786|g' /tmp/ffead-cpp-sql-raw-async-picoev/resources/server.prop && \
+	sed -i 's|PORT_NO=8080|PORT_NO=9787|g' /tmp/ffead-cpp-sql-raw-async-iouring/resources/server.prop
 
 CMD /bin/bash

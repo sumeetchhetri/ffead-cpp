@@ -22,8 +22,8 @@
 
 #include "DocumentQuery.h"
 
-DocumentQuery::DocumentQuery() {
-
+DocumentQuery::DocumentQuery(bool commit) {
+	this->commit = commit;
 }
 
 DocumentQuery::~DocumentQuery() {

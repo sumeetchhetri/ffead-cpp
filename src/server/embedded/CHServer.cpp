@@ -33,6 +33,7 @@ static bool isSSLEnabled = false, isThreadprq = false, processforcekilled = fals
 static int preForked = 5;
 static std::map<int,pid_t> pds;
 static Mutex m_mutex, p_mutex;
+static bool isrHandler1 = true;
 
 static Logger logger;
 
@@ -1230,7 +1231,9 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	} catch(const std::exception& e) {
 	}
 
-	bool isrHandler1 = rHandler=="RequestReaderHandler";
+	isrHandler1 = rHandler=="RequestReaderHandler";
+
+	bool isLazyHeaderParsing = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["LAZY_HEADER_PARSE"])=="true";
 
 	std::string qw = "false";
 	try {
@@ -1254,6 +1257,8 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		isSinglEVH = true;
 	}
 
+	CommonUtils::setDate();
+
 	unsigned int nthreads = hardware_concurrency();
 	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &ServiceTask::handleWebsockOpen, nthreads, isSinglEVH, &ServiceTask::handle);
 
@@ -1262,7 +1267,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	if(isrHandler1) {
 		RequestReaderHandler* reader = new RequestReaderHandler(handler, true, isSinglEVH);
 		RequestReaderHandler::setInstance(reader);
-		handler->start();
+		handler->start(&CHServer::clearSocketInterface);
 		reader->registerSocketInterfaceFactory(&CHServer::createSocketInterface);
 		reader->startNL(-1);
 		rHandleIns = reader;
@@ -1270,8 +1275,8 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	} else {
 		RequestHandler2* reader = new RequestHandler2(handler, true, isSSLEnabled, &ServiceTask::handle);
 		RequestHandler2::setInstance(reader);
-		handler->start();
-		reader->registerSocketInterfaceFactory(&CHServer::createSocketInterface2);
+		handler->start(&CHServer::clearSocketInterface);
+		reader->registerSocketInterfaceFactory(&CHServer::createSocketInterface);
 		reader->startNL(-1, isQueuedWrites);
 		rHandleIns = reader;
 		logger << ("Initializing RequestHandler2....") << std::endl;
@@ -1342,18 +1347,22 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	HTTPResponseStatus::init();
 
-	HttpRequest::init();
+	HttpRequest::init(isLazyHeaderParsing);
 
 	HttpResponse::init();
 
 	MultipartContent::init();
 
-	//int counter = 0;
+	int counter = 0;
 	struct stat buffer;
 	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 	{
 		CommonUtils::setDate();
 		Thread::sSleep(1);
+		if(counter++>=5) {
+			handler->closeConnectionsInternal();
+			counter = 0;
+		}
 		//CommonUtils::printStats();
 	}
 
@@ -1443,7 +1452,10 @@ int CHServer::techunkSiz = 0;
 int CHServer::connKeepAlive = 10;
 int CHServer::maxReqHdrCnt = 100, CHServer::maxEntitySize = 2147483647;
 
-SocketInterface* CHServer::createSocketInterface(SOCKET fd) {
+BaseSocket* CHServer::createSocketInterface(SOCKET fd) {
+	if(!isrHandler1) {
+		return new Http11Socket(fd, techunkSiz, connKeepAlive, maxReqHdrCnt, maxEntitySize);
+	}
 #ifdef HAVE_SSLINC
 	SSL* ssl = NULL;
 	BIO* io = NULL;
@@ -1457,8 +1469,17 @@ SocketInterface* CHServer::createSocketInterface(SOCKET fd) {
 #endif
 }
 
-Http11Socket* CHServer::createSocketInterface2(SOCKET fd) {
-	return new Http11Socket(fd, techunkSiz, connKeepAlive, maxReqHdrCnt, maxEntitySize);
+void CHServer::clearSocketInterface(BaseSocket* bs) {
+	if(!isrHandler1) {
+		delete (Http11Socket*)bs;
+	} else {
+		SocketInterface* si = (SocketInterface*)bs;
+		if(si->isHttp2()) {
+			delete (Http2Handler*)si;
+		} else {
+			delete (Http11Handler*)si;
+		}
+	}
 }
 
 bool CHServer::doRegisterListenerFunc() {

@@ -70,6 +70,7 @@ const std::string HttpResponse::CONN_CLOSE = "Connection: close\r\n";
 const std::string HttpResponse::CONN_KAL = "Connection: keep-alive\r\n";
 
 RiMap HttpResponse::HDRS_SW_CODES;
+std::map<std::string, std::tuple<std::string, int, int>> HttpResponse::HDR_DATA_BY_CNT;
 
 void HttpResponse::init() {
 	std::string t = VALID_RESPONSE_HEADERS.substr(1, VALID_RESPONSE_HEADERS.length()-1);
@@ -78,6 +79,82 @@ void HttpResponse::init() {
 	for(int i=0;i<(int)vt.size();i++) {
 		HDRS_SW_CODES[vt.at(i)] = i;
 	}
+
+	int dtpos = 0, cntlenpos = 0;
+	std::string resp;
+	HTTPResponseStatus::Ok.getResponseLine(1.1, resp);
+	resp.append(ContentType);
+	resp.append(HDR_SEP);
+	resp.append("application/json");
+	resp.append(HDR_END);
+	dtpos = resp.length();
+	resp.append(ContentLength);
+	resp.append(HDR_SEP);
+	cntlenpos = resp.length() + 52;
+	resp.append(HDR_FIN);
+	HDR_DATA_BY_CNT["application/json"] = std::make_tuple(resp, dtpos, cntlenpos);
+
+	resp = "";
+	HTTPResponseStatus::Ok.getResponseLine(1.1, resp);
+	resp.append(ContentType);
+	resp.append(HDR_SEP);
+	resp.append("text/plain");
+	resp.append(HDR_END);
+	dtpos = resp.length();
+	resp.append(ContentLength);
+	resp.append(HDR_SEP);
+	cntlenpos = resp.length() + 52;
+	resp.append(HDR_FIN);
+	HDR_DATA_BY_CNT["text/plain"] = std::make_tuple(resp, dtpos, cntlenpos);
+
+	resp = "";
+	HTTPResponseStatus::Ok.getResponseLine(1.1, resp);
+	resp.append(ContentType);
+	resp.append(HDR_SEP);
+	resp.append("text/html; charset=utf-8");
+	resp.append(HDR_END);
+	dtpos = resp.length();
+	resp.append(ContentLength);
+	resp.append(HDR_SEP);
+	cntlenpos = resp.length() + 52;
+	resp.append(HDR_FIN);
+	HDR_DATA_BY_CNT["text/html"] = std::make_tuple(resp, dtpos, cntlenpos);
+}
+
+HttpResponse& HttpResponse::jsonRef() {
+	size_t len = content.length();
+	std::tuple<std::string, int, int>& tup = HDR_DATA_BY_CNT["application/json"];
+	content.insert(0, std::get<0>(tup));
+	content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
+	content.insert(std::get<2>(tup), std::to_string(len));
+	return *this;
+}
+
+HttpResponse& HttpResponse::textRef() {
+	size_t len = content.length();
+	std::tuple<std::string, int, int>& tup = HDR_DATA_BY_CNT["text/plain"];
+	content.insert(0, std::get<0>(tup));
+	content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
+	content.insert(std::get<2>(tup), std::to_string(len));
+	return *this;
+}
+
+HttpResponse& HttpResponse::htmlRef() {
+	size_t len = content.length();
+	std::tuple<std::string, int, int>& tup = HDR_DATA_BY_CNT["text/html"];
+	content.insert(0, std::get<0>(tup));
+	content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
+	content.insert(std::get<2>(tup), std::to_string(len));
+	return *this;
+}
+
+HttpResponse& HttpResponse::errorRef(HTTPResponseStatus& status) {
+	content = "";
+	status.getResponseLine(1.1, content);
+	CommonUtils::getDateStr(content);
+	content.append(CONN_CLOSE);
+	content.append(HDR_FIN);
+	return *this;
 }
 
 void HttpResponse::reset() {
@@ -94,7 +171,7 @@ void HttpResponse::reset() {
 	teparts = 0;
 	techunkSiz = 0;
 	intCntLen = -1;
-	httpVers = 0;
+	httpVers = 1.1;
 	done = false;
 	status = &HTTPResponseStatus::NotFound;
 	httpVersion = "HTTP/1.1";
@@ -108,10 +185,15 @@ HttpResponse::HttpResponse() {
 	techunkSiz = 0;
 	hasContent = false;
 	intCntLen = -1;
-	httpVers = 0;
+	httpVers = 1.1;
 	done = false;
 	status = &HTTPResponseStatus::NotFound;
 	conn_clos = false;
+}
+
+
+HttpResponse::HttpResponse(HTTPResponseStatus& st): HttpResponse() {
+	status = &st;
 }
 
 HttpResponse::~HttpResponse() {
@@ -312,11 +394,33 @@ const std::string& HttpResponse::getHeadersStr(const std::string& server, bool s
 	return _headers_str;
 }
 
+HttpResponse& HttpResponse::generateHeadResponseMinimal(std::string& resp, std::string& contentType, int content_length, bool conn_clos)
+{
+	HTTPResponseStatus::Ok.getResponseLine(1.1, resp);
+	resp.append(ContentType);
+	resp.append(HDR_SEP);
+	resp.append(contentType);
+	resp.append(HDR_END);
+	if(conn_clos) {
+		resp.append(CONN_CLOSE);
+	} else {
+		resp.append(CONN_KAL);
+	}
+	CommonUtils::getDateStr(resp);
+	content_length = content_length==-1?(int)content.length():content_length;
+	if(content_length>0) {
+		resp.append(ContentLength);
+		resp.append(HDR_SEP);
+		resp.append(std::to_string(content_length));
+	}
+	resp.append(HDR_FIN);
+	return *this;
+}
+
 HttpResponse& HttpResponse::generateHeadResponse(std::string& resp, std::string& contentType, int content_length)
 {
 	bool isTE = isHeaderValue(TransferEncoding, "chunked");
 	status->getResponseLine(httpVers, resp);
-	//resp.append(HDR_SRV);
 	resp.append(ContentType);
 	resp.append(HDR_SEP);
 	resp.append(contentType);
@@ -659,7 +763,7 @@ const std::string& HttpResponse::getStatusMsg()
 	return status->getMsg();
 }
 
-const std::string& HttpResponse::getContent()
+std::string& HttpResponse::getContent()
 {
 	return content;
 }
@@ -673,12 +777,13 @@ std::string* HttpResponse::getContentP()
 	return &content_stream;
 }*/
 
-void HttpResponse::setContent(const std::string& content)
+HttpResponse& HttpResponse::setContent(const std::string& content)
 {
 	this->content = content;
 	if(content.length()>0) {
 		hasContent = true;
 	}
+	return *this;
 }
 
 void HttpResponse::setUrl(const std::string& url) {

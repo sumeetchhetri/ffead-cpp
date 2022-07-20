@@ -24,10 +24,20 @@
 #define ELASTICSEARCH_H_
 #include "SearchEngineInterface.h"
 #ifdef HAVE_ELASTIC
+#include <cpr/response.h>
 #include <elasticlient/client.h>
 
+class ElasticSearchConnectionPool: public ConnectionPooler {
+	void initEnv();
+	void* newConnection(const bool& isWrite, const ConnectionNode& node);
+	void closeConnection(void* conn);
+	void destroy();
+public:
+	ElasticSearchConnectionPool(const ConnectionProperties& props);
+	virtual ~ElasticSearchConnectionPool();
+};
+
 class ElasticSearch: public SearchEngineInterface {
-	static std::string COLL_URL;
 public:
 	ElasticSearch(ConnectionPooler* pool);
 	virtual ~ElasticSearch();

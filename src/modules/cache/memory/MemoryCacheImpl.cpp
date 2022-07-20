@@ -160,6 +160,15 @@ void MemoryCacheImpl::clean() {
 	}
 }
 
+void MemoryCacheImpl::cleanN() {
+	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
+	while((int)p->internalMapN.size()>p->size) {
+		auto last_it = p->lruln.end(); last_it --;
+		p->internalMapN.erase(last_it->first);
+		p->lruln.pop_back();
+	}
+}
+
 bool MemoryCacheImpl::setInternal(const std::string& key, const std::string& value, const int& expireSeconds, const int& setOrAddOrRep) {
 	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
 
@@ -204,7 +213,7 @@ bool MemoryCacheImpl::setInternalN(const unsigned long long& key, const std::str
 	{
 		p->lruln.push_front(make_pair(key, value));
 		p->internalMapN.insert(make_pair(key, p->lruln.begin()));
-		clean();
+		cleanN();
 		flag = true;
 	}
 

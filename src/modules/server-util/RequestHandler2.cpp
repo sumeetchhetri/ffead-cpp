@@ -43,7 +43,7 @@ void RequestHandler2::setInstance(RequestHandler2* ins) {
 	}
 }
 
-void RequestHandler2::registerSocketInterfaceFactory(const SocketInterfaceFactory2& f) {
+void RequestHandler2::registerSocketInterfaceFactory(const SocketInterfaceFactory& f) {
 	this->sf = f;
 }
 
@@ -75,14 +75,15 @@ void RequestHandler2::addListenerSocket(doRegisterListener drl, const SOCKET& li
 	}
 	if(drl!=NULL) {
 		int counter = 0;
+		Logger logger = LoggerFactory::getLogger("RequestHandler2");
 		while(!drl()) {
 			Thread::sSleep(1);
 			if(counter++==60) {
-				Logger logger = LoggerFactory::getLogger("RequestHandler2");
 				logger << "Cannot wait more than 60 seconds for cache/database to initialize, will forcefully start server now...." << std::endl;
 				break;
 			}
 		}
+		logger << "All initializations are now complete...." << std::endl;
 	}
 	selector.addListeningSocket(this->listenerSock);
 }
@@ -138,7 +139,7 @@ BaseSocket* RequestHandler2::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* bi, in
 	RequestHandler2* ins = static_cast<RequestHandler2*>(ths->getCtx());
 	switch(type) {
 		case ACCEPTED: {
-			Http11Socket* si = ins->sf(fd);
+			Http11Socket* si = (Http11Socket*)ins->sf(fd);
 			si->eh = &(ins->selector);
 			si->onOpen();
 			if(!ins->run) {
@@ -147,7 +148,8 @@ BaseSocket* RequestHandler2::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* bi, in
 			return si;
 		}
 		case READ_READY: {
-			bi->handle();
+			BaseSocket* si = (BaseSocket*)bi;
+			si->handle();
 			break;
 		}
 		case CLOSED: {
@@ -273,11 +275,15 @@ bool Http11Socket::read() {
 	return fl;
 }
 
-void Http11Socket::handle() {
+bool Http11Socket::hasPendingRead() {
+	return bytesToRead>(int)buffer.length();
+}
+
+bool Http11Socket::handle() {
 	if(readFrom()==0) {
 		onClose();
 		RequestHandler2::_i->shi->closeConnection(this);
-		return;
+		return true;
 	}
 
 	bool pd = false;
@@ -330,9 +336,10 @@ void Http11Socket::handle() {
 	}
 
 	if(isClosed()) {
-		onClose();
+		return true;
 		RequestHandler2::_i->shi->closeConnection(this);
 	} else {
 		doneRead();
 	}
+	return false;
 }

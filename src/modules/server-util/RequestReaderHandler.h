@@ -39,8 +39,6 @@
 #include "SSLHandler.h"
 #endif
 
-typedef SocketInterface* (*SocketInterfaceFactory) (SOCKET);
-
 class RequestReaderHandler;
 
 class RequestReaderHandler {

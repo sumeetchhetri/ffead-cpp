@@ -111,6 +111,7 @@ option("MOD_ELASTIC")
 			if not l then
 				raise('elasticlient library not found')
 			end
+			option:set("configvar", "HAVE_ELASTICLIB", 1)
 			option:add(l)
 			import("lib.detect.has_cxxincludes")
 			local ok = has_cxxincludes({"elasticlient/client.h"}, {target = target})
@@ -118,6 +119,18 @@ option("MOD_ELASTIC")
 				option:set("configvar", "HAVE_ELASTIC", 1)
 		    else
 		    	raise('elasticlient includes not found')
+			end
+			l = find_package("cpr")
+			if not l then
+				raise('cpr library not found')
+			end
+			option:set("configvar", "HAVE_CPRLIB", 1)
+			option:add(l)
+			local ok = has_cxxincludes({"cpr/response.h"}, {target = target})
+			if ok then
+				option:set("configvar", "HAVE_CPR", 1)
+		    else
+		    	raise('cpr includes not found')
 			end
 	    end
     end)
@@ -594,6 +607,7 @@ option("IOURING")
 			local ok = has_cincludes("liburing.h")
 			if ok then
 				option:set("configvar", "USE_IO_URING", 1)
+				option:set("configvar", "USE_PICOEV", 0)
 			else
 				option:enable(false)
 			end
@@ -744,11 +758,11 @@ end
 local bindir = "$(projectdir)/ffead-cpp-6.0-bin"
 
 function getOptions()
-	return {"CHECK_UUID", "LIBPQ", "CHECK_REGEX", "SSL", "ZLIB", "CURL", "GENERIC", "LIBCUCKOO", 
+	return {"CHECK_UUID", "LIBPQ", "CHECK_REGEX", "SSL", "ZLIB", "CURL", "GENERIC", "LIBCUCKOO", "WITH_PICOEV" 
 			 "SELECT", "POLL", "DEVPOLL", "IOURING", "EPOLL", "KQUEUE", "EVPORT", "ACCEPT4", "TCP_QUICKACK", 
 			 "TCP_DEFER_ACCEPT", "TCP_FASTOPEN", "MOD_MEMORY","MOD_MEMCACHED", "MOD_REDIS", "MOD_SDORM_SQL", 
 			 "MOD_SDORM_MONGO", "MOD_SDORM_SCYLLA", "MOD_SER_BIN", "MOD_JOBS", "SRV_EMB", "WITH_RAPIDJSON", 
-			 "WITH_PUGIXML", "WITH_PICOEV", "MOD_ELASTIC", "MOD_SOLR"}
+			 "WITH_PUGIXML", "MOD_ELASTIC", "MOD_SOLR"}
 end
 
 includes("src/modules")

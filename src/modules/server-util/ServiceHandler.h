@@ -72,8 +72,10 @@ public:
 };
 
 class ServiceHandler {
+	void closeConnectionsInternal();
 	static void* closeConnections(void *arg);
 	static void* timer(void *arg);
+	CleanSocket cls;
 	moodycamel::ConcurrentQueue<BaseSocket*> toBeClosedConns;
 	std::atomic<bool> run;
 	bool isThreadPerRequests;
@@ -91,6 +93,7 @@ class ServiceHandler {
 	friend class HttpReadTask;
 	friend class HttpServiceTask;
 	friend class RequestHandler2;
+	friend class CHServer;
 	virtual void sockInit(SocketInterface* si)=0;
 protected:
 	static std::string getDateStr();
@@ -103,7 +106,7 @@ public:
 	void closeConnection(BaseSocket* si);
 	void registerReadRequest(SocketInterface* si);
 	void registerWriteRequest(SocketInterface* sif);
-	void start();
+	void start(const CleanSocket& cls, bool withCCQ = false);
 	void stop();
 	ServiceHandler(const int& spoolSize, bool isSinglEVH);
 	virtual ~ServiceHandler();

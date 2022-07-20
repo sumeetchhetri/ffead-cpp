@@ -157,6 +157,7 @@
 	#define BACKLOG             512
 	#define MAX_MESSAGE_LEN     2048
 	#define BUFFERS_COUNT       MAX_CONNECTIONS
+#include <sys/eventfd.h>
 #include <sys/uio.h>
 #include <sys/poll.h>
 #include "liburing.h"
@@ -170,7 +171,9 @@ enum io_uring_events {
     ACCEPT,
     READ,
     WRITE,
-    PROV_BUF
+    PROV_BUF,
+	WRITE_CONT,
+	INTERRUPT
 };
 
 enum event_type {
@@ -179,7 +182,7 @@ enum event_type {
 	WRITE_READY,
 	CLOSED,
 	ON_DATA_READ,
-	ON_DATA_WRITE,
+	ON_DATA_WRITE
 };
 
 class SelEpolKqEvPrt;
@@ -230,10 +233,16 @@ class SelEpolKqEvPrt : public EventHandler {
 	    nfds_t nfds;
 	    struct pollfd polled_fds[MAXDESCRIPTORS];
 	#elif defined USE_IO_URING
+	    //Needs higher amount of max locked memory
+	    //set ulimit -l
+	    //in docker use something like , --ulimit memlock=102400000:102400000
 	    struct sockaddr_in client_addr;
 	    socklen_t client_len;
 	    struct io_uring_params params;
 	    struct io_uring ring;
+	    int efd;
+		BaseSocket* efdbs;
+		std::atomic<int> pending;
 	    //char** bufs;
 	    //int group_id;
 	#elif defined(USE_PICOEV)
@@ -244,7 +253,12 @@ public:
 	SelEpolKqEvPrt();
 	virtual ~SelEpolKqEvPrt();
 #if defined(USE_IO_URING) //Not thread safe
-	void post_write(BaseSocket* sfd, const std::string& data);
+	void interrupt_wait();
+	void register_interrupt();
+	void submit_to_ring();
+	void post_write(BaseSocket* sfd, const std::string& data, int off = 0);
+	void post_write_2(BaseSocket* sfd, const std::string& data, const std::string& data1);
+	void post_write(BaseSocket* sfd, const char* data, int len);
 	void post_read(BaseSocket* sfd);
 #endif
 	void setCtx(void* ctx);

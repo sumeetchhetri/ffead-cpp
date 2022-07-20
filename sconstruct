@@ -175,6 +175,16 @@ mod_elastic = ARGUMENTS.get('MOD_ELASTIC', False)
 if bool(mod_elastic):
 	if conf.CheckLibWithHeader('elasticlient', 'elasticlient/client.h', 'cxx'):
 			conf.env.Append(CPPDEFINES=['HAVE_ELASTIC'])
+			onf.env.Append(CPPDEFINES=['HAVE_ELASTICLIB'])
+			if conf.CheckLibWithHeader('cpr', 'cpr/response.h', 'cxx'):
+				conf.env.Append(CPPDEFINES=['HAVE_CPR'])
+				conf.env.Append(CPPDEFINES=['HAVE_CPRLIB'])
+			else:
+				print('Did not find cpr devel files!')
+				Exit(1)
+	else:
+		print('Did not find elasticlient devel files!')
+		Exit(1)
 
 if conf.CheckLib('dl'):
 	pass
@@ -197,7 +207,8 @@ if bool(mod_jobs):
 
 mod_withpicoev = ARGUMENTS.get('WITH_PICOEV', False)
 if bool(mod_withpicoev):
-	conf.env.Append(CPPDEFINES=['USE_PICOEV'])
+	if not conf.CheckCHeader('liburing'):
+		conf.env.Append(CPPDEFINES=['USE_PICOEV'])
 
 mod_memory = ARGUMENTS.get('MOD_MEMORY', True)
 if bool(mod_memory):

@@ -57,6 +57,7 @@ class MemoryCacheImpl : public CacheInterface {
 	bool setInternal(const std::string& key, const std::string& value, const int& expireSeconds, const int& setOrAddOrRep);
 	bool setInternalN(const unsigned long long& key, const std::string& value, const int& expireSeconds, const int& setOrAddOrRep);
 	void clean();
+	void cleanN();
 public:
 	MemoryCacheImpl(ConnectionPooler* pool);
 	~MemoryCacheImpl();

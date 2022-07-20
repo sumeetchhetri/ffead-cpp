@@ -25,6 +25,9 @@ NUM_PROC=1
 #Is Single event handler thread
 EVH_SINGLE=false
 
+#Do we parse headers lazily?
+LAZY_HEADER_PARSE=false
+
 #The type of Threading strategy
 THRD_PREQ=false
 
@@ -51,7 +54,7 @@ IP_ADDR=0.0.0.0
 SCRIPT_ERRS=false
 
 #Number of seconds the connection should be kept-alive, keep it low for better overall performance
-KEEP_ALIVE_SECONDS=20
+KEEP_ALIVE_SECONDS=10
 
 TRANSFER_ENCODING_CHUNK_SIZE=8192
 

@@ -25,6 +25,7 @@
 #include "string"
 #include "vector"
 #include <sys/stat.h>
+#include <tuple>
 #include "CastUtil.h"
 #include "HttpRequest.h"
 #include "HTTPResponseStatus.h"
@@ -48,6 +49,7 @@ public:
 				  StrictTransportSecurity,Trailer,TransferEncoding,Vary,Via,Warning,WWWAuthenticate,
 				  Upgrade,SecWebSocketAccept,SecWebSocketVersion,AltSvc;
 	HttpResponse();
+	HttpResponse(HTTPResponseStatus& st);
 	virtual ~HttpResponse();
     std::string getHttpVersion() const;
     HttpResponse& setHTTPResponseStatus(HTTPResponseStatus& status);
@@ -57,9 +59,9 @@ public:
     const std::string& getStatusMsg();
     std::string* getContentP();
     fcpstream* getStreamP();
-    const std::string& getContent();
+    std::string& getContent();
 	//void setContent(const Cont& content);
-	void setContent(const std::string& content);
+    HttpResponse& setContent(const std::string& content);
 	void addCookie(const std::string& cookie);
     void addContent(const MultipartContent& content);
     void addHeaderValue(std::string header, const std::string& value);
@@ -85,13 +87,19 @@ public:
 	void setUrl(const std::string& url);
 	const std::string& getUrl();
 	void addHeader(std::string header, const std::string& value);
+	HttpResponse& jsonRef();
+	HttpResponse& textRef();
+	HttpResponse& htmlRef();
+	HttpResponse& errorRef(HTTPResponseStatus& status);
 	HttpResponse& generateHeadResponse(std::string& resp);
 	HttpResponse& generateHeadResponse(std::string& resp, float httpVers, bool conn_clos);
+	HttpResponse& generateHeadResponseMinimal(std::string& resp, std::string& contentType, int content_length = -1, bool conn_clos = false);
 	HttpResponse& generateHeadResponse(std::string& resp, std::string& contentType, int content_length = -1);
 	HttpResponse& generateHeadResponse(std::string& resp, std::string& contentType, float httpVers, bool conn_clos, int content_length = -1);
 	void update(HttpRequest* req);
 private:
 	static RiMap HDRS_SW_CODES;
+	static std::map<std::string, std::tuple<std::string, int, int> > HDR_DATA_BY_CNT;
 	static const std::string HDR_SRV, HDR_SEP, HDR_SEPT, HDR_END, HDR_CORS_ALW, HDR_FIN, CONN_CLOSE, CONN_KAL;
     bool done;
     float httpVers;

@@ -26,6 +26,7 @@ std::string HttpRequest::VALID_REQUEST_HEADERS = ",accept,accept-charset,accept-
 
 const std::string HttpRequest::DEFAULT_CTX = "default";
 const std::string HttpRequest::BLANK = "";
+bool HttpRequest::isLazyHeaderParsing = false;
 
 std::string HttpRequest::Accept =			 "Accept";
 std::string HttpRequest::AcceptCharset = 		 "Accept-Charset";
@@ -72,7 +73,8 @@ std::string HttpRequest::Http2Settings = "HTTP2-Settings";
 
 RiMap HttpRequest::HDRS_SW_CODES;
 
-void HttpRequest::init() {
+void HttpRequest::init(bool isLazyHeaderParsingT) {
+	isLazyHeaderParsing = isLazyHeaderParsingT;
 	std::string t = VALID_REQUEST_HEADERS.substr(1, VALID_REQUEST_HEADERS.length()-1);
 	std::vector<std::string> vt;
 	StringUtil::split(vt, t, ",");
@@ -185,6 +187,7 @@ HttpRequest::HttpRequest(const char* pp, size_t pl, const char* qp, size_t ql, c
 		ext = pathv.substr(pathv.find("."));
 		file = pathv.substr(pathv.find_last_of("/")+1);
 	}
+	parser_pos = -1;
 }
 
 HttpRequest::HttpRequest(const char* mp, size_t ml, const char* pp, size_t pl, const char* qp, size_t ql, const char* hp, size_t hl, const char* bp, size_t bl, int hv)  {
@@ -226,6 +229,7 @@ HttpRequest::HttpRequest(const char* mp, size_t ml, const char* pp, size_t pl, c
 		ext = pathv.substr(pathv.find("."));
 		file = pathv.substr(pathv.find_last_of("/")+1);
 	}
+	parser_pos = -1;
 }
 
 
@@ -267,6 +271,7 @@ HttpRequest::HttpRequest(const char* mp, size_t ml, const char* pp, size_t pl, c
 		ext = pathv.substr(pathv.find("."));
 		file = pathv.substr(pathv.find_last_of("/")+1);
 	}
+	parser_pos = -1;
 }
 
 HttpRequest::HttpRequest(const char* cnt, size_t cntlen, const std::unordered_map<std::string, std::string>& header_map, const std::string& url, const std::string& query, const char* method, int hv) {
@@ -316,6 +321,7 @@ HttpRequest::HttpRequest(const char* cnt, size_t cntlen, const std::unordered_ma
 		ext = pathv.substr(pathv.find("."));
 		file = pathv.substr(pathv.find_last_of("/")+1);
 	}
+	parser_pos = -1;
 }
 
 HttpRequest::HttpRequest(std::unordered_map<std::string_view, std::string_view> header_map, std::string_view url, std::string_view qv, std::string_view method, std::string_view hv, std::string_view cnt) {
@@ -365,6 +371,7 @@ HttpRequest::HttpRequest(std::unordered_map<std::string_view, std::string_view> 
 		ext = pathv.substr(pathv.find("."));
 		file = pathv.substr(pathv.find_last_of("/")+1);
 	}
+	parser_pos = -1;
 }
 
 HttpRequest::HttpRequest(void* thdrlist, size_t num_headers, std::string_view rawUrl, std::string_view method, int hv, std::string_view cnt) {
@@ -416,6 +423,7 @@ HttpRequest::HttpRequest(void* thdrlist, size_t num_headers, std::string_view ra
 		ext = pathv.substr(pathv.find("."));
 		file = pathv.substr(pathv.find_last_of("/")+1);
 	}
+	parser_pos = -1;
 }
 
 HttpRequest::HttpRequest(void* thdrlist, size_t num_headers, std::string_view rawUrl, std::string_view qv, std::string_view method, int hv, std::string_view cnt) {
@@ -462,6 +470,7 @@ HttpRequest::HttpRequest(void* thdrlist, size_t num_headers, std::string_view ra
 		ext = pathv.substr(pathv.find("."));
 		file = pathv.substr(pathv.find_last_of("/")+1);
 	}
+	parser_pos = -1;
 }
 
 HttpRequest::HttpRequest(std::string_view rawUrl, std::string_view method, int hv, const char *headers, size_t headers_len, const char *body, size_t body_len) {
@@ -476,7 +485,7 @@ HttpRequest::HttpRequest(std::string_view rawUrl, std::string_view method, int h
 	num_params = 0;
 	int temp;
 	num_headers = 100;
-	phr_parse_headers_fcp(headers, headers_len, headers_list, &num_headers, 0, &temp);
+	parser_pos = phr_parse_headers_fcp(headers, headers_len, headers_list, &num_headers, 0, &temp);
 	httpVers = 1 + (float)hv/10;
 	httpVersion = hv==1?"HTTP/1.1":"HTTP/1.0";
 	this->methodv = method;
@@ -527,8 +536,8 @@ HttpRequest::HttpRequest(const char *headers, size_t headers_len, const char *bo
 		size_t method_len, path_len;
 		int content_length;
 		num_headers = 100;
-		if(phr_parse_request_fcp(headers, headers_len, (const char **)&method, &method_len, (const char **)&path, &path_len,
-					&minor_version, headers_list, &num_headers, 0, &content_length)<0) {
+		if((parser_pos = phr_parse_request_fcp(headers, headers_len, (const char **)&method, &method_len, (const char **)&path, &path_len,
+					&minor_version, headers_list, &num_headers, 0, &content_length))<0) {
 			status = &HTTPResponseStatus::BadRequest;
 		} else {
 			content = std::string(body, body_len);
@@ -582,8 +591,8 @@ HttpRequest::HttpRequest(std::string &&data, int* content_length) : headers_data
 		char *method, *path;
 		size_t method_len, path_len;
 		num_headers = sizeof(headers_list) / sizeof(headers_list[0]);
-		if(phr_parse_request_fcp(headers_data.c_str(), headers_data.length(), (const char **)&method, &method_len, (const char **)&path, &path_len,
-					&minor_version, headers_list, &num_headers, 0, content_length)<0) {
+		if((parser_pos=phr_parse_request_fcp(headers_data.c_str(), headers_data.length(), (const char **)&method, &method_len, (const char **)&path, &path_len,
+					&minor_version, headers_list, &num_headers, 0, content_length))<0) {
 			status = &HTTPResponseStatus::BadRequest;
 		} else {
 			methodv = std::string_view{method, method_len};
@@ -619,6 +628,15 @@ HttpRequest::HttpRequest(std::string &&data, int* content_length) : headers_data
 	}
 }
 
+bool HttpRequest::parseHeaders(int* content_length) {
+	if(headers_data.length()>0 && httpVers>0) {
+		int r;
+		const char *buf = headers_data.c_str()+parser_pos, *buf_end = headers_data.c_str() + headers_data.length();
+		return parse_headers(buf, buf_end, headers_list, &num_headers, num_headers, &r, content_length)!=NULL;
+	}
+	return false;
+}
+
 void HttpRequest::reset(std::string&& data, int* content_length) {
 	cntxt_root = NULL;
 	headers_data = data;
@@ -635,12 +653,11 @@ void HttpRequest::reset(std::string&& data, int* content_length) {
 	queryv = std::string_view(BLANK);
 
 	if(headers_data.length()>0) {
-		headers_data = data;
 		char *method, *path;
 		size_t method_len, path_len;
 		num_headers = sizeof(headers_list) / sizeof(headers_list[0]);
-		if(phr_parse_request_fcp(headers_data.c_str(), headers_data.length(), (const char **)&method, &method_len, (const char **)&path, &path_len,
-					&minor_version, headers_list, &num_headers, 0, content_length)<0) {
+		if((parser_pos=phr_parse_request_fcp(headers_data.c_str(), headers_data.length(), (const char **)&method, &method_len, (const char **)&path, &path_len,
+					&minor_version, headers_list, &num_headers, 0, content_length, isLazyHeaderParsing)<0)) {
 			status = &HTTPResponseStatus::BadRequest;
 		} else {
 			methodv = std::string_view{method, method_len};
@@ -720,6 +737,7 @@ HttpRequest::HttpRequest() {
 	minor_version = 1;
 	num_headers = 0;
 	num_params = 0;
+	parser_pos = -1;
 }
 
 HttpRequest::HttpRequest(const std::string& path) {
@@ -734,6 +752,7 @@ HttpRequest::HttpRequest(const std::string& path) {
 	num_headers = 0;
 	status = NULL;
 	num_params = 0;
+	parser_pos = -1;
 }
 
 void HttpRequest::updateContent()
@@ -1506,6 +1525,11 @@ void HttpRequest::setContent_boundary(const std::string& content_boundary)
 std::string HttpRequest::getContent() const
 {
 	return content;
+}
+
+void HttpRequest::setContent(std::string &data)
+{
+	content = data;
 }
 
 void HttpRequest::setContent(std::string &&data)

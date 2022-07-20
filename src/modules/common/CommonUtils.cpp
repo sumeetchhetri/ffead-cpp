@@ -67,7 +67,7 @@ static const char* get_date() {
 
 	time(&t);
 	gmtime_r(&t, &tm);
-	strftime(date, 58, "Date: ---, %d --- %Y %H:%M:%S GMT\r\nServer: FFEAD 2.0\r\n", &tm);
+	strftime(date, 58, "Date: ---, %d --- %Y %H:%M:%S GMT\r\nServer: ffead\r\n", &tm);
 	memcpy(date + 6, days[tm.tm_wday], 3);
 	memcpy(date + 14, months[tm.tm_mon], 3);
 
@@ -450,11 +450,11 @@ std::string CommonUtils::normalizeAppName(const std::string& appName) {
 	return scappName;
 }
 
-std::string CommonUtils::getTpeFnName(const std::string& tpe, const std::string& appName) {
+std::string CommonUtils::getTpeFnName(const std::string& tpe, const std::string& appName, bool fast) {
 	std::string stpe = appName + tpe;
 	RegexUtil::replace(stpe,"[/]+","/");
 	RegexUtil::replace(stpe,"[^a-zA-Z0-9_]+","");
-	return "_" + stpe + "emittTemplateHTML";
+	return "_" + stpe + "emittTemplateHTML" + (fast?"_s":"");
 }
 
 void CommonUtils::getDateStr(std::string& resp) {
@@ -463,4 +463,8 @@ void CommonUtils::getDateStr(std::string& resp) {
 
 std::string CommonUtils::getDateStr() {
 	return std::string(dateStr);
+}
+
+const char* CommonUtils::getDateStrP() {
+	return dateStr;
 }

@@ -47,6 +47,7 @@ class TeBkUmFortune {
 	int id;
 	#pragma @Column dbf="message"
 	std::string message;
+	friend class TeBkUmRouter;
 public:
 	TeBkUmFortune();
 	virtual ~TeBkUmFortune();

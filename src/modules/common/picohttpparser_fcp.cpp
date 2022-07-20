@@ -262,7 +262,7 @@ static const char *parse_http_version(const char *buf, const char *buf_end, int 
     return buf;
 }
 
-static const char *parse_headers(const char *buf, const char *buf_end, struct phr_header_fcp *headers, size_t *num_headers,
+const char *parse_headers(const char *buf, const char *buf_end, struct phr_header_fcp *headers, size_t *num_headers,
                                  size_t max_headers, int *ret, int* content_length)
 {
     for (;; ++*num_headers) {
@@ -354,7 +354,7 @@ static const char *parse_headers(const char *buf, const char *buf_end, struct ph
 
 static const char *parse_request(const char *buf, const char *buf_end, const char **method, size_t *method_len, const char **path,
                                  size_t *path_len, int *minor_version, struct phr_header_fcp *headers, size_t *num_headers,
-                                 size_t max_headers, int *ret, int* content_length)
+                                 size_t max_headers, int *ret, int* content_length, bool isLazyHeaderParsing)
 {
     /* skip first empty line (some clients add CRLF after POST content) */
     CHECK_EOF();
@@ -390,12 +390,14 @@ static const char *parse_request(const char *buf, const char *buf_end, const cha
         *ret = -1;
         return NULL;
     }
-
-    return parse_headers(buf, buf_end, headers, num_headers, max_headers, ret, content_length);
+    if(isLazyHeaderParsing)
+    	return parse_headers(buf, buf_end, headers, num_headers, max_headers, ret, content_length);
+    return buf;
 }
 
 int phr_parse_request_fcp(const char *buf_start, size_t len, const char **method, size_t *method_len, const char **path,
-                      size_t *path_len, int *minor_version, struct phr_header_fcp *headers, size_t *num_headers, size_t last_len, int* content_length)
+                      size_t *path_len, int *minor_version, struct phr_header_fcp *headers, size_t *num_headers, size_t last_len,
+					  int* content_length, bool isLazyHeaderParsing)
 {
     const char *buf = buf_start, *buf_end = buf_start + len;
     size_t max_headers = *num_headers;
@@ -415,7 +417,7 @@ int phr_parse_request_fcp(const char *buf_start, size_t len, const char **method
     }
 
     if ((buf = parse_request(buf, buf_end, method, method_len, path, path_len, minor_version, headers, num_headers, max_headers,
-                             &r, content_length)) == NULL) {
+                             &r, content_length, isLazyHeaderParsing)) == NULL) {
         return r;
     }
 

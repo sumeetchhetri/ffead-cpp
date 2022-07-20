@@ -105,6 +105,9 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 			MarkerHandler::collectBool(2, true, false)));
 
 	ref.addMarker(Marker("@IgnoreSer", Marker::TYPE_PROP));
+	ref.addMarker(Marker("@IgnoreSer", Marker::TYPE_CLASS));
+
+	ref.addMarker(Marker("@IgnoreRef", Marker::TYPE_CLASS));
 
 	PropFileReader pread;
 	propMap srprps = pread.getProperties(respath+"/server.prop");
@@ -1094,7 +1097,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		StringUtil::replaceFirst(libs, handoffVec.at(cntn), "");
 	}
 	logger << "started generating reflection/serialization code" <<std::endl;
-	std::string ret = ref.generateClassDefinitionsAll(clsstrucMaps,includeRef,webdirs1);
+	std::string ret = ref.generateClassDefinitionsAll(clsstrucMaps, includeRef, webdirs1);
 	std::string objs, ajaxret, headers,typerefs;
 	AfcUtil::writeTofile(rtdcfpath+"ReflectorInterface.cpp",ret,true);
 	#ifdef BUILD_AUTOCONF
@@ -1102,7 +1105,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	#else
 	confsrcFiles += "ReflectorInterface.cpp ";
 	#endif
-	ret = ref.generateSerDefinitionAll(clsstrucMaps,includeRef, true, objs, ajaxret, headers,typerefs,webdirs1);
+	ret = ref.generateSerDefinitionAll(clsstrucMaps,includeRef, true, objs, ajaxret, headers, typerefs, webdirs1);
 	AfcUtil::writeTofile(rtdcfpath+"SerializeInterface.cpp",ret,true);
 	#ifdef BUILD_AUTOCONF
 	confsrcFiles += "../SerializeInterface.cpp ";

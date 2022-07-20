@@ -36,6 +36,7 @@ public:
 	TemplateGenerator();
 	virtual ~TemplateGenerator();
 	static std::string generateTempCd(const std::string&, std::string &, std::string &, const std::string& app);
+	static std::string generateTempCdFast(const std::string&, std::string &, std::string &, const std::string& app);
 	static std::string generateTempCdAll(const std::string& serverRootDirectory);
 };
 

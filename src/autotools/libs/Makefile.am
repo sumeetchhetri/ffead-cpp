@@ -121,6 +121,7 @@ libffead_modules_la_SOURCES += \
 						../../modules/search/SearchEngineManager.cpp \
 						../../modules/search/SearchEngineInterface.cpp \
 						../../modules/search/solr/SolrSearch.cpp \
+						../../modules/common/MurmurHash3.cpp \
 						../../modules/search/elasticsearch/ElasticSearch.cpp \
 						../../modules/client-util/Client.cpp \
 						../../modules/client-util/ClientInterface.cpp \
@@ -508,7 +509,7 @@ if MOD_SOLR
 AM_CPPFLAGS += \
 				-I"../../modules/search/solr"
 libffead_modules_la_SOURCES += \
-						../../modules/search/solr/SolrSearch.cpp
+						../../modules/search/solr/SolrSearch.cpp ../../modules/common/MurmurHash3.cpp
 endif
 if MOD_ELASTIC
 AM_CPPFLAGS += \

@@ -387,7 +387,7 @@ SOCKET Server::createListener(const int& port, const bool& block, bool isSinglEV
 		#ifdef OS_MINGW
 			u_long iMode = 1;
 			ioctlsocket(sockfd, FIONBIO, &iMode);
-		#else
+		#elif !defined(USE_IO_URING)
 			fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK);
 		#endif
 	}
@@ -526,7 +526,7 @@ SOCKET Server::createListener(const std::string& ipAddress, const int& port, con
 		#ifdef OS_MINGW
 			u_long iMode = 1;
 			ioctlsocket(sockfd, FIONBIO, &iMode);
-		#else
+		#elif !defined(USE_IO_URING)
 			fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK);
 		#endif
 	}

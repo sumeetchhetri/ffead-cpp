@@ -40,16 +40,17 @@
 
 class HttpClient {
 	std::string baseUrl;
-	std::string _bd;
-	std::vector<std::string> _hd;
 #ifdef HAVE_CURLLIB
 	CURL* _h;
 #endif
 	static size_t onContent(void *res, size_t len, size_t mb, void *data);
 	static size_t onHeaders(void *res, size_t len, size_t mb, void *data);
+	static size_t readContent(char *ptr, size_t size, size_t nmemb, void *userdata);
 public:
 	static void init();
 	static void cleanup();
+	HttpClient();
+	HttpClient& withBaseUrl(std::string baseUrl);
 	HttpClient(std::string baseUrl);
 	virtual ~HttpClient();
 

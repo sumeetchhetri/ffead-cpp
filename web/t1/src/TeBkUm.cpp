@@ -203,7 +203,9 @@ void TeBkUmRouter::getContext(HttpRequest* request, Context* context) {
 		nf.setId(0);
 		nf.setMessage("Additional fortune added at request time.");
 		flst->push_back(nf);
-		std::sort (flst->begin(), flst->end());
+		std::sort (flst->begin(), flst->end(), [](const TeBkUmFortune& a, const TeBkUmFortune& b) {
+			return a.message < b.message;
+		});
 
 		context->insert(std::pair<std::string, void*>("fortunes", flst));
 
@@ -257,9 +259,7 @@ bool TeBkUmRouter::route(HttpRequest* req, HttpResponse* res, BaseSocket* sif) {
 
 		if(tmplFunc!=NULL)
 		{
-			fcpstream str;
-			tmplFunc(&ctx, str);
-			res->setContent(str.str());
+			tmplFunc(&ctx, res->getContent());
 			res->setContentType(ContentTypes::CONTENT_TYPE_TEXT_HTML);
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		}

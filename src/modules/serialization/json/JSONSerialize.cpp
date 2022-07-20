@@ -1572,20 +1572,22 @@ void* Serializer::fromJson(const std::string &appName, std::string className, co
 	return SerializeBase::_unserContainer(serObject, className, appName, container, &JSONSerialize::_i);
 }
 
-std::string JSONSerialize::serializeObject(void* t, Ser f, void* serobject) {
+std::string JSONSerialize::serializeObject(void* t, Ser f, void* serobject, bool withTmpl) {
 	bool soe = serobject!=NULL;
-	if(f!=NULL && soe) {
+	if(f!=NULL) {
+		if(soe) {
 #ifdef HAVE_RAPID_JSON
-		serobject = new RapiJsonState(serobject);
+			serobject = new RapiJsonState(serobject);
 #endif
-		f(t, &JSONSerialize::_i, serobject);
+			f(t, &JSONSerialize::_i, serobject);
 #ifdef HAVE_RAPID_JSON
-		_i.cleanSerializableObject(serobject);
+			_i.cleanSerializableObject(serobject);
 #endif
-		return CommonUtils::BLANK;
+			return CommonUtils::BLANK;
+		} else {
+			return f(t, &JSONSerialize::_i, serobject);
+		}
 	}
-	if(f!=NULL)
-		return f(t, &JSONSerialize::_i, serobject);
 	return CommonUtils::BLANK;
 }
 

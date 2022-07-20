@@ -65,6 +65,7 @@ class HttpRequest {
 	struct yuarel yurl;
 	struct yuarel_param params[100];
 	int num_params;
+	int parser_pos;
 
 	static RiMap HDRS_SW_CODES;
 	static std::string VALID_REQUEST_HEADERS;
@@ -153,12 +154,14 @@ class HttpRequest {
 	friend class LithiumServer;
 	friend class Http11Socket;
 	static const std::string VALID_METHODS;
+	static bool isLazyHeaderParsing;
 	void reset(std::string &&data, int* content_length);
 public:
+	bool parseHeaders(int* content_length);
 	enum {
 		PREFLIGHT, CORS, OTHER
 	};
-	static void init();
+	static void init(bool isLazyHeaderParsing = false);
 	void normalizeUrl();
 	static const std::string DEFAULT_CTX, BLANK;
 	static std::string Accept,AcceptCharset,AcceptEncoding,AcceptLanguage,AcceptDatetime,
@@ -194,6 +197,7 @@ public:
 	float getHttpVers() const;
 	std::string getContent_boundary() const;
 	std::string getContent() const;
+	void setContent(std::string &data);
 	void setContent(std::string &&data);
     RMap getRequestParams() const;
     std::string getRequestParam(const std::string&);

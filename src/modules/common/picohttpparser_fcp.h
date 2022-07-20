@@ -84,6 +84,8 @@ int phr_decode_chunked_is_in_data_fcp(struct phr_chunked_decoder_fcp *decoder);
 /* returns number of bytes consumed if successful, -2 if request is partial,
  * -1 if failed */
 extern "C" int phr_parse_request_fcp(const char *buf, size_t len, const char **method, size_t *method_len, const char **path, size_t *path_len,
-                      int *minor_version, struct phr_header_fcp *headers, size_t *num_headers, size_t last_len, int* content_length);
+                      int *minor_version, struct phr_header_fcp *headers, size_t *num_headers, size_t last_len, int* content_length, bool isLazyHeaderParsing = false);
+extern "C" const char* parse_headers(const char *buf, const char *buf_end, struct phr_header_fcp *headers, size_t *num_headers,
+        			size_t max_headers, int *ret, int* content_length);
 
 #endif

@@ -29,6 +29,30 @@ bool ServiceHandler::isActive() {
 	return run;
 }
 
+void ServiceHandler::closeConnectionsInternal() {
+	std::map<std::string, long long> addrs;
+	std::map<std::string, BaseSocket*> sifMap;
+	std::map<std::string, long long>::iterator it;
+	BaseSocket* si;
+	while(toBeClosedConns.try_dequeue(si)) {
+		std::string as = si->address + CastUtil::fromNumber(si->fd);
+		if(addrs.find(as)==addrs.end()) {
+			addrs[as] = Timer::getTimestamp();
+			sifMap[as] = si;
+		}
+	}
+	for(it=addrs.begin();it!=addrs.end();) {
+		long long t = Timer::getTimestamp();
+		if(t-it->second>=10 && sifMap[it->first]->useCounter==0) {
+			cls(sifMap[it->first]);
+			sifMap.erase(it->first);
+			addrs.erase(it++);
+		} else {
+			++it;
+		}
+	}
+}
+
 void* ServiceHandler::closeConnections(void *arg) {
 	ServiceHandler* ths = (ServiceHandler*)arg;
 	std::map<std::string, long long> addrs;
@@ -36,24 +60,7 @@ void* ServiceHandler::closeConnections(void *arg) {
 	std::map<std::string, long long>::iterator it;
 	while(ths->run) {
 		Thread::sSleep(5);
-		BaseSocket* si;
-		while(ths->toBeClosedConns.try_dequeue(si)) {
-			std::string as = si->address + CastUtil::fromNumber(si->fd);
-			if(addrs.find(as)==addrs.end()) {
-				addrs[as] = Timer::getTimestamp();
-				sifMap[as] = si;
-			}
-		}
-		for(it=addrs.begin();it!=addrs.end();) {
-			long long t = Timer::getTimestamp();
-			if(t-it->second>=15 && sifMap[it->first]->useCounter==0) {
-				delete sifMap[it->first];
-				sifMap.erase(it->first);
-				addrs.erase(it++);
-			} else {
-				++it;
-			}
-		}
+		ths->closeConnectionsInternal();
 	}
 	return NULL;
 }
@@ -108,11 +115,14 @@ void* ServiceHandler::taskService(void* inp) {
 }
 
 
-void ServiceHandler::start() {
+void ServiceHandler::start(const CleanSocket& cls, bool withCCQ) {
 	if(!run) {
+		this->cls = cls;
 		run = true;
-		Thread* mthread = new Thread(&closeConnections, this);
-		mthread->execute(-1);
+		if(withCCQ) {
+			Thread* mthread = new Thread(&closeConnections, this);
+			mthread->execute(-1);
+		}
 		//Thread* tthread = new Thread(&timer, this);
 		//tthread->execute();
 	}
@@ -128,6 +138,7 @@ void ServiceHandler::stop() {
 
 ServiceHandler::ServiceHandler(const int& spoolSize, bool isSinglEVH) {
 	this->spoolSize = spoolSize;
+	cls = NULL;
 	run = false;
 	isThreadPerRequests = false;
 	if(!isSinglEVH) {

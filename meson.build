@@ -253,8 +253,21 @@ if get_option('MOD_ELASTIC') == true
 	libelastic = cc.find_library('elasticlient')
 	if libelastic.found()
 		global_libs += [libelastic]
+		conf_data.set('HAVE_ELASTICLIB', 1)
 	else
 		error('elastic lib not found')
+	endif
+	if cc.has_header('cpr/response.h', args : '-I/usr/local/include/')
+		conf_data.set('HAVE_CPR', 1)
+	else
+		error('cpr headers not found')
+	endif
+	libcpr = cc.find_library('cpr')
+	if libcpr.found()
+		global_libs += [libcpr]
+		conf_data.set('HAVE_CPRLIB', 1)
+	else
+		error('cpr lib not found')
 	endif
 endif
 
@@ -337,6 +350,7 @@ endif
 
 if cc.has_header('liburing', args : '-I/usr/local/include')
 	conf_data.set('USE_IO_URING', 1)
+	conf_data.set('USE_PICOEV', 0)
 elif cc.has_header('sys/epoll.h')
 	conf_data.set('USE_EPOLL', 1)
 elif cc.has_header('sys/event.h')

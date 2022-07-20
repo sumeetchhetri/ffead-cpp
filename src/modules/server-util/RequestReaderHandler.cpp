@@ -138,7 +138,7 @@ BaseSocket* RequestReaderHandler::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* b
 	RequestReaderHandler* ins = static_cast<RequestReaderHandler*>(ths->getCtx());
 	switch(type) {
 		case ACCEPTED: {
-			SocketInterface* sockIntf = ins->sf(fd);
+			SocketInterface* sockIntf = (SocketInterface*)ins->sf(fd);
 			sockIntf->eh = &(ins->selector);
 			ins->addSf(sockIntf);
 			ins->shi->sockInit(sockIntf);
@@ -284,7 +284,7 @@ void* RequestReaderHandler::handle_Old(void* inp) {
 								break;
 							}
 						}
-						SocketInterface* sockIntf = ins->sf(newSocket);
+						SocketInterface* sockIntf = (SocketInterface*)ins->sf(newSocket);
 						sockIntf->eh = &(ins->selector);
 						ins->addSf(sockIntf);
 						ins->shi->sockInit(sockIntf);
@@ -296,7 +296,7 @@ void* RequestReaderHandler::handle_Old(void* inp) {
 #else
 					sin_size = sizeof their_addr;
 					SOCKET newSocket = accept(ins->listenerSock, (struct sockaddr *)&(their_addr), &sin_size);
-					SocketInterface* sockIntf = ins->sf(newSocket);
+					SocketInterface* sockIntf = (SocketInterface*)ins->sf(newSocket);
 					sockIntf->eh = &(ins->selector);
 					ins->addSf(sockIntf);
 					ins->shi->sockInit(sockIntf);

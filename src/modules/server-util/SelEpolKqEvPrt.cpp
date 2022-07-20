@@ -48,6 +48,9 @@ SelEpolKqEvPrt::~SelEpolKqEvPrt() {
 		delete dsi;
 	}
 #if defined USE_IO_URING
+	if(efdbs!=NULL) {
+		delete efdbs;
+	}
 	/*for (int i = 0; i < BUFFERS_COUNT; i++ )
 	{
 	    free(bufs[i]);
@@ -123,6 +126,17 @@ void SelEpolKqEvPrt::initialize(const int& timeout, eventLoopContinue elcCb, onE
 			printf("IORING_FEAT_FAST_POLL not available in the kernel, quiting...\n");
 			return;
 		}
+		efd = eventfd(0, O_NONBLOCK);
+		if (efd < 0) {
+			perror("eventfd");
+			exit(0);
+		}
+
+		efdbs = new BaseSocket();
+		efdbs->fd = efd;
+		register_interrupt();
+
+		pending = 0;
 
 		// check if buffer selection is supported
 		/*struct io_uring_probe *probe;
@@ -180,6 +194,7 @@ void SelEpolKqEvPrt::addListeningSocket(SOCKET sockfd) {
 	    io_uring_sqe_set_flags(sqe, 0);
 	    dsi->io_uring_type = ACCEPT;
 	    io_uring_sqe_set_data(sqe, dsi);
+	    io_uring_submit(&ring);
 	    return;
 	#endif
 	if(sockfd>0)registerRead(dsi, true);
@@ -268,6 +283,18 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout, eventLoopCont
 			return;
 		}
 
+		efd = eventfd(0, O_NONBLOCK);
+		if (efd < 0) {
+			perror("eventfd");
+			exit(0);
+		}
+
+		efdbs = new BaseSocket();
+		efdbs->fd = efd;
+		register_interrupt();
+
+		pending = 0;
+
 		// check if buffer selection is supported
 		/*struct io_uring_probe *probe;
 		probe = io_uring_get_probe_ring(&ring);
@@ -303,6 +330,7 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout, eventLoopCont
 		io_uring_sqe_set_flags(sqe1, 0);
 		dsi->io_uring_type = ACCEPT;
 		io_uring_sqe_set_data(sqe1, dsi);
+		io_uring_submit(&ring);
 		return;
 	#endif
 	if(sockfd>0)registerRead(dsi, true);
@@ -839,83 +867,114 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
 		this->eCb = ev;
 	}
 
+#ifdef USE_IO_URING
+	if(dsi==NULL) {
+		sleep(1);
+	}
+#endif
+
 	while (elcCb(this)) {
 #ifdef USE_IO_URING
-		io_uring_submit_and_wait(&ring, 1);
 		struct io_uring_cqe *cqe;
-		unsigned head;
-		unsigned count = 0;
+
+		int ret = io_uring_wait_cqe(&ring, &cqe);
+		if (ret < 0) {
+			//fprintf(stderr, "io_uring_wait_cqe");
+			continue;
+		}
+		BaseSocket* udata = (BaseSocket*)io_uring_cqe_get_data(cqe);
+		/*if (cqe->res < 0) {
+			fprintf(stderr, "Async request failed: %s for event: %d\n", strerror(-cqe->res), udata->io_uring_type);
+			exit(1);
+		}*/
+
+		//io_uring_submit_and_wait(&ring, 1);
+		//unsigned head;
+		//unsigned count = 0;
 
 		// go through all CQEs
-		io_uring_for_each_cqe(&ring, head, cqe) {
-			++count;
-			// There is an optional `std::uintptr_t` in C++11
-			BaseSocket* udata = (BaseSocket*)io_uring_cqe_get_data(cqe);
+		//io_uring_for_each_cqe(&ring, head, cqe) {
+		//	++count;
+			//BaseSocket* udata = (BaseSocket*)io_uring_cqe_get_data(cqe);
 
-			if (cqe->res == -ENOBUFS) {
-				fprintf(stdout, "bufs in automatic buffer selection empty, this should not happen...\n");
-				fflush(stdout);
+		if (cqe->res == -ENOBUFS) {
+			fprintf(stdout, "bufs in automatic buffer selection empty, this should not happen...\n");
+			fflush(stdout);
+			return;
+		} else if (udata->io_uring_type == PROV_BUF) {
+			if (cqe->res < 0) {
+				printf("cqe->res = %d\n", cqe->res);
 				return;
-			} else if (udata->io_uring_type == PROV_BUF) {
-				if (cqe->res < 0) {
-					printf("cqe->res = %d\n", cqe->res);
-					return;
-				}
-			} else if (udata->io_uring_type == ACCEPT) {
-				int sock_conn_fd = cqe->res;
-				// only read when there is no error, >= 0
-				if (sock_conn_fd >= 0) {
-					BaseSocket* sifd = ev(this, udata, ACCEPTED, sock_conn_fd, NULL, -1, false);
-
-					struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
-					io_uring_prep_recv(sqe, sock_conn_fd, sifd->buff, MAX_MESSAGE_LEN, 0);
-					//io_uring_sqe_set_flags(sqe, IOSQE_BUFFER_SELECT);
-					//sqe->buf_group = group_id;
-					sifd->io_uring_type = READ;
-					io_uring_sqe_set_data(sqe, sifd);
-					//add_socket_read(&ring, sock_conn_fd, group_id, MAX_MESSAGE_LEN, IOSQE_BUFFER_SELECT);
-				}
-
-				// new connected client; read data from socket and re-add accept to monitor for new connections
-				struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
-				io_uring_prep_accept(sqe, udata->fd, (sockaddr*)&client_addr, &client_len, 0);
-				io_uring_sqe_set_flags(sqe, 0);
-				udata->io_uring_type = ACCEPT;
-				io_uring_sqe_set_data(sqe, udata);
-				//add_accept(&ring, sock_listen_fd, (struct sockaddr *)&client_addr, &client_len, 0);
-			} else if (udata->io_uring_type == READ) {
-				int bytes_read = cqe->res;
-				if (cqe->res <= 0) {
-					// connection closed or error
-					shutdown(udata->fd, SHUT_RDWR);
-					eCb(this, udata, CLOSED, udata->fd, NULL, -1, true);
-				} else {
-					// bytes have been read into bufs, now add write to socket sqe
-					//int bid = cqe->flags >> 16;
-					//udata->io_uring_bid = bid;
-					eCb(this, udata, ON_DATA_READ, udata->fd, udata->buff, bytes_read, false);
-					//add_socket_write(&ring, conn_i.fd, bid, bytes_read, 0);
-				}
-			} else if (udata->io_uring_type == WRITE) {
-				// write has been completed, first re-add the buffer
-				/*struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
-				io_uring_prep_provide_buffers(sqe, bufs[udata->io_uring_bid], MAX_MESSAGE_LEN, 1, group_id, udata->io_uring_bid);
-				io_uring_sqe_set_data(sqe, &df);*/
-				//add_provide_buf(&ring, conn_i.bid, group_id);
-
-				// add a new read for the existing connection
-				struct io_uring_sqe *sqe1 = io_uring_get_sqe(&ring);
-				io_uring_prep_recv(sqe1, udata->fd, udata->buff, MAX_MESSAGE_LEN, 0);
-				//io_uring_sqe_set_flags(sqe1, IOSQE_BUFFER_SELECT);
-				//sqe1->buf_group = group_id;
-				udata->io_uring_type = READ;
-				io_uring_sqe_set_data(sqe1, udata);
-				eCb(this, udata, ON_DATA_WRITE, udata->fd, NULL, -1, false);
-				//add_socket_read(&ring, conn_i.fd, group_id, MAX_MESSAGE_LEN, IOSQE_BUFFER_SELECT);
 			}
-		}
+		} else if (udata->io_uring_type == INTERRUPT) {
+			register_interrupt();
+		} else if (udata->io_uring_type == ACCEPT) {
+			int sock_conn_fd = cqe->res;
+			// only read when there is no error, >= 0
+			if (sock_conn_fd >= 0) {
+				BaseSocket* sifd = ev(this, udata, ACCEPTED, sock_conn_fd, NULL, -1, false);
 
-		io_uring_cq_advance(&ring, count);
+				struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
+				io_uring_prep_recv(sqe, sock_conn_fd, sifd->buff, MAX_MESSAGE_LEN, 0);
+				//io_uring_sqe_set_flags(sqe, IOSQE_BUFFER_SELECT);
+				//sqe->buf_group = group_id;
+				sifd->io_uring_type = READ;
+				io_uring_sqe_set_data(sqe, sifd);
+				//add_socket_read(&ring, sock_conn_fd, group_id, MAX_MESSAGE_LEN, IOSQE_BUFFER_SELECT);
+			}
+
+			// new connected client; read data from socket and re-add accept to monitor for new connections
+			struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
+			io_uring_prep_accept(sqe, udata->fd, (sockaddr*)&client_addr, &client_len, 0);
+			io_uring_sqe_set_flags(sqe, 0);
+			udata->io_uring_type = ACCEPT;
+			io_uring_sqe_set_data(sqe, udata);
+			submit_to_ring();
+			//add_accept(&ring, sock_listen_fd, (struct sockaddr *)&client_addr, &client_len, 0);
+		} else if (udata->io_uring_type == READ) {
+			int bytes_read = cqe->res;
+			if (cqe->res <= 0) {
+				// connection closed or error
+				shutdown(udata->fd, SHUT_RDWR);
+				eCb(this, udata, CLOSED, udata->fd, NULL, -1, true);
+			} else {
+				//fprintf(stdout, "sock data read....\n");
+				// bytes have been read into bufs, now add write to socket sqe
+				//int bid = cqe->flags >> 16;
+				//udata->io_uring_bid = bid;
+				eCb(this, udata, ON_DATA_READ, udata->fd, udata->buff, bytes_read, false);
+				//add_socket_write(&ring, conn_i.fd, bid, bytes_read, 0);
+			}
+		} else if (udata->io_uring_type == WRITE_CONT) {
+			// write has been completed, first re-add the buffer
+			/*struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
+			io_uring_prep_provide_buffers(sqe, bufs[udata->io_uring_bid], MAX_MESSAGE_LEN, 1, group_id, udata->io_uring_bid);
+			io_uring_sqe_set_data(sqe, &df);*/
+			//add_provide_buf(&ring, conn_i.bid, group_id);
+			eCb(this, udata, ON_DATA_WRITE, udata->fd, NULL, -1, false);
+			//add_socket_read(&ring, conn_i.fd, group_id, MAX_MESSAGE_LEN, IOSQE_BUFFER_SELECT);
+		} else if (udata->io_uring_type == WRITE) {
+			//fprintf(stdout, "sock data written....\n");
+			// write has been completed, first re-add the buffer
+			/*struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
+			io_uring_prep_provide_buffers(sqe, bufs[udata->io_uring_bid], MAX_MESSAGE_LEN, 1, group_id, udata->io_uring_bid);
+			io_uring_sqe_set_data(sqe, &df);*/
+			//add_provide_buf(&ring, conn_i.bid, group_id);
+			pending--;
+			// add a new read for the existing connection
+			struct io_uring_sqe *sqe1 = io_uring_get_sqe(&ring);
+			io_uring_prep_recv(sqe1, udata->fd, udata->buff, MAX_MESSAGE_LEN, 0);
+			//io_uring_sqe_set_flags(sqe1, IOSQE_BUFFER_SELECT);
+			//sqe1->buf_group = group_id;
+			udata->io_uring_type = READ;
+			io_uring_sqe_set_data(sqe1, udata);
+			submit_to_ring();
+			eCb(this, udata, ON_DATA_WRITE, udata->fd, NULL, -1, false);
+			//add_socket_read(&ring, conn_i.fd, group_id, MAX_MESSAGE_LEN, IOSQE_BUFFER_SELECT);
+		}
+		//}
+		io_uring_cqe_seen(&ring, cqe);
+		//io_uring_cq_advance(&ring, 1);
 #else
 		int num = getEvents();
 #ifdef USE_PICOEV
@@ -981,12 +1040,55 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
 }
 
 #if defined USE_IO_URING
-void SelEpolKqEvPrt::post_write(BaseSocket* sifd, const std::string& data) {
+void SelEpolKqEvPrt::register_interrupt() {
 	struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
-	io_uring_prep_send(sqe, sifd->fd, &data[0], data.length(), 0);
+	io_uring_prep_recv(sqe, efdbs->fd, efdbs->buff, 1, 0);
+	efdbs->io_uring_type = INTERRUPT;
+	io_uring_sqe_set_data(sqe, &efd);
+	submit_to_ring();
+}
+void SelEpolKqEvPrt::interrupt_wait() {
+	if(pending>0) {
+		eventfd_write(efd, 0);
+	}
+}
+void SelEpolKqEvPrt::submit_to_ring() {
+	l.lock();
+	io_uring_submit(&ring);
+	l.unlock();
+}
+void SelEpolKqEvPrt::post_write(BaseSocket* sifd, const std::string& data, int off) {
+	struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
+	io_uring_prep_send(sqe, sifd->fd, &data[off], data.length()-off, 0);
 	io_uring_sqe_set_flags(sqe, 0);
 	sifd->io_uring_type = WRITE;
 	io_uring_sqe_set_data(sqe, sifd);
+	pending++;
+	submit_to_ring();
+}
+void SelEpolKqEvPrt::post_write_2(BaseSocket* sifd, const std::string& data, const std::string& data1) {
+	struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
+	io_uring_prep_send(sqe, sifd->fd, &data[0], data.length(), 0);
+	io_uring_sqe_set_flags(sqe, IOSQE_IO_LINK);
+	sifd->io_uring_type = WRITE;
+	io_uring_sqe_set_data(sqe, sifd);
+	struct io_uring_sqe *sqe1 = io_uring_get_sqe(&ring);
+	io_uring_prep_send(sqe1, sifd->fd, &data1[0], data1.length(), 0);
+	io_uring_sqe_set_flags(sqe1, IOSQE_IO_LINK);
+	sifd->io_uring_type = WRITE;
+	io_uring_sqe_set_data(sqe1, sifd);
+	pending++;
+	pending++;
+	submit_to_ring();
+}
+void SelEpolKqEvPrt::post_write(BaseSocket* sifd, const char* data, int len) {
+	struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
+	io_uring_prep_send(sqe, sifd->fd, data, len, 0);
+	io_uring_sqe_set_flags(sqe, 0);
+	sifd->io_uring_type = WRITE;
+	io_uring_sqe_set_data(sqe, sifd);
+	pending++;
+	submit_to_ring();
 }
 void SelEpolKqEvPrt::post_read(BaseSocket* sifd) {
 	struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
@@ -995,6 +1097,7 @@ void SelEpolKqEvPrt::post_read(BaseSocket* sifd) {
 	//sqe->buf_group = group_id;
 	sifd->io_uring_type = READ;
 	io_uring_sqe_set_data(sqe, sifd);
+	submit_to_ring();
 }
 #endif
 
