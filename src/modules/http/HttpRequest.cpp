@@ -632,7 +632,7 @@ bool HttpRequest::parseHeaders(int* content_length) {
 	if(headers_data.length()>0 && httpVers>0) {
 		int r;
 		const char *buf = headers_data.c_str()+parser_pos, *buf_end = headers_data.c_str() + headers_data.length();
-		return parse_headers(buf, buf_end, headers_list, &num_headers, num_headers, &r, content_length)!=NULL;
+		return parse_headers_fcp(buf, buf_end, headers_list, &num_headers, num_headers, &r, content_length)!=NULL;
 	}
 	return false;
 }

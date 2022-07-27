@@ -24,6 +24,7 @@
 #define SRC_SERVER_CppServerServer_H_
 #include "ServerInitUtil.h"
 #include <memory>
+#include "fmt/ostream.h"
 #include "server/asio/service.h"
 #include "server/http/http_server.h"
 

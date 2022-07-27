@@ -23,7 +23,7 @@
 #ifndef SRC_SERVER_UvCppServer_H_
 #define SRC_SERVER_UvCppServer_H_
 #include "ServerInitUtil.h"
-#include <uv/include/uv11.h>
+#include <uv/include/uv11.hpp>
 
 class UvCppServer {
 	static void handler(uv::http::Request& req, uv::http::Response* resp);

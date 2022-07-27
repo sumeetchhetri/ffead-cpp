@@ -19,7 +19,7 @@ WORKDIR ${IROOT}
 
 COPY install_ffead-cpp-framework.sh install_ffead-cpp-httpd.sh install_ffead-cpp-nginx.sh server.sh ${IROOT}/
 RUN chmod 755 ${IROOT}/*.sh
-RUN ./install_ffead-cpp-framework.sh && ./install_ffead-cpp-httpd.sh && ./install_ffead-cpp-nginx.sh && cd ${IROOT}/ffead-cpp-src && make clean && rm -rf CMakeFiles
+RUN ./install_ffead-cpp-framework.sh && ./install_ffead-cpp-httpd.sh && ./install_ffead-cpp-nginx.sh && cd ${IROOT}/ffead-cpp-src && ninja clean && rm -rf CMakeFiles CMakeCache.txt
 
 COPY run_ffead.sh /
 RUN chmod 755 /run_ffead.sh
