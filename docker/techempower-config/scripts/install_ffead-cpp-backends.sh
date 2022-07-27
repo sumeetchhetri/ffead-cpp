@@ -89,10 +89,13 @@ then
 	cd CppServer
 	gil update
 	cd $IROOT/CppServer/build
+	sed -i "s/enable_testing/#enable_testing/g" $IROOT/CppServer/CMakeLists.txt
+	sed -i "s/add_test/#add_test/g" $IROOT/CppServer/CMakeLists.txt
 	./unix.sh
 	cp $IROOT/CppServer/bin/libcppserver.a /usr/local/lib/
 	cp -rf $IROOT/CppServer/modules/asio/asio/include/* /usr/local/include/
 	cp -rf $IROOT/CppServer/modules/CppCommon/include/* /usr/local/include/
+	cp -rf $IROOT/CppServer/modules/CppCommon/modules/fmt/include/fmt /usr/local/include/
 	cp -rf $IROOT/CppServer/include/* /usr/local/include/
 	cp $IROOT/CppServer/temp/modules/libasio.a /usr/local/lib/
 	cp $IROOT/CppServer/temp/modules/CppCommon/libcppcommon.a /usr/local/lib/

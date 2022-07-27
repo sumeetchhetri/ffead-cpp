@@ -85,7 +85,7 @@ sed -i 's|web/peer-server/src/autotools/Makefile||g' configure.ac
 
 #./autogen.sh
 #./configure --enable-debug=no --enable-apachemod=yes --enable-nginxmod=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes CPPFLAGS="$CPPFLAGS -I${IROOT}/include/libmongoc-1.0 -I${IROOT}/include/libbson-1.0 -I${IROOT}/include/" LDFLAGS="$LDFLAGS -L${IROOT} -L${IROOT}/lib"
-cmake -DSRV_ALL=on -DCINATRA_INCLUDES=${IROOT}/cinatra/include -DMOD_APACHE=on -DMOD_NGINX=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DDEBUG=${DEBUG} -DWITH_RAPIDJSON=on -DWITH_PUGIXML=on .
+cmake -DSRV_ALL=on -DCINATRA_INCLUDES=${IROOT}/cinatra/include -DMOD_APACHE=on -DMOD_NGINX=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DDEBUG=${DEBUG} -DWITH_RAPIDJSON=on -DWITH_PUGIXML=on -GNinja .
 
 cp resources/sample-odbcinst.ini ${IROOT}/odbcinst.ini
 cp resources/sample-odbc.ini ${IROOT}/odbc.ini
@@ -94,7 +94,7 @@ cp resources/sample-odbc.ini ${IROOT}/odbc.ini
 cd ${IROOT}/ffead-cpp-src/
 cp -f web/t1/sql-src/TeBkUmWorldmongo.h web/t1/include/TeBkUmWorld.h
 cp -f web/t1/sql-src/TeBkUmWorldmongo.cpp web/t1/src/TeBkUmWorld.cpp
-make install -j${MAX_THREADS}
+ninja install
 
 rm -f /usr/local/lib/libffead-*
 rm -f /usr/local/lib/libt1.so*
@@ -162,7 +162,7 @@ rm -f tmp/*.sess
 cd ${IROOT}/ffead-cpp-src/
 cp -f web/t1/sql-src/TeBkUmWorldsql.h web/t1/include/TeBkUmWorld.h
 cp -f web/t1/sql-src/TeBkUmWorldsql.cpp web/t1/src/TeBkUmWorld.cpp
-make install -j${MAX_THREADS}
+ninja install
 
 if [ ! -d "ffead-cpp-6.0-bin" ]
 then
@@ -218,11 +218,9 @@ rm -f tmp/*.sess
 
 #Start building for picoev backend
 cd ${IROOT}/ffead-cpp-src/
-mkdir build
-cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DDEBUG=${DEBUG} -DWITH_RAPIDJSON=on -DWITH_PUGIXML=on -DWITH_PICOEV=on -GNinja ..
+rm -rf CMakeCache.txt CMakeFiles
+cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DDEBUG=${DEBUG} -DWITH_RAPIDJSON=on -DWITH_PUGIXML=on -DWITH_PICOEV=on -GNinja .
 ninja install
-cd ..
-rm -rf build
 if [ ! -d "ffead-cpp-6.0-bin" ]
 then
 	exit 1
@@ -275,18 +273,26 @@ rm -f tmp/*.sess
 #Done
 
 #Start building for io_uring backend
+cd /tmp
+wget -q https://github.com/axboe/liburing/archive/liburing-2.2.tar.gz
+tar xf liburing-2.2.tar.gz
+rm -f liburing-2.2.tar.gz
+cd liburing-liburing-2.2 && ./configure --prefix=/usr/local && make install
+cd /tmp && rm -rf liburing-liburing-2.2
+
 cd ${IROOT}/ffead-cpp-src/
-mkdir build
-cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DDEBUG=${DEBUG} -DWITH_RAPIDJSON=on -DWITH_PUGIXML=on -DWITH_IOURING=on -GNinja ..
+rm -rf CMakeCache.txt CMakeFiles
+cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DDEBUG=${DEBUG} -DWITH_RAPIDJSON=on -DWITH_PUGIXML=on -DWITH_IOURING=on -GNinja .
 ninja install
-cd ..
-rm -rf build
 if [ ! -d "ffead-cpp-6.0-bin" ]
 then
 	exit 1
 fi
 
 cd ffead-cpp-6.0-bin
+#ulimit -l 102400000
+sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' resources/server.prop
+sed -i 's|REQUEST_HANDLER=RequestReaderHandler|REQUEST_HANDLER=RequestHandler2|g' resources/server.prop
 #cache related dockerfiles will add the cache.xml accordingly whenever needed
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 ./server.sh &

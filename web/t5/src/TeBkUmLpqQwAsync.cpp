@@ -179,7 +179,7 @@ void TeBkUmLpqQwAsyncRouter::queriesAsync(const char* q, int ql, BaseSocket* sif
 			reqdt->reset();
 			TeBkUmLpqQwAsyncWorld::tmplJson(*vec, reqdt->r.getContentP());
 			reqdt->r.jsonRef();
-			sif->writeDirect(reqdt->h, reqdt->r.getContent());
+			sif->writeDirect(reqdt->r.getContent());
 			sif->unUse();
 			delete vec;
 		}, vec);
@@ -235,7 +235,7 @@ void TeBkUmLpqQwAsyncRouter::queriesMultiAsync(const char* q, int ql, BaseSocket
 			reqdt->reset();
 			TeBkUmLpqQwAsyncWorld::tmplJson(*vec, reqdt->r.getContentP());
 			reqdt->r.jsonRef();
-			sif->writeDirect(reqdt->h, reqdt->r.getContent());
+			sif->writeDirect(reqdt->r.getContent());
 			sif->unUse();
 			delete vec;
 		}, vec);
@@ -304,7 +304,7 @@ void TeBkUmLpqQwAsyncRouter::updatesMulti(const char* q, int ql, AsyncUpdatesReq
 						reqdt->reset();
 						TeBkUmLpqQwAsyncWorld::tmplJson(req->vec, reqdt->r.getContentP());
 						reqdt->r.jsonRef();
-						req->sif->writeDirect(reqdt->h, reqdt->r.getContent());
+						req->sif->writeDirect(reqdt->r.getContent());
 					} else {
 						HttpResponse r;
 						r.errorRef(HTTPResponseStatus::InternalServerError);
@@ -414,7 +414,7 @@ void TeBkUmLpqQwAsyncRouter::updatesAsyncb(const char* q, int ql, AsyncUpdatesRe
 					reqdt->reset();
 					TeBkUmLpqQwAsyncWorld::tmplJson(req->vec, reqdt->r.getContentP());
 					reqdt->r.jsonRef();
-					req->sif->writeDirect(reqdt->h, reqdt->r.getContent());
+					req->sif->writeDirect(reqdt->r.getContent());
 				} else {
 					HttpResponse r;
 					r.errorRef(HTTPResponseStatus::InternalServerError);
@@ -500,7 +500,7 @@ void TeBkUmLpqQwAsyncRouter::updatesAsync(const char* q, int ql, AsyncUpdatesReq
 				if(req->vec.size()>0) {
 					TeBkUmLpqQwAsyncWorld::tmplJson(req->vec, reqdt->r.getContentP());
 					reqdt->r.jsonRef();
-					req->sif->writeDirect(reqdt->h, reqdt->r.getContent());
+					req->sif->writeDirect(reqdt->r.getContent());
 				} else {
 					reqdt->r.errorRef(HTTPResponseStatus::InternalServerError);
 					req->sif->writeDirect(reqdt->r.getContent());
@@ -562,6 +562,11 @@ void TeBkUmLpqQwAsyncRouter::fortunes(BaseSocket* sif) {
 
 bool TeBkUmLpqQwAsyncRouter::route(HttpRequest* req, HttpResponse* res, BaseSocket* sif) {
 	sif->use();
+	if(sif->getData()==NULL) {
+		sif->setData(new AsyncQwReqData, [](void* data) {
+			delete (AsyncQwReqData*)data;
+		});
+	}
 	if(StringUtil::endsWith(req->getPath(), "/d")) {
 		dbAsync(sif);
 	} else if(StringUtil::endsWith(req->getPath(), "/quer")) {

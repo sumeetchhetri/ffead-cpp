@@ -262,7 +262,7 @@ static const char *parse_http_version(const char *buf, const char *buf_end, int 
     return buf;
 }
 
-const char *parse_headers(const char *buf, const char *buf_end, struct phr_header_fcp *headers, size_t *num_headers,
+const char *parse_headers_fcp(const char *buf, const char *buf_end, struct phr_header_fcp *headers, size_t *num_headers,
                                  size_t max_headers, int *ret, int* content_length)
 {
     for (;; ++*num_headers) {
@@ -352,7 +352,7 @@ const char *parse_headers(const char *buf, const char *buf_end, struct phr_heade
     return buf;
 }
 
-static const char *parse_request(const char *buf, const char *buf_end, const char **method, size_t *method_len, const char **path,
+static const char *parse_request_fcp(const char *buf, const char *buf_end, const char **method, size_t *method_len, const char **path,
                                  size_t *path_len, int *minor_version, struct phr_header_fcp *headers, size_t *num_headers,
                                  size_t max_headers, int *ret, int* content_length, bool isLazyHeaderParsing)
 {
@@ -391,7 +391,7 @@ static const char *parse_request(const char *buf, const char *buf_end, const cha
         return NULL;
     }
     if(isLazyHeaderParsing)
-    	return parse_headers(buf, buf_end, headers, num_headers, max_headers, ret, content_length);
+    	return parse_headers_fcp(buf, buf_end, headers, num_headers, max_headers, ret, content_length);
     return buf;
 }
 
@@ -416,7 +416,7 @@ int phr_parse_request_fcp(const char *buf_start, size_t len, const char **method
         return r;
     }
 
-    if ((buf = parse_request(buf, buf_end, method, method_len, path, path_len, minor_version, headers, num_headers, max_headers,
+    if ((buf = parse_request_fcp(buf, buf_end, method, method_len, path, path_len, minor_version, headers, num_headers, max_headers,
                              &r, content_length, isLazyHeaderParsing)) == NULL) {
         return r;
     }
@@ -464,7 +464,7 @@ static const char *parse_response(const char *buf, const char *buf_end, int *min
         return NULL;
     }
 
-    return parse_headers(buf, buf_end, headers, num_headers, max_headers, ret, content_length);
+    return parse_headers_fcp(buf, buf_end, headers, num_headers, max_headers, ret, content_length);
 }
 
 int phr_parse_response_fcp(const char *buf_start, size_t len, int *minor_version, int *status, const char **msg, size_t *msg_len,
@@ -507,7 +507,7 @@ int phr_parse_headers_fcp(const char *buf_start, size_t len, struct phr_header_f
         return r;
     }
 
-    if ((buf = parse_headers(buf, buf_end, headers, num_headers, max_headers, &r, content_length)) == NULL) {
+    if ((buf = parse_headers_fcp(buf, buf_end, headers, num_headers, max_headers, &r, content_length)) == NULL) {
         return r;
     }
 

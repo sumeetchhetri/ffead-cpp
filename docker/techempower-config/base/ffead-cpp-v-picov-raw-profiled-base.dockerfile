@@ -87,7 +87,7 @@ RUN ./sql-profiled-util.sh nobatch noclang noasync
 
 COPY sql-profiled-install.sh install_ffead-cpp-sql-raw-profiled.sh ${IROOT}/
 RUN chmod 755 ${IROOT}/sql-profiled-install.sh ${IROOT}/install_ffead-cpp-sql-raw-profiled.sh
-RUN ./sql-profiled-install.sh nocleanup
+RUN ./sql-profiled-install.sh "-sql"
 
 RUN apt update -yqq && apt install -y git make && rm -rf /var/lib/apt/lists/*
 #For Latest vlang, uncomment the below mentioned line, due to lot of new enhancements and unsafe block handling, vlang has slowed down tremendously

@@ -10,7 +10,7 @@ sed -i 's|"TeBkUmLpqRouter"|"TeBkUmLpqRouterPicoV"|g' ${FFEAD_CPP_PATH}/web/t3/c
 sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' ${FFEAD_CPP_PATH}/resources/server.prop
 #sed -i 's|LOGGING_ENABLED=false|LOGGING_ENABLED=true|g' ${FFEAD_CPP_PATH}/resources/server.prop
 nohup bash -c "./main --server_dir=$FFEAD_CPP_PATH --server_port=8080 > ffead.log &"
-sleep 10
+sleep 30
 echo "ffead-cpp-v-picov with sql-raw support launched"
 wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
 	-H 'Connection: keep-alive' --latency -d 5 -c 256 --timeout 8 -t 2 "http://localhost:8080/plaintext"

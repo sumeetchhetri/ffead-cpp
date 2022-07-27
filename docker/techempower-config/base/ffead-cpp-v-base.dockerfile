@@ -6,15 +6,15 @@ LABEL description="Base v docker image with ffead-cpp v4.0 commit id - master"
 ENV IROOT=/installs
 
 RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/libinter.so /usr/local/lib/libdinter.so && \
-	ln -s ${IROOT}/ffead-cpp-6.0/lib/libt3.so /usr/local/lib/libt3.so && \
-	ln -s ${IROOT}/ffead-cpp-6.0/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
-	ln -s ${IROOT}/ffead-cpp-6.0/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
-	ln -s ${IROOT}/ffead-cpp-6.0/lib/libinter.so /usr/local/lib/libinter.so && \
-	ln -s ${IROOT}/ffead-cpp-6.0/lib/libdinter.so /usr/local/lib/libdinter.so && \
+	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libt3.so /usr/local/lib/libt3.so && \
+	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
+	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
+	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libinter.so /usr/local/lib/libinter.so && \
+	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libdinter.so /usr/local/lib/libdinter.so && \
 	ldconfig
 	
 RUN apt update -yqq && apt install -y git make && rm -rf /var/lib/apt/lists/*
-#For Latest vlang, uncomment the below mentioned line, due to lot of new enhancements and unsafe block handling, vlnag has slowed down tremendously
+#For Latest vlang, uncomment the below mentioned line, due to lot of new enhancements and unsafe block handling, vlang has slowed down tremendously
 #RUN git clone https://github.com/vlang/v && cd v && make && ./v symlink
 
 #For the fastest vlang performance, use 0.1.29, where the unsafe changes were only restricted to pointer arithmetic

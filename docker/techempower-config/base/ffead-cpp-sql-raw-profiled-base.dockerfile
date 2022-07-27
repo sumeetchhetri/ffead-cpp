@@ -83,7 +83,7 @@ COPY sql-profiled-util.sh sql-profiled-install.sh install_ffead-cpp-sql-raw-prof
 RUN chmod 755 ${IROOT}/sql-profiled-util.sh ${IROOT}/sql-profiled-install.sh ${IROOT}/install_ffead-cpp-sql-raw-profiled.sh
 RUN ./sql-profiled-util.sh nobatch noclang noasync
 
-ENV BUILD_EXT_OPTS
+ENV BUILD_EXT_OPTS ""
 RUN ./sql-profiled-install.sh "-sql"
 
 ENV BUILD_EXT_OPTS -DWITH_PICOEV=on
@@ -91,3 +91,6 @@ RUN ./sql-profiled-install.sh "-picoev"
 
 ENV BUILD_EXT_OPTS -DWITH_IOURING=on
 RUN ./sql-profiled-install.sh "-io_uring"
+
+RUN apt remove -yqq postgresql-13 postgresql-contrib-13 gnupg lsb-release && apt autoremove -yqq
+RUN rm -rf /ssd/postgresql && rm -rf /tmp/postgresql && rm -rf /tmp/wrk /usr/local/bin/wrk

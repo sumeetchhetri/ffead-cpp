@@ -142,7 +142,7 @@ fi
 
 if [ "$2" = "emb" ]
 then
-	sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' resources/server.prop
+	sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' $FFEAD_CPP_PATH/resources/server.prop
 	sed -i 's|REQUEST_HANDLER=RequestReaderHandler|REQUEST_HANDLER=RequestHandler2|g' $FFEAD_CPP_PATH/resources/server.prop
 	sed -i 's|LAZY_HEADER_PARSE=false|LAZY_HEADER_PARSE=true|g' $FFEAD_CPP_PATH/resources/server.prop
 	if [ "$3" = "postgresql-raw-async-qw" ]

@@ -153,14 +153,12 @@ public:
 #pragma @IgnoreRef
 class AsyncReqData {
 public:
-	std::string h;
 	HttpResponse r;
 #ifdef HAVE_RAPID_JSON
 	rapidjson::StringBuffer sb;
 	rapidjson::Writer<rapidjson::StringBuffer> wr;
 #endif
 	void reset() {
-		h.clear();
 #ifdef HAVE_RAPID_JSON
 		sb.Clear();
 		wr.Reset(sb);
