@@ -9,5 +9,5 @@ RUN unzip -qq android-ndk-r25-linux.zip && mv android-ndk-r25 /usr/lib/android-s
 RUN git clone --depth=1 https://github.com/sumeetchhetri/ffead-cpp /ffead-cpp
 WORKDIR /ffead-cpp
 COPY cross-build.sh cross-build-deps.sh build-android*.sh build-common*.sh /ffead-cpp/
-RUN chmod +x cross-build-deps.sh && ./cross-build-deps.sh android /usr/lib/android-sdk/ /usr/lib/android-sdk/ndk-bundle/ armeabi-v7a 23
-RUN chmod +x cross-build.sh && ./cross-build.sh android /usr/lib/android-sdk/ /usr/lib/android-sdk/ndk-bundle/ armeabi-v7a 23
+RUN chmod +x cross-build-deps.sh && ./cross-build-deps.sh android /usr/lib/android-sdk/ /usr/lib/android-sdk/ndk-bundle armeabi-v7a 21
+RUN chmod +x cross-build.sh && ./cross-build.sh android /usr/lib/android-sdk/ /usr/lib/android-sdk/ndk-bundle armeabi-v7a 21

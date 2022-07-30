@@ -21,7 +21,7 @@ set -u
 export ANDROID_HOME=$1
 export ANDROID_NDK_ROOT=$2
 
-source ./build-android-common.sh $1 $2
+source ./build-android-common.sh $1 $2 $6
 
 #init_log_color
 
@@ -40,8 +40,8 @@ echo TOOLS_ROOT=${TOOLS_ROOT}
 
 # openssl-1.1.0f has a configure bug
 # openssl-1.1.1d has fix configure bug
-LIB_VERSION="OpenSSL_1_1_1d"
-LIB_NAME="openssl-1.1.1d"
+LIB_VERSION="OpenSSL_1_1_1q"
+LIB_NAME="openssl-1.1.1q"
 #LIB_DEST_DIR="${pwd_path}/../output/android/openssl-universal"
 
 echo "https://www.openssl.org/source/${LIB_NAME}.tar.gz"
@@ -80,7 +80,7 @@ function configure_make() {
     mkdir -p ${OUTPUT_ROOT}/log
 
     set_android_toolchain "openssl" "${ARCH}" "${ANDROID_API}"
-    set_android_cpu_feature "openssl" "${ARCH}" "${ANDROID_API}"
+    #set_android_cpu_feature "openssl" "${ARCH}" "${ANDROID_API}"
 
     export ANDROID_NDK_HOME=${ANDROID_NDK_ROOT}
     echo ANDROID_NDK_HOME=${ANDROID_NDK_HOME}

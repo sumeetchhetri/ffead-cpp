@@ -21,7 +21,7 @@ set -u
 export ANDROID_HOME=$1
 export ANDROID_NDK_ROOT=$2
 
-source ./build-android-common.sh $1 $2
+source ./build-android-common.sh $1 $2 $6
 
 #init_log_color
 
@@ -38,8 +38,8 @@ pwd_path="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 echo pwd_path=${pwd_path}
 echo TOOLS_ROOT=${TOOLS_ROOT}
 
-LIB_VERSION="v1.40.0"
-LIB_NAME="nghttp2-1.40.0"
+LIB_VERSION="v1.48.0"
+LIB_NAME="nghttp2-1.48.0"
 #LIB_DEST_DIR="${pwd_path}/../output/android/nghttp2-universal"
 
 echo "https://github.com/nghttp2/nghttp2/releases/download/${LIB_VERSION}/${LIB_NAME}.tar.gz"
@@ -76,7 +76,7 @@ function configure_make() {
     mkdir -p ${OUTPUT_ROOT}/log
 
     set_android_toolchain "nghttp2" "${ARCH}" "${ANDROID_API}"
-    set_android_cpu_feature "nghttp2" "${ARCH}" "${ANDROID_API}"
+    #set_android_cpu_feature "nghttp2" "${ARCH}" "${ANDROID_API}"
 
     export ANDROID_NDK_HOME=${ANDROID_NDK_ROOT}
     echo ANDROID_NDK_HOME=${ANDROID_NDK_HOME}

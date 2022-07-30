@@ -14,8 +14,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: Verify tfb
       run: |
-        cp -f docker/DockerFile-tfb-test FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp.dockerfile
-        cp -rf docker/techempower-config/* FrameworkBenchmarks/frameworks/C++/ffead-cpp/
-        cp -f docker/techempower-config/benchmark_config.json FrameworkBenchmarks/frameworks/C++/ffead-cpp/benchmark_config.json
-        cd FrameworkBenchmarks
+        git clone https://github.com/TechEmpower/FrameworkBenchmarks
+        cd docker/techempower-config/
+        cp -rf benchmark_config.json postgresql base/*.dockerfile lang/*.dockerfile scripts/*.sh *.sh *.dockerfile ../../FrameworkBenchmarks/frameworks/C++/ffead-cpp/
+        cd ../../FrameworkBenchmarks
         ./tfb --mode verify --test-dir C++/ffead-cpp

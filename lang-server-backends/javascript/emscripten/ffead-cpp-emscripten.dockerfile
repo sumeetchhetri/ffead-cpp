@@ -15,7 +15,7 @@ ENV EMSDK_NODE=/installs/emsdk/node/14.18.2_64bit/bin/node
 #RUN git clone https://github.com/madler/zlib && cd zlib && emcmake cmake -DBUILD_SHARED_LIBS=off . && emmake make -j4 install
 RUN git clone https://github.com/sean-/ossp-uuid && cd ossp-uuid && emconfigure ./configure --disable-shared && emmake make -j4 && cp uuid.h /usr/local/include/ \
 	&& cp .libs/libuuid.a /usr/local/lib
-RUN git clone https://github.com/kkos/oniguruma && cd oniguruma && emcmake cmake -DBUILD_SHARED_LIBS=off -DENABLE_BINARY_COMPATIBLE_POSIX_API=on . && emmake make -j4 install
+RUN git clone https://github.com/kkos/oniguruma && cd oniguruma && emcmake cmake -DBUILD_SHARED_LIBS=off -DENABLE_BINARY_COMPATIBLE_POSIX_API=on -DBUILD_TEST=off . && emmake make -j4 install
 RUN git clone https://github.com/efficient/libcuckoo.git && cd libcuckoo && emcmake cmake . && emmake make install
 
 RUN cd ${IROOT}/ffead-cpp-src/ && rm -rf CMakeFiles CMakeCache.txt build && mkdir build && cd build && emcmake cmake -DBUILD_SHARED_LIBS=off -DMOD_SDORM_SQL=off .. \

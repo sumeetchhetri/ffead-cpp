@@ -20,7 +20,7 @@ export PLATFORM_TYPE="Android"
 export ARCHS=("arm" "arm64" "x86" "x86_64")
 export ABIS=("armeabi-v7a" "arm64-v8a" "x86" "x86_64")
 export ABI_TRIPLES=("arm-linux-androideabi" "aarch64-linux-android" "i686-linux-android" "x86_64-linux-android")
-export ANDROID_API=23
+export ANDROID_API=$3
 
 export ANDROID_HOME=$1
 export ANDROID_NDK_ROOT=$2
@@ -148,13 +148,13 @@ function set_android_toolchain() {
   local build_host=$(get_build_host_internal "$arch")
   local clang_target_host=$(get_clang_target_host "$arch" "$api")
 
-  export AR=${build_host}-ar
+  export AR=llvm-ar
   export CC=${clang_target_host}-clang
   export CXX=${clang_target_host}-clang++
-  export AS=${build_host}-as
-  export LD=${build_host}-ld
-  export RANLIB=${build_host}-ranlib
-  export STRIP=${build_host}-strip
+  export AS=${CC}
+  export LD=ld
+  export RANLIB=llvm-ranlib
+  export STRIP=llvm-strip
 }
 
 function get_common_includes() {
@@ -221,8 +221,8 @@ function android_printf_global_params() {
   echo -e "LD =             $LD"
   echo -e "RANLIB =         $RANLIB"
   echo -e "STRIP =          $STRIP"
-  echo -e "CFLAGS =         $CFLAGS"
-  echo -e "CXXFLAGS =       $CXXFLAGS"
-  echo -e "LDFLAGS =        $LDFLAGS"
-  echo -e "CPPFLAGS =       $CPPFLAGS"
+  #echo -e "CFLAGS =         $CFLAGS"
+  #echo -e "CXXFLAGS =       $CXXFLAGS"
+  #echo -e "LDFLAGS =        $LDFLAGS"
+  #echo -e "CPPFLAGS =       $CPPFLAGS"
 }

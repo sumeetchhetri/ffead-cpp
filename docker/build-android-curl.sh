@@ -21,7 +21,7 @@ set -u
 export ANDROID_HOME=$1
 export ANDROID_NDK_ROOT=$2
 
-source ./build-android-common.sh $1 $2
+source ./build-android-common.sh $1 $2 $6
 
 #init_log_color
 
@@ -38,8 +38,8 @@ pwd_path="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 echo pwd_path=${pwd_path}
 echo TOOLS_ROOT=${TOOLS_ROOT}
 
-LIB_VERSION="curl-7_68_0"
-LIB_NAME="curl-7.68.0"
+LIB_VERSION="curl-7_84_0"
+LIB_NAME="curl-7.84.0"
 #LIB_DEST_DIR="${pwd_path}/../output/android/curl-universal"
 
 echo "https://github.com/curl/curl/releases/download/${LIB_VERSION}/${LIB_NAME}.tar.gz"
@@ -79,13 +79,13 @@ function configure_make() {
     mkdir -p ${OUTPUT_ROOT}/log
 
     set_android_toolchain "curl" "${ARCH}" "${ANDROID_API}"
-    set_android_cpu_feature "curl" "${ARCH}" "${ANDROID_API}"
+    #set_android_cpu_feature "curl" "${ARCH}" "${ANDROID_API}"
 
     export ANDROID_NDK_HOME=${ANDROID_NDK_ROOT}
     echo ANDROID_NDK_HOME=${ANDROID_NDK_HOME}
 
-    export LDFLAGS="${LDFLAGS} -L${4}/lib -L${4}/lib"
-    # export LDFLAGS="-Wl,-rpath-link,-L${4}/lib,-L${4}/lib $LDFLAGS "
+    export LDFLAGS="-L${4}/lib"
+    # export LDFLAGS="-Wl,-rpath-link,-L${4}/lib $LDFLAGS "
 
     android_printf_global_params "$ARCH" "$ABI" "$ABI_TRIPLE" "$PREFIX_DIR" "$OUTPUT_ROOT"
 

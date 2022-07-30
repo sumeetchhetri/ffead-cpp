@@ -155,7 +155,7 @@ int receive_fd(int fd)
 
 void handler(int sig)
 {
-#if defined(HAVE_EXECINFOINC)
+#if defined(HAVE_EXECINFOINC) && !defined(OS_ANDROID)
 	void *array[10];
 	size_t size;
 
@@ -1309,7 +1309,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		logger << "Unable to start the server on the specified ip/port..." << std::endl;
 		return;
 	}
-#if defined(OS_LINUX) && !defined(DISABLE_BPF)
+#if defined(OS_LINUX) && !defined(OS_ANDROID) && !defined(DISABLE_BPF)
 	Server::set_cbpf(sockfd, get_nprocs());
 #endif
 	if(isrHandler1) {

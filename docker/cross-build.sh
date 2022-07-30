@@ -62,8 +62,8 @@ build_ffeadcpp_autoconf() {
 	./autogen.sh
 	if [ "$1" = "android" ]
 	then
-		env AR=$TOOLCHAIN/bin/$TARGET-ar AS=$TOOLCHAIN/bin/$TARGET-as CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
-			LD=$TOOLCHAIN/bin/$TARGET-ld RANLIB=$TOOLCHAIN/bin/$TARGET-ranlib STRIP=$TOOLCHAIN/bin/$TARGET-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
+		env AR=$TOOLCHAIN/bin/llvm-ar AS=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
+			LD=$TOOLCHAIN/bin/ld RANLIB=$TOOLCHAIN/bin/llvm-ranlib STRIP=$TOOLCHAIN/bin/llvm-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
 			CFLAGS="-I${STAGE_DIR}/include" CXXFLAGS="-I${STAGE_DIR}/include -std=c++17" LDFLAGS="-L${STAGE_DIR}/lib" ./configure --host="${TARGET}" --enable-srv_emb=yes \
 			--enable-mod_sdormsql=yes --enable-mod_rediscache=yes --with-top_inc_dir=${STAGE_DIR}/include
 	else
@@ -154,13 +154,10 @@ then
 	TOOLCHAIN="$NDK/toolchains/llvm/prebuilt/linux-x86_64"
 	ANDROID_API=$5
 	ANDROID_ARCH=$4
+	export PATH=${TOOLCHAIN}/bin:$PATH
+  	echo PATH=$PATH
 	case $4 in
 	  armeabi-v7a)
-	  	cp ${TOOLCHAIN}/bin/arm-linux-androideabi-ar ${TOOLCHAIN}/bin/armv7a-linux-androideabi-ar
-	    cp ${TOOLCHAIN}/bin/arm-linux-androideabi-as ${TOOLCHAIN}/bin/armv7a-linux-androideabi-as
-	    cp ${TOOLCHAIN}/bin/arm-linux-androideabi-ld ${TOOLCHAIN}/bin/armv7a-linux-androideabi-ld
-	    cp ${TOOLCHAIN}/bin/arm-linux-androideabi-ranlib ${TOOLCHAIN}/bin/armv7a-linux-androideabi-ranlib
-	    cp ${TOOLCHAIN}/bin/arm-linux-androideabi-strip ${TOOLCHAIN}/bin/armv7a-linux-androideabi-strip
 	    init android armv7a-linux-androideabi x86_32
 	    build_ffeadcpp_cmake android
 		build_ffeadcpp_autoconf android

@@ -11,11 +11,11 @@ STAGE_ROOT="${STAGE_ROOT:-/opt/stage}"
 BUILD_ROOT="${BUILD_ROOT:-/opt/build}"
 
 ZLIB_VERSION="${ZLIB_VERSION:-1.2.11}"
-OPENSSL_VERSION="${OPENSSL_VERSION:-1_1_1-stable}"
-UNIXODBC_VERSION="${UNIXODBC_VERSION:-2.3.7}"
-CURL_VERSION="${CURL_VERSION:-7.71.1}"
-LIBCUCKOO_VERSION="${LIBCUCKOO_VERSION:-0.3}"
-LIBHIREDIS_VERSION="${LIBHIREDIS_VERSION:-0.13.3}"
+OPENSSL_VERSION="${OPENSSL_VERSION:-1_1_1q}"
+UNIXODBC_VERSION="${UNIXODBC_VERSION:-2.3.11}"
+CURL_VERSION="${CURL_VERSION:-7.84.0}"
+LIBCUCKOO_VERSION="${LIBCUCKOO_VERSION:-0.3.1}"
+LIBHIREDIS_VERSION="${LIBHIREDIS_VERSION:-1.0.0}"
 MONGOCDRIVER_VERSION="${MONGOCDRIVER_VERSION:-1.4.2}"
 
 ANDROID_HOME="/usr/lib/android-sdk"
@@ -35,8 +35,8 @@ build_zlib() {
     		make -j"$(nproc)"
     	elif [ "$1" = "android" ]
     	then
-    		env AR=$TOOLCHAIN/bin/$TARGET-ar AS=$TOOLCHAIN/bin/$TARGET-as CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
-				LD=$TOOLCHAIN/bin/$TARGET-ld RANLIB=$TOOLCHAIN/bin/$TARGET-ranlib STRIP=$TOOLCHAIN/bin/$TARGET-strip CHOST=${TARGET} \
+    		env AR=$TOOLCHAIN/bin/llvm-ar AS=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
+				LD=$TOOLCHAIN/bin/ld RANLIB=$TOOLCHAIN/bin/llvm-ranlib STRIP=$TOOLCHAIN/bin/llvm-strip CHOST=${TARGET} \
 				./configure --enable-shared --prefix=${STAGE_DIR}
     		make -j"$(nproc)"
     	else
@@ -62,7 +62,9 @@ build_openssl() {
     		sed -i'' -e's|_ANDROID_API="android-18"|_ANDROID_API="${API}"|g' Setenv-android.sh
     		export ANDROID_NDK_ROOT=$NDK
     		./Setenv-android.sh
-    		./config shared no-ssl2 no-ssl3 no-comp no-hw no-engine --prefix="${STAGE_DIR}" --openssldir=${STAGE_DIR}
+    		env AR=$TOOLCHAIN/bin/llvm-ar AS=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
+				LD=$TOOLCHAIN/bin/ld RANLIB=$TOOLCHAIN/bin/llvm-ranlib STRIP=$TOOLCHAIN/bin/llvm-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
+				./config shared no-ssl2 no-ssl3 no-comp no-hw no-engine --prefix="${STAGE_DIR}" --openssldir=${STAGE_DIR}
 			make depend
 			make all
 			make install_sw
@@ -80,8 +82,8 @@ build_unixodbc() {
 	pushd ${BUILD_DIR}/unixODBC-${UNIXODBC_VERSION}
 		if [ "$1" = "android" ]
     	then
-    		env AR=$TOOLCHAIN/bin/$TARGET-ar AS=$TOOLCHAIN/bin/$TARGET-as CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
-				LD=$TOOLCHAIN/bin/$TARGET-ld RANLIB=$TOOLCHAIN/bin/$TARGET-ranlib STRIP=$TOOLCHAIN/bin/$TARGET-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
+    		env AR=$TOOLCHAIN/bin/llvm-ar AS=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
+				LD=$TOOLCHAIN/bin/ld RANLIB=$TOOLCHAIN/bin/llvm-ranlib STRIP=$TOOLCHAIN/bin/llvm-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
 				./configure --host="${TARGET}" --prefix=${STAGE_DIR}
     	else
 			env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib C_INCLUDE_PATH=${STAGE_DIR}/include \
@@ -98,8 +100,8 @@ build_curl() {
 	pushd ${BUILD_DIR}/curl-${CURL_VERSION}
 		if [ "$1" = "android" ]
     	then
-    		env AR=$TOOLCHAIN/bin/$TARGET-ar AS=$TOOLCHAIN/bin/$TARGET-as CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
-				LD=$TOOLCHAIN/bin/$TARGET-ld RANLIB=$TOOLCHAIN/bin/$TARGET-ranlib STRIP=$TOOLCHAIN/bin/$TARGET-strip LIBS="-lssl -lcrypto" \
+    		env AR=$TOOLCHAIN/bin/llvm-ar AS=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
+				LD=$TOOLCHAIN/bin/ld RANLIB=$TOOLCHAIN/bin/llvm-ranlib STRIP=$TOOLCHAIN/bin/llvm-strip LIBS="-lssl -lcrypto" \
 				LDFLAGS="-L${STAGE_DIR}/lib" CPPFLAGS="-I${STAGE_DIR}/include" ./configure --build=`./config.guess` --target="${TARGET}" --host="${TARGET}" --prefix=${STAGE_DIR} \
 				--with-ssl=${STAGE_DIR} --with-zlib --disable-ftp --disable-gopher --disable-file --disable-imap --disable-ldap --disable-ldaps --disable-pop3 --disable-proxy \
 				--disable-rtsp --disable-smtp --disable-telnet --disable-tftp --without-gnutls --without-libidn --without-librtmp --disable-dict
@@ -135,11 +137,11 @@ build_libhiredis() {
 	pushd ${BUILD_DIR}/hiredis-${LIBHIREDIS_VERSION}
 		if [ "$1" = "android" ]
     	then
-    		env AR=$TOOLCHAIN/bin/$TARGET-ar AS=$TOOLCHAIN/bin/$TARGET-as CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
-				LD=$TOOLCHAIN/bin/$TARGET-ld RANLIB=$TOOLCHAIN/bin/$TARGET-ranlib STRIP=$TOOLCHAIN/bin/$TARGET-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
+    		env AR=$TOOLCHAIN/bin/llvm-ar AS=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
+				LD=$TOOLCHAIN/bin/ld RANLIB=$TOOLCHAIN/bin/llvm-ranlib STRIP=$TOOLCHAIN/bin/llvm-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
 				make -j"$(nproc)" > /dev/null
-			env AR=$TOOLCHAIN/bin/$TARGET-ar AS=$TOOLCHAIN/bin/$TARGET-as CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
-				LD=$TOOLCHAIN/bin/$TARGET-ld RANLIB=$TOOLCHAIN/bin/$TARGET-ranlib STRIP=$TOOLCHAIN/bin/$TARGET-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
+			env AR=$TOOLCHAIN/bin/llvm-ar AS=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
+				LD=$TOOLCHAIN/bin/ld RANLIB=$TOOLCHAIN/bin/llvm-ranlib STRIP=$TOOLCHAIN/bin/llvm-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
 				PREFIX=${STAGE_DIR} make install
     	else
 			env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib C_INCLUDE_PATH=${STAGE_DIR}/include make -j"$(nproc)" > /dev/null
@@ -154,8 +156,8 @@ build_uuid() {
 		echo "=== Building e2fsprogs-uuid (${TARGET})..."
 		curl -sLo- "https://mirrors.edge.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v1.45.6/e2fsprogs-1.45.6.tar.gz" | tar xz -C ${BUILD_DIR}
 		pushd ${BUILD_DIR}/e2fsprogs-1.45.6
-			env AR=$TOOLCHAIN/bin/$TARGET-ar AS=$TOOLCHAIN/bin/$TARGET-as CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
-				LD=$TOOLCHAIN/bin/$TARGET-ld RANLIB=$TOOLCHAIN/bin/$TARGET-ranlib STRIP=$TOOLCHAIN/bin/$TARGET-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
+			env AR=$TOOLCHAIN/bin/llvm-ar AS=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
+				LD=$TOOLCHAIN/bin/ld RANLIB=$TOOLCHAIN/bin/llvm-ranlib STRIP=$TOOLCHAIN/bin/llvm-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
 				./configure --enable-elf-shlibs --host="${TARGET}" --prefix=${STAGE_DIR}
 		popd
 		pushd ${BUILD_DIR}/e2fsprogs-1.45.6/lib/uuid
@@ -200,8 +202,8 @@ build_libmemcached() {
         		./configure --host="${TARGET}" --prefix="${STAGE_DIR}"
     	elif [ "$1" = "android" ]
     	then
-			env AR=$TOOLCHAIN/bin/$TARGET-ar AS=$TOOLCHAIN/bin/$TARGET-as CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
-				LD=$TOOLCHAIN/bin/$TARGET-ld RANLIB=$TOOLCHAIN/bin/$TARGET-ranlib STRIP=$TOOLCHAIN/bin/$TARGET-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
+			env AR=$TOOLCHAIN/bin/llvm-ar AS=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
+				LD=$TOOLCHAIN/bin/ld RANLIB=$TOOLCHAIN/bin/llvm-ranlib STRIP=$TOOLCHAIN/bin/llvm-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
 				./configure --host="${TARGET}" --prefix="${STAGE_DIR}"
     	else
     		env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib C_INCLUDE_PATH=${STAGE_DIR}/include LDFLAGS="-L${STAGE_DIR}/lib" CFLAGS="-I${STAGE_DIR}/include" \
@@ -222,8 +224,8 @@ build_mongocdriver() {
 				./configure --disable-tests --host="${TARGET}" --prefix=${STAGE_DIR} --disable-automatic-init-and-cleanup --disable-ssl --disable-sasl
 		elif [ "$1" = "android" ]
     	then
-			env AR=$TOOLCHAIN/bin/$TARGET-ar AS=$TOOLCHAIN/bin/$TARGET-as CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
-				LD=$TOOLCHAIN/bin/$TARGET-ld RANLIB=$TOOLCHAIN/bin/$TARGET-ranlib STRIP=$TOOLCHAIN/bin/$TARGET-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
+			env AR=$TOOLCHAIN/bin/llvm-ar AS=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
+				LD=$TOOLCHAIN/bin/ld RANLIB=$TOOLCHAIN/bin/llvm-ranlib STRIP=$TOOLCHAIN/bin/llvm-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
 				LDFLAGS="-L${STAGE_DIR}/lib -lrt" ./configure --disable-tests --host="${TARGET}" --prefix=${STAGE_DIR} --disable-automatic-init-and-cleanup --disable-ssl --disable-sasl
     	else
 			env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib C_INCLUDE_PATH=${STAGE_DIR}/include LDFLAGS="-L${STAGE_DIR}/lib" CFLAGS="-I${STAGE_DIR}/include" \
@@ -239,9 +241,9 @@ build_android_openssl_curl() {
 	cp build-common*.sh ${BUILD_ROOT}/
 	pushd ${BUILD_ROOT}
 		chmod +x *.sh
-		./build-android-openssl.sh $1 $2 $3 ${STAGE_DIR}/ ${BUILD_ROOT}/
-		./build-android-nghttp2.sh $1 $2 $3 ${STAGE_DIR}/ ${BUILD_ROOT}/
-		./build-android-curl.sh $1 $2 $3 ${STAGE_DIR}/ ${BUILD_ROOT}/
+		./build-android-openssl.sh $1 $2 $3 ${STAGE_DIR}/ ${BUILD_ROOT}/ $4
+		./build-android-nghttp2.sh $1 $2 $3 ${STAGE_DIR}/ ${BUILD_ROOT}/ $4
+		./build-android-curl.sh $1 $2 $3 ${STAGE_DIR}/ ${BUILD_ROOT}/ $4
 	popd
 }
 
@@ -348,30 +350,27 @@ then
 	TOOLCHAIN="$NDK/toolchains/llvm/prebuilt/linux-x86_64"
 	ANDROID_API=$5
 	ANDROID_ARCH=$4
+	export PATH=${TOOLCHAIN}/bin:$PATH
+  	echo PATH=$PATH
 	case $4 in
 	  armeabi-v7a)
-	  	cp ${TOOLCHAIN}/bin/arm-linux-androideabi-ar ${TOOLCHAIN}/bin/armv7a-linux-androideabi-ar
-	    cp ${TOOLCHAIN}/bin/arm-linux-androideabi-as ${TOOLCHAIN}/bin/armv7a-linux-androideabi-as
-	    cp ${TOOLCHAIN}/bin/arm-linux-androideabi-ld ${TOOLCHAIN}/bin/armv7a-linux-androideabi-ld
-	    cp ${TOOLCHAIN}/bin/arm-linux-androideabi-ranlib ${TOOLCHAIN}/bin/armv7a-linux-androideabi-ranlib
-	    cp ${TOOLCHAIN}/bin/arm-linux-androideabi-strip ${TOOLCHAIN}/bin/armv7a-linux-androideabi-strip
 	    init android armv7a-linux-androideabi x86_32
-	    build_android_openssl_curl $2 $3 arm
+	    build_android_openssl_curl $2 $3 arm $5
 	    build android armv7a-linux-androideabi x86_32
 	    ;;
 	  arm64-v8a)
 	    init android aarch64-linux-android arm64
-	    build_android_openssl_curl $2 $3 arm64
+	    build_android_openssl_curl $2 $3 arm64 $5
 	    build android aarch64-linux-android arm64
 	    ;;
 	  x86)
 	    init android i686-linux-android x86
-	    build_android_openssl_curl $2 $3 x86
+	    build_android_openssl_curl $2 $3 x86 $5
 	    build android i686-linux-android x86
 	    ;;
 	  x86-64)
 	    init android x86_64-linux-android x86-64
-	    build_android_openssl_curl $2 $3 x86-64
+	    build_android_openssl_curl $2 $3 x86-64 $5
 	    build android x86_64-linux-android x86-64
 	    ;;
 	  *)

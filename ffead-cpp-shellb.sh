@@ -149,7 +149,15 @@ function do_start() {
 	templatize "rtdcf/inter-shellb.sh.tem" "rtdcf/inter-shellb.sh" "CPPFLAGS,LFLAGS,LIBS"
 }
 function do_install() {
-	install_here "." "ffead-cpp" "script@*.sh,*.key,*.pem,*.crt" "resources" "public" "rtdcf" "web"
+	install_here "." "ffead-cpp" "script@*.sh,*.key,*.pem,*.crt" "resources" "public" "rtdcf"
+	install_here "web"
+	install_here "web" "web/default" "web/flexApp" "web/markers" "web/oauthApp" "web/peer-server" "web/te-benchmark" "web/t1"
+	if is_config "MOD_SDORM_MONGO"; then
+		install_here "web" "web/t2"
+	fi
+	if is_config "MOD_SDORM_SQL"; then
+		install_here "web" "web/t3" "web/t4" "web/t5"
+	fi
 	install_here "lib" "lib*.${SHLIB_EXT}"
 	install_here "include" "src/framework@*.h" "src/modules@*.h"
 	install_here "logs"

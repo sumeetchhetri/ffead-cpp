@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-base:6.0
+FROM sumeetchhetri/ffead-cpp-base:6.1
 
 #seastar needs ubuntu 20 and boost >= 1.66
 WORKDIR ${IROOT}

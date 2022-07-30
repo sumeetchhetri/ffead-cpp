@@ -390,7 +390,7 @@ static const char *parse_request_fcp(const char *buf, const char *buf_end, const
         *ret = -1;
         return NULL;
     }
-    if(isLazyHeaderParsing)
+    if(!isLazyHeaderParsing)
     	return parse_headers_fcp(buf, buf_end, headers, num_headers, max_headers, ret, content_length);
     return buf;
 }

@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-v-picov-raw-profiled-base:6.0
+FROM sumeetchhetri/ffead-cpp-v-picov-raw-profiled-base:6.1
 
 ENV IROOT=/installs
 

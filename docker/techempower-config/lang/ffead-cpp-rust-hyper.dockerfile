@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-rust-base:6.0
+FROM sumeetchhetri/ffead-cpp-rust-base:6.1
 
 ENV IROOT=/installs
 

@@ -109,6 +109,7 @@ then
 	fi
 fi
 if [ "$6" = "pool" ]
+then
 	if [[ $string == *"-async"* ]]; then
 		sed -i 's|"TeBkUmLpqAsyncRouter"|"TeBkUmLpqAsyncRouterPooled"|g' ${WEB_DIR}/config/application.xml
 		sed -i 's|TeBkUmLpqAsyncRouter|TeBkUmLpqAsyncRouterPooled|g' ${WEB_DIR}/config/cachememory.xml

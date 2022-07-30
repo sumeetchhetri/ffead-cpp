@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 LABEL maintainer="Sumeet Chhetri"
-LABEL version="6.0"
+LABEL version="6.1"
 LABEL description="ffead-cpp docker image with backend dependencies"
 
 ENV IROOT=/installs

@@ -55,7 +55,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 						valus.push_back(&cnt);
 						reflector.invokeMethodGVP(_temp,meth,valus);
 
-						std::string fname = CommonUtils::getTpeFnName(tpefilename, std::string(req->getCntxt_name()));
+						std::string fname = CommonUtils::getTpeFnName(tpefilename, "");
 						void* mkr = dlsym(ddlib, fname.c_str());
 						if(mkr!=NULL)
 						{

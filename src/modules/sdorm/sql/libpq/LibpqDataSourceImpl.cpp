@@ -96,7 +96,7 @@ bool LibpqDataSourceImpl::init() {
 			rdTsk = new PgReadTask(this);
 #endif
 			PQsetnonblocking(conn, 1);
-#if defined(OS_LINUX) && !defined(DISABLE_BPF)
+#if defined(OS_LINUX) && !defined(OS_ANDROID) && !defined(DISABLE_BPF)
 			Server::set_cbpf(fd, get_nprocs());
 #endif
 #ifdef USE_IO_URING
@@ -118,7 +118,7 @@ bool LibpqDataSourceImpl::init() {
 		} else {
 			stEvhMode = true;
 			PQsetnonblocking(conn, 1);
-#if defined(OS_LINUX) && !defined(DISABLE_BPF)
+#if defined(OS_LINUX) && !defined(OS_ANDROID) && !defined(DISABLE_BPF)
 			Server::set_cbpf(fd, get_nprocs());
 #endif
 			if(RequestReaderHandler::getInstance()!=NULL) {
