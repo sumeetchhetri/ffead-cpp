@@ -6,11 +6,11 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN git clone https://github.com/emscripten-core/emsdk.git && cd emsdk && ./emsdk install latest && ./emsdk activate latest
 
-ENV PATH=$PATH:/installs/emsdk:/installs/emsdk/node/12.18.1_64bit/bin:/installs/emsdk/upstream/emscripten
+ENV PATH=$PATH:/installs/emsdk:/installs/emsdk/node/14.18.2_64bit/bin:/installs/emsdk/upstream/emscripten
 ENV EMSDK=/installs/emsdk
 ENV EM_CONFIG=/installs/emsdk/.emscripten
 ENV EM_CACHE=/installs/emsdk/upstream/emscripten/cache
-ENV EMSDK_NODE=/installs/emsdk/node/12.18.1_64bit/bin/node
+ENV EMSDK_NODE=/installs/emsdk/node/14.18.2_64bit/bin/node
 
 #RUN git clone https://github.com/madler/zlib && cd zlib && emcmake cmake -DBUILD_SHARED_LIBS=off . && emmake make -j4 install
 RUN git clone https://github.com/sean-/ossp-uuid && cd ossp-uuid && emconfigure ./configure --disable-shared && emmake make -j4 && cp uuid.h /usr/local/include/ \

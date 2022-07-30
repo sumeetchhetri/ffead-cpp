@@ -26,7 +26,8 @@ std::string SolrSearch::COLL_C_PARAMS = ",router.name,numShards,shards,replicati
     "maxShardsPerNode,createNodeSet,createNodeSet.shuffle,collection.configName,router.field,autoAddReplicas,async,rule,snitch,policy,waitForFinalState,";
 std::string SolrSearch::COLL_M_PARAMS = ",maxShardsPerNode,replicationFactor,autoAddReplicas,collection.configName,rule,snitch,policy,";
 
-SolrSearch::SolrSearch() {
+SolrSearch::SolrSearch(ConnectionPooler* pool) {
+	this->pool = pool;
 	bool isZkUrl = StringUtil::toLowerCopy(pool->getProperties().getProperty("isZkUrl"))=="true";
 	solrcloud = StringUtil::toLowerCopy(pool->getProperties().getProperty("solrcloud"))=="true";
 	std::string colls = pool->getProperties().getProperty("collections");

@@ -90,7 +90,7 @@ class SolrSearch: public SearchEngineInterface {
     bool solrcloud;
     SolrState solrState;
 public:
-    SolrSearch();
+    SolrSearch(ConnectionPooler* pool);
     virtual ~SolrSearch();
 
     void createIndex(IndexQuery& iq);
