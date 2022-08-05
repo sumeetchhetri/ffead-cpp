@@ -1244,6 +1244,16 @@ AC_LINK_IFELSE(
       [AC_DEFINE(HAVE_TCP_FASTOPEN, [1], [TCP_FASTOPEN])],
       [])
 AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM([[#include <sys/socket.h>]],
+                      [[return SO_REUSEPORT;]])],
+      [AC_DEFINE(HAVE_SO_REUSEPORT, [1], [SO_REUSEPORT])],
+      [])
+AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM([[#include <sys/socket.h>]],
+                      [[return SO_REUSEADDR;]])],
+      [AC_DEFINE(HAVE_SO_REUSEADDR, [1], [SO_REUSEADDR])],
+      [])
+AC_LINK_IFELSE(
       [AC_LANG_PROGRAM([[#include <sys/socket.h>
 						 #include <netinet/in.h>
 						 #include <netinet/tcp.h>

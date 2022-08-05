@@ -1,0 +1,10 @@
+FROM dockcross/linux-armv5-uclibc
+
+RUN git clone --depth=1 https://github.com/sumeetchhetri/ffead-cpp /ffead-cpp
+WORKDIR /ffead-cpp
+
+COPY files/libmemcached-build.patch files/musl-fixes.patch /ffead-cpp/
+COPY dockcross-build-deps.sh /ffead-cpp/
+RUN chmod +x dockcross-build-deps.sh && ./dockcross-build-deps.sh arm-unknown-linux-uclibcgnueabi
+COPY dockcross-build.sh /ffead-cpp/
+RUN chmod +x dockcross-build.sh && ./dockcross-build.sh arm-unknown-linux-uclibcgnueabi

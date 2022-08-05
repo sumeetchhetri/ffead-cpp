@@ -73,15 +73,20 @@ Server::Server(const std::string& port, const bool& block, const int& waiting, c
 			perror("server: socket");
 			continue;
 		}
+
 		#ifdef OS_MINGW
+#ifdef HAVE_SO_REUSEADDR
 			BOOL bOptVal = FALSE;
 			if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&bOptVal, sizeof(int)) == -1) {
 				perror("setsockopt");
 			}
+#endif
 		#else
+#ifdef HAVE_SO_REUSEADDR
 			if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
 				perror("setsockopt");
 			}
+#endif
 		#ifdef HAVE_TCP_QUICKACK
 			if (setsockopt(this->sock, IPPROTO_TCP, TCP_QUICKACK, &yes, sizeof(int)) == -1) {
 				perror("setsockopt");
@@ -322,17 +327,21 @@ SOCKET Server::createListener(const int& port, const bool& block, bool isSinglEV
 
 	#ifdef OS_MINGW
 		BOOL bOptVal = FALSE;
+#ifdef HAVE_SO_REUSEADDR
 		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&bOptVal, sizeof(int)) == -1) {
 			perror("setsockopt");
 		}
+#endif
 	#else
 		#ifdef CYGWIN
+#ifdef HAVE_SO_REUSEADDR
 		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
 		#else
 		if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), &yes, sizeof(int)) == -1) {
 		#endif
 			perror("setsockopt");
 		}
+#endif
 	#ifdef HAVE_TCP_QUICKACK
 		if (setsockopt(sockfd, IPPROTO_TCP, TCP_QUICKACK, &yes, sizeof(int)) == -1) {
 			perror("setsockopt");
@@ -451,18 +460,22 @@ SOCKET Server::createListener(const std::string& ipAddress, const int& port, con
 		}
 
 		#ifdef OS_MINGW
+#ifdef HAVE_SO_REUSEADDR
 			BOOL bOptVal = FALSE;
 			if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&bOptVal, sizeof(int)) == -1) {
 				perror("setsockopt");
 			}
+#endif
 		#else
 		#ifdef CYGWIN
+#ifdef HAVE_SO_REUSEADDR
 			if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
 			#else
 			if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), &yes, sizeof(int)) == -1) {
 			#endif
 				perror("setsockopt");
 			}
+#endif
 		#ifdef HAVE_TCP_QUICKACK
 			if (setsockopt(sockfd, IPPROTO_TCP, TCP_QUICKACK, &yes, sizeof(int)) == -1) {
 				perror("setsockopt");

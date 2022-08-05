@@ -313,10 +313,6 @@ bool SocketInterface::isCurrentRequest(int reqp) {
 }
 
 int BaseSocket::writeDirect(const std::string& h, const std::string& d) {
-#if defined(USE_IO_URING)
-	eh->post_write_2(this, h, d);
-	return 1;
-#endif
 	int res = writeDirect(h, 0, true);
 	if(res>0) {
 		res = writeDirect(d, 0, false);
@@ -329,10 +325,6 @@ int BaseSocket::writeDirect(const std::string& h, const char* d, size_t len, boo
 	int res = writeDirect(h, 0, cont);
 	if(res>0) {
 		if(!isSecure()) {
-#if defined(USE_IO_URING)
-			eh->post_write(this, d, len);
-			return 1;
-#endif
 			int er = send(fd, d, len, 0);
 			switch(er) {
 				case -1:
@@ -357,10 +349,6 @@ int BaseSocket::writeDirect(const std::string& h, const char* d, size_t len, boo
 
 int BaseSocket::writeDirect(const std::string& d, int off, bool cont) {
 	if(!isSecure()) {
-#if defined(USE_IO_URING)
-		eh->post_write(this, d, off);
-		return 1;
-#endif
 		int er = send(fd, &d[off], d.length()-off, 0);
 		switch(er) {
 			case -1:
@@ -535,11 +523,7 @@ int BaseSocket::readFrom()
 	if(!isSecure()) {
 		int er = 0;
 		do {
-#if defined USE_IO_URING
-			er = recv(fd, buff, 2048, 0);
-#else
 			er = recv(fd, buff, 8192, 0);
-#endif
 			switch(er) {
 				case -1:
 				case 0:
@@ -781,11 +765,10 @@ bool BaseSecureSocket::isSecure() {
 
 void BaseSocket::doneRead() {
 #if defined USE_IO_URING
-	if(hasPendingRead()) {
+	//if(hasPendingRead()) {
 		eh->post_read(this);
-	}
-#endif
-#if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL) || defined(USE_EVPORT)
+	//}
+#elif defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL) || defined(USE_EVPORT)
 	eh->registerRead(this);
 #endif
 }

@@ -172,7 +172,6 @@ enum io_uring_events {
     READ,
     WRITE,
     PROV_BUF,
-	WRITE_CONT,
 	INTERRUPT
 };
 
@@ -240,9 +239,9 @@ class SelEpolKqEvPrt : public EventHandler {
 	    socklen_t client_len;
 	    struct io_uring_params params;
 	    struct io_uring ring;
-	    int efd;
-		BaseSocket* efdbs;
-		std::atomic<int> pending;
+	    //int efd;
+		//BaseSocket* efdbs;
+		//std::atomic<int> pending;
 	    //char** bufs;
 	    //int group_id;
 	#elif defined(USE_PICOEV)

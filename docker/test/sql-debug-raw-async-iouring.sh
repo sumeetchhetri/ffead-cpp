@@ -10,7 +10,9 @@ export LD_LIBRARY_PATH=$FFEAD_CPP_PATH/lib:/usr/local/lib:$LD_LIBRARY_PATH
 export PATH=$FFEAD_CPP_PATH/lib:$PATH
 cd /tmp/ffead-cpp-sql-raw-async-iouring
 cp -f web/t4/config/cachememory.xml web/t4/config/cache.xml
-sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' resources/server.prop
+sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' $FFEAD_CPP_PATH/resources/server.prop
+sed -i 's|REQUEST_HANDLER=RequestReaderHandler|REQUEST_HANDLER=RequestHandler2|g' $FFEAD_CPP_PATH/resources/server.prop
+sed -i 's|LAZY_HEADER_PARSE=false|LAZY_HEADER_PARSE=true|g' $FFEAD_CPP_PATH/resources/server.prop
 if [ $# -eq 0 ]; then
 	cp /server_orig.sh server.sh
 	nohup bash -c "./server.sh > ffead.log &"

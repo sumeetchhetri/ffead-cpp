@@ -159,7 +159,6 @@ BaseSocket* RequestHandler2::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* bi, in
 		}
 		case WRITE_READY: {
 			Http11Socket* si = (Http11Socket*)bi;
-#ifndef USE_IO_URING
 			ins->selector.unRegisterWrite(bi);
 			std::vector<ResponseData>::iterator it = si->outbuf.begin();
 			while(it != si->outbuf.end()) {
@@ -171,7 +170,6 @@ BaseSocket* RequestHandler2::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* bi, in
 					it = si->outbuf.erase(it);
 				}
 			}
-#endif
 			break;
 		}
 		case ON_DATA_READ: {
@@ -213,6 +211,10 @@ void* RequestHandler2::handleWrites(void* inp) {
 	while(ins->shi->run) {
 		ins->selector.wQ->wait_dequeue(swr);
 		swr.f(swr.bs, swr.arg);
+		//Remove the sync block on io_uring as write does not need to be on the uring
+/*#if defined(USE_IO_URING)
+		swr.bs->eh->interrupt_wait();
+#endif*/
 	}
 	return 0;
 }
@@ -320,10 +322,10 @@ bool Http11Socket::handle() {
 	if(pd) {
 		std::vector<ResponseData>::iterator it = outbuf.begin();
 		while(it != outbuf.end()) {
-#if defined(USE_IO_URING)
+/*#if defined(USE_IO_URING)
 			eh->post_write(this, it->_b);
 			it = outbuf.erase(it);
-#else
+#else*/
 			int done = writeTo(&*it);
 			if(done == -1) {
 				eh->registerWrite(this);
@@ -331,7 +333,7 @@ bool Http11Socket::handle() {
 			} else {
 				it = outbuf.erase(it);
 			}
-#endif
+//#endif
 		}
 	}
 

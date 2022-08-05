@@ -110,7 +110,7 @@ then
 fi
 if [ "$6" = "pool" ]
 then
-	if [[ $string == *"-async"* ]]; then
+	if [[ $3 == *"-async"* ]]; then
 		sed -i 's|"TeBkUmLpqAsyncRouter"|"TeBkUmLpqAsyncRouterPooled"|g' ${WEB_DIR}/config/application.xml
 		sed -i 's|TeBkUmLpqAsyncRouter|TeBkUmLpqAsyncRouterPooled|g' ${WEB_DIR}/config/cachememory.xml
 		if [ "$3" = "postgresql-raw-async-qw" ]

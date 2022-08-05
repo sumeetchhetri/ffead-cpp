@@ -1,4 +1,5 @@
 FROM sumeetchhetri/musl-cross:1.0
+
 RUN git clone --depth=1 https://github.com/sumeetchhetri/ffead-cpp /ffead-cpp
 WORKDIR /ffead-cpp
 COPY files/libmemcached-build.patch files/musl-fixes.patch /ffead-cpp/

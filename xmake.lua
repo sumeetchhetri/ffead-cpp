@@ -673,6 +673,34 @@ option("TCP_FASTOPEN")
 	end)
 option_end()
 
+option("SO_REUSEPORT")
+	set_default(true)
+	set_showmenu(false)
+	after_check(function (option)
+		import("lib.detect.check_cxsnippets")
+		local ok = check_cxsnippets({"#include <sys/socket.h>\nint test() { return SO_REUSEPORT; }"})
+		if ok then
+			option:set("configvar", "HAVE_SO_REUSEPORT", 1)
+		else
+			option:enable(false)
+		end
+	end)
+option_end()
+
+option("SO_REUSEADDR")
+	set_default(true)
+	set_showmenu(false)
+	after_check(function (option)
+		import("lib.detect.check_cxsnippets")
+		local ok = check_cxsnippets({"#include <sys/socket.h>\nint test() { return SO_REUSEADDR; }"})
+		if ok then
+			option:set("configvar", "HAVE_SO_REUSEADDR", 1)
+		else
+			option:enable(false)
+		end
+	end)
+option_end()
+
 option("SO_ATTACH_REUSEPORT_CBPF")
 	set_default(true)
 	set_showmenu(false)
@@ -762,7 +790,7 @@ function getOptions()
 			 "SELECT", "POLL", "DEVPOLL", "IOURING", "EPOLL", "KQUEUE", "EVPORT", "ACCEPT4", "TCP_QUICKACK", 
 			 "TCP_DEFER_ACCEPT", "TCP_FASTOPEN", "MOD_MEMORY","MOD_MEMCACHED", "MOD_REDIS", "MOD_SDORM_SQL", 
 			 "MOD_SDORM_MONGO", "MOD_SDORM_SCYLLA", "MOD_SER_BIN", "MOD_JOBS", "SRV_EMB", "WITH_RAPIDJSON", 
-			 "WITH_PUGIXML", "MOD_ELASTIC", "MOD_SOLR"}
+			 "WITH_PUGIXML", "MOD_ELASTIC", "MOD_SOLR", "SO_REUSEADDR", "SO_REUSEPORT"}
 end
 
 includes("src/modules")

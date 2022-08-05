@@ -1,6 +1,7 @@
 import os
 import shutil
 import json
+import SCons.Conftest
 
 vars = Variables('scons_options.py')
 vars.Add(BoolVariable('MOD_DEBUG', 'Enable Debug', False))
@@ -50,6 +51,19 @@ common_env.Append(LIBPATH 		= library_paths)
 common_env.Append(CXXFLAGS 		= cxxFlags)
 
 conf = Configure(common_env)
+
+if conf.CheckDeclaration('SO_REUSEPORT', '#include <sys/socket.h>'):
+	conf.env.Append(CPPDEFINES=['HAVE_SO_REUSEPORT'])
+if conf.CheckDeclaration('SO_REUSEADDR', '#include <sys/socket.h>'):
+	conf.env.Append(CPPDEFINES=['HAVE_SO_REUSEADDR'])
+if conf.CheckDeclaration('TCP_QUICKACK', '#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>'):
+	conf.env.Append(CPPDEFINES=['HAVE_TCP_QUICKACK'])
+if conf.CheckDeclaration('TCP_DEFER_ACCEPT', '#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>'):
+	conf.env.Append(CPPDEFINES=['HAVE_TCP_DEFER_ACCEPT'])
+if conf.CheckDeclaration('TCP_FASTOPEN', '#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>'):
+	conf.env.Append(CPPDEFINES=['HAVE_TCP_FASTOPEN'])
+if conf.CheckDeclaration('SO_ATTACH_REUSEPORT_CBPF', '#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\n#include <linux/bpf.h>\n#include <linux/filter.h>\n#include <sys/sysinfo.h>'):
+	conf.env.Append(CPPDEFINES=['HAVE_SO_ATTACH_REUSEPORT_CBPF'])
 
 platform = common_env['PLATFORM']
 if platform == 'darwin':

@@ -66,6 +66,8 @@ function do_start() {
 	c_code "#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\nint test() { return TCP_QUICKACK; }" "HAVE_TCP_QUICKACK"
 	c_code "#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\nint test() { return TCP_DEFER_ACCEPT; }" "HAVE_TCP_DEFER_ACCEPT"
 	c_code "#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\nint test() { return TCP_FASTOPEN; }" "HAVE_TCP_FASTOPEN"
+	c_code "#include <sys/socket.h>\nint test() { return SO_REUSEPORT; }" "HAVE_SO_REUSEPORT"
+	c_code "#include <sys/socket.h>\nint test() { return SO_REUSEADDR; }" "HAVE_SO_REUSEADDR"
 	c_code "#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\n#include <linux/bpf.h>\n#include <linux/filter.h>\n#include <sys/sysinfo.h>\nint main() { return SO_ATTACH_REUSEPORT_CBPF; }" "HAVE_SO_ATTACH_REUSEPORT_CBPF"
 	if ! c_hdr "regex.h" "HAVE_REGEX"; then 
 		c_hdr_lib "onigposix.h" "onig" "HAVE_ONIG_REGEX,HAVE_ONIG_REGEX_LIB" "regex devel not found"

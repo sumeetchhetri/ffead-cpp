@@ -340,6 +340,14 @@ if cc.compiles('#include <sys/socket.h>\n#include <netinet/in.h>\n#include <neti
 	conf_data.set('HAVE_TCP_FASTOPEN', 1)
 endif
 
+if cc.compiles('#include <sys/socket.h>\nint test() { return SO_REUSEPORT; }')
+	conf_data.set('HAVE_SO_REUSEPORT', 1)
+endif
+
+if cc.compiles('#include <sys/socket.h>\nint test() { return SO_REUSEADDR; }')
+	conf_data.set('HAVE_SO_REUSEADDR', 1)
+endif
+
 if cc.compiles('#include <sys/socket.h>\n#include <netinet/in.h>\n#include <netinet/tcp.h>\n#include <linux/bpf.h>\n#include <linux/filter.h>\n#include <sys/sysinfo.h>\nint main() { return SO_ATTACH_REUSEPORT_CBPF; }')
 	conf_data.set('HAVE_SO_ATTACH_REUSEPORT_CBPF', 1)
 endif

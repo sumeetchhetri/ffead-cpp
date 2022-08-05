@@ -49,6 +49,7 @@ class TeBkUmLpqWorld {
 	int id;
 	int randomNumber;
 	static TemplateJson tJ;
+	static TemplateJson tJc;
 public:
 	TeBkUmLpqWorld(int id);
 	TeBkUmLpqWorld(int id, int randomNumber);
@@ -75,15 +76,15 @@ public:
 		ou->insert(il+tJ.tpos.at(1)+ids.length(), std::to_string(randomNumber));
 	}
 	static void tmplJson(std::vector<TeBkUmLpqWorld>& vec, std::string* ou) {
-		ou->append("[");
 		for(auto el: vec) {
 			size_t il = ou->length();
-			ou->append(tJ.t);
+			ou->append(tJc.t);
 			std::string ids = std::to_string(el.id);
-			ou->insert(il+tJ.tpos.at(0), ids);
-			ou->insert(il+tJ.tpos.at(1)+ids.length(), std::to_string(el.randomNumber));
+			ou->insert(il+tJc.tpos.at(0), ids);
+			ou->insert(il+tJc.tpos.at(1)+ids.length(), std::to_string(el.randomNumber));
 		}
-		ou->append("]");
+		ou->insert(0, "[");
+		ou->insert(ou->length()-1, "]");
 	}
 #ifdef HAVE_RAPID_JSON
 	void toJson(rapidjson::Writer<rapidjson::StringBuffer>& w) {

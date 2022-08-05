@@ -24,6 +24,7 @@
 
 //This is template based json serialization approach
 TemplateJson TeBkUmLpqWorld::tJ = TemplateJson("{\"id\":,\"randomNumber\":}", {6,22});
+TemplateJson TeBkUmLpqWorld::tJc = TemplateJson("{\"id\":,\"randomNumber\":},", {6,22});
 
 int TeBkUmLpqWorld::getId() const {
 	return id;

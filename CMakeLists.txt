@@ -256,6 +256,18 @@ HAVE_TCP_FASTOPEN)
 include(CheckCSourceCompiles)
 CHECK_C_SOURCE_COMPILES("
 	#include <sys/socket.h>
+	int main() { return SO_REUSEPORT; }"
+HAVE_SO_REUSEPORT)
+
+include(CheckCSourceCompiles)
+CHECK_C_SOURCE_COMPILES("
+	#include <sys/socket.h>
+	int main() { return SO_REUSEADDR; }"
+HAVE_SO_REUSEADDR)
+
+include(CheckCSourceCompiles)
+CHECK_C_SOURCE_COMPILES("
+	#include <sys/socket.h>
 	#include <netinet/in.h>
 	#include <netinet/tcp.h>
 	#include <linux/bpf.h>

@@ -263,9 +263,6 @@ void* LibpqDataSourceImpl::handle(void* inp) {
 					if (FD_ISSET(ths->fd, &read_fds)) {
 						//fprintf(stdout, "Data read....\n");
 						rdTsk->run();
-#if defined(USE_IO_URING)
-						ths->eh->interrupt_wait();
-#endif
 					}
 					break;
 			}

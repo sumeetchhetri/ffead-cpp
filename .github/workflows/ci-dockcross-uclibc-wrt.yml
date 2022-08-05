@@ -1,4 +1,4 @@
-name: Opensuse
+name: Dockcross Compile
 
 on:
   push:
@@ -17,8 +17,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip_build]')"
     steps:
     - uses: actions/checkout@v2
-    - name: Build ffead-cpp on opensuse
+    - name: Cross compile ffead-cpp for arm uclibc openwrt
       run: |
-        cd docker/os-based
-        docker build -f DockerFile-OpenSuse-x64-ffead-cpp .
-        docker build -f DockerFile-OpenSuse-x64-ffead-cpp_autoconf .
+        cd docker
+        docker build -f DockerFile-dockcross-build .
