@@ -244,9 +244,7 @@ fn main() {
 	println!("Initializing ffead-cpp end...");
 
     //let mut app = App::<Request, Ctx, ()>::create(generate_context, ());
-	let mut app = App::<Request, Ctx, ()>::new_basic();
-
-    app.set404(async_middleware!(Ctx, [index]));
+	let app = App::<Request, Ctx, ()>::new_basic().set404(async_middleware!(Ctx, [index]));
 
     let addr_str = format!("{}:{}", "0.0.0.0", arg1);
     let addr: String = addr_str.parse().unwrap();

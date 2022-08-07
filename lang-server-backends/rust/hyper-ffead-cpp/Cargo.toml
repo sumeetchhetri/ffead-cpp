@@ -5,12 +5,12 @@ authors = ["Sumeet Chhetri <sumeet.chhetri@gmail.com>"]
 edition = "2021"
 
 [dependencies]
-hyper = { version = "0.14.15", features = ["full"] }
-tokio = { version = "1.14.0", features = ["full"] }
+hyper = { version = "0.14.20", features = ["full"] }
+tokio = { version = "1.20.1", features = ["full"] }
 pretty_env_logger = "0.4.0"
-libc = "0.2.108"
-bytes = "1.1.0"
-futures = "0.3.18"
+libc = "0.2.127"
+bytes = "1.2.1"
+futures = "0.3.21"
 
 [profile.release]
 lto = true

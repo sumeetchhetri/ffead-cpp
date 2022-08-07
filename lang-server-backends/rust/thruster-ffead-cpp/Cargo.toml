@@ -5,16 +5,16 @@ authors = ["Sumeet Chhetri <sumeet.chhetri@gmail.com>"]
 edition = "2021"
 
 [dependencies]
-hyper = "0.14.15"
-futures = "0.1"
-serde = "1.0.130"
-serde_derive = "1.0.130"
-serde_json = "1.0.71"
-smallvec = "1.7.0"
-thruster = "1.1.10"
-thruster-proc = "1.1.10"
-libc = "0.2.108"
-bytes = "1.1.0"
+hyper = "0.14.20"
+futures = "0.3.21"
+serde = "1.0.142"
+serde_derive = "1.0.142"
+serde_json = "1.0.83"
+smallvec = "1.9.0"
+thruster = "1.2.4"
+thruster-proc = "1.2.4"
+libc = "0.2.127"
+bytes = "1.2.1"
 
 [profile.release]
 lto = true

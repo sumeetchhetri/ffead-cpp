@@ -16,15 +16,15 @@
 
 extern crate libc;
 
-use actix_http::http::Version;
-use actix_http::http::StatusCode;
+use actix_http::Version;
+use actix_http::StatusCode;
 use libc::{c_char, c_int, size_t, c_void};
 use std::ptr;
 use std::path::PathBuf;
 use std::mem;
 use std::slice;
 use futures::StreamExt;
-use actix_web::dev::HttpResponseBuilder;
+use actix_web::HttpResponseBuilder;
 use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Either, Error};
 use actix_files::NamedFile;
 use std::env;
@@ -193,19 +193,19 @@ async fn handle(_req: HttpRequest, mut body: web::Payload) -> RegisterResult {
         for i in 0..resp_headers_len as usize {
             let k = slice_from_raw(response.headers[i].name, response.headers[i].name_len);
             let v = slice_from_raw(response.headers[i].value, response.headers[i].value_len);
-            response_builder.set_header(k, v);
+            response_builder.insert_header((k, v));
         }
-        response_builder.set_header(SERVER, SERVER_NAME);
+        response_builder.insert_header((SERVER, SERVER_NAME));
         let body = slice_from_raw(response.body, response.body_len);
-        Either::A(response_builder.body(body))
+        Either::Left(response_builder.body(body))
     } else {
         let url_path = slice_from_raw(response.url, response.url_len);
         let url_path = std::str::from_utf8(url_path).unwrap();
         if Path::new(url_path).exists() {
         	let path: PathBuf = url_path.parse().unwrap();
-        	Either::B(Ok(NamedFile::open(path).unwrap()))
+        	Either::Right(Ok(NamedFile::open(path).unwrap()))
         } else {
-        	Either::A(HttpResponse::NotFound().finish())
+        	Either::Left(HttpResponse::NotFound().finish())
         }
     }
 }
