@@ -84,7 +84,7 @@ public:
 			ou->insert(il+tJc.tpos.at(1)+ids.length(), std::to_string(el.randomNumber));
 		}
 		ou->insert(0, "[");
-		ou->insert(ou->length()-1, "]");
+		ou->at(ou->length()-1) = ']';
 	}
 #ifdef HAVE_RAPID_JSON
 	void toJson(rapidjson::Writer<rapidjson::StringBuffer>& w) {
