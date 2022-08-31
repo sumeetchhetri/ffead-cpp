@@ -1,28 +1,51 @@
 export FFEAD_CPP_PATH=${IROOT}/ffead-cpp-6.0-sql
 export LD_LIBRARY_PATH=${IROOT}/:${IROOT}/lib:${FFEAD_CPP_PATH}/lib:/usr/local/lib:$LD_LIBRARY_PATH
 
-sed -i 's|tfb-database|localhost|g' ${FFEAD_CPP_PATH}/web/t3/config/sdorm.xml
-sed -i 's|"TeBkUmLpqRouter"|"TeBkUmLpqRouterPicoV"|g' ${FFEAD_CPP_PATH}/web/t3/config/application.xml
+if [ "$1" = "async" ]
+then
+	rm -rf $FFEAD_CPP_PATH/web/t1 $FFEAD_CPP_PATH/web/t2 $FFEAD_CPP_PATH/web/t3 $FFEAD_CPP_PATH/web/t5
+	sed -i 's|<async>false</async>|<async>true</async>|g' $FFEAD_CPP_PATH/web/t4/config/sdorm.xml
+	sed -i 's|tfb-database|localhost|g' $FFEAD_CPP_PATH/web/t4/config/sdorm.xml
+elif [ "$1" = "async-pool" ]
+then
+	rm -rf $FFEAD_CPP_PATH/web/t1 $FFEAD_CPP_PATH/web/t2 $FFEAD_CPP_PATH/web/t3 $FFEAD_CPP_PATH/web/t4
+	sed -i 's|<async>false</async>|<async>true</async>|g' $FFEAD_CPP_PATH/web/t5/config/sdorm.xml
+	sed -i 's|tfb-database|localhost|g' $FFEAD_CPP_PATH/web/t5/config/sdorm.xml
+else
+	rm -rf $FFEAD_CPP_PATH/web/t1 $FFEAD_CPP_PATH/web/t2 $FFEAD_CPP_PATH/web/t4 $FFEAD_CPP_PATH/web/t5
+	sed -i 's|tfb-database|localhost|g' ${FFEAD_CPP_PATH}/web/t3/config/sdorm.xml
+	sed -i 's|"TeBkUmLpqRouter"|"TeBkUmLpqRouterPicoV"|g' ${FFEAD_CPP_PATH}/web/t3/config/application.xml
+fi
+
 
 cd $IROOT/lang-server-backends/v/pico.v
-v -prod -cflags '-std=gnu11 -Wall -O3 -march=native -mtune=native -no-pie -flto -fprofile-dir=/tmp/profile-data -fprofile-generate -lgcov --coverage' main.v
+v -enable-globals -prod -cflags '-std=gnu11 -Wall -O3 -march=native -mtune=native -no-pie -flto -fprofile-dir=/tmp/profile-data -fprofile-generate -lgcov --coverage' main.v
 
 #Start postgresql
 service postgresql start
 #For profiling/benchmarking
 
 cd $IROOT/
-./install_ffead-cpp-sql-raw-v-picov-profiled.sh
+./install_ffead-cpp-sql-raw-v-picov-profiled.sh "$1"
 
 cd $IROOT/lang-server-backends/v/pico.v
-v -prod -cflags '-std=gnu11 -Wall -O3 -march=native -mtune=native -no-pie -flto  -fprofile-dir=/tmp/profile-data -fprofile-use=/tmp/profile-data -fprofile-correction -lgcov --coverage' main.v
+v -enable-globals -prod -cflags '-std=gnu11 -Wall -O3 -march=native -mtune=native -no-pie -flto  -fprofile-dir=/tmp/profile-data -fprofile-use=/tmp/profile-data -fprofile-correction -lgcov --coverage' main.v
 
 cd $IROOT/
-./install_ffead-cpp-sql-raw-v-picov-profiled.sh
+./install_ffead-cpp-sql-raw-v-picov-profiled.sh "$1"
 
-mv $IROOT/lang-server-backends/v/pico.v/main $IROOT/
-
-sed -i 's|localhost|tfb-database|g' $IROOT/ffead-cpp-6.0-sql/web/t3/config/sdorm.xml
+if [ "$1" = "async" ]
+then
+	sed -i 's|localhost|tfb-database|g' $IROOT/ffead-cpp-6.0-sql/web/t4/config/sdorm.xml
+	mv $IROOT/lang-server-backends/v/pico.v/main_async $IROOT/
+elif [ "$1" = "async-pool" ]
+then
+	sed -i 's|localhost|tfb-database|g' $IROOT/ffead-cpp-6.0-sql/web/t5/config/sdorm.xml
+	mv $IROOT/lang-server-backends/v/pico.v/main_async $IROOT/
+else
+	sed -i 's|localhost|tfb-database|g' $IROOT/ffead-cpp-6.0-sql/web/t3/config/sdorm.xml
+	mv $IROOT/lang-server-backends/v/pico.v/main $IROOT/
+fi
 
 apt remove -yqq postgresql-13 postgresql-contrib-13 gnupg lsb-release
 apt autoremove -yqq

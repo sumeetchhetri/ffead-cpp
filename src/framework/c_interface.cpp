@@ -32,6 +32,10 @@ void ffead_cpp_init() {
     ServerInitUtil::initIB();
 }
 
+void ffead_cpp_init_for_pv(cb_reg_ext_fd_pv pvregfd) {
+    ServerInitUtil::initIB(pvregfd);
+}
+
 /*
     This should be called before application exit, responsible for cleaning up the ffead-cpp framework
 */
@@ -142,7 +146,7 @@ void* ffead_cpp_handle_c_1(const ffead_request *request, int* scode, const char*
         *out_body = cnt.c_str();
         *out_body_len = cnt.length();
         if(cnt.length()>0) {
-            respo->addHeader(HttpResponse::ContentLength, CastUtil::fromNumber((int)cnt.length()));
+            respo->addHeader(HttpResponse::ContentLength, std::to_string((int)cnt.length()));
         }
     }
     if(req.isClose() || req.getHttpVers()<=1.0) {
@@ -194,7 +198,7 @@ void* ffead_cpp_handle_picov_1(const ffead_request3 *request, int* scode, const 
         const std::string& cnt = respo->getContent();
         *out_body = cnt.c_str();
         *out_body_len = cnt.length();
-        respo->addHeader(HttpResponse::ContentLength, CastUtil::fromNumber((int)cnt.length()));
+        respo->addHeader(HttpResponse::ContentLength, std::to_string((int)cnt.length()));
     }
     *out_headers_len = 0;
     RMap::const_iterator it = respo->getCHeaders().cbegin();
@@ -207,6 +211,27 @@ void* ffead_cpp_handle_picov_1(const ffead_request3 *request, int* scode, const 
     }
     return respo;
 }
+void ffead_cpp_handle_picov_2(const ffead_request3 *request)
+{
+	PicoVWriter* writer = (PicoVWriter*)request->writer;
+	HttpRequest req((void*)request->headers, request->headers_len, std::string_view{request->path, request->path_len},
+    		std::string_view{request->method, request->method_len}, request->version, std::string_view{request->body, request->body_len});
+    ServiceTask::handleAsync(&req, NULL, writer);
+}
+void* ffead_cpp_handle_picov_2_init_sock(int fd, void* pv, cb_into_pv cb)
+{
+	return new PicoVWriter(fd, pv, cb);
+}
+void ffead_cpp_handle_picov_2_deinit_sock(int fd, void* data)
+{
+	delete (PicoVWriter*)data;
+}
+void ffead_cpp_handle_picov_ext_fd_cb(int fd, void* data)
+{
+	LibpqDataSourceImpl* libpq = (LibpqDataSourceImpl*)data;
+	libpq->handle();
+}
+
 void* ffead_cpp_handle_crystal_js_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
 	const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len,
     phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
@@ -482,7 +507,7 @@ void* ffead_cpp_handle_1t(const ffead_request2 *request, int* scode,
         *out_body = cnt.c_str();
         *out_body_len = cnt.length();
         if(cnt.length()>0) {
-            respo->addHeader(HttpResponse::ContentLength, CastUtil::fromNumber((int)cnt.length()));
+            respo->addHeader(HttpResponse::ContentLength, std::to_string((int)cnt.length()));
         }
     }
     *out_headers_len = 0;
@@ -652,7 +677,7 @@ void* ffead_cpp_handle_js_1(const ffead_request *request, int* scode, size_t *ou
         const std::string& cnt = respo->generateNginxApacheResponse();
         *out_body_len = cnt.length();
         if(cnt.length()>0) {
-            respo->addHeader(HttpResponse::ContentLength, CastUtil::fromNumber((int)cnt.length()));
+            respo->addHeader(HttpResponse::ContentLength, std::to_string((int)cnt.length()));
         }
     }
     *out_headers_len = respo->getHeaders().size();

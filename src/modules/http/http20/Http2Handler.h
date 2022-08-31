@@ -67,8 +67,6 @@ class Http2Handler : public Http2ReadWriteUtil, public SocketInterface {
 	bool processFrame(Http2Frame* frame, void*& request, int reqPos);
 public:
 	void addHandler(SocketInterface* handler);
-	void onOpen();
-	void onClose();
 	std::string getProtocol(void* context);
 	int getType(void* context);
 	int getTimeout();

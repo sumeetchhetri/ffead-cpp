@@ -24,6 +24,7 @@
 #define WEB_t1_INCLUDE_TeBkUmLpqAsync_H_
 #include "TemplateHandler.h"
 #include "vector"
+#include "unordered_map"
 #ifndef OS_MINGW
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -150,25 +151,8 @@ public:
 #endif
 };
 
-#pragma @IgnoreSer
-#pragma @IgnoreRef
-class AsyncReqData {
-public:
-	HttpResponse r;
-#ifdef HAVE_RAPID_JSON
-	rapidjson::StringBuffer sb;
-	rapidjson::Writer<rapidjson::StringBuffer> wr;
-#endif
-	void reset() {
-#ifdef HAVE_RAPID_JSON
-		sb.Clear();
-		wr.Reset(sb);
-#endif
-	}
-};
-
 struct AsyncUpdatesReq {
-	BaseSocket* sif;
+	Writer* sif;
 	LibpqDataSourceImpl* sqli;
 	std::vector<TeBkUmLpqAsyncWorld> vec;
 };
@@ -192,14 +176,14 @@ class TeBkUmLpqAsyncRouter : public Router {
 	static Ser w_ser;
 	static SerCont wcont_ser;
 
-	void dbAsync(BaseSocket* sif);
-	void queriesAsync(const char* q, int ql, BaseSocket* sif);
+	void dbAsync(Writer* sif);
+	void queriesAsync(const char* q, int ql, Writer* sif);
 	void updatesAsync(const char* q, int ql, AsyncUpdatesReq* req);
 	void updatesAsyncb(const char* q, int ql, AsyncUpdatesReq* req);
 	void cachedWorlds(const char*, int, std::vector<TeBkUmLpqAsyncWorld>&);
-	void fortunes(BaseSocket* sif);
+	void fortunes(Writer* sif);
 
-	void queriesMultiAsync(const char*, int, BaseSocket* sif);
+	void queriesMultiAsync(const char*, int, Writer* sif);
 	void updatesMulti(const char*, int, AsyncUpdatesReq*);
 
 	static std::string& getUpdQuery(int count);
@@ -229,7 +213,8 @@ public:
 		return std::map<std::string, std::string>();
 	}
 	/* END */
-	bool route(HttpRequest* req, HttpResponse* res, BaseSocket* sif);
+	bool route(HttpRequest* req, HttpResponse* res, Writer* sif);
+	void routeAsync(HttpRequest* req, HttpResponse* res, Writer* sif);
 };
 
 class TeBkUmLpqAsyncRouterPooled : public TeBkUmLpqAsyncRouter {

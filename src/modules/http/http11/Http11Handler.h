@@ -42,8 +42,6 @@ class Http11Handler : public SocketInterface {
 public:
 	int readFrom();
 	void addHandler(SocketInterface* handler);
-	void onOpen();
-	void onClose();
 	std::string getProtocol(void* context);
 	int getType(void* context);
 	int getTimeout();

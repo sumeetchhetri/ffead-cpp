@@ -40,7 +40,7 @@
 typedef bool (*doRegisterListener) ();
 typedef WebSockHandler* (*webSockHandle)(WebSocketData* request, WebSocketRespponseData* response, BaseSocket* sif, HttpRequest* hreq);
 typedef void (*httpHandle)(HttpRequest* req, HttpResponse* res);
-typedef bool (*httpSockHandle)(HttpRequest* req, HttpResponse* res, BaseSocket* sif);
+typedef bool (*httpSockHandle)(HttpRequest* req, HttpResponse* res, Writer* sif);
 
 class ServiceHandler;
 

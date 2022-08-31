@@ -184,14 +184,20 @@ RUN ninja install && \
 	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t5 && \
 	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw && cd .. && rm -rf build
 
-RUN wget -q https://github.com/vlang/v/releases/download/0.1.29/v_linux.zip && unzip -q v_linux.zip && cd v && chmod +x v && ./v symlink && cd .. && rm -f v_linux.zip
 COPY pico.v /tmp/pico.v
+RUN wget -q https://github.com/vlang/v/releases/download/0.1.29/v_linux.zip && unzip -q v_linux.zip && cp /tmp/pico.v/picoev.v v/vlib/picoev/picoev.v && cd v && chmod +x v && ./v symlink && cd .. && rm -f v_linux.zip
 WORKDIR /tmp/pico.v
-RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* && \
+RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libt3* && \
 	ln -s /tmp/ffead-cpp-sql-raw/lib/libt3.so /usr/local/lib/libt3.so && \
 	ln -s /tmp/ffead-cpp-sql-raw/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
 	ln -s /tmp/ffead-cpp-sql-raw/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
-	ldconfig && chmod +x *.sh && ./build-debug.sh && cp main /tmp/ && rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc*
+	ldconfig && chmod +x *.sh && ./build-debug.sh && cp main /tmp/ && rm -f /usr/local/lib/libffead-* /usr/local/lib/libt3* main
+RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libt4* /usr/local/lib/libt5* && \
+	ln -s /tmp/ffead-cpp-sql-raw-async/lib/libt4.so /usr/local/lib/libt4.so && \
+	ln -s /tmp/ffead-cpp-sql-raw-async/lib/libt5.so /usr/local/lib/libt5.so && \
+	ln -s /tmp/ffead-cpp-sql-raw-async/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
+	ln -s /tmp/ffead-cpp-sql-raw-async/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
+	ldconfig && chmod +x *.sh && ./build-debug.sh && cp main /tmp/main_async && rm -f /usr/local/lib/libffead-* /usr/local/lib/libt4* /usr/local/lib/libt5* main
 
 WORKDIR /
 
@@ -199,7 +205,7 @@ RUN chown -Rf root:root /ssd && chown -Rf postgres:postgres /ssd/postgresql && c
 
 EXPOSE 9784 9785 9786 9787
 
-RUN rm -rf /tmp/ffead-cpp-src && chmod +x *.sh && ./install_ffead-cpp.sh
+RUN chmod +x *.sh && ./install_ffead-cpp.sh
 
 RUN sed -i 's|PORT_NO=8080|PORT_NO=9784|g' /tmp/ffead-cpp-sql-raw/resources/server.prop && \
 	sed -i 's|PORT_NO=8080|PORT_NO=9785|g' /tmp/ffead-cpp-sql-raw-async/resources/server.prop && \

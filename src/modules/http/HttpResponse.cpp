@@ -70,7 +70,7 @@ const std::string HttpResponse::CONN_CLOSE = "Connection: close\r\n";
 const std::string HttpResponse::CONN_KAL = "Connection: keep-alive\r\n";
 
 RiMap HttpResponse::HDRS_SW_CODES;
-std::map<std::string, std::tuple<std::string, int, int>> HttpResponse::HDR_DATA_BY_CNT;
+std::map<std::string, std::tuple<std::string, int, int, std::string, std::string, std::string>> HttpResponse::HDR_DATA_BY_CNT;
 
 void HttpResponse::init() {
 	std::string t = VALID_RESPONSE_HEADERS.substr(1, VALID_RESPONSE_HEADERS.length()-1);
@@ -81,8 +81,17 @@ void HttpResponse::init() {
 	}
 
 	int dtpos = 0, cntlenpos = 0;
-	std::string resp;
+	std::string resp, hline, hlinecka;
 	HTTPResponseStatus::Ok.getResponseLine(1.1, resp);
+	hline = resp;
+	hline.append(ContentType);
+	hline.append(HDR_SEP);
+	hline.append("application/json");
+	hline.append(HDR_END);
+	//hline.append("Connection: close");
+	//hline.append(HDR_END);
+	hlinecka = hline;
+	StringUtil::replaceFirst(hlinecka, "Connection: close", "Connection: keep-alive");
 	resp.append(ContentType);
 	resp.append(HDR_SEP);
 	resp.append("application/json");
@@ -92,10 +101,20 @@ void HttpResponse::init() {
 	resp.append(HDR_SEP);
 	cntlenpos = resp.length() + 52;
 	resp.append(HDR_FIN);
-	HDR_DATA_BY_CNT["application/json"] = std::make_tuple(resp, dtpos, cntlenpos);
+	HDR_DATA_BY_CNT["application/json"] = std::make_tuple(resp, dtpos, cntlenpos, hline, "application/json", hlinecka);
 
 	resp = "";
+	hline = "";
 	HTTPResponseStatus::Ok.getResponseLine(1.1, resp);
+	hline = resp;
+	hline.append(ContentType);
+	hline.append(HDR_SEP);
+	hline.append("text/plain");
+	hline.append(HDR_END);
+	//hline.append("Connection: close");
+	//hline.append(HDR_END);
+	hlinecka = hline;
+	StringUtil::replaceFirst(hlinecka, "Connection: close", "Connection: keep-alive");
 	resp.append(ContentType);
 	resp.append(HDR_SEP);
 	resp.append("text/plain");
@@ -105,10 +124,20 @@ void HttpResponse::init() {
 	resp.append(HDR_SEP);
 	cntlenpos = resp.length() + 52;
 	resp.append(HDR_FIN);
-	HDR_DATA_BY_CNT["text/plain"] = std::make_tuple(resp, dtpos, cntlenpos);
+	HDR_DATA_BY_CNT["text/plain"] = std::make_tuple(resp, dtpos, cntlenpos, hline, "text/plain", hlinecka);
 
 	resp = "";
+	hline = "";
 	HTTPResponseStatus::Ok.getResponseLine(1.1, resp);
+	hline = resp;
+	hline.append(ContentType);
+	hline.append(HDR_SEP);
+	hline.append("text/html; charset=utf-8");
+	hline.append(HDR_END);
+	//hline.append("Connection: close");
+	//hline.append(HDR_END);
+	hlinecka = hline;
+	StringUtil::replaceFirst(hlinecka, "Connection: close", "Connection: keep-alive");
 	resp.append(ContentType);
 	resp.append(HDR_SEP);
 	resp.append("text/html; charset=utf-8");
@@ -118,42 +147,88 @@ void HttpResponse::init() {
 	resp.append(HDR_SEP);
 	cntlenpos = resp.length() + 52;
 	resp.append(HDR_FIN);
-	HDR_DATA_BY_CNT["text/html"] = std::make_tuple(resp, dtpos, cntlenpos);
+	HDR_DATA_BY_CNT["text/html"] = std::make_tuple(resp, dtpos, cntlenpos, hline, "text/html; charset=utf-8", hlinecka);
 }
 
-HttpResponse& HttpResponse::jsonRef() {
-	size_t len = content.length();
-	std::tuple<std::string, int, int>& tup = HDR_DATA_BY_CNT["application/json"];
-	content.insert(0, std::get<0>(tup));
-	content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
-	content.insert(std::get<2>(tup), std::to_string(len));
+HttpResponse& HttpResponse::sendJson(Writer* wr) {
+	std::tuple<std::string, int, int, std::string, std::string, std::string>& tup = HDR_DATA_BY_CNT["application/json"];
+	switch(wr->type()) {
+		case 0: {
+			wr->internalWrite(std::get<3>(tup).data(), std::get<3>(tup).length(), content.data(), content.length());
+			break;
+		}
+		case 1: {
+			size_t len = content.length();
+			content.insert(0, std::get<0>(tup));
+			content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
+			content.insert(std::get<2>(tup), std::to_string(len));
+			wr->write(&content);
+			break;
+		}
+		default: break;
+	}
 	return *this;
 }
 
-HttpResponse& HttpResponse::textRef() {
-	size_t len = content.length();
-	std::tuple<std::string, int, int>& tup = HDR_DATA_BY_CNT["text/plain"];
-	content.insert(0, std::get<0>(tup));
-	content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
-	content.insert(std::get<2>(tup), std::to_string(len));
+HttpResponse& HttpResponse::sendText(Writer* wr) {
+	std::tuple<std::string, int, int, std::string, std::string, std::string>& tup = HDR_DATA_BY_CNT["text/plain"];
+	switch(wr->type()) {
+		case 0: {
+			wr->internalWrite(std::get<3>(tup).data(), std::get<3>(tup).length(), content.data(), content.length());
+			break;
+		}
+		case 1: {
+			size_t len = content.length();
+			content.insert(0, std::get<0>(tup));
+			content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
+			content.insert(std::get<2>(tup), std::to_string(len));
+			wr->write(&content);
+			break;
+		}
+		default: break;
+	}
 	return *this;
 }
 
-HttpResponse& HttpResponse::htmlRef() {
-	size_t len = content.length();
-	std::tuple<std::string, int, int>& tup = HDR_DATA_BY_CNT["text/html"];
-	content.insert(0, std::get<0>(tup));
-	content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
-	content.insert(std::get<2>(tup), std::to_string(len));
+HttpResponse& HttpResponse::sendHtml(Writer* wr) {
+	std::tuple<std::string, int, int, std::string, std::string, std::string>& tup = HDR_DATA_BY_CNT["text/html"];
+	switch(wr->type()) {
+		case 0: {
+			wr->internalWrite(std::get<3>(tup).data(), std::get<3>(tup).length(), content.data(), content.length());
+			break;
+		}
+		case 1: {
+			size_t len = content.length();
+			content.insert(0, std::get<0>(tup));
+			content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
+			content.insert(std::get<2>(tup), std::to_string(len));
+			wr->write(&content);
+			break;
+		}
+		default: break;
+	}
 	return *this;
 }
 
-HttpResponse& HttpResponse::errorRef(HTTPResponseStatus& status) {
-	content = "";
-	status.getResponseLine(1.1, content);
-	CommonUtils::getDateStr(content);
-	content.append(CONN_CLOSE);
-	content.append(HDR_FIN);
+HttpResponse& HttpResponse::sendStatus(HTTPResponseStatus& status, Writer* wr) {
+	switch(wr->type()) {
+		case 0: {
+			content = "";
+			status.getResponseLine(1.1, content);
+			wr->internalWrite(content.data(), content.length(), NULL, 0);
+			break;
+		}
+		case 1: {
+			content = "";
+			status.getResponseLine(1.1, content);
+			CommonUtils::getDateStr(content);
+			content.append(CONN_CLOSE);
+			content.append(HDR_FIN);
+			wr->write(&content);
+			break;
+		}
+		default: break;
+	}
 	return *this;
 }
 
@@ -189,6 +264,7 @@ HttpResponse::HttpResponse() {
 	done = false;
 	status = &HTTPResponseStatus::NotFound;
 	conn_clos = false;
+	fd = -1;
 }
 
 

@@ -45,6 +45,9 @@ pub mut:
     body byteptr
     body_len u64
     version int
+    fd int
+    pv voidptr
+    cb &C.cb_into_pv
 }
 struct C.ffead_request3_t {}
 
@@ -93,6 +96,9 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 	    body: byteptr(0)
 	    body_len: 0
 	    version: 1
+	    fd: -1
+	    pv: voidptr(0)
+	    cb: voidptr(0)
 	}
 	
 	scode := 0

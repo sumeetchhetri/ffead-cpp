@@ -57,7 +57,7 @@ class PeerServerRouter : public Router {
 	bool isAuthorizedKey(const std::string &key, HttpResponse* res);
 	bool isValidUser(const std::string& id, const std::string& token, HttpResponse* res);
 public:
-	bool route(HttpRequest* req, HttpResponse* res, BaseSocket* sif);
+	bool route(HttpRequest* req, HttpResponse* res, Router* sif);
 	PeerServerRouter();
 	virtual ~PeerServerRouter();
 };

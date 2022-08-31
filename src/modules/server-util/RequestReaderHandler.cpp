@@ -123,7 +123,7 @@ void RequestReaderHandler::addSf(SocketInterface* psi) {
 	{
 		//addToTimeoutSocks.push(psi);
 	}
-	psi->onOpen();
+	Writer::onWriterEvent((Writer*)psi, 1);
 }
 
 RequestReaderHandler::~RequestReaderHandler() {
@@ -154,14 +154,14 @@ BaseSocket* RequestReaderHandler::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* b
 				if(!si->isClosed()) {
 					si->rdTsk->run();
 				} else {
-					si->onClose();
+					Writer::onWriterEvent((Writer*)si, 2);
 					ins->shi->closeConnection(si);
 				}
 			} else {
 				if(!si->isClosed()) {
 					ins->shi->registerReadRequest(si);
 				} else {
-					si->onClose();
+					Writer::onWriterEvent((Writer*)si, 2);
 					ins->shi->closeConnection(si);
 				}
 			}
@@ -174,7 +174,7 @@ BaseSocket* RequestReaderHandler::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* b
 					ins->selector.unRegisterWrite(si);
 					ins->shi->registerWriteRequest(si);
 				} else {
-					si->onClose();
+					Writer::onWriterEvent((Writer*)si, 2);
 					ins->shi->closeConnection(si);
 				}
 			} else {
@@ -182,7 +182,7 @@ BaseSocket* RequestReaderHandler::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* b
 					ins->selector.unRegisterWrite(si);
 					ins->shi->registerWriteRequest(si);
 				} else {
-					si->onClose();
+					Writer::onWriterEvent((Writer*)si, 2);
 					ins->shi->closeConnection(si);
 				}
 			}
@@ -190,7 +190,7 @@ BaseSocket* RequestReaderHandler::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* b
 		}
 		case CLOSED: {
 			SocketInterface* si = (SocketInterface*)bi;
-			si->onClose();
+			Writer::onWriterEvent((Writer*)si, 2);
 			ins->shi->closeConnection(si);
 			break;
 		}
@@ -314,7 +314,7 @@ void* RequestReaderHandler::handle_Old(void* inp) {
 							if(!si->isClosed()) {
 								si->rdTsk->run();
 							} else {
-								si->onClose();
+								Writer::onWriterEvent((Writer*)si, 2);
 								ins->shi->closeConnection(si);
 							}
 						} else {
@@ -322,7 +322,7 @@ void* RequestReaderHandler::handle_Old(void* inp) {
 								ins->selector.unRegisterWrite(si);
 								ins->shi->registerWriteRequest(si);
 							} else {
-								si->onClose();
+								Writer::onWriterEvent((Writer*)si, 2);
 								ins->shi->closeConnection(si);
 							}
 						}
@@ -331,7 +331,7 @@ void* RequestReaderHandler::handle_Old(void* inp) {
 							if(!si->isClosed()) {
 								ins->shi->registerReadRequest(si);
 							} else {
-								si->onClose();
+								Writer::onWriterEvent((Writer*)si, 2);
 								ins->shi->closeConnection(si);
 							}
 						} else {
@@ -339,7 +339,7 @@ void* RequestReaderHandler::handle_Old(void* inp) {
 								ins->selector.unRegisterWrite(si);
 								ins->shi->registerWriteRequest(si);
 							} else {
-								si->onClose();
+								Writer::onWriterEvent((Writer*)si, 2);
 								ins->shi->closeConnection(si);
 							}
 						}

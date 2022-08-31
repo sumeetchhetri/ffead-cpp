@@ -56,8 +56,6 @@ class Http11WebSocketHandler : public SocketInterface {
 	friend class HttpServiceTask;
 public:
 	void addHandler(SocketInterface* handler);
-	void onOpen();
-	void onClose();
 	std::string getUrl();
 	std::string getProtocol(void* context);
 	int getType(void* context);

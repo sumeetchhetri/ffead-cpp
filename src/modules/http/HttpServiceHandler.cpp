@@ -59,7 +59,7 @@ void HttpServiceHandler::sockInit(SocketInterface* sif) {
 	wtask->sif = sif;
 	wtask->service = this;
 
-	sif->onOpen();
+	Writer::onWriterEvent((Writer*)sif, 1);
 }
 
 void HttpServiceHandler::handleService(void* request, SocketInterface* sif, void* context, int reqPos)
@@ -109,7 +109,7 @@ void HttpReadTask::run() {
 	//Timer to;
 	//to.start();
 	if(sif->readFrom()==0) {
-		sif->onClose();
+		Writer::onWriterEvent((Writer*)sif, 2);
 		service->closeConnection(sif);
 		//to.end();
 		//CommonUtils::tsReqSockRead += to.timerNanoSeconds();
@@ -133,7 +133,7 @@ void HttpReadTask::run() {
 	//CommonUtils::tsReqPrsSrvc += to.timerNanoSeconds();
 
 	if(sif->isClosed()) {
-		sif->onClose();
+		Writer::onWriterEvent((Writer*)sif, 2);
 		service->closeConnection(sif);
 	} else {
 		sif->doneRead();
@@ -299,13 +299,13 @@ void HttpServiceTask::run() {
 	//CommonUtils::cResps += 1;
 	int ret = handlerRequest.getSif()->pushResponse(handlerRequest.getRequest(), handlerRequest.response, handlerRequest.getContext(), handlerRequest.reqPos);
 	if(ret==0) {
-		handlerRequest.sif->onClose();
+		Writer::onWriterEvent((Writer*)handlerRequest.sif, 2);
 	}
 }
 
 void HttpWriteTask::run() {
 	if(sif->completeWrite()==0) {
-		sif->onClose();
+		Writer::onWriterEvent((Writer*)sif, 2);
 		service->closeConnection(sif);
 	}
 }

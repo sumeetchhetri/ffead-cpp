@@ -22,50 +22,8 @@
 
 #ifndef SOCKETINTERFACE_H_
 #define SOCKETINTERFACE_H_
-#include "Compatibility.h"
-#include "vector"
-/*HTTPS related*/
-#include <unistd.h>
-#include <sys/types.h>
-#include "string"
-#include "Mutex.h"
-#include <fcntl.h>
-#ifdef HAVE_SSLINC
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-#include "SSLHandler.h"
-#endif
-#include <sys/stat.h>
-#include <fcntl.h>
-#include "vector"
-#include "concurrentqueue.h"
-#include "map"
+#include "Server.h"
 #include "Task.h"
-#ifndef OS_MINGW
-#include <netinet/tcp.h>
-#endif
-#ifdef HAVE_SO_ATTACH_REUSEPORT_CBPF
-#include <linux/bpf.h>
-#include <linux/filter.h>
-#endif
-#include "blockingconcurrentqueue.h"
-#include "StringUtil.h"
-
-class BaseSocket;
-
-typedef void (*SockWriteRequestF) (BaseSocket* bs, void* arg);
-
-class SockWriteRequest {
-	SockWriteRequestF f;
-	BaseSocket* bs;
-	void* arg;
-	void* arg1;
-	SockWriteRequest():f(NULL), bs(NULL), arg(NULL), arg1(NULL) {}
-	SockWriteRequest(SockWriteRequestF f, BaseSocket* bs, void* arg): f(f), bs(bs), arg(arg), arg1(NULL) {}
-	SockWriteRequest(SockWriteRequestF f, BaseSocket* bs, void* arg, void* arg1): f(f), bs(bs), arg(arg), arg1(arg1) {}
-	friend class RequestHandler2;
-	friend class EventHandler;
-};
 
 class ResponseData {
 public:
@@ -75,37 +33,9 @@ public:
 	virtual ~ResponseData();
 };
 
-class EventHandler {
-	moodycamel::BlockingConcurrentQueue<SockWriteRequest>* wQ;
-	template<typename Func1> void queueWrite(Func1 f, BaseSocket* bs, void* arg) {
-		wQ->enqueue(SockWriteRequest(f, bs, arg));
-	}
-	friend class BaseSocket;
-	friend class RequestHandler2;
-	friend class RequestReaderHandler;
-public:
-	virtual bool unRegisterWrite(BaseSocket* obj)=0;
-	virtual bool unRegisterRead(const SOCKET& descriptor)=0;
-	virtual bool registerWrite(BaseSocket* obj)=0;
-	virtual bool registerRead(BaseSocket* obj, const bool& isListeningSock = false, bool epoll_et = true, bool isNonBlocking = false)=0;
-#if defined(USE_IO_URING)
-	virtual void interrupt_wait()=0;
-	virtual void post_write(BaseSocket* sfd, const std::string& data, int off = 0)=0;
-	virtual void post_write_2(BaseSocket* sfd, const std::string& data, const std::string& data1)=0;
-	virtual void post_write(BaseSocket* sfd, const char* data, int len)=0;
-	virtual void post_read(BaseSocket* sfd)=0;
-#endif
-	EventHandler(): wQ(NULL) {}
-	virtual ~EventHandler() {
-		if(wQ!=NULL) {
-			delete wQ;
-			wQ = NULL;
-		}
-	}
-};
 typedef void (*CleanerFunc) (void* data);
 
-class BaseSocket {
+class BaseSocket: public Writer {
 protected:
 	//static std::atomic<int> openSocks;
 	SOCKET fd;
@@ -119,9 +49,6 @@ protected:
 	std::atomic<int> useCounter;
 	std::string address;
 	int io_uring_type;
-	EventHandler* eh;
-	void* data;
-	CleanerFunc cf;
 	bool isBlocking();
 	void init(const SOCKET& fd);
 	friend class RequestReaderHandler;
@@ -141,27 +68,21 @@ protected:
 	friend class RequestHandler2;
 	friend class Http11Socket;
 public:
-	void* getData();
-	template<typename CleanerF>
-	void setData(void* data, CleanerF f) {
-		if(data!=NULL && f!=NULL) {
-			this->data = data;
-			this->cf = f;
-		}
-	}
 	BaseSocket();
 	BaseSocket(const SOCKET& fd);
 	virtual ~BaseSocket();
-
+	int type() {
+		return 1;
+	}
 	int readFrom();
+	int write(void* data) {
+		std::string* cont = (std::string*)data;
+		return writeDirect(*cont);
+	}
 	int writeDirect(const std::string& d, int off = 0, bool cont = false);
 	int writeDirect(const std::string& h, const std::string& d);
 	int writeDirect(const std::string& h, const char* d, size_t len, bool cont = false);
 	int writeTo(ResponseData* d);
-	template<typename Func1>
-	void queueWrite(Func1 f, void* arg) {
-		eh->queueWrite(f, this, arg);
-	}
 
 	bool writeFile(int fdes, int remain_data);
 	bool isClosed();
@@ -179,8 +100,6 @@ public:
 
 	virtual int getType(void* context){return -1;};
 	virtual int getTimeout(){return -1;};
-	virtual void onOpen(){};
-	virtual void onClose(){};
 	virtual bool isEmbedded(){return true;};
 	virtual bool isSecure();
 	virtual int writeWsData(void* d){return -1;}

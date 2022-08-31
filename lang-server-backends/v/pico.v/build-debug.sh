@@ -1,1 +1,1 @@
-v -cg -showcc -cflags '-std=gnu11 -Wall -flto' main.v
+v -enable-globals -cg -showcc -cflags '-std=gnu11 -Wall -flto' main.v

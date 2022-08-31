@@ -191,6 +191,7 @@ class CoreServerProperties {
 	friend class WsUtil;
 	friend class DCPGenerator;
 	friend class TemplateGenerator;
+	friend class ServerInitUtil;
 public:
 	CoreServerProperties(){
 		isMainServerProcess = false;
@@ -330,6 +331,7 @@ class ConfigurationData {
 	friend class CacheManager;
 	friend class SearchEngineManager;
 	friend class ServerInitUtil;
+	friend class LibpqDataSourceImpl;
 public:
 	static void enableFeatures(bool enableCors, bool enableSecurity, bool enableFilters, bool enableControllers,
 		bool enableContMpg, bool enableContPath, bool enableContExt,bool enableContRst, bool enableExtra,

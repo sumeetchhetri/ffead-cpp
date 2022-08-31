@@ -5,8 +5,7 @@ LABEL description="Base v docker image with ffead-cpp v4.0 commit id - master"
 
 ENV IROOT=/installs
 
-RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/libinter.so /usr/local/lib/libdinter.so && \
-	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libt3.so /usr/local/lib/libt3.so && \
+RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libt3* /usr/local/lib/libinter.so /usr/local/lib/libdinter.so && \
 	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
 	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
 	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libinter.so /usr/local/lib/libinter.so && \
@@ -18,7 +17,7 @@ RUN apt update -yqq && apt install -y git make && rm -rf /var/lib/apt/lists/*
 #RUN git clone https://github.com/vlang/v && cd v && make && ./v symlink
 
 #For the fastest vlang performance, use 0.1.29, where the unsafe changes were only restricted to pointer arithmetic
-RUN wget -q https://github.com/vlang/v/releases/download/0.1.29/v_linux.zip && unzip -q v_linux.zip && cd v && chmod +x v && ./v symlink && cd .. && rm -f v_linux.zip
+RUN wget -q https://github.com/vlang/v/releases/download/0.1.29/v_linux.zip && unzip -q v_linux.zip && cp ${IROOT}/lang-server-backends/v/pico.v/picoev.v v/vlib/picoev/picoev.v && cd v && chmod +x v && ./v symlink && cd .. && rm -f v_linux.zip
 
 WORKDIR ${IROOT}/lang-server-backends/v/vweb
 #COPY vweb.v ${IROOT}/lang-server-backends/v/vweb/
@@ -26,4 +25,14 @@ WORKDIR ${IROOT}/lang-server-backends/v/vweb
 
 WORKDIR ${IROOT}/lang-server-backends/v/pico.v
 #COPY main.v ${IROOT}/lang-server-backends/v/pico.v/
-RUN chmod +x *.sh && ./build.sh && cp main $IROOT/ && rm -rf ${IROOT}/lang-server-backends
+RUN chmod +x *.sh && ./build.sh && cp main $IROOT/
+
+RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libt3.so /usr/local/lib/libt3.so /usr/local/lib/libinter.so /usr/local/lib/libdinter.so && \
+	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
+	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
+	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libinter.so /usr/local/lib/libinter.so && \
+	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libdinter.so /usr/local/lib/libdinter.so && \
+	ldconfig
+	
+#COPY main.v ${IROOT}/lang-server-backends/v/pico.v/
+RUN chmod +x *.sh && ./build.sh && cp main $IROOT/main_async && rm -rf ${IROOT}/lang-server-backends

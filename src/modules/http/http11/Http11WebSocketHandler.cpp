@@ -31,6 +31,14 @@ Http11WebSocketHandler::Http11WebSocketHandler(const SOCKET& fd, void* ssl, void
 	this->url = url;
 	this->h = NULL;
 	this->lastOpCode = -1;
+	Writer::registerWriterEventCallback([](Writer* bs, int type) {
+		if(type==2) {
+			Http11WebSocketHandler* hws = (Http11WebSocketHandler*)bs;
+			if(hws->h!=NULL) {
+				hws->h->onClose(hws->getAddress());
+			}
+		}
+	});
 }
 
 std::string Http11WebSocketHandler::getUrl() {
@@ -241,12 +249,6 @@ bool Http11WebSocketHandler::writeResponse(void* req, void* res, void* context, 
 }
 
 void Http11WebSocketHandler::addHandler(SocketInterface* handler) {}
-void Http11WebSocketHandler::onOpen(){}
-void Http11WebSocketHandler::onClose(){
-	if(h!=NULL) {
-		h->onClose(getAddress());
-	}
-}
 
 bool Http11WebSocketHandler::isEmbedded() {
 	return true;

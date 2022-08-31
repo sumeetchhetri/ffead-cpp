@@ -76,7 +76,8 @@ public:
 	//static std::string getCntEncoding();
 	static WebSockHandler* handleWebsockOpen(WebSocketData* request, WebSocketRespponseData* response, BaseSocket* sif, HttpRequest* hreq);
 	static void handle(HttpRequest* req, HttpResponse* res);
-	static bool handle(HttpRequest* req, HttpResponse* res, BaseSocket* sif);
+	static bool handle(HttpRequest* req, HttpResponse* res, Writer* sif);
+	static bool handleAsync(HttpRequest* req, HttpResponse* res, Writer* sif);
 };
 
 #endif /* SERVICETASK_H_ */

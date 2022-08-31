@@ -51,7 +51,6 @@
 #include "CastUtil.h"
 #include "LoggerFactory.h"
 #include "HTTPResponseStatus.h"
-#include "SocketInterface.h"
 #include "ClassInfo.h"
 
 struct ClassBeanIns {

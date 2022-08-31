@@ -150,27 +150,10 @@ public:
 #endif
 };
 
-#pragma @IgnoreSer
-#pragma @IgnoreRef
-class AsyncQwReqData {
-public:
-	HttpResponse r;
-#ifdef HAVE_RAPID_JSON
-	rapidjson::StringBuffer sb;
-	rapidjson::Writer<rapidjson::StringBuffer> wr;
-#endif
-	void reset() {
-#ifdef HAVE_RAPID_JSON
-		sb.Clear();
-		wr.Reset(sb);
-#endif
-	}
-};
-
 struct AsyncUpdatesReqWq {
 	float httpVers;
 	bool conn_clos;
-	BaseSocket* sif;
+	Writer* sif;
 	LibpqDataSourceImpl* sqli;
 	std::vector<TeBkUmLpqQwAsyncWorld> vec;
 };
@@ -192,13 +175,13 @@ class TeBkUmLpqQwAsyncRouter : public Router {
 	static std::string& getUpdQuery(int count);
 	static std::string& getMultiQuery(int count);
 
-	void dbAsync(BaseSocket* sif);
-	void queriesAsync(const char* q, int ql, BaseSocket* sif);
+	void dbAsync(Writer* sif);
+	void queriesAsync(const char* q, int ql, Writer* sif);
 	void updatesAsync(const char* q, int ql, AsyncUpdatesReqWq* req);
 	void updatesAsyncb(const char* q, int ql, AsyncUpdatesReqWq* req);
-	void fortunes(BaseSocket* sif);
+	void fortunes(Writer* sif);
 
-	void queriesMultiAsync(const char*, int, BaseSocket* sif);
+	void queriesMultiAsync(const char*, int, Writer* sif);
 	void updatesMulti(const char*, int, AsyncUpdatesReqWq*);
 
 	static std::unordered_map<int, std::string> _qC;
@@ -224,7 +207,8 @@ public:
 		return std::map<std::string, std::string>();
 	}
 	/* END */
-	bool route(HttpRequest* req, HttpResponse* res, BaseSocket* sif);
+	bool route(HttpRequest* req, HttpResponse* res, Writer* sif);
+	void routeAsync(HttpRequest* req, HttpResponse* res, Writer* sif);
 };
 
 class TeBkUmLpqQwAsyncRouterPooled : public TeBkUmLpqQwAsyncRouter {

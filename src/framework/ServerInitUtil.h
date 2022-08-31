@@ -46,6 +46,7 @@
 #ifdef INC_COMP
 #include "AppContext.h"
 #endif
+#include "Server.h"
 #include "Logger.h"
 #include "ConfigurationHandler.h"
 #include "ServiceTask.h"
@@ -63,14 +64,35 @@
 
 class ServerInitUtil {
 	static Logger loggerIB;
+	friend class LibpqDataSourceImpl;
 public:
 	static void bootstrap(std::string, Logger& logger, SERVER_BACKEND type);
 	static void init(Logger& logger);
 
 	static void bootstrapIB(std::string, SERVER_BACKEND type);
 	static void initIB();
+	static void initIB(cb_reg_ext_fd_pv pvregfd);
 
 	static void cleanUp();
+};
+
+class PicoVWriter: public Writer {
+	int fd;
+	void* pv;
+	cb_into_pv cb;
+	AsyncReqData adata;
+public:
+	PicoVWriter(int fd, void* pv, cb_into_pv cb): fd(fd), pv(pv), cb(cb) {}
+	virtual ~PicoVWriter() {}
+	int internalWrite(const char* hline, size_t hline_len, const char* body, size_t body_len) {
+		return cb(hline, hline_len, body, body_len, fd, pv);
+	}
+	int write(void* data) {
+		return 1;
+	};
+	void* getData() {
+		return &adata;
+	}
 };
 
 #endif /* SRC_SERVER_SERVERINITUTIL_H_ */

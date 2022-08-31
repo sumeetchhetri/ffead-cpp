@@ -394,7 +394,7 @@ void TeBkUmLpqRouter::cachedWorlds(const char* q, int ql, std::vector<TeBkUmLpqW
 	CacheManager::cleanImpl(cchi);
 }
 
-void TeBkUmLpqRouter::handleTemplate(HttpRequest* req, HttpResponse* res, BaseSocket* sif) {
+void TeBkUmLpqRouter::handleTemplate(HttpRequest* req, HttpResponse* res, Writer* sif) {
 	LibpqDataSourceImpl* sqli = getDb();
 	Context ctx;
 	std::vector<TeBkUmLpqFortune*> flst;
@@ -420,8 +420,7 @@ void TeBkUmLpqRouter::handleTemplate(HttpRequest* req, HttpResponse* res, BaseSo
 	ctx.emplace("fortunes", &flst);
 
 	tmplFunc(&ctx, res->getContent());
-	res->htmlRef();
-	sif->writeDirect(res->getContent());
+	res->sendHtml(sif);
 	for(int k=0;k<(int)flst.size();k++) {
         delete flst.at(k);
     }
@@ -429,37 +428,32 @@ void TeBkUmLpqRouter::handleTemplate(HttpRequest* req, HttpResponse* res, BaseSo
 
 //Do not use this class with non-embedded servers as it needs access to the underlying socket
 //and writes the response directly to the socket, use TeBkUmLpqRouterPicoV for all lang-server implementations
-bool TeBkUmLpqRouter::route(HttpRequest* req, HttpResponse* res, BaseSocket* sif) {
+bool TeBkUmLpqRouter::route(HttpRequest* req, HttpResponse* res, Writer* sif) {
 	if(StringUtil::endsWith(req->getPath(), "/plaint")) {
-		res->setContent(HELLO_WORLD).textRef();
-		sif->writeDirect(res->getContent());
+		res->setContent(HELLO_WORLD).sendText(sif);
 	} else if(StringUtil::endsWith(req->getPath(), "/j")) {
 		TeBkUmLpqMessage msg(HELLO_WORLD);
 		msg.tmplJson(res->getContentP());
-		res->jsonRef();
-		sif->writeDirect(res->getContent());
+		res->sendJson(sif);
 	} else if(StringUtil::endsWith(req->getPath(), "/d")) {
 		TeBkUmLpqWorld msg;
 		db(msg);
 		msg.tmplJson(res->getContentP());
-		res->jsonRef();
-		sif->writeDirect(res->getContent());
+		res->sendJson(sif);
 	} else if(StringUtil::endsWith(req->getPath(), "/que_")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;
 		queries(params[0].val, params[0].val_len, msg);
 		TeBkUmLpqWorld::tmplJson(msg, res->getContentP());
-		res->jsonRef();
-		sif->writeDirect(res->getContent());
+		res->sendJson(sif);
 	} else if(StringUtil::endsWith(req->getPath(), "/quer")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;
 		queriesMulti(params[0].val, params[0].val_len, msg);
 		TeBkUmLpqWorld::tmplJson(msg, res->getContentP());
-		res->jsonRef();
-		sif->writeDirect(res->getContent());
+		res->sendJson(sif);
 	} else if(StringUtil::endsWith(req->getPath(), "/fortu")) {
 		handleTemplate(req, res, sif);
 	} else if(StringUtil::endsWith(req->getPath(), "/upd_")) {
@@ -468,28 +462,23 @@ bool TeBkUmLpqRouter::route(HttpRequest* req, HttpResponse* res, BaseSocket* sif
 		std::vector<TeBkUmLpqWorld> msg;
 		updates(params[0].val, params[0].val_len, msg);
 		TeBkUmLpqWorld::tmplJson(msg, res->getContentP());
-		res->jsonRef();
-		sif->writeDirect(res->getContent());
+		res->sendJson(sif);
 	} else if(StringUtil::endsWith(req->getPath(), "/updt")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;
 		updatesMulti(params[0].val, params[0].val_len, msg);
 		TeBkUmLpqWorld::tmplJson(msg, res->getContentP());
-		res->jsonRef();
-		sif->writeDirect(res->getContent());
+		res->sendJson(sif);
 	} else if(StringUtil::endsWith(req->getPath(), "/cached-wld")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;
 		cachedWorlds(params[0].val, params[0].val_len, msg);
 		TeBkUmLpqWorld::tmplJson(msg, res->getContentP());
-		res->jsonRef();
-		sif->writeDirect(res->getContent());
+		res->sendJson(sif);
 	} else {
-		std::string h;
-		res->httpStatus(HTTPResponseStatus::NotFound).generateHeadResponse(h, req->getHttpVers(), true);
-		sif->writeDirect(h);
+		res->sendStatus(HTTPResponseStatus::NotFound, sif);
 	}
 	return false;
 }
@@ -556,7 +545,7 @@ void TeBkUmLpqRouterPicoV::handleTemplate(HttpResponse* res) {
 	res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_TEXT_HTML);
 }
 
-bool TeBkUmLpqRouterPicoV::route(HttpRequest *req, HttpResponse *res, BaseSocket *sif) {
+bool TeBkUmLpqRouterPicoV::route(HttpRequest *req, HttpResponse *res, Writer *sif) {
 	if(StringUtil::endsWith(req->getPath(), "/plaint")) {
 		res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_TEXT_PLAIN).setContent(HELLO_WORLD);
 	} else if(StringUtil::endsWith(req->getPath(), "/j")) {

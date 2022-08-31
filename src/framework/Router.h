@@ -29,7 +29,8 @@
 
 class Router {
 public:
-	virtual bool route(HttpRequest* req, HttpResponse* res, BaseSocket* sif)=0;
+	virtual bool route(HttpRequest* req, HttpResponse* res, Writer* sif)=0;
+	virtual void routeAsync(HttpRequest* req, HttpResponse* res, Writer* sif){};
 	virtual ~Router(){}
 };
 

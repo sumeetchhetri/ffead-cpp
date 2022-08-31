@@ -38,6 +38,7 @@
 #include "RequestHandler2.h"
 #include "Server.h"
 #include <variant>
+#include "ConfigurationData.h"
 
 class LibpqParamsBase {
 public:

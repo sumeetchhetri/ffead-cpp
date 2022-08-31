@@ -454,24 +454,42 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res) {
 	handle(req, res, NULL);
 }
 
-bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, BaseSocket* sif)
+bool ServiceTask::handleAsync(HttpRequest* req, HttpResponse* res, Writer* sif)
 {
-	//Timer t1;
-	//t1.start();
+	try {
+		if(req->getCntxt_name().length()==0) {
+			req->setCntxt_name(HttpRequest::DEFAULT_CTX);
+		}
 
+		if(ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())!=
+				ConfigurationData::getInstance()->servingContextRouters.end()) {
+			CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames.find(req->getCntxt_name())->second);
+			Router* router = ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())->second;
+			req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
+			router->routeAsync(req, res, sif);
+		} else {
+			if(ConfigurationData::getInstance()->servingContextRouters.find(HttpRequest::DEFAULT_CTX)!=
+					ConfigurationData::getInstance()->servingContextRouters.end()) {
+				req->setCntxt_name(HttpRequest::DEFAULT_CTX);
+				CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames.find(req->getCntxt_name())->second);
+				Router* router = ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())->second;
+				req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
+				router->routeAsync(req, res, sif);
+			}
+		}
+	} catch (const std::exception& e) {
+	}
+	return true;
+}
+
+bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, Writer* sif)
+{
 	res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 	/*After going through the controller the response might be blank, just set the HTTP version*/
 	res->update(req);
 
 	try
 	{
-		if(req->getRequestParseStatus()!=NULL || req->getMethod().at(0)=='t' || req->getMethod().at(0)=='T')
-		{
-			res->setHTTPResponseStatus(*req->getRequestParseStatus());
-			//res->addHeader(HttpResponse::Connection, "close");
-			return true;
-		}
-
 		if(ConfigurationData::getInstance()->enableStaticResponses && ConfigurationData::getInstance()->staticResponsesMap.find(req->getPath())!=
 				ConfigurationData::getInstance()->staticResponsesMap.end()) {
 			StaticResponseData& sr = ConfigurationData::getInstance()->staticResponsesMap.find(req->getPath())->second;
@@ -486,31 +504,29 @@ bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, BaseSocket* sif)
 			req->setCntxt_name(HttpRequest::DEFAULT_CTX);
 		}
 
-		Reflector& reflector = ConfigurationData::getInstance()->reflector;
-
 		if(ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())!=
 				ConfigurationData::getInstance()->servingContextRouters.end()) {
 			CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames.find(req->getCntxt_name())->second);
 			Router* router = ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())->second;
-			if(router!=NULL) {
-				req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
-				return router->route(req, res, sif);
-				//t1.end();
-				//CommonUtils::tsServicePre += t1.timerNanoSeconds();
-			}
+			req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
+			return router->route(req, res, sif);
 		} else {
 			if(ConfigurationData::getInstance()->servingContextRouters.find(HttpRequest::DEFAULT_CTX)!=
 					ConfigurationData::getInstance()->servingContextRouters.end()) {
 				req->setCntxt_name(HttpRequest::DEFAULT_CTX);
 				CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames.find(req->getCntxt_name())->second);
 				Router* router = ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())->second;
-				if(router!=NULL) {
-					req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
-					return router->route(req, res, sif);
-					//t1.end();
-					//CommonUtils::tsServicePre += t1.timerNanoSeconds();
-				}
+				req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
+				return router->route(req, res, sif);
 			}
+		}
+
+		Reflector& reflector = ConfigurationData::getInstance()->reflector;
+		if(req->getRequestParseStatus()!=NULL || req->getMethod().at(0)=='t' || req->getMethod().at(0)=='T')
+		{
+			res->setHTTPResponseStatus(*req->getRequestParseStatus());
+			//res->addHeader(HttpResponse::Connection, "close");
+			return true;
 		}
 
 		if(!ConfigurationData::isServingContext(req->getCntxt_name())) {
@@ -581,13 +597,8 @@ bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, BaseSocket* sif)
 #endif
 
 		std::string ext = req->getExt();
-
-		//t1.end();
-		//CommonUtils::tsServicePre += t1.timerNanoSeconds();
-
 		bool isContrl = false;
 
-		//t1.start();
 		if(ConfigurationData::getInstance()->enableCors) {
 			try {
 				isContrl = CORSHandler::handle(ConfigurationData::getInstance()->corsConfig, req, res);
@@ -596,10 +607,7 @@ bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, BaseSocket* sif)
 				isContrl = true;
 			}
 		}
-		//t1.end();
-		//CommonUtils::tsServiceCors += t1.timerNanoSeconds();
 
-		//t1.start();
 		bool hasSecurity = false;
 		if(!isContrl && ConfigurationData::getInstance()->enableSecurity) {
 			hasSecurity = SecurityHandler::hasSecurity(req->getCntxt_name());
@@ -612,10 +620,6 @@ bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, BaseSocket* sif)
 				}
 			}
 		}
-		//t1.end();
-		//CommonUtils::tsServiceSec += t1.timerNanoSeconds();
-
-		//t1.start();
 		bool hasFilters = false;
 		if(!isContrl && ConfigurationData::getInstance()->enableFilters) {
 			hasFilters = FilterHandler::hasFilters(req->getCntxt_name());
@@ -626,10 +630,7 @@ bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, BaseSocket* sif)
 				ext = req->getExt();
 			}
 		}
-		//t1.end();
-		//CommonUtils::tsServiceFlt += t1.timerNanoSeconds();
 
-		//t1.start();
 		if(!isContrl && ConfigurationData::getInstance()->enableControllers) {
 			isContrl = ControllerHandler::handle(req, res, ext, reflector);
 		}
@@ -637,18 +638,9 @@ bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, BaseSocket* sif)
 			isContrl = ControllerExtensionHandler::handle(req, res, ext, reflector);
 			ext = req->getExt();
 		}
-		//t1.end();
-		//CommonUtils::tsServiceCnt += t1.timerNanoSeconds();
-
-		//t1.start();
 		if(!isContrl && ConfigurationData::getInstance()->enableExtra) {
 			isContrl = ExtHandler::handle(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, ext, reflector);
 		}
-		//t1.end();
-		//CommonUtils::tsServiceExt += t1.timerNanoSeconds();
-
-		//t1.start();
-
 		if(!res->isDone())
 		{
 			if(!isContrl)
@@ -715,9 +707,6 @@ bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, BaseSocket* sif)
 		if(ConfigurationData::getInstance()->enableSecurity && hasSecurity) {
 			storeSessionAttributes(res, req, ConfigurationData::getInstance()->coreServerProperties.sessionTimeout, ConfigurationData::getInstance()->coreServerProperties.sessatserv);
 		}
-
-		//t1.end();
-		//CommonUtils::tsServicePost += t1.timerNanoSeconds();
 	}
 	catch(const std::exception& e)
 	{

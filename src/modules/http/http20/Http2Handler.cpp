@@ -588,8 +588,6 @@ std::string Http2Handler::getMimeType(const std::string& ext) {
 }
 
 void Http2Handler::addHandler(SocketInterface* handler) {}
-void Http2Handler::onOpen(){}
-void Http2Handler::onClose(){}
 
 bool Http2Handler::isEmbedded() {
 	return true;

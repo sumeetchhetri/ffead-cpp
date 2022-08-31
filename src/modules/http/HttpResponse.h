@@ -36,18 +36,20 @@
 #include "MultipartContent.h"
 #include "DateFormat.h"
 #include "CommonUtils.h"
+#include "Server.h"
+#include "JSONSerialize.h"
 
 typedef std::vector<unsigned char> Cont;
 class HttpResponse {
 public:
 	static void init();
 	static std::string AccessControlAllowOrigin,AccessControlAllowHeaders,AccessControlAllowCredentials,
-				  AccessControlAllowMethods,AccessControlMaxAge,AcceptRanges,Age,Allow,CacheControl,
-				  Connection,ContentEncoding,ContentLanguage,ContentLength,ContentLocation,ContentMD5,
-				  ContentDisposition,ContentRange,ContentType,DateHeader,ETag,Expires,LastModified,Link,
-				  Location,P3P,Pragma,ProxyAuthenticate,Refresh,RetryAfter,Server,SetCookie,Status,
-				  StrictTransportSecurity,Trailer,TransferEncoding,Vary,Via,Warning,WWWAuthenticate,
-				  Upgrade,SecWebSocketAccept,SecWebSocketVersion,AltSvc;
+		AccessControlAllowMethods,AccessControlMaxAge,AcceptRanges,Age,Allow,CacheControl,
+		Connection,ContentEncoding,ContentLanguage,ContentLength,ContentLocation,ContentMD5,
+		ContentDisposition,ContentRange,ContentType,DateHeader,ETag,Expires,LastModified,Link,
+		Location,P3P,Pragma,ProxyAuthenticate,Refresh,RetryAfter,Server,SetCookie,Status,
+		StrictTransportSecurity,Trailer,TransferEncoding,Vary,Via,Warning,WWWAuthenticate,
+		Upgrade,SecWebSocketAccept,SecWebSocketVersion,AltSvc;
 	HttpResponse();
 	HttpResponse(HTTPResponseStatus& st);
 	virtual ~HttpResponse();
@@ -87,10 +89,10 @@ public:
 	void setUrl(const std::string& url);
 	const std::string& getUrl();
 	void addHeader(std::string header, const std::string& value);
-	HttpResponse& jsonRef();
-	HttpResponse& textRef();
-	HttpResponse& htmlRef();
-	HttpResponse& errorRef(HTTPResponseStatus& status);
+	HttpResponse& sendJson(Writer* wr);
+	HttpResponse& sendText(Writer* wr);
+	HttpResponse& sendHtml(Writer* wr);
+	HttpResponse& sendStatus(HTTPResponseStatus& status, Writer* wr);
 	HttpResponse& generateHeadResponse(std::string& resp);
 	HttpResponse& generateHeadResponse(std::string& resp, float httpVers, bool conn_clos);
 	HttpResponse& generateHeadResponseMinimal(std::string& resp, std::string& contentType, int content_length = -1, bool conn_clos = false);
@@ -99,8 +101,9 @@ public:
 	void update(HttpRequest* req);
 private:
 	static RiMap HDRS_SW_CODES;
-	static std::map<std::string, std::tuple<std::string, int, int> > HDR_DATA_BY_CNT;
+	static std::map<std::string, std::tuple<std::string, int, int, std::string, std::string, std::string> > HDR_DATA_BY_CNT;
 	static const std::string HDR_SRV, HDR_SEP, HDR_SEPT, HDR_END, HDR_CORS_ALW, HDR_FIN, CONN_CLOSE, CONN_KAL;
+	int fd;
     bool done;
     float httpVers;
     bool conn_clos;
@@ -151,6 +154,21 @@ private:
 	friend class CORSHandler;
 	friend class HttpRequest;
 	friend class Http11Socket;
+};
+
+class AsyncReqData {
+public:
+	HttpResponse r;
+#ifdef HAVE_RAPID_JSON
+	rapidjson::StringBuffer sb;
+	rapidjson::Writer<rapidjson::StringBuffer> wr;
+#endif
+	void reset() {
+#ifdef HAVE_RAPID_JSON
+		sb.Clear();
+		wr.Reset(sb);
+#endif
+	}
 };
 
 #endif /* HTTPRESPONSE_H_ */

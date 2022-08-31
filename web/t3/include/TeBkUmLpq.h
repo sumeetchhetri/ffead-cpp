@@ -197,7 +197,7 @@ class TeBkUmLpqRouter : public Router {
 	void updates(const char*, int, std::vector<TeBkUmLpqWorld>&);
 	void updatesMulti(const char*, int, std::vector<TeBkUmLpqWorld>&);
 	void cachedWorlds(const char*, int, std::vector<TeBkUmLpqWorld>&);
-	void handleTemplate(HttpRequest* req, HttpResponse* res, BaseSocket* sif);
+	void handleTemplate(HttpRequest* req, HttpResponse* res, Writer* sif);
 	std::string& getUpdQuery(int count);
 	std::string& getMultiQuery(int count);
 
@@ -211,7 +211,7 @@ public:
 	TeBkUmLpqRouter();
 	virtual ~TeBkUmLpqRouter();
 	void updateCache();
-	bool route(HttpRequest* req, HttpResponse* res, BaseSocket* sif);
+	bool route(HttpRequest* req, HttpResponse* res, Writer* sif);
 };
 
 class TeBkUmLpqRouterPicoV : public TeBkUmLpqRouter {
@@ -219,7 +219,7 @@ class TeBkUmLpqRouterPicoV : public TeBkUmLpqRouter {
 public:
 	TeBkUmLpqRouterPicoV();
 	virtual ~TeBkUmLpqRouterPicoV();
-	bool route(HttpRequest* req, HttpResponse* res, BaseSocket* sif);
+	bool route(HttpRequest* req, HttpResponse* res, Writer* sif);
 };
 
 #endif /* WEB_t1_INCLUDE_TeBkUmLpq_H_ */

@@ -124,7 +124,7 @@ std::unordered_map<int, std::string> TeBkUmLpqAsyncRouter::_qC;
 std::unordered_map<int, std::string> TeBkUmLpqAsyncRouter::_mqC;
 int TeBkUmLpqAsyncRouter::g_seed = 0;
 
-void TeBkUmLpqAsyncRouter::dbAsync(BaseSocket* sif) {
+void TeBkUmLpqAsyncRouter::dbAsync(Writer* sif) {
 	LibpqDataSourceImpl* sqli = getDb(5);
 	int rid = CommonUtils::fastrand(g_seed) % 10000 + 1;
 	LibpqAsyncReq* areq = sqli->getAsyncRequest();
@@ -132,20 +132,19 @@ void TeBkUmLpqAsyncRouter::dbAsync(BaseSocket* sif) {
 	q->withParamInt4(rid);
 #ifdef HAVE_LIBPQ
 	q->withSelectQuery(WORLD_ONE_QUERY).withContext(sif).withCb0([](void* ctx, PGresult* res) {
-		BaseSocket* sif = (BaseSocket*)ctx;
+		Writer* sif = (Writer*)ctx;
 		AsyncReqData* reqdt = (AsyncReqData*)sif->getData();
 		reqdt->reset();
 		TeBkUmLpqAsyncWorld w(ntohl(*((uint32_t *) PQgetvalue(res, 0, 0))), ntohl(*((uint32_t *) PQgetvalue(res, 0, 1))));
 		w.tmplJson(reqdt->r.getContentP());
-		reqdt->r.jsonRef();
-		sif->writeDirect(reqdt->r.getContent());
+		reqdt->r.sendJson(sif);
 		sif->unUse();
 	});
 #endif
 	sqli->postAsync(areq);
 }
 
-void TeBkUmLpqAsyncRouter::queriesAsync(const char* q, int ql, BaseSocket* sif) {
+void TeBkUmLpqAsyncRouter::queriesAsync(const char* q, int ql, Writer* sif) {
 	int queryCount = 0;
 	CommonUtils::naiveStrToNum(q, ql, queryCount);
 	queryCount = std::max(1, std::min(queryCount, 500));
@@ -160,7 +159,7 @@ void TeBkUmLpqAsyncRouter::queriesAsync(const char* q, int ql, BaseSocket* sif) 
 	}
 #ifdef HAVE_LIBPQ
 	areq->withFinalCb(sif, [](void* ctx, bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
-		BaseSocket* sif = (BaseSocket*)ctx;
+		Writer* sif = (Writer*)ctx;
 		std::vector<TeBkUmLpqAsyncWorld> vec;
 		vec.reserve((int)results->size());
 		for (int i = 0; i < (int)results->size(); ++i) {
@@ -171,8 +170,7 @@ void TeBkUmLpqAsyncRouter::queriesAsync(const char* q, int ql, BaseSocket* sif) 
 		AsyncReqData* reqdt = (AsyncReqData*)sif->getData();
 		reqdt->reset();
 		TeBkUmLpqAsyncWorld::tmplJson(vec, reqdt->r.getContentP());
-		reqdt->r.jsonRef();
-		sif->writeDirect(reqdt->r.getContent());
+		reqdt->r.sendJson(sif);
 		sif->unUse();
 	});
 #endif
@@ -195,7 +193,7 @@ std::string& TeBkUmLpqAsyncRouter::getMultiQuery(int count) {
 	return _mqC[count];
 }
 
-void TeBkUmLpqAsyncRouter::queriesMultiAsync(const char* q, int ql, BaseSocket* sif) {
+void TeBkUmLpqAsyncRouter::queriesMultiAsync(const char* q, int ql, Writer* sif) {
 	int queryCount = 0;
 	CommonUtils::naiveStrToNum(q, ql, queryCount);
 	queryCount = std::max(1, std::min(queryCount, 500));
@@ -209,7 +207,7 @@ void TeBkUmLpqAsyncRouter::queriesMultiAsync(const char* q, int ql, BaseSocket* 
 	qu->withSelectQuery(query).withMulti();
 #ifdef HAVE_LIBPQ
 	areq->withFinalCb(sif, [](void* ctx, bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
-		BaseSocket* sif = (BaseSocket*)ctx;
+		Writer* sif = (Writer*)ctx;
 		std::vector<TeBkUmLpqAsyncWorld> vec;
 		vec.reserve((int)results->size());
 		for (int i = 0; i < (int)results->size(); ++i) {
@@ -223,8 +221,7 @@ void TeBkUmLpqAsyncRouter::queriesMultiAsync(const char* q, int ql, BaseSocket* 
 		AsyncReqData* reqdt = (AsyncReqData*)sif->getData();
 		reqdt->reset();
 		TeBkUmLpqAsyncWorld::tmplJson(vec, reqdt->r.getContentP());
-		reqdt->r.jsonRef();
-		sif->writeDirect(reqdt->r.getContent());
+		reqdt->r.sendJson(sif);
 		sif->unUse();
 	});
 #endif
@@ -288,12 +285,10 @@ void TeBkUmLpqAsyncRouter::updatesMulti(const char* q, int ql, AsyncUpdatesReq* 
 					AsyncReqData* reqdt = (AsyncReqData*)req->sif->getData();
 					reqdt->reset();
 					TeBkUmLpqAsyncWorld::tmplJson(req->vec, reqdt->r.getContentP());
-					reqdt->r.jsonRef();
-					req->sif->writeDirect(reqdt->r.getContent());
+					reqdt->r.sendJson(req->sif);
 				} else {
 					HttpResponse r;
-					r.errorRef(HTTPResponseStatus::InternalServerError);
-					req->sif->writeDirect(r.getContent());
+					r.sendStatus(HTTPResponseStatus::InternalServerError, req->sif);
 				}
 				req->sif->unUse();
 				delete req;
@@ -395,12 +390,10 @@ void TeBkUmLpqAsyncRouter::updatesAsyncb(const char* q, int ql, AsyncUpdatesReq*
 				AsyncReqData* reqdt = (AsyncReqData*)req->sif->getData();
 				reqdt->reset();
 				TeBkUmLpqAsyncWorld::tmplJson(req->vec, reqdt->r.getContentP());
-				reqdt->r.jsonRef();
-				req->sif->writeDirect(reqdt->r.getContent());
+				reqdt->r.sendJson(req->sif);
 			} else {
 				HttpResponse r;
-				r.errorRef(HTTPResponseStatus::InternalServerError);
-				req->sif->writeDirect(r.getContent());
+				r.sendStatus(HTTPResponseStatus::InternalServerError, req->sif);
 			}
 			req->sif->unUse();
 			delete req;
@@ -478,11 +471,9 @@ void TeBkUmLpqAsyncRouter::updatesAsync(const char* q, int ql, AsyncUpdatesReq* 
 			reqdt->reset();
 			if(status) {
 				TeBkUmLpqAsyncWorld::tmplJson(req->vec, reqdt->r.getContentP());
-				reqdt->r.jsonRef();
-				req->sif->writeDirect(reqdt->r.getContent());
+				reqdt->r.sendJson(req->sif);
 			} else {
-				reqdt->r.errorRef(HTTPResponseStatus::InternalServerError);
-				req->sif->writeDirect(reqdt->r.getContent());
+				reqdt->r.sendStatus(HTTPResponseStatus::InternalServerError, req->sif);
 			}
 			req->sif->unUse();
 			delete req;
@@ -556,13 +547,13 @@ void TeBkUmLpqAsyncRouter::cachedWorlds(const char* q, int ql, std::vector<TeBkU
 }
 
 
-void TeBkUmLpqAsyncRouter::fortunes(BaseSocket* sif) {
+void TeBkUmLpqAsyncRouter::fortunes(Writer* sif) {
 	LibpqDataSourceImpl* sqli = getDb(7);
 	LibpqAsyncReq* areq = sqli->getAsyncRequest();
 	LibpqQuery* q = areq->getQuery();
 #ifdef HAVE_LIBPQ
 	q->withSelectQuery(FORTUNE_ALL_QUERY).withContext(sif).withCb0([](void* ctx, PGresult* res) {
-		BaseSocket* sif = (BaseSocket*)ctx;
+		Writer* sif = (Writer*)ctx;
 		std::vector<TeBkUmLpqAsyncFortune*> flst;
 		int rows = PQntuples(res);
 		flst.reserve((size_t)rows+1);
@@ -581,8 +572,7 @@ void TeBkUmLpqAsyncRouter::fortunes(BaseSocket* sif) {
 		dbreq->reset();
 
 		tmplFunc(&context, dbreq->r.getContent());
-		dbreq->r.htmlRef();
-		sif->writeDirect(dbreq->r.getContent());
+		dbreq->r.sendHtml(sif);
 		sif->unUse();
 		for(int k=0;k<(int)flst.size();k++) {
 	        delete flst.at(k);
@@ -592,111 +582,65 @@ void TeBkUmLpqAsyncRouter::fortunes(BaseSocket* sif) {
 	sqli->postAsync(areq);
 }
 
-bool TeBkUmLpqAsyncRouter::route(HttpRequest* req, HttpResponse* res, BaseSocket* sif) {
+void TeBkUmLpqAsyncRouter::routeAsync(HttpRequest* req, HttpResponse* res, Writer* sif) {
+	AsyncReqData* dbreq = (AsyncReqData*)sif->getData();
+	route(req, &dbreq->r, sif);
+}
+
+bool TeBkUmLpqAsyncRouter::route(HttpRequest* req, HttpResponse* res, Writer* sif) {
 	sif->use();
 	if(StringUtil::endsWith(req->getPath(), "/plaint")) {
-		res->setContent(HELLO_WORLD).textRef();
-		sif->writeDirect(res->getContent());
+		res->setContent(HELLO_WORLD).sendText(sif);
 		sif->unUse();
 	} else if(StringUtil::endsWith(req->getPath(), "/j")) {
-		if(sif->getData()==NULL) {
-			sif->setData(new AsyncReqData, [](void* data) {
-				delete (AsyncReqData*)data;
-			});
-		}
 		TeBkUmLpqAsyncMessage msg(HELLO_WORLD);
-
 		AsyncReqData* dbreq = (AsyncReqData*)sif->getData();
 		dbreq->reset();
 		msg.tmplJson(res->getContentP());
-		res->jsonRef();
-		sif->writeDirect(res->getContent());
+		res->sendJson(sif);
 		sif->unUse();
 	} else if(StringUtil::endsWith(req->getPath(), "/d")) {
-		if(sif->getData()==NULL) {
-			sif->setData(new AsyncReqData, [](void* data) {
-				delete (AsyncReqData*)data;
-			});
-		}
 		dbAsync(sif);
 	} else if(StringUtil::endsWith(req->getPath(), "/quer")) {
-		if(sif->getData()==NULL) {
-			sif->setData(new AsyncReqData, [](void* data) {
-				delete (AsyncReqData*)data;
-			});
-		}
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		queriesAsync(params[0].val, params[0].val_len, sif);
 	} else if(StringUtil::endsWith(req->getPath(), "/quem")) {
-		if(sif->getData()==NULL) {
-			sif->setData(new AsyncReqData, [](void* data) {
-				delete (AsyncReqData*)data;
-			});
-		}
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		queriesMultiAsync(params[0].val, params[0].val_len, sif);
 	} else if(StringUtil::endsWith(req->getPath(), "/updm")) {
-		if(sif->getData()==NULL) {
-			sif->setData(new AsyncReqData, [](void* data) {
-				delete (AsyncReqData*)data;
-			});
-		}
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		AsyncUpdatesReq* ar = new AsyncUpdatesReq;
 		ar->sif = sif;
 		updatesMulti(params[0].val, params[0].val_len, ar);
 	} else if(StringUtil::endsWith(req->getPath(), "/fortu")) {
-		if(sif->getData()==NULL) {
-			sif->setData(new AsyncReqData, [](void* data) {
-				delete (AsyncReqData*)data;
-			});
-		}
 		fortunes(sif);
 	} else if(StringUtil::endsWith(req->getPath(), "/bupdt") || StringUtil::endsWith(req->getPath(), "/updt")) {
-		if(sif->getData()==NULL) {
-			sif->setData(new AsyncReqData, [](void* data) {
-				delete (AsyncReqData*)data;
-			});
-		}
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		AsyncUpdatesReq* ar = new AsyncUpdatesReq;
 		ar->sif = sif;
 		updatesAsyncb(params[0].val, params[0].val_len, ar);
 	} else if(StringUtil::endsWith(req->getPath(), "/upd_")) {
-		if(sif->getData()==NULL) {
-			sif->setData(new AsyncReqData, [](void* data) {
-				delete (AsyncReqData*)data;
-			});
-		}
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		AsyncUpdatesReq* ar = new AsyncUpdatesReq;
 		ar->sif = sif;
 		updatesAsync(params[0].val, params[0].val_len, ar);
 	} else if(StringUtil::endsWith(req->getPath(), "/cached-wld")) {
-		if(sif->getData()==NULL) {
-			sif->setData(new AsyncReqData, [](void* data) {
-				delete (AsyncReqData*)data;
-			});
-		}
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqAsyncWorld> vec;
 		cachedWorlds(params[0].val, params[0].val_len, vec);
-
 		AsyncReqData* dbreq = (AsyncReqData*)sif->getData();
 		dbreq->reset();
 		TeBkUmLpqAsyncWorld::tmplJson(vec, res->getContentP());
-		res->jsonRef();
-		sif->writeDirect(res->getContent());
+		res->sendJson(sif);
 		sif->unUse();
 	} else {
-		res->errorRef(HTTPResponseStatus::NotFound);
-		sif->writeDirect(res->getContent());
+		res->sendStatus(HTTPResponseStatus::NotFound, sif);
 		sif->unUse();
 	}
 	return false;
@@ -708,6 +652,13 @@ Ser TeBkUmLpqAsyncRouter::w_ser;
 SerCont TeBkUmLpqAsyncRouter::wcont_ser;
 
 TeBkUmLpqAsyncRouter::TeBkUmLpqAsyncRouter() {
+	Writer::registerWriterEventCallback([](Writer* bs, int type) {
+		if(type==1) {
+			bs->setData(new AsyncReqData, [](void* data) {
+				delete (AsyncReqData*)data;
+			});
+		}
+	});
 	sqli = NULL;
 	tmplFunc = TemplateUtil::getTemplateFunc("t4", "tpe/fortunes.tpe");
 	m_ser = Serializer::getSerFuncForObject("t4", "TeBkUmLpqAsyncMessage");
@@ -750,6 +701,13 @@ LibpqDataSourceImpl* TeBkUmLpqAsyncRouterPooled::getDb(int max) {
 }
 
 TeBkUmLpqAsyncRouterPooled::TeBkUmLpqAsyncRouterPooled() {
+	Writer::registerWriterEventCallback([](Writer* bs, int type) {
+		if(type==1) {
+			bs->setData(new AsyncReqData, [](void* data) {
+				delete (AsyncReqData*)data;
+			});
+		}
+	});
 	maxconns = 7;
 	propMap props = ConfigurationData::getAppProperties();
 	if(props.size()>0) {

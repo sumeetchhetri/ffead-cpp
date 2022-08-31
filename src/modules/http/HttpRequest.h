@@ -54,7 +54,6 @@ typedef std::map<std::string, MultipartContent, std::less<> > FMap;
 
 class HttpRequest {
 	void* resp;
-
 	std::string headers_data;
 	struct phr_header_fcp headers_list[100];
 	size_t num_headers;

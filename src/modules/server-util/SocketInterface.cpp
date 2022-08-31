@@ -91,9 +91,6 @@ SocketInterface::SocketInterface(const SOCKET& fd) : BaseSecureSocket(fd) {
 	srvTsk = NULL;
 }
 
-void* BaseSocket::getData() {
-	return data;
-}
 
 BaseSecureSocket::BaseSecureSocket(): BaseSocket() {
 #ifdef HAVE_SSLINC

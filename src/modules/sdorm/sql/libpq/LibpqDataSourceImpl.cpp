@@ -55,7 +55,7 @@ bool LibpqDataSourceImpl::init() {
 	}
 	fd = PQsocket(conn);
 	if(isAsync) {
-		bool rHandler = RequestReaderHandler::getInstance()!=NULL || RequestHandler2::getInstance()!=NULL;
+		bool rHandler = RequestReaderHandler::getInstance()!=NULL || RequestHandler2::getInstance()!=NULL || Writer::isPicoEvAsyncBackendMode;
 		if(rHandler) {
 #ifdef HAVE_LIBPQ_BATCH
 			if(isBatch) {
@@ -109,7 +109,9 @@ bool LibpqDataSourceImpl::init() {
 			Thread* pthread = new Thread(&handle, this);
 			pthread->execute();
 #else
-			if(RequestReaderHandler::getInstance()!=NULL) {
+			if(Writer::isPicoEvAsyncBackendMode) {
+				Writer::pvregfd(fd, this);
+			} else if(RequestReaderHandler::getInstance()!=NULL) {
 				RequestReaderHandler::getInstance()->selector.registerRead(this, false, false, true);
 			} else {
 				RequestHandler2::getInstance()->selector.registerRead(this, false, false, true);

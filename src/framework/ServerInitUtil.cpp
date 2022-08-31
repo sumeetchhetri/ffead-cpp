@@ -25,6 +25,9 @@
 Logger ServerInitUtil::loggerIB;
 
 void ServerInitUtil::bootstrapIB(std::string serverRootDirectory, SERVER_BACKEND type) {
+	if(type==V_PICO) {
+		Writer::isPicoEvAsyncBackendMode = true;
+	}
 	bootstrap(serverRootDirectory, loggerIB, type);
 }
 
@@ -342,6 +345,11 @@ void ServerInitUtil::initIB() {
 	init(loggerIB);
 }
 
+void ServerInitUtil::initIB(cb_reg_ext_fd_pv pvregfd_) {
+	Writer::pvregfd = pvregfd_;
+	init(loggerIB);
+}
+
 void ServerInitUtil::init(Logger& logger) {
 	logger << "FFEAD in init" << std::endl;
 	logger << "Initializing ffead-cpp....." << std::endl;
@@ -417,9 +425,11 @@ void ServerInitUtil::init(Logger& logger) {
 	}
 #endif
 
+	bool isLazyHeaderParsing = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["LAZY_HEADER_PARSE"])=="true";
+
 	HTTPResponseStatus::init();
 
-	HttpRequest::init();
+	HttpRequest::init(isLazyHeaderParsing);
 
 	HttpResponse::init();
 
