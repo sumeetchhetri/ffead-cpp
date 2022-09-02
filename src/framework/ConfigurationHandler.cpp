@@ -240,7 +240,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		CommonUtils::addContext(scappName);
 		ConfigurationData::getInstance()->servingContextAppRoots[name] = defpath;
 
-		ConfigurationData::getInstance()->servingContextRouters[name] = NULL;
+		//ConfigurationData::getInstance()->servingContextRouters[name] = NULL;
 
 		std::vector<std::string> adcps;
 		CommonUtils::listFiles(adcps, dcppath, ".dcp");

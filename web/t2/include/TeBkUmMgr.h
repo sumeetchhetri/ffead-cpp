@@ -114,7 +114,7 @@ public:
 	TeBkUmMgrRouter();
 	virtual ~TeBkUmMgrRouter();
 	void updateCache();
-	bool route(HttpRequest* req, HttpResponse* res, Router* sif);
+	bool route(HttpRequest* req, HttpResponse* res, Writer* sif);
 };
 
 #endif /* WEB_t1_INCLUDE_TeBkUmMgr_H_ */

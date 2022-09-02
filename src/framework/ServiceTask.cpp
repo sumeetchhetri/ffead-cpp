@@ -461,20 +461,20 @@ bool ServiceTask::handleAsync(HttpRequest* req, HttpResponse* res, Writer* sif)
 			req->setCntxt_name(HttpRequest::DEFAULT_CTX);
 		}
 
-		if(ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())!=
-				ConfigurationData::getInstance()->servingContextRouters.end()) {
+		std::map<std::string, Router*, std::less<> >::iterator rit = ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name());
+		if(rit!=ConfigurationData::getInstance()->servingContextRouters.end()) {
 			CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames.find(req->getCntxt_name())->second);
-			Router* router = ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())->second;
+			Router* router = rit->second;
 			req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
-			router->routeAsync(req, res, sif);
+			return router->route(req, res, sif);
 		} else {
-			if(ConfigurationData::getInstance()->servingContextRouters.find(HttpRequest::DEFAULT_CTX)!=
-					ConfigurationData::getInstance()->servingContextRouters.end()) {
+			rit = ConfigurationData::getInstance()->servingContextRouters.find(HttpRequest::DEFAULT_CTX);
+			if(rit!=ConfigurationData::getInstance()->servingContextRouters.end()) {
 				req->setCntxt_name(HttpRequest::DEFAULT_CTX);
 				CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames.find(req->getCntxt_name())->second);
-				Router* router = ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())->second;
+				Router* router = rit->second;
 				req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
-				router->routeAsync(req, res, sif);
+				return router->route(req, res, sif);
 			}
 		}
 	} catch (const std::exception& e) {
@@ -504,18 +504,18 @@ bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, Writer* sif)
 			req->setCntxt_name(HttpRequest::DEFAULT_CTX);
 		}
 
-		if(ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())!=
-				ConfigurationData::getInstance()->servingContextRouters.end()) {
+		std::map<std::string, Router*, std::less<> >::iterator rit = ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name());
+		if(rit!=ConfigurationData::getInstance()->servingContextRouters.end()) {
 			CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames.find(req->getCntxt_name())->second);
-			Router* router = ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())->second;
+			Router* router = rit->second;
 			req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
 			return router->route(req, res, sif);
 		} else {
-			if(ConfigurationData::getInstance()->servingContextRouters.find(HttpRequest::DEFAULT_CTX)!=
-					ConfigurationData::getInstance()->servingContextRouters.end()) {
+			rit = ConfigurationData::getInstance()->servingContextRouters.find(HttpRequest::DEFAULT_CTX);
+			if(rit!=ConfigurationData::getInstance()->servingContextRouters.end()) {
 				req->setCntxt_name(HttpRequest::DEFAULT_CTX);
 				CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames.find(req->getCntxt_name())->second);
-				Router* router = ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())->second;
+				Router* router = rit->second;
 				req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
 				return router->route(req, res, sif);
 			}

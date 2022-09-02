@@ -338,7 +338,7 @@ bool TeBkUmMgrRouter::strToNum(const char* str, int len, int& ret) {
     return true;
 }
 
-bool TeBkUmMgrRouter::route(HttpRequest* req, HttpResponse* res, Router* sif) {
+bool TeBkUmMgrRouter::route(HttpRequest* req, HttpResponse* res, Writer* sif) {
 	std::string_view path = req->getPath();
 	if(StringUtil::endsWith(path, "/plaint")) {
 		res->setContent(HELLO_WORLD);
