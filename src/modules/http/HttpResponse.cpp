@@ -162,7 +162,7 @@ HttpResponse& HttpResponse::sendJson(Writer* wr) {
 			content.insert(0, std::get<0>(tup));
 			content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
 			content.insert(std::get<2>(tup), std::to_string(len));
-			wr->write(&content);
+			wr->writeData(&content);
 			break;
 		}
 		default: break;
@@ -182,7 +182,7 @@ HttpResponse& HttpResponse::sendText(Writer* wr) {
 			content.insert(0, std::get<0>(tup));
 			content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
 			content.insert(std::get<2>(tup), std::to_string(len));
-			wr->write(&content);
+			wr->writeData(&content);
 			break;
 		}
 		default: break;
@@ -202,7 +202,7 @@ HttpResponse& HttpResponse::sendHtml(Writer* wr) {
 			content.insert(0, std::get<0>(tup));
 			content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
 			content.insert(std::get<2>(tup), std::to_string(len));
-			wr->write(&content);
+			wr->writeData(&content);
 			break;
 		}
 		default: break;
@@ -224,7 +224,7 @@ HttpResponse& HttpResponse::sendStatus(HTTPResponseStatus& status, Writer* wr) {
 			CommonUtils::getDateStr(content);
 			content.append(CONN_CLOSE);
 			content.append(HDR_FIN);
-			wr->write(&content);
+			wr->writeData(&content);
 			break;
 		}
 		default: break;

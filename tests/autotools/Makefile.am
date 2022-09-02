@@ -8,7 +8,10 @@ AM_CPPFLAGS=-I"../../src/modules/common" \
 			-I"../../src/modules/http" \
 			-I"../../src/modules/threads" \
 			-I"../../src/modules/reflection" \
-			-I"../../src/modules/ssl"
+			-I"../../src/modules/ssl" \
+			-I"../../src/modules/serialization" \
+			-I"../../src/modules/serialization/json"
+			
 
 prefix=${abs_builddir}
 

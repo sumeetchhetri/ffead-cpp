@@ -221,7 +221,7 @@ public:
 	virtual int internalWrite(const char* hline, size_t hline_len, const char* body, size_t body_len) {
 		return -1;
 	}
-	virtual int write(void* data)=0;
+	virtual int writeData(void* data)=0;
 	virtual int type() {
 		return 0;
 	}

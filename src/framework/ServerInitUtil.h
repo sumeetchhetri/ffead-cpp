@@ -87,7 +87,7 @@ public:
 	int internalWrite(const char* hline, size_t hline_len, const char* body, size_t body_len) {
 		return cb(hline, hline_len, body, body_len, fd, pv);
 	}
-	int write(void* data) {
+	int writeData(void* data) {
 		return 1;
 	};
 	void* getData() {

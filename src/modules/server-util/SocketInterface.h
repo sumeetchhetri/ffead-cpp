@@ -75,7 +75,7 @@ public:
 		return 1;
 	}
 	int readFrom();
-	int write(void* data) {
+	int writeData(void* data) {
 		std::string* cont = (std::string*)data;
 		return writeDirect(*cont);
 	}
