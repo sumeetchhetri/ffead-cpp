@@ -78,7 +78,6 @@ const (
 	hdr_sep = ': '
 	hdr_del = '\r\n'
 	hdr_end = '\r\n\r\n'
-	hdr_end_ = '\r\n\r\n'
 )
 
 fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
@@ -223,6 +222,7 @@ fn fcp_callback_write(hline byteptr, hline_len u64, body byteptr, body_len u64, 
 		out = C.fc_memcpy(out, hdr_end.str, 4)
 		out = C.fc_memcpy(out, body, body_len)
 	} else {
+		out = C.fc_memcpy(out, "Content-Length: 0\r\n", 19)
 		out = C.fc_memcpy(out, hdr_end.str, 4)
 	}
 	n := int(out) - int(buf_start)
@@ -298,10 +298,10 @@ fn main() {
 		C.ffead_cpp_init()
 	} else {
 		C.ffead_cpp_init_for_pv(&picoev.register_external_fd)
+		go update_date()
 	}
 	println('Initializing ffead-cpp end...')
 	
-	go update_date()
 	pv.serve()
 
 	println('Cleaning up ffead-cpp start...')

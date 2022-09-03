@@ -99,7 +99,7 @@ void HttpResponse::init() {
 	dtpos = resp.length();
 	resp.append(ContentLength);
 	resp.append(HDR_SEP);
-	cntlenpos = resp.length() + 52;
+	cntlenpos = resp.length();
 	resp.append(HDR_FIN);
 	HDR_DATA_BY_CNT["application/json"] = std::make_tuple(resp, dtpos, cntlenpos, hline, "application/json", hlinecka);
 
@@ -122,7 +122,7 @@ void HttpResponse::init() {
 	dtpos = resp.length();
 	resp.append(ContentLength);
 	resp.append(HDR_SEP);
-	cntlenpos = resp.length() + 52;
+	cntlenpos = resp.length();
 	resp.append(HDR_FIN);
 	HDR_DATA_BY_CNT["text/plain"] = std::make_tuple(resp, dtpos, cntlenpos, hline, "text/plain", hlinecka);
 
@@ -145,7 +145,7 @@ void HttpResponse::init() {
 	dtpos = resp.length();
 	resp.append(ContentLength);
 	resp.append(HDR_SEP);
-	cntlenpos = resp.length() + 52;
+	cntlenpos = resp.length();
 	resp.append(HDR_FIN);
 	HDR_DATA_BY_CNT["text/html"] = std::make_tuple(resp, dtpos, cntlenpos, hline, "text/html; charset=utf-8", hlinecka);
 }
@@ -160,8 +160,8 @@ HttpResponse& HttpResponse::sendJson(Writer* wr) {
 		case 1: {
 			size_t len = content.length();
 			content.insert(0, std::get<0>(tup));
-			content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
 			content.insert(std::get<2>(tup), std::to_string(len));
+			content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
 			wr->writeData(&content);
 			break;
 		}
@@ -180,8 +180,8 @@ HttpResponse& HttpResponse::sendText(Writer* wr) {
 		case 1: {
 			size_t len = content.length();
 			content.insert(0, std::get<0>(tup));
-			content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
 			content.insert(std::get<2>(tup), std::to_string(len));
+			content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
 			wr->writeData(&content);
 			break;
 		}
@@ -200,8 +200,8 @@ HttpResponse& HttpResponse::sendHtml(Writer* wr) {
 		case 1: {
 			size_t len = content.length();
 			content.insert(0, std::get<0>(tup));
-			content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
 			content.insert(std::get<2>(tup), std::to_string(len));
+			content.insert(std::get<1>(tup), std::string(CommonUtils::getDateStrP()));
 			wr->writeData(&content);
 			break;
 		}
@@ -223,6 +223,9 @@ HttpResponse& HttpResponse::sendStatus(HTTPResponseStatus& status, Writer* wr) {
 			status.getResponseLine(1.1, content);
 			CommonUtils::getDateStr(content);
 			content.append(CONN_CLOSE);
+			content.append(ContentLength);
+			content.append(":0");
+			content.append(HDR_END);
 			content.append(HDR_FIN);
 			wr->writeData(&content);
 			break;

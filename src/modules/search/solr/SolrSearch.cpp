@@ -98,6 +98,7 @@ SolrSearch::SolrSearch(ConnectionPooler* pool) {
 				}
 				throw std::runtime_error("Error during init op ");
 			} else {
+#ifdef HAVE_RAPID_JSON
 				rapidjson::Document doc;
 				doc.Parse(&rs.getContent()[0], rs.getContent().size());
 				if(doc["responseHeader"]["status"].GetInt()>0) {
@@ -130,6 +131,7 @@ SolrSearch::SolrSearch(ConnectionPooler* pool) {
 						}
 					}
 				}
+#endif
 			}
 		}
 	}
