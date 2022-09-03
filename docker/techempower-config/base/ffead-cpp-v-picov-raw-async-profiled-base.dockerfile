@@ -79,15 +79,13 @@ ENV accept accept
 
 WORKDIR ${IROOT}
 
-RUN sed -i 's|"TeBkUmLpqRouter"|"TeBkUmLpqRouterPicoV"|g' $IROOT/ffead-cpp-src/web/t3/config/application.xml
-
 COPY sql-profiled-util.sh ${IROOT}/
 RUN chmod 755 ${IROOT}/sql-profiled-util.sh
-RUN ./sql-profiled-util.sh nobatch noclang noasync
+RUN ./sql-profiled-util.sh nobatch noclang async
 
 COPY sql-profiled-install.sh install_ffead-cpp-sql-raw-profiled.sh ${IROOT}/
 RUN chmod 755 ${IROOT}/sql-profiled-install.sh ${IROOT}/install_ffead-cpp-sql-raw-profiled.sh
-RUN ./sql-profiled-install.sh "-sql"
+RUN ./sql-async-profiled-install.sh "-sql"
 
 RUN apt update -yqq && apt install -y git make && rm -rf /var/lib/apt/lists/*
 #For Latest vlang, uncomment the below mentioned line, due to lot of new enhancements and unsafe block handling, vlang has slowed down tremendously
@@ -104,3 +102,4 @@ RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/li
 COPY sql-v-picov-profiled-install.sh install_ffead-cpp-sql-raw-v-picov-profiled.sh ${IROOT}/
 RUN chmod 755 ${IROOT}/sql-v-picov-profiled-install.sh ${IROOT}/install_ffead-cpp-sql-raw-v-picov-profiled.sh
 RUN ./sql-v-picov-profiled-install.sh async
+RUN ./sql-v-picov-profiled-install.sh async-pool
