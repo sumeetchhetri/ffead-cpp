@@ -466,7 +466,7 @@ bool ServiceTask::handleAsync(HttpRequest* req, HttpResponse* res, Writer* sif)
 			CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames.find(req->getCntxt_name())->second);
 			Router* router = rit->second;
 			req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
-			return router->route(req, res, sif);
+			router->routeAsync(req, res, sif);
 		} else {
 			rit = ConfigurationData::getInstance()->servingContextRouters.find(HttpRequest::DEFAULT_CTX);
 			if(rit!=ConfigurationData::getInstance()->servingContextRouters.end()) {
@@ -474,7 +474,7 @@ bool ServiceTask::handleAsync(HttpRequest* req, HttpResponse* res, Writer* sif)
 				CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames.find(req->getCntxt_name())->second);
 				Router* router = rit->second;
 				req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
-				return router->route(req, res, sif);
+				router->routeAsync(req, res, sif);
 			}
 		}
 	} catch (const std::exception& e) {

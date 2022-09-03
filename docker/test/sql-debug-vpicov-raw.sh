@@ -18,7 +18,7 @@ if [ $# -eq 0 ]; then
 	sleep 30
 	echo "ffead-cpp with sql-raw-vpicov support launched"
 	curl -vvv http://localhost:9783/t3/j
-	curl -vvv http://localhost:9783/t4/plaint
+	curl -vvv http://localhost:9783/t3/plaint
 	curl -vvv http://localhost:9783/t3/fortu
 	curl -vvv http://localhost:9783/t3/d
 	curl -vvv http://localhost:9783/t3/quer?queries=20

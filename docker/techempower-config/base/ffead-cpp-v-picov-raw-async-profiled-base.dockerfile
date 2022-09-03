@@ -94,7 +94,7 @@ RUN apt update -yqq && apt install -y git make && rm -rf /var/lib/apt/lists/*
 #RUN git clone https://github.com/vlang/v && cd v && make && ./v symlink
 
 #For the fastest vlang performance, use 0.1.29, where the unsafe changes were only restricted to pointer arithmetic
-RUN wget -q https://github.com/vlang/v/releases/download/0.1.29/v_linux.zip && unzip -q v_linux.zip && cd v && chmod +x v && ./v symlink && cd .. && rm -f v_linux.zip
+RUN wget -q https://github.com/vlang/v/releases/download/0.1.29/v_linux.zip && unzip -q v_linux.zip && cp ${IROOT}/lang-server-backends/v/pico.v/picoev.v v/vlib/picoev/picoev.v && cd v && chmod +x v && ./v symlink && cd .. && rm -f v_linux.zip
 
 RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/libinter.so /usr/local/lib/libdinter.so && \
 	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
