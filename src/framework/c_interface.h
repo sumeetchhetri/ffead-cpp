@@ -140,6 +140,7 @@ extern "C" void* ffead_cpp_handle_picov_1(const ffead_request3 *request, int* sc
 extern "C" void ffead_cpp_handle_picov_2(const ffead_request3 *request);
 extern "C" void* ffead_cpp_handle_picov_2_init_sock(int fd, void* pv, cb_into_pv cb);
 extern "C" void ffead_cpp_handle_picov_2_deinit_sock(int fd, void* data);
+extern "C" void ffead_cpp_handle_picov_clean_sockets();
 extern "C" void ffead_cpp_handle_picov_ext_fd_cb(int fd, void* data);
 extern "C" void* ffead_cpp_handle_crystal_js_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
 	const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len, 

@@ -76,3 +76,4 @@ extern void ffead_cpp_handle_picov_2(const ffead_request3 *request);
 extern void* ffead_cpp_handle_picov_2_init_sock(int fd, void* pv, cb_into_pv cb);
 extern void ffead_cpp_handle_picov_2_deinit_sock(int fd, void* data);
 extern void ffead_cpp_handle_picov_ext_fd_cb(int fd, void* data);
+extern void ffead_cpp_handle_picov_clean_sockets();

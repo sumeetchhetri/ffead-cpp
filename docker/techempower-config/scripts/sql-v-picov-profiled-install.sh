@@ -37,18 +37,15 @@ cd $IROOT/
 if [ "$1" = "async" ]
 then
 	sed -i 's|localhost|tfb-database|g' $IROOT/ffead-cpp-6.0-sql/web/t4/config/sdorm.xml
-	mv $IROOT/lang-server-backends/v/pico.v/main_async $IROOT/
+	mv $IROOT/lang-server-backends/v/pico.v/main $IROOT/main_async
 elif [ "$1" = "async-pool" ]
 then
 	sed -i 's|localhost|tfb-database|g' $IROOT/ffead-cpp-6.0-sql/web/t5/config/sdorm.xml
-	mv $IROOT/lang-server-backends/v/pico.v/main_async $IROOT/
+	mv $IROOT/lang-server-backends/v/pico.v/main $IROOT/main_async_pool
 else
 	sed -i 's|localhost|tfb-database|g' $IROOT/ffead-cpp-6.0-sql/web/t3/config/sdorm.xml
 	mv $IROOT/lang-server-backends/v/pico.v/main $IROOT/
 fi
 
-apt remove -yqq postgresql-13 postgresql-contrib-13 gnupg lsb-release
-apt autoremove -yqq
-rm -rf /ssd/postgresql
-rm -rf /tmp/postgresql
-rm -rf /tmp/wrk /usr/local/bin/wrk
+apt remove -yqq postgresql-13 postgresql-contrib-13 gnupg lsb-release && apt autoremove -yqq
+rm -rf /ssd/postgresql && rm -rf /tmp/postgresql && rm -rf /tmp/wrk /usr/local/bin/wrk

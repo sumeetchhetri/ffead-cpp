@@ -46,7 +46,6 @@ protected:
 	char buff[8192];
 #endif
 	std::string buffer;
-	std::atomic<int> useCounter;
 	std::string address;
 	int io_uring_type;
 	bool isBlocking();
@@ -88,8 +87,6 @@ public:
 	bool isClosed();
 	int getDescriptor();
 	std::string getAddress();
-	void use();
-	void unUse();
 	void doneRead();
 	virtual bool hasPendingRead() {
 		return false;

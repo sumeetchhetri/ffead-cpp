@@ -28,7 +28,6 @@ BaseSocket::BaseSocket() {
 	eh = NULL;
 	closed = false;
 	fd = -1;
-	useCounter = 0;
 	io_uring_type = -1;
 	//io_uring_bid = -1;
 	data = NULL;
@@ -55,7 +54,6 @@ BaseSocket::BaseSocket(const SOCKET& fd) {
 	address = StringUtil::toHEX((long long)this);
 	this->fd = fd;
 	//openSocks++;
-	useCounter = 0;
 	io_uring_type = -1;
 	//io_uring_bid = -1;
 	data = NULL;
@@ -108,14 +106,6 @@ BaseSecureSocket::BaseSecureSocket(const SOCKET& fd): BaseSocket(fd) {
 }
 
 BaseSecureSocket::~BaseSecureSocket() {
-}
-
-void BaseSocket::use() {
-	useCounter++;
-}
-
-void BaseSocket::unUse() {
-	useCounter--;
 }
 
 #ifdef HAVE_SSLINC

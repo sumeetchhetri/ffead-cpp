@@ -24,7 +24,8 @@
 
 cb_reg_ext_fd_pv Writer::pvregfd;
 bool Writer::isPicoEvAsyncBackendMode = false;
-WriterEvent Writer::we = NULL;
+WriterEvent Writer::we = [](Writer* bs, int type) {
+};
 
 #if !defined(OS_MINGW)
 void sigchld_handler(int s)

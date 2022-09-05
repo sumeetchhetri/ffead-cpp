@@ -1,5 +1,8 @@
 FROM sumeetchhetri/ffead-cpp-sql-raw-async-pool-profiled-base:6.1
 
+RUN apt remove -yqq postgresql-13 postgresql-contrib-13 gnupg lsb-release && apt autoremove -yqq
+RUN rm -rf /ssd/postgresql && rm -rf /tmp/postgresql && rm -rf /tmp/wrk /usr/local/bin/wrk
+
 ENV IROOT=/installs
 
 WORKDIR /

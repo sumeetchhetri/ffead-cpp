@@ -30,34 +30,18 @@ bool ServiceHandler::isActive() {
 }
 
 void ServiceHandler::closeConnectionsInternal() {
-	std::map<std::string, long long> addrs;
-	std::map<std::string, BaseSocket*> sifMap;
-	std::map<std::string, long long>::iterator it;
 	BaseSocket* si;
 	while(toBeClosedConns.try_dequeue(si)) {
-		std::string as = si->address + CastUtil::fromNumber(si->fd);
-		if(addrs.find(as)==addrs.end()) {
-			addrs[as] = Timer::getTimestamp();
-			sifMap[as] = si;
-		}
-	}
-	for(it=addrs.begin();it!=addrs.end();) {
-		long long t = Timer::getTimestamp();
-		if(t-it->second>=10 && sifMap[it->first]->useCounter==0) {
-			cls(sifMap[it->first]);
-			sifMap.erase(it->first);
-			addrs.erase(it++);
+		if((Timer::getTimestamp() - si->cqat)>10 && si->useCounter==0) {
+			cls(si);
 		} else {
-			++it;
+			toBeClosedConns.enqueue(si);
 		}
 	}
 }
 
 void* ServiceHandler::closeConnections(void *arg) {
 	ServiceHandler* ths = (ServiceHandler*)arg;
-	std::map<std::string, long long> addrs;
-	std::map<std::string, BaseSocket*> sifMap;
-	std::map<std::string, long long>::iterator it;
 	while(ths->run) {
 		Thread::sSleep(5);
 		ths->closeConnectionsInternal();
@@ -84,6 +68,7 @@ std::string ServiceHandler::getDateStr() {
 }
 
 void ServiceHandler::closeConnection(BaseSocket* si) {
+	si->cqat = Timer::getTimestamp();
 	this->toBeClosedConns.enqueue(si);
 }
 

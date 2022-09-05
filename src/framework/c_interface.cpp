@@ -224,7 +224,11 @@ void* ffead_cpp_handle_picov_2_init_sock(int fd, void* pv, cb_into_pv cb)
 }
 void ffead_cpp_handle_picov_2_deinit_sock(int fd, void* data)
 {
-	delete (PicoVWriter*)data;
+	ServerInitUtil::closeConnection(data);
+}
+void ffead_cpp_handle_picov_clean_sockets()
+{
+	ServerInitUtil::closeConnections();
 }
 void ffead_cpp_handle_picov_ext_fd_cb(int fd, void* data)
 {

@@ -67,6 +67,7 @@ fn C.ffead_cpp_handle_picov_2(&C.ffead_request3)
 fn C.ffead_cpp_handle_picov_2_init_sock(int, voidptr, Cb_into_pv) voidptr
 fn C.ffead_cpp_handle_picov_2_deinit_sock(int, voidptr)
 fn C.ffead_cpp_handle_picov_ext_fd_cb(int, voidptr)
+fn C.ffead_cpp_handle_picov_clean_sockets()
 
 fn C.ffead_cpp_resp_cleanup(voidptr)
 
@@ -313,5 +314,6 @@ fn update_date() {
 	for {
 		pv.date = C.get_date_2()
 		C.usleep(1000000)
+		C.ffead_cpp_handle_picov_clean_sockets()
 	}
 }

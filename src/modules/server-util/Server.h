@@ -197,12 +197,18 @@ class Writer {
 	friend class LibpqDataSourceImpl;
 protected:
 	EventHandler* eh;
+	std::atomic<int> useCounter;
+	long long cqat;
 public:
-	Writer(): data(NULL), cf(NULL), eh(NULL) {}
+	Writer(): data(NULL), cf(NULL), eh(NULL), cqat(-1) {
+		useCounter = 0;
+	}
 	virtual ~Writer() {}
 	virtual void use() {
+		useCounter++;
 	}
 	virtual void unUse() {
+		useCounter--;
 	}
 	virtual void* getData() {
 		return data;
@@ -235,9 +241,7 @@ public:
 	 */
 	template<typename WriterEventF>
 	static void registerWriterEventCallback(WriterEventF nwe) {
-		if(we==NULL) {
-			we = nwe;
-		}
+		we = nwe;
 	}
 	static void onWriterEvent(Writer* writer, int type) {
 		we(writer, type);

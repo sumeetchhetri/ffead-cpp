@@ -1,7 +1,7 @@
 FROM sumeetchhetri/ffead-cpp-base:6.1
 LABEL maintainer="Sumeet Chhetri"
 LABEL version="6.1"
-LABEL description="SQL Raw Base ffead-cpp docker image with commit id - master"
+LABEL description="SQL Raw Async Pool Profiled Base ffead-cpp docker image with commit id - master"
 
 WORKDIR /tmp
 RUN mkdir postgresql
@@ -17,7 +17,7 @@ RUN apt-get -yqq update && apt-get -yqq install locales gnupg lsb-release
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list
 
-ENV PG_VERSION 13
+ENV PG_VERSION 14
 RUN locale-gen en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
@@ -28,6 +28,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -yqq update && apt-get -yqq install postgresql-13 postgresql-contrib-13 &&  rm -rf /var/lib/apt/lists/*
 
 # Make sure all the configuration files in main belong to postgres
+RUN sed -i "s|PG_VERSION|${PG_VERSION}|g" postgresql.conf 
 RUN mv postgresql.conf /etc/postgresql/${PG_VERSION}/main/postgresql.conf
 RUN mv pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
 
@@ -91,6 +92,3 @@ RUN ./sql-async-profiled-install.sh "-picoev"
 
 ENV BUILD_EXT_OPTS -DWITH_IOURING=on
 RUN ./sql-async-profiled-install.sh "-io_uring"
-
-RUN apt remove -yqq postgresql-13 postgresql-contrib-13 gnupg lsb-release && apt autoremove -yqq
-RUN rm -rf /ssd/postgresql && rm -rf /tmp/postgresql && rm -rf /tmp/wrk /usr/local/bin/wrk

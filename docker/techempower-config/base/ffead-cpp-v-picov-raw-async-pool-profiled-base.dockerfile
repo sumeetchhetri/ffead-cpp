@@ -1,7 +1,7 @@
-FROM sumeetchhetri/ffead-cpp-sql-raw-profiled-base:6.1
+FROM sumeetchhetri/ffead-cpp-sql-raw-async-pool-profiled-base:6.1
 LABEL maintainer="Sumeet Chhetri"
 LABEL version="6.1"
-LABEL description="vpicov SQL Raw Profiled Base ffead-cpp docker image with commit id - master"
+LABEL description="vpicov SQL Raw Async Pool Profiled Base ffead-cpp docker image with commit id - master"
 
 WORKDIR ${IROOT}
 
@@ -19,4 +19,4 @@ RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/li
 
 COPY sql-v-picov-profiled-install.sh install_ffead-cpp-sql-raw-v-picov-profiled.sh ${IROOT}/
 RUN chmod 755 ${IROOT}/sql-v-picov-profiled-install.sh ${IROOT}/install_ffead-cpp-sql-raw-v-picov-profiled.sh
-RUN ./sql-v-picov-profiled-install.sh
+RUN ./sql-v-picov-profiled-install.sh async-pool

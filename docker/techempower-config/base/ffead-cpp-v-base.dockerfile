@@ -25,14 +25,4 @@ WORKDIR ${IROOT}/lang-server-backends/v/vweb
 
 WORKDIR ${IROOT}/lang-server-backends/v/pico.v
 #COPY main.v ${IROOT}/lang-server-backends/v/pico.v/
-RUN chmod +x *.sh && ./build.sh && cp main $IROOT/
-
-RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libt3.so /usr/local/lib/libt3.so /usr/local/lib/libinter.so /usr/local/lib/libdinter.so && \
-	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
-	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
-	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libinter.so /usr/local/lib/libinter.so && \
-	ln -s ${IROOT}/ffead-cpp-6.0-sql/lib/libdinter.so /usr/local/lib/libdinter.so && \
-	ldconfig
-	
-#COPY main.v ${IROOT}/lang-server-backends/v/pico.v/
-RUN chmod +x *.sh && ./build.sh && cp main $IROOT/main_async && rm -rf ${IROOT}/lang-server-backends
+RUN chmod +x *.sh && ./build.sh && cp main $IROOT/main && cp main $IROOT/main_async

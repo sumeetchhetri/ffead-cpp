@@ -249,12 +249,18 @@ then
 	if [ "$3" = "postgresql-raw-async" ] || [ "$3" = "postgresql-raw-async-qw" ]
 	then
 		for i in $(seq 0 $(($(nproc --all)-1))); do
-			taskset -c $i ./main --server_dir=$FFEAD_CPP_PATH --server_port=8080 --is_async=true &
+			taskset -c $i ./main_async --server_dir=$FFEAD_CPP_PATH --server_port=8080 --is_async=true &
 		done
+	elif [ "$3" = "postgresql-raw-async-pool" ] || [ "$3" = "postgresql-raw-async-qw-pool" ]
+	then
+		for i in $(seq 0 $(($(nproc --all)-1))); do
+			taskset -c $i ./main_async_pool --server_dir=$FFEAD_CPP_PATH --server_port=8080 --is_async=true &
+		done
+	
 	else
 		sed -i 's|"TeBkUmLpqRouter"|"TeBkUmLpqRouterPicoV"|g' ${WEB_DIR}/config/application.xml
 		for i in $(seq 0 $(($(nproc --all)-1))); do
-			taskset -c $i ./main_async --server_dir=$FFEAD_CPP_PATH --server_port=8080 --is_async=false &
+			taskset -c $i ./main --server_dir=$FFEAD_CPP_PATH --server_port=8080 --is_async=false &
 		done
 	fi
 elif [ "$2" = "java-firenio" ]

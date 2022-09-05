@@ -33,6 +33,7 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <queue>
+#include <map>
 #ifdef INC_COMP
 #include "ComponentGen.h"
 #include "ComponentHandler.h"
@@ -74,6 +75,8 @@ public:
 	static void initIB(cb_reg_ext_fd_pv pvregfd);
 
 	static void cleanUp();
+	static void closeConnection(void* pcwr);
+	static void closeConnections();
 };
 
 class PicoVWriter: public Writer {
@@ -81,8 +84,13 @@ class PicoVWriter: public Writer {
 	void* pv;
 	cb_into_pv cb;
 	AsyncReqData adata;
+	std::string address;
+	static moodycamel::ConcurrentQueue<PicoVWriter*> toBeClosedConns;
+	friend class ServerInitUtil;
 public:
-	PicoVWriter(int fd, void* pv, cb_into_pv cb): fd(fd), pv(pv), cb(cb) {}
+	PicoVWriter(int fd, void* pv, cb_into_pv cb): fd(fd), pv(pv), cb(cb) {
+		address = StringUtil::toHEX((long long)this);
+	}
 	virtual ~PicoVWriter() {}
 	int internalWrite(const char* hline, size_t hline_len, const char* body, size_t body_len) {
 		return cb(hline, hline_len, body, body_len, fd, pv);

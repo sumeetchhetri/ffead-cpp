@@ -35,6 +35,18 @@ docker rmi -f sumeetchhetri/ffead-cpp-base:${VERSION}
 docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-base.dockerfile -t sumeetchhetri/ffead-cpp-base:${VERSION} .
 docker push sumeetchhetri/ffead-cpp-base:${VERSION}
 
+docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-profiled-base:${VERSION}
+docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-sql-raw-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-profiled-base:${VERSION} .
+docker push sumeetchhetri/ffead-cpp-sql-raw-profiled-base:${VERSION}
+
+docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-async-profiled-base:${VERSION}
+docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-sql-raw-async-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-async-profiled-base:${VERSION} .
+docker push sumeetchhetri/ffead-cpp-sql-raw-async-profiled-base:${VERSION}
+
+docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-async-pool-profiled-base:${VERSION}
+docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-sql-raw-async-pool-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-async-pool-profiled-base:${VERSION} .
+docker push sumeetchhetri/ffead-cpp-sql-raw-async-pool-profiled-base:${VERSION}
+
 docker rmi -f sumeetchhetri/ffead-cpp-v-base:${VERSION}
 docker build --progress plain -f ffead-cpp-v-base.dockerfile -t sumeetchhetri/ffead-cpp-v-base:${VERSION} .
 docker push sumeetchhetri/ffead-cpp-v-base:${VERSION}
@@ -50,18 +62,6 @@ docker push sumeetchhetri/ffead-cpp-v-picov-raw-async-profiled-base:${VERSION}
 docker rmi -f sumeetchhetri/ffead-cpp-v-picov-raw-async-qw-profiled-base:${VERSION}
 docker build --progress plain -f ffead-cpp-v-picov-raw-async-qw-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-v-picov-raw-async-qw-profiled-base:${VERSION} .
 docker push sumeetchhetri/ffead-cpp-v-picov-raw-async-qw-profiled-base:${VERSION}
-
-docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-profiled-base:${VERSION}
-docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-sql-raw-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-profiled-base:${VERSION} .
-docker push sumeetchhetri/ffead-cpp-sql-raw-profiled-base:${VERSION}
-
-docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-async-profiled-base:${VERSION}
-docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-sql-raw-async-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-async-profiled-base:${VERSION} .
-docker push sumeetchhetri/ffead-cpp-sql-raw-async-profiled-base:${VERSION}
-
-docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-async-pool-profiled-base:${VERSION}
-docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-sql-raw-async-pool-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-async-pool-profiled-base:${VERSION} .
-docker push sumeetchhetri/ffead-cpp-sql-raw-async-pool-profiled-base:${VERSION}
 
 ####docker rmi -f sumeetchhetri/ffead-cpp-java-base:${VERSION}
 ####docker build --progress plain -f ffead-cpp-java-base.dockerfile -t sumeetchhetri/ffead-cpp-java-base:${VERSION} .

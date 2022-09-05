@@ -23,6 +23,24 @@
 #include "ServerInitUtil.h"
 
 Logger ServerInitUtil::loggerIB;
+moodycamel::ConcurrentQueue<PicoVWriter*> PicoVWriter::toBeClosedConns;
+
+void ServerInitUtil::closeConnection(void* pcwr) {
+	PicoVWriter* si = (PicoVWriter*)pcwr;
+	si->cqat = Timer::getTimestamp();
+	PicoVWriter::toBeClosedConns.enqueue(si);
+}
+
+void ServerInitUtil::closeConnections() {
+	PicoVWriter* si;
+	while(PicoVWriter::toBeClosedConns.try_dequeue(si)) {
+		if((Timer::getTimestamp()-si->cqat)>10 && si->useCounter==0) {
+			delete si;
+		} else {
+			PicoVWriter::toBeClosedConns.enqueue(si);
+		}
+	}
+}
 
 void ServerInitUtil::bootstrapIB(std::string serverRootDirectory, SERVER_BACKEND type) {
 	if(type==V_PICO) {

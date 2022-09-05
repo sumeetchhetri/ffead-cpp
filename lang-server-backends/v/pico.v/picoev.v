@@ -227,6 +227,7 @@ fn rw_callback_async(loop &C.picoev_loop, fd, events int, cb_arg voidptr) {
 	mut p := &Picoev(cb_arg)
 	if (events & C.PICOEV_TIMEOUT) != 0 {
 		close_conn(loop, fd)
+		p.close_cb(fd, p.data[fd])
 		p.idx[fd] = 0
 		return
 	}
