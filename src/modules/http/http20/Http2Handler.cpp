@@ -505,7 +505,7 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si, std::string
 	return false;
 }
 
-bool Http2Handler::writeData(Http2RequestResponseData& data, Http2RequestResponseData& pendingSendData, int& streamFlowControlWindowS, std::string& respd) {
+bool Http2Handler::writeData2(Http2RequestResponseData& data, Http2RequestResponseData& pendingSendData, int& streamFlowControlWindowS, std::string& respd) {
 	Http2HeadersFrame hframe;
 	hframe.headerBlockFragment = context.encode(data.preHeaders);
 	CommonUtils::printHEX(hframe.headerBlockFragment);

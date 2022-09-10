@@ -109,8 +109,6 @@ void HttpReadTask::run() {
 	//Timer to;
 	//to.start();
 	if(sif->readFrom()==0) {
-		Writer::onWriterEvent((Writer*)sif, 2);
-		service->closeConnection(sif);
 		//to.end();
 		//CommonUtils::tsReqSockRead += to.timerNanoSeconds();
 
@@ -132,10 +130,7 @@ void HttpReadTask::run() {
 	//to.end();
 	//CommonUtils::tsReqPrsSrvc += to.timerNanoSeconds();
 
-	if(sif->isClosed()) {
-		Writer::onWriterEvent((Writer*)sif, 2);
-		service->closeConnection(sif);
-	} else {
+	if(!sif->isClosed()) {
 		sif->doneRead();
 	}
 
@@ -305,8 +300,6 @@ void HttpServiceTask::run() {
 
 void HttpWriteTask::run() {
 	if(sif->completeWrite()==0) {
-		Writer::onWriterEvent((Writer*)sif, 2);
-		service->closeConnection(sif);
 	}
 }
 

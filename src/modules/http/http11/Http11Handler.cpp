@@ -166,13 +166,19 @@ Http11Handler::Http11Handler(const SOCKET& fd, void* ssl, void* io, const int& c
 	this->maxReqHdrCnt = maxReqHdrCnt;
 	this->maxEntitySize = maxEntitySize;
 	this->handler = NULL;
-	Writer::registerWriterEventCallback([](Writer* bs, int type) {
-		Http11Handler* hws = (Http11Handler*)bs;
-		if(hws->handler!=NULL) {
-			Writer::onWriterEvent((Writer*)hws->handler, type);
-		}
-	});
 	//logger = LoggerFactory::getLogger("Http11Handler");
+}
+
+void Http11Handler::onOpen() {
+	if(handler!=NULL) {
+		handler->onOpen();
+	}
+}
+
+void Http11Handler::onClose() {
+	if(handler!=NULL) {
+		handler->onClose();
+	}
 }
 
 void Http11Handler::addHandler(SocketInterface* handler) {

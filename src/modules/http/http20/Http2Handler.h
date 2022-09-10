@@ -78,7 +78,7 @@ public:
 	void addPushPromisedRequestToQ(const Http2RequestResponseData& ppdat);
 	void writeInitData(Http2Frame* frame);
 	bool writePendingDataFrame(Http2RequestResponseData&, std::string& data);
-	bool writeData(Http2RequestResponseData& data, Http2RequestResponseData& pendingSendData, int& streamFlowControlWindowS, std::string& respd);
+	bool writeData2(Http2RequestResponseData& data, Http2RequestResponseData& pendingSendData, int& streamFlowControlWindowS, std::string& respd);
 	std::vector<std::string> getRelatedEntitiesForPP(const std::string&);
 	int getHighestPushPromiseStreamIdentifier();
 	int updateSenderWindowSize(const int& windowSize);

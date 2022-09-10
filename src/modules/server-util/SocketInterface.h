@@ -34,6 +34,7 @@ public:
 };
 
 typedef void (*CleanerFunc) (void* data);
+typedef void (*SockCloseEvent) (void* data);
 
 class BaseSocket: public Writer {
 protected:
@@ -66,6 +67,7 @@ protected:
 	friend class LibpqDataSourceImpl;
 	friend class RequestHandler2;
 	friend class Http11Socket;
+	static SockCloseEvent sockCloseFunc;
 public:
 	BaseSocket();
 	BaseSocket(const SOCKET& fd);

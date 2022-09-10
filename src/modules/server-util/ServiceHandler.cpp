@@ -99,7 +99,6 @@ void* ServiceHandler::taskService(void* inp) {
 	return NULL;
 }
 
-
 void ServiceHandler::start(const CleanSocket& cls, bool withCCQ) {
 	if(!run) {
 		this->cls = cls;

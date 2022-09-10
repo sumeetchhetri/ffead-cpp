@@ -141,6 +141,7 @@ BaseSocket* RequestHandler2::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* bi, in
 		case ACCEPTED: {
 			Http11Socket* si = (Http11Socket*)ins->sf(fd);
 			si->eh = &(ins->selector);
+			bi->onOpen();
 			Writer::onWriterEvent((Writer*)si, 1);
 			if(!ins->run) {
 				ins->clsdConns.push_back(si);
@@ -153,8 +154,8 @@ BaseSocket* RequestHandler2::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* bi, in
 			break;
 		}
 		case CLOSED: {
-			Writer::onWriterEvent((Writer*)bi, 2);
-			ins->shi->closeConnection(bi);
+			bi->onClose();
+			bi->closeSocket();
 			break;
 		}
 		case WRITE_READY: {
@@ -187,6 +188,10 @@ BaseSocket* RequestHandler2::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* bi, in
 
 void* RequestHandler2::handle(void* inp) {
 	RequestHandler2* ins  = static_cast<RequestHandler2*>(inp);
+	BaseSocket::sockCloseFunc = [](void* sock) {
+		Writer::onWriterEvent((Writer*)sock, 2);
+		_i->shi->closeConnection((BaseSocket*)sock);
+	};
 	ins->selector.loop(&loopContinue, &loopEventCb);
 
 	for(int i=0;i<(int)ins->clsdConns.size();i++) {
@@ -283,7 +288,6 @@ bool Http11Socket::hasPendingRead() {
 
 bool Http11Socket::handle() {
 	if(readFrom()==0) {
-		RequestHandler2::_i->shi->closeConnection(this);
 		return true;
 	}
 
@@ -338,7 +342,6 @@ bool Http11Socket::handle() {
 
 	if(isClosed()) {
 		return true;
-		RequestHandler2::_i->shi->closeConnection(this);
 	} else {
 		doneRead();
 	}

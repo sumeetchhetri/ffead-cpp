@@ -143,6 +143,8 @@ BaseSocket* RequestReaderHandler::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* b
 			ins->addSf(sockIntf);
 			ins->shi->sockInit(sockIntf);
 			CommonUtils::cSocks += 1;
+			Writer::onWriterEvent((Writer*)sockIntf, 1);
+			sockIntf->onOpen();
 			if(!ins->run) {
 				ins->clsdConns.push_back(sockIntf);
 			}
@@ -154,15 +156,13 @@ BaseSocket* RequestReaderHandler::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* b
 				if(!si->isClosed()) {
 					si->rdTsk->run();
 				} else {
-					Writer::onWriterEvent((Writer*)si, 2);
-					ins->shi->closeConnection(si);
+					si->onClose();
 				}
 			} else {
 				if(!si->isClosed()) {
 					ins->shi->registerReadRequest(si);
 				} else {
-					Writer::onWriterEvent((Writer*)si, 2);
-					ins->shi->closeConnection(si);
+					si->onClose();
 				}
 			}
 			break;
@@ -174,24 +174,20 @@ BaseSocket* RequestReaderHandler::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* b
 					ins->selector.unRegisterWrite(si);
 					ins->shi->registerWriteRequest(si);
 				} else {
-					Writer::onWriterEvent((Writer*)si, 2);
-					ins->shi->closeConnection(si);
+					si->onClose();
 				}
 			} else {
 				if(!si->isClosed()) {
 					ins->selector.unRegisterWrite(si);
 					ins->shi->registerWriteRequest(si);
 				} else {
-					Writer::onWriterEvent((Writer*)si, 2);
-					ins->shi->closeConnection(si);
+					si->onClose();
 				}
 			}
 			break;
 		}
 		case CLOSED: {
-			SocketInterface* si = (SocketInterface*)bi;
-			Writer::onWriterEvent((Writer*)si, 2);
-			ins->shi->closeConnection(si);
+			bi->closeSocket();
 			break;
 		}
 		case ON_DATA_READ: {
@@ -215,6 +211,10 @@ BaseSocket* RequestReaderHandler::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* b
 
 void* RequestReaderHandler::handle(void* inp) {
 	RequestReaderHandler* ins  = static_cast<RequestReaderHandler*>(inp);
+	BaseSocket::sockCloseFunc = [](void* sock) {
+		Writer::onWriterEvent((Writer*)sock, 2);
+		_i->shi->closeConnection((BaseSocket*)sock);
+	};
 	ins->selector.loop(&loopContinue, &loopEventCb);
 
 	for(int i=0;i<(int)ins->clsdConns.size();i++) {
@@ -313,34 +313,22 @@ void* RequestReaderHandler::handle_Old(void* inp) {
 						if(isRead) {
 							if(!si->isClosed()) {
 								si->rdTsk->run();
-							} else {
-								Writer::onWriterEvent((Writer*)si, 2);
-								ins->shi->closeConnection(si);
 							}
 						} else {
 							if(!si->isClosed()) {
 								ins->selector.unRegisterWrite(si);
 								ins->shi->registerWriteRequest(si);
-							} else {
-								Writer::onWriterEvent((Writer*)si, 2);
-								ins->shi->closeConnection(si);
 							}
 						}
 					} else {
 						if(isRead) {
 							if(!si->isClosed()) {
 								ins->shi->registerReadRequest(si);
-							} else {
-								Writer::onWriterEvent((Writer*)si, 2);
-								ins->shi->closeConnection(si);
 							}
 						} else {
 							if(!si->isClosed()) {
 								ins->selector.unRegisterWrite(si);
 								ins->shi->registerWriteRequest(si);
-							} else {
-								Writer::onWriterEvent((Writer*)si, 2);
-								ins->shi->closeConnection(si);
 							}
 						}
 					}

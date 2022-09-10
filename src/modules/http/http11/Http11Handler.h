@@ -40,6 +40,8 @@ class Http11Handler : public SocketInterface {
 	friend class HttpServiceHandler;
 	friend class HttpServiceTask;
 public:
+	void onOpen();
+	void onClose();
 	int readFrom();
 	void addHandler(SocketInterface* handler);
 	std::string getProtocol(void* context);

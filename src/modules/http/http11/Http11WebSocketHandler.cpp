@@ -41,6 +41,15 @@ Http11WebSocketHandler::Http11WebSocketHandler(const SOCKET& fd, void* ssl, void
 	});
 }
 
+void Http11WebSocketHandler::onOpen() {
+}
+
+void Http11WebSocketHandler::onClose() {
+	if(h!=NULL) {
+		h->onClose(getAddress());
+	}
+}
+
 std::string Http11WebSocketHandler::getUrl() {
 	return this->url;
 }

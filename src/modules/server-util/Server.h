@@ -204,6 +204,8 @@ public:
 		useCounter = 0;
 	}
 	virtual ~Writer() {}
+	virtual void onOpen() {}
+	virtual void onClose() {}
 	virtual void use() {
 		useCounter++;
 	}
