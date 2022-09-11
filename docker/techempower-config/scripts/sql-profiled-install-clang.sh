@@ -40,7 +40,7 @@ sed -i 's|localhost|tfb-database|g' $IROOT/ffead-cpp-6.0-sql/web/t3/config/sdorm
 
 if [ "$#" = 0 ]
 then
-	apt remove -yqq postgresql-13 postgresql-contrib-13 gnupg lsb-release
+	apt remove -yqq postgresql-${PG_VERSION} postgresql-contrib-${PG_VERSION} gnupg lsb-release
 	apt autoremove -yqq
 	rm -rf /ssd/postgresql
 	rm -rf /tmp/postgresql

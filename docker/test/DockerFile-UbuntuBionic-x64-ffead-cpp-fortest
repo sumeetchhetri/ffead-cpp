@@ -31,7 +31,7 @@ ENV LC_ALL en_US.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
 
 # install postgresql on database machine
-RUN apt-get -yqq update && apt-get -yqq install postgresql-13 postgresql-contrib-13 &&  rm -rf /var/lib/apt/lists/*
+RUN apt-get -yqq update && apt-get -yqq install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" postgresql-${PG_VERSION} postgresql-contrib-${PG_VERSION} &&  rm -rf /var/lib/apt/lists/*
 
 # Make sure all the configuration files in main belong to postgres
 RUN sed -i "s|PG_VERSION|${PG_VERSION}|g" postgresql.conf 

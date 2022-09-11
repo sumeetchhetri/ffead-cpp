@@ -59,9 +59,9 @@ docker rmi -f sumeetchhetri/ffead-cpp-v-picov-raw-async-profiled-base:${VERSION}
 docker build --progress plain -f ffead-cpp-v-picov-raw-async-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-v-picov-raw-async-profiled-base:${VERSION} .
 docker push sumeetchhetri/ffead-cpp-v-picov-raw-async-profiled-base:${VERSION}
 
-docker rmi -f sumeetchhetri/ffead-cpp-v-picov-raw-async-qw-profiled-base:${VERSION}
-docker build --progress plain -f ffead-cpp-v-picov-raw-async-qw-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-v-picov-raw-async-qw-profiled-base:${VERSION} .
-docker push sumeetchhetri/ffead-cpp-v-picov-raw-async-qw-profiled-base:${VERSION}
+docker rmi -f sumeetchhetri/ffead-cpp-v-picov-raw-async-pool-profiled-base:${VERSION}
+docker build --progress plain -f ffead-cpp-v-picov-raw-async-pool-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-v-picov-raw-async-pool-profiled-base:${VERSION} .
+docker push sumeetchhetri/ffead-cpp-v-picov-raw-async-pool-profiled-base:${VERSION}
 
 ####docker rmi -f sumeetchhetri/ffead-cpp-java-base:${VERSION}
 ####docker build --progress plain -f ffead-cpp-java-base.dockerfile -t sumeetchhetri/ffead-cpp-java-base:${VERSION} .

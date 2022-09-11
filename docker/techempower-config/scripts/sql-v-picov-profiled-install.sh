@@ -47,5 +47,5 @@ else
 	mv $IROOT/lang-server-backends/v/pico.v/main $IROOT/
 fi
 
-apt remove -yqq postgresql-13 postgresql-contrib-13 gnupg lsb-release && apt autoremove -yqq
+apt remove -yqq postgresql-${PG_VERSION} postgresql-contrib-${PG_VERSION} gnupg lsb-release && apt autoremove -yqq
 rm -rf /ssd/postgresql && rm -rf /tmp/postgresql && rm -rf /tmp/wrk /usr/local/bin/wrk
