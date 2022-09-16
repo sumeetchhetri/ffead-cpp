@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 rm -f /usr/local/lib/libffead-*
 rm -f /usr/local/lib/libt1.so*

@@ -31,20 +31,35 @@ bool ServiceHandler::isActive() {
 
 void ServiceHandler::closeConnectionsInternal() {
 	BaseSocket* si;
+	Timer t;
+	t.start();
 	while(toBeClosedConns.try_dequeue(si)) {
 		if((Timer::getTimestamp() - si->cqat)>10 && si->useCounter==0) {
 			cls(si);
 		} else {
 			toBeClosedConns.enqueue(si);
 		}
+		if(t.elapsedMilliSeconds()>900) {
+			CommonUtils::setDate();
+			t.start();
+		}
+	}
+	if(t.elapsedMilliSeconds()>800) {
+		CommonUtils::setDate();
+		t.start();
 	}
 }
 
 void* ServiceHandler::closeConnections(void *arg) {
 	ServiceHandler* ths = (ServiceHandler*)arg;
+	int counter = 0;
 	while(ths->run) {
-		Thread::sSleep(5);
-		ths->closeConnectionsInternal();
+		CommonUtils::setDate();
+		Thread::sSleep(1);
+		if(counter++>=5) {
+			ths->closeConnectionsInternal();
+			counter = 0;
+		}
 	}
 	return NULL;
 }
