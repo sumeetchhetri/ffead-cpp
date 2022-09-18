@@ -6,7 +6,7 @@ export LD_LIBRARY_PATH=${IROOT}/:${IROOT}/lib:${FFEAD_CPP_PATH}/lib:/usr/local/l
 cd $IROOT/lang-server-backends/v/pico.v
 
 APP=t3
-if [ "$1" = "async" ]
+if [ "$1" = "async" ] || [ "$1" = "async-pool" ]
 then
 	APP=t4
 	cp -f ${FFEAD_CPP_PATH}/web/t4/config/cachememory.xml ${FFEAD_CPP_PATH}/web/t4/config/cache.xml
@@ -14,9 +14,11 @@ then
 	nohup bash -c "./main --server_dir=$FFEAD_CPP_PATH --server_port=8080 --is_async=true > ffead.log &"
 elif [ "$1" = "async-pool" ]
 then
-	APP=t5
-	cp -f ${FFEAD_CPP_PATH}/web/t5/config/cachememory.xml ${FFEAD_CPP_PATH}/web/t5/config/cache.xml
+	APP=t4
+	cp -f ${FFEAD_CPP_PATH}/web/t4/config/cachememory.xml ${FFEAD_CPP_PATH}/web/t4/config/cache.xml
 	sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' ${FFEAD_CPP_PATH}/resources/server.prop
+	sed -i 's|"TeBkUmLpqAsyncRouter"|"TeBkUmLpqAsyncRouterPooled"|g' ${FFEAD_CPP_PATH}/web/t4/config/application.xml
+	sed -i 's|TeBkUmLpqAsyncRouter|TeBkUmLpqAsyncRouterPooled|g' ${FFEAD_CPP_PATH}/web/t4/config/cachememory.xml
 	nohup bash -c "./main --server_dir=$FFEAD_CPP_PATH --server_port=8080 --is_async=true > ffead.log &"
 else
 	cp -f ${FFEAD_CPP_PATH}/web/t3/config/cachememory.xml ${FFEAD_CPP_PATH}/web/t3/config/cache.xml

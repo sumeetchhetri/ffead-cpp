@@ -107,7 +107,7 @@ extern "C" void ffead_cpp_bootstrap(const char* srv, size_t srv_len, int type);
     Initialize the ffead-cpp server framework
 */
 extern "C" void ffead_cpp_init();
-extern "C" void ffead_cpp_init_for_pv(cb_reg_ext_fd_pv pvregfd);
+extern "C" void ffead_cpp_init_for_pv(cb_reg_ext_fd_pv pvregfd, cb_into_pv cb, cb_into_pv_for_date cdt);
 
 /*
     Cleanup the ffead-cpp server framework
@@ -138,7 +138,7 @@ extern "C" void* ffead_cpp_handle_picov_1(const ffead_request3 *request, int* sc
 	const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len,
     phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len);
 extern "C" void ffead_cpp_handle_picov_2(const ffead_request3 *request);
-extern "C" void* ffead_cpp_handle_picov_2_init_sock(int fd, void* pv, cb_into_pv cb);
+extern "C" void* ffead_cpp_handle_picov_2_init_sock(int fd, void* pv);
 extern "C" void ffead_cpp_handle_picov_2_deinit_sock(int fd, void* data);
 extern "C" void ffead_cpp_handle_picov_clean_sockets();
 extern "C" void ffead_cpp_handle_picov_ext_fd_cb(int fd, void* data);

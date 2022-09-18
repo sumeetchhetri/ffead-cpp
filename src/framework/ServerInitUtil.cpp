@@ -23,6 +23,8 @@
 #include "ServerInitUtil.h"
 
 Logger ServerInitUtil::loggerIB;
+cb_into_pv PicoVWriter::cb;
+cb_into_pv_for_date PicoVWriter::cdt;
 moodycamel::ConcurrentQueue<PicoVWriter*> PicoVWriter::toBeClosedConns;
 
 void ServerInitUtil::closeConnection(void* pcwr) {
@@ -33,11 +35,17 @@ void ServerInitUtil::closeConnection(void* pcwr) {
 
 void ServerInitUtil::closeConnections() {
 	PicoVWriter* si;
+	Timer t;
+	t.start();
 	while(PicoVWriter::toBeClosedConns.try_dequeue(si)) {
 		if((Timer::getTimestamp()-si->cqat)>10 && si->useCounter==0) {
 			delete si;
 		} else {
 			PicoVWriter::toBeClosedConns.enqueue(si);
+		}
+		if(t.elapsedMilliSeconds()>900) {
+			PicoVWriter::cdt();
+			t.start();
 		}
 	}
 }
@@ -363,8 +371,10 @@ void ServerInitUtil::initIB() {
 	init(loggerIB);
 }
 
-void ServerInitUtil::initIB(cb_reg_ext_fd_pv pvregfd_) {
-	Writer::pvregfd = pvregfd_;
+void ServerInitUtil::initIB(cb_reg_ext_fd_pv pvregfd, cb_into_pv cb, cb_into_pv_for_date cdt) {
+	Writer::pvregfd = pvregfd;
+	PicoVWriter::cb = cb;
+	PicoVWriter::cdt = cdt;
 	init(loggerIB);
 }
 

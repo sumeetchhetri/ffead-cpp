@@ -1,16 +1,11 @@
 export FFEAD_CPP_PATH=${IROOT}/ffead-cpp-6.0-sql
 export LD_LIBRARY_PATH=${IROOT}/:${IROOT}/lib:${FFEAD_CPP_PATH}/lib:/usr/local/lib:$LD_LIBRARY_PATH
 
-if [ "$1" = "async" ]
+if [ "$1" = "async" ] || [ "$1" = "async-pool" ]
 then
 	rm -rf $FFEAD_CPP_PATH/web/t1 $FFEAD_CPP_PATH/web/t2 $FFEAD_CPP_PATH/web/t3 $FFEAD_CPP_PATH/web/t5
 	sed -i 's|<async>false</async>|<async>true</async>|g' $FFEAD_CPP_PATH/web/t4/config/sdorm.xml
 	sed -i 's|tfb-database|localhost|g' $FFEAD_CPP_PATH/web/t4/config/sdorm.xml
-elif [ "$1" = "async-pool" ]
-then
-	rm -rf $FFEAD_CPP_PATH/web/t1 $FFEAD_CPP_PATH/web/t2 $FFEAD_CPP_PATH/web/t3 $FFEAD_CPP_PATH/web/t4
-	sed -i 's|<async>false</async>|<async>true</async>|g' $FFEAD_CPP_PATH/web/t5/config/sdorm.xml
-	sed -i 's|tfb-database|localhost|g' $FFEAD_CPP_PATH/web/t5/config/sdorm.xml
 else
 	rm -rf $FFEAD_CPP_PATH/web/t1 $FFEAD_CPP_PATH/web/t2 $FFEAD_CPP_PATH/web/t4 $FFEAD_CPP_PATH/web/t5
 	sed -i 's|tfb-database|localhost|g' ${FFEAD_CPP_PATH}/web/t3/config/sdorm.xml
@@ -40,7 +35,7 @@ then
 	mv $IROOT/lang-server-backends/v/pico.v/main $IROOT/main_async
 elif [ "$1" = "async-pool" ]
 then
-	sed -i 's|localhost|tfb-database|g' $IROOT/ffead-cpp-6.0-sql/web/t5/config/sdorm.xml
+	sed -i 's|localhost|tfb-database|g' $IROOT/ffead-cpp-6.0-sql/web/t4/config/sdorm.xml
 	mv $IROOT/lang-server-backends/v/pico.v/main $IROOT/main_async_pool
 else
 	sed -i 's|localhost|tfb-database|g' $IROOT/ffead-cpp-6.0-sql/web/t3/config/sdorm.xml

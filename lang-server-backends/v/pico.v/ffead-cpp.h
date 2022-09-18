@@ -21,6 +21,7 @@
 #include <stddef.h>
 #include <string.h>
 
+typedef int cb_into_pv_for_date();
 typedef int cb_into_pv(const char* hline, size_t hline_len, const char* body, size_t body_len, int fd, void* pv);
 typedef void cb_reg_ext_fd_pv(int fd, void* pv);
 
@@ -67,13 +68,13 @@ static inline const char* get_date_2() {
 extern void ffead_cpp_resp_cleanup(void* ptr);
 extern void ffead_cpp_bootstrap(const char* srv, size_t srv_len, int type);
 extern void ffead_cpp_init();
-extern void ffead_cpp_init_for_pv(cb_reg_ext_fd_pv pvregfd);
+extern void ffead_cpp_init_for_pv(cb_reg_ext_fd_pv pvregfd, cb_into_pv cb, cb_into_pv_for_date cdt);
 extern void ffead_cpp_cleanup();
 extern void* ffead_cpp_handle_picov_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
     const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len,
     phr_header_t *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len);
 extern void ffead_cpp_handle_picov_2(const ffead_request3 *request);
-extern void* ffead_cpp_handle_picov_2_init_sock(int fd, void* pv, cb_into_pv cb);
+extern void* ffead_cpp_handle_picov_2_init_sock(int fd, void* pv);
 extern void ffead_cpp_handle_picov_2_deinit_sock(int fd, void* data);
 extern void ffead_cpp_handle_picov_ext_fd_cb(int fd, void* data);
 extern void ffead_cpp_handle_picov_clean_sockets();

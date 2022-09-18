@@ -64,6 +64,7 @@ class Writer;
 class BaseSocket;
 
 typedef void (*WriterEvent) (Writer* bs, int type);
+typedef int (*cb_into_pv_for_date) ();
 typedef int (*cb_into_pv) (const char* hline, size_t hline_len, const char* body, size_t body_len, int fd, void* pv);
 typedef void (*cb_reg_ext_fd_pv) (int fd, void* pv);
 typedef void (*CleanerFunc) (void* data);

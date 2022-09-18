@@ -72,7 +72,7 @@ public:
 
 	static void bootstrapIB(std::string, SERVER_BACKEND type);
 	static void initIB();
-	static void initIB(cb_reg_ext_fd_pv pvregfd);
+	static void initIB(cb_reg_ext_fd_pv pvregfd, cb_into_pv cb, cb_into_pv_for_date cdt);
 
 	static void cleanUp();
 	static void closeConnection(void* pcwr);
@@ -82,13 +82,14 @@ public:
 class PicoVWriter: public Writer {
 	int fd;
 	void* pv;
-	cb_into_pv cb;
+	static cb_into_pv cb;
+	static cb_into_pv_for_date cdt;
 	AsyncReqData adata;
 	std::string address;
 	static moodycamel::ConcurrentQueue<PicoVWriter*> toBeClosedConns;
 	friend class ServerInitUtil;
 public:
-	PicoVWriter(int fd, void* pv, cb_into_pv cb): fd(fd), pv(pv), cb(cb) {
+	PicoVWriter(int fd, void* pv): fd(fd), pv(pv) {
 		address = StringUtil::toHEX((long long)this);
 	}
 	virtual ~PicoVWriter() {}

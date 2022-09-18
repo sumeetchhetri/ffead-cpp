@@ -44,10 +44,6 @@ void ServiceHandler::closeConnectionsInternal() {
 			t.start();
 		}
 	}
-	if(t.elapsedMilliSeconds()>800) {
-		CommonUtils::setDate();
-		t.start();
-	}
 }
 
 void* ServiceHandler::closeConnections(void *arg) {

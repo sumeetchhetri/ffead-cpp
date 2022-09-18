@@ -246,12 +246,17 @@ elif [ "$2" = "v-picov" ]
 then
 	cd ${IROOT}
 	sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' $FFEAD_CPP_PATH/resources/server.prop
-	if [ "$3" = "postgresql-raw-async" ] || [ "$3" = "postgresql-raw-async-qw" ]
+	if [ "$3" = "postgresql-raw-async" ]
 	then
 		for i in $(seq 0 $(($(nproc --all)-1))); do
 			if [ "$6" = "pool" ]
 			then
-				taskset -c $i ./main_async_pool --server_dir=$FFEAD_CPP_PATH --server_port=8080 --is_async=true &
+				if [ -f "main_async_pool" ]
+				then
+					taskset -c $i ./main_async_pool --server_dir=$FFEAD_CPP_PATH --server_port=8080 --is_async=true &
+				else
+					taskset -c $i ./main_async --server_dir=$FFEAD_CPP_PATH --server_port=8080 --is_async=true &
+				fi
 			else
 				taskset -c $i ./main_async --server_dir=$FFEAD_CPP_PATH --server_port=8080 --is_async=true &
 			fi

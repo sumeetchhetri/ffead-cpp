@@ -28,13 +28,14 @@ import flag
 fn C.ffead_cpp_bootstrap(byteptr, u64, int)
 //no args
 fn C.ffead_cpp_init()
+type Cb_into_pv = fn (hline byteptr, hline_len u64, body byteptr, body_len u64, fd int, pv voidptr) int
+type Cb_into_pv_for_date = fn ()
 type Cb_reg_ext_fd_pv = fn (int, voidptr)
-fn C.ffead_cpp_init_for_pv(Cb_reg_ext_fd_pv)
+fn C.ffead_cpp_init_for_pv(Cb_reg_ext_fd_pv, Cb_into_pv, Cb_into_pv_for_date)
 //no args
 fn C.ffead_cpp_cleanup()
 fn C.fc_memcpy(voidptr, byteptr, u64) byteptr
 fn C.get_date_2() byteptr
-type Cb_into_pv = fn (hline byteptr, hline_len u64, body byteptr, body_len u64, fd int, pv voidptr) int
 
 struct C.ffead_request3 {
 pub mut:
@@ -64,7 +65,7 @@ struct C.ffead_request3_t {}
 */
 fn C.ffead_cpp_handle_picov_1(&C.ffead_request3, &int, &string, &u64, &string, &u64, &string, &u64, &C.phr_header, &u64, &string, &u64) voidptr
 fn C.ffead_cpp_handle_picov_2(&C.ffead_request3)
-fn C.ffead_cpp_handle_picov_2_init_sock(int, voidptr, Cb_into_pv) voidptr
+fn C.ffead_cpp_handle_picov_2_init_sock(int, voidptr) voidptr
 fn C.ffead_cpp_handle_picov_2_deinit_sock(int, voidptr)
 fn C.ffead_cpp_handle_picov_ext_fd_cb(int, voidptr)
 fn C.ffead_cpp_handle_picov_clean_sockets()
@@ -234,7 +235,7 @@ fn fcp_callback_write(hline byteptr, hline_len u64, body byteptr, body_len u64, 
 }
 
 fn open_cb_async(fd int) voidptr {
-	return C.ffead_cpp_handle_picov_2_init_sock(fd, &pv, &fcp_callback_write)
+	return C.ffead_cpp_handle_picov_2_init_sock(fd, &pv)
 }
 
 fn close_cb_async(fd int, data voidptr) {
@@ -259,6 +260,10 @@ fn callback_async(req picohttpparser.Request, fd int, writer voidptr) {
 	}
 	
 	C.ffead_cpp_handle_picov_2(&freq)
+}
+
+fn set_date() {
+	pv.date = C.get_date_2()
 }
 
 __global pv picoev.Picoev
@@ -298,7 +303,7 @@ fn main() {
 	if !is_async {
 		C.ffead_cpp_init()
 	} else {
-		C.ffead_cpp_init_for_pv(&picoev.register_external_fd)
+		C.ffead_cpp_init_for_pv(&picoev.register_external_fd, &fcp_callback_write, &set_date)
 		go update_date()
 	}
 	println('Initializing ffead-cpp end...')
@@ -312,7 +317,7 @@ fn main() {
 
 fn update_date() {
 	for {
-		pv.date = C.get_date_2()
+		set_date()
 		C.usleep(1000000)
 		C.ffead_cpp_handle_picov_clean_sockets()
 	}

@@ -32,8 +32,8 @@ void ffead_cpp_init() {
     ServerInitUtil::initIB();
 }
 
-void ffead_cpp_init_for_pv(cb_reg_ext_fd_pv pvregfd) {
-    ServerInitUtil::initIB(pvregfd);
+void ffead_cpp_init_for_pv(cb_reg_ext_fd_pv pvregfd, cb_into_pv cb, cb_into_pv_for_date cdt) {
+    ServerInitUtil::initIB(pvregfd, cb, cdt);
 }
 
 /*
@@ -218,9 +218,9 @@ void ffead_cpp_handle_picov_2(const ffead_request3 *request)
     		std::string_view{request->method, request->method_len}, request->version, std::string_view{request->body, request->body_len});
     ServiceTask::handleAsync(&req, NULL, writer);
 }
-void* ffead_cpp_handle_picov_2_init_sock(int fd, void* pv, cb_into_pv cb)
+void* ffead_cpp_handle_picov_2_init_sock(int fd, void* pv)
 {
-	return new PicoVWriter(fd, pv, cb);
+	return new PicoVWriter(fd, pv);
 }
 void ffead_cpp_handle_picov_2_deinit_sock(int fd, void* data)
 {
