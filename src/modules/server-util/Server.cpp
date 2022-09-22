@@ -347,7 +347,7 @@ SOCKET Server::createListener(const int& port, const bool& block, bool isSinglEV
 		#if defined(HAVE_SO_REUSEADDR) && defined(HAVE_SO_REUSEPORT)
 		if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), &yes, sizeof(int)) == -1) {
 		#else
-		if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), &yes, sizeof(int)) == -1) {
+		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
 		#endif
 			perror("setsockopt");
 		}
@@ -487,7 +487,7 @@ SOCKET Server::createListener(const std::string& ipAddress, const int& port, con
 		#if defined(HAVE_SO_REUSEADDR) && defined(HAVE_SO_REUSEPORT)
 		if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), &yes, sizeof(int)) == -1) {
 		#else
-		if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), &yes, sizeof(int)) == -1) {
+		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
 		#endif
 			perror("setsockopt");
 		}
