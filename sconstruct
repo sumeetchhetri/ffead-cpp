@@ -142,6 +142,8 @@ if bool(mod_sql):
 			conf.env.Append(CPPDEFINES=['HAVE_PQHDR', 'HAVE_LIBPQ'])
 			if conf.CheckFunc('PQenterBatchMode', '#include <libpq-fe.h>'):
 				conf.env.Append(CPPDEFINES=['HAVE_LIBPQ_BATCH'])
+			if conf.CheckFunc('PQenterPipelineMode', '#include <libpq-fe.h>'):
+				conf.env.Append(CPPDEFINES=['HAVE_LIBPQ_PIPELINE'])
 			
 
 mod_mongo = ARGUMENTS.get('MOD_SDORM_MONGO', True)

@@ -11,7 +11,14 @@ export PATH=$FFEAD_CPP_PATH/lib:$PATH
 cp -f $FFEAD_CPP_PATH/web/t4/config/cachememory.xml $FFEAD_CPP_PATH/web/t4/config/cache.xml
 sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' $FFEAD_CPP_PATH/resources/server.prop
 cd $FFEAD_CPP_PATH
-if [ $# -eq 0 ]; then
+if [ $# -eq 0 ] || [ "$1" == "pool" ]; then
+	if [ "$1" == "pool" ]; then
+		sed -i 's|"TeBkUmLpqAsyncRouter"|"TeBkUmLpqAsyncRouterPooled"|g'  $FFEAD_CPP_PATH/web/t4/config/application.xml
+		sed -i 's|TeBkUmLpqAsyncRouter|TeBkUmLpqAsyncRouterPooled|g'  $FFEAD_CPP_PATH/web/t4/config/cache.xml
+	else
+		sed -i 's|"TeBkUmLpqAsyncRouterPooled"|"TeBkUmLpqAsyncRouter"|g'  $FFEAD_CPP_PATH/web/t4/config/application.xml
+		sed -i 's|TeBkUmLpqAsyncRouterPooled|TeBkUmLpqAsyncRouter|g'  $FFEAD_CPP_PATH/web/t4/config/cache.xml
+	fi
 	cd /tmp
 	nohup bash -c "./main --server_dir=$FFEAD_CPP_PATH --server_port=9783 --is_async=true > ffead.log &"
 	sleep 30

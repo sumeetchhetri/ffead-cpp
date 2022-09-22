@@ -349,6 +349,7 @@ void FFEADContext::clear(const std::string& appName)
 {
 	std::map<std::string, void*>::iterator it;
 	for(it=objects.begin();it!=objects.end();++it) {
+		if(it->first.find(appName)!=0) continue;
 		std::string k = StringUtil::replaceFirstCopy(it->first, appName, "");
 		k = k.substr(k.find(";")+1);
 		reflector->destroy(it->second, k, appName);

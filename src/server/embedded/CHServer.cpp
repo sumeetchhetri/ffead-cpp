@@ -1320,8 +1320,9 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		rh->addListenerSocket(&doRegisterListenerFunc, sockfd);
 	}
 
+	bool enableJobs = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["ENABLE_JOBS"])=="true";
 #ifdef INC_JOBS
-	if(StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["ENABLE_JOBS"])=="true") {
+	if(enableJobs) {
 		JobScheduler::start();
 	}
 #endif
@@ -1423,7 +1424,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	#endif
 
 #ifdef INC_JOBS
-	if(StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["ENABLE_JOBS"])=="true") {
+	if(enableJobs) {
 		JobScheduler::stop();
 	}
 #endif

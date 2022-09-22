@@ -75,13 +75,13 @@
 #mesondefine HAVE_TCP_QUICKACK
 #mesondefine HAVE_TCP_DEFER_ACCEPT
 #mesondefine HAVE_TCP_FASTOPEN
+#mesondefine HAVE_SO_REUSEPORT
+#mesondefine HAVE_SO_REUSEADDR
 #mesondefine HAVE_SO_ATTACH_REUSEPORT_CBPF
 #mesondefine HAVE_LIBPQ_BATCH
 #mesondefine HAVE_LIBPQ_PIPELINE
 #mesondefine IS_SENDFILE
 #mesondefine HAVE_RAPID_JSON
-#mesondefine HAVE_PUGI_XML
-#mesondefine HAVE_SYSINFO
 #mesondefine HAVE_PUGI_XML
 #mesondefine HAVE_SYSINFO
 #mesondefine HAVE_SOLR

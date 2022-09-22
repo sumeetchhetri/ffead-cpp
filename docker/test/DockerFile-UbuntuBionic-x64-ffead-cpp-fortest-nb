@@ -9,8 +9,10 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 # prepare PostgreSQL APT repository
-RUN cp pgdg.list /etc/apt/sources.list.d/
+RUN apt-get -yqq update && apt-get -yqq install locales gnupg lsb-release
+
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list
 
 # prepare mysql APT repository
 RUN cp mysql.list /etc/apt/sources.list.d/

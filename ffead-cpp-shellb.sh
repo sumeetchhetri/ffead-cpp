@@ -80,6 +80,8 @@ function do_start() {
 		set_exclude_src "src/modules/ssl" "src/modules/client-util/ssl"
 	fi
 	c_hdr_lib "libpq-fe.h" "pq" "HAVE_PQHDR,HAVE_LIBPQ" "libpq devel not found"
+	c_func "PQenterBatchMode" "HAVE_LIBPQ_BATCH"
+	c_func "PQenterPipelineMode" "HAVE_LIBPQ_PIPELINE"
 	c_hdr_lib "sql.h" "odbc" "HAVE_SQLINC,HAVE_ODBCLIB,HAVE_LIBODBC,INC_SDORM,INC_SDORM_SQL" "odbc devel not found"
 	c_hdr_lib "mongoc.h" "mongoc-1.0" "HAVE_MONGOINC,HAVE_MONGOCLIB,INC_SDORM_MONGO" "libmongoc devel not found"
 	c_hdr_lib "bson.h" "bson-1.0" "HAVE_BSONINC,HAVE_BSONLIB" "libbson devel not found"

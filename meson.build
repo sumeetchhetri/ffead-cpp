@@ -137,7 +137,7 @@ if get_option('MOD_SDORM_SQL') == true
 		global_libs += [libodbc]
 	endif
 	libpq = cc.find_library('pq', dirs: ['/usr/local/lib'], required: false)
-	pqincpath = ''
+	pqincpath = '/usr/include'
 	if libpq.found()
 		if not cc.has_header('libpq-fe.h')
 			if not cc.has_header('libpq-fe.h', args : '-I/usr/include/postgresql')
@@ -163,9 +163,13 @@ if get_option('MOD_SDORM_SQL') == true
 		conf_data.set('HAVE_LIBPQ', 1)
 		global_libs += [libpq]
 	endif
-	if libpq.found() and cc.has_function('PQenterBatchMode', prefix: '#include <libpq-fe.h>', args: '-I'+pqincpath)
+	if libpq.found() and cc.has_function('PQenterBatchMode', prefix: '#include <libpq-fe.h>', args: '-I'+pqincpath, dependencies: libpq)
 		# regcomp in libc, everything is fine, no lib needed
 		conf_data.set('HAVE_LIBPQ_BATCH', 1)
+	endif
+	if libpq.found() and cc.has_function('PQenterPipelineMode', prefix: '#include <libpq-fe.h>', args: '-I'+pqincpath, dependencies: libpq)
+		# regcomp in libc, everything is fine, no lib needed
+		conf_data.set('HAVE_LIBPQ_PIPELINE', 1)
 	endif
 endif
 

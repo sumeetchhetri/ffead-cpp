@@ -319,34 +319,39 @@ SOCKET Server::createListener(const int& port, const bool& block, bool isSinglEV
 	self.sin_port = htons(port);
 	self.sin_addr.s_addr = INADDR_ANY;
 
-	/*---Create streaming socket---*/
-	#ifdef OS_MINGW
+#ifdef OS_MINGW
 	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
-	#else
+#else
 	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-	#endif
+#endif
 	{
 		perror("server: socket");
 		return INVALID_SOCKET;
 	}
 
-	#ifdef OS_MINGW
+#ifdef OS_MINGW
+	#ifdef HAVE_SO_REUSEADDR
 		BOOL bOptVal = FALSE;
-#ifdef HAVE_SO_REUSEADDR
 		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&bOptVal, sizeof(int)) == -1) {
 			perror("setsockopt");
 		}
-#endif
-	#else
-		#ifdef CYGWIN
-#ifdef HAVE_SO_REUSEADDR
+	#endif
+#else
+	#ifdef CYGWIN
+		#ifdef HAVE_SO_REUSEADDR
 		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+			perror("setsockopt");
+		}
+		#endif
+	#else
+		#if defined(HAVE_SO_REUSEADDR) && defined(HAVE_SO_REUSEPORT)
+		if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), &yes, sizeof(int)) == -1) {
 		#else
 		if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), &yes, sizeof(int)) == -1) {
 		#endif
 			perror("setsockopt");
 		}
-#endif
+	#endif
 	#ifdef HAVE_TCP_QUICKACK
 		if (setsockopt(sockfd, IPPROTO_TCP, TCP_QUICKACK, &yes, sizeof(int)) == -1) {
 			perror("setsockopt");
@@ -363,7 +368,7 @@ SOCKET Server::createListener(const int& port, const bool& block, bool isSinglEV
 			perror("setsockopt");
 		}
 	#endif
-	#endif
+#endif
 
 	#ifdef OS_MINGW
 	if (::bind(sockfd, (struct sockaddr*)&self, sizeof(self)) == SOCKET_ERROR) {
@@ -464,44 +469,50 @@ SOCKET Server::createListener(const std::string& ipAddress, const int& port, con
 			continue;
 		}
 
-		#ifdef OS_MINGW
-#ifdef HAVE_SO_REUSEADDR
-			BOOL bOptVal = FALSE;
-			if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&bOptVal, sizeof(int)) == -1) {
-				perror("setsockopt");
-			}
-#endif
+#ifdef OS_MINGW
+	#ifdef HAVE_SO_REUSEADDR
+		BOOL bOptVal = FALSE;
+		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&bOptVal, sizeof(int)) == -1) {
+			perror("setsockopt");
+		}
+	#endif
+#else
+	#ifdef CYGWIN
+		#ifdef HAVE_SO_REUSEADDR
+		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+			perror("setsockopt");
+		}
+		#endif
+	#else
+		#if defined(HAVE_SO_REUSEADDR) && defined(HAVE_SO_REUSEPORT)
+		if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), &yes, sizeof(int)) == -1) {
 		#else
-		#ifdef CYGWIN
-#ifdef HAVE_SO_REUSEADDR
-			if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-			#else
-			if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), &yes, sizeof(int)) == -1) {
-			#endif
-				perror("setsockopt");
-			}
+		if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), &yes, sizeof(int)) == -1) {
+		#endif
+			perror("setsockopt");
+		}
+	#endif
+	#ifdef HAVE_TCP_QUICKACK
+		if (setsockopt(sockfd, IPPROTO_TCP, TCP_QUICKACK, &yes, sizeof(int)) == -1) {
+			perror("setsockopt");
+		}
+	#endif
+	#ifdef HAVE_TCP_DEFER_ACCEPT
+		if (setsockopt(sockfd, IPPROTO_TCP, TCP_DEFER_ACCEPT, &option, sizeof(int)) == -1) {
+			perror("setsockopt");
+		}
+	#endif
+	#ifdef HAVE_TCP_FASTOPEN
+		option = 4096;
+		if (setsockopt(sockfd, IPPROTO_TCP, TCP_FASTOPEN, &option, sizeof(int)) == -1) {
+			perror("setsockopt");
+		}
+	#endif
 #endif
-		#ifdef HAVE_TCP_QUICKACK
-			if (setsockopt(sockfd, IPPROTO_TCP, TCP_QUICKACK, &yes, sizeof(int)) == -1) {
-				perror("setsockopt");
-			}
-		#endif
-		#ifdef HAVE_TCP_DEFER_ACCEPT
-			if (setsockopt(sockfd, IPPROTO_TCP, TCP_DEFER_ACCEPT, &option, sizeof(int)) == -1) {
-				perror("setsockopt");
-			}
-		#endif
-		#ifdef HAVE_TCP_FASTOPEN
-			option = 4096;
-			if (setsockopt(sockfd, IPPROTO_TCP, TCP_FASTOPEN, &option, sizeof(int)) == -1) {
-				perror("setsockopt");
-			}
-		#endif
-		#endif
-		
-		#ifdef OS_MINGW
+
+	#ifdef OS_MINGW
 		if (::bind(sockfd, p->ai_addr, p->ai_addrlen) == SOCKET_ERROR) {
-		#else
+	#else
 		if (::bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
 		#endif
 			close(sockfd);
