@@ -115,7 +115,7 @@ void Logger::writeToStream(std::ostream& (*pf) (std::ostream&), const std::strin
 void Logger::fatal(const std::string& msg)
 {
 	if(config==NULL)return;
-	if(levelMap[config->mode]>=4)
+	if(levelMap[config->level]>=4)
 	{
 		writeInternl(msg,LEVEL_FATAL,true);
 	}
@@ -124,7 +124,7 @@ void Logger::fatal(const std::string& msg)
 void Logger::error(const std::string& msg)
 {
 	if(config==NULL)return;
-	if(levelMap[config->mode]>=4)
+	if(levelMap[config->level]>=4)
 	{
 		writeInternl(msg,LEVEL_ERROR,true);
 	}
@@ -133,7 +133,7 @@ void Logger::error(const std::string& msg)
 void Logger::warn(const std::string& msg)
 {
 	if(config==NULL)return;
-	if(levelMap[config->mode]>=4)
+	if(levelMap[config->level]>=4)
 	{
 		writeInternl(msg,LEVEL_WARN,true);
 	}
@@ -142,7 +142,7 @@ void Logger::warn(const std::string& msg)
 void Logger::info(const std::string& msg)
 {
 	if(config==NULL)return;
-	if(levelMap[config->mode]>=4)
+	if(levelMap[config->level]>=4)
 	{
 		writeInternl(msg,LEVEL_INFO,true);
 	}
@@ -151,7 +151,7 @@ void Logger::info(const std::string& msg)
 void Logger::debug(const std::string& msg)
 {
 	if(config==NULL)return;
-	if(levelMap[config->mode]==2 || levelMap[config->mode]==3)
+	if(levelMap[config->level]==2 || levelMap[config->level]==3)
 	{
 		writeInternl(msg,LEVEL_DEBUG,true);
 	}
@@ -160,7 +160,7 @@ void Logger::debug(const std::string& msg)
 void Logger::trace(const std::string& msg)
 {
 	if(config==NULL)return;
-	if(levelMap[config->mode]==2)
+	if(levelMap[config->level]==2)
 	{
 		writeInternl(msg,LEVEL_TRACE,true);
 	}

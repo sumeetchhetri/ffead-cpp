@@ -133,10 +133,10 @@ void* FFEADContext::getBean(const Bean& bean)
 	{
 		type = bean.clas;
 	}
-	std::string k = bean.name+";"+type;
+	std::string k = bean.name + ";" + type;
 	if(StringUtil::toLowerCopy(bean.scope)!="prototype")
 	{
-		std::string _k = bean.appName + k;
+		std::string _k = bean.appName + ";" + k;
 		if(objects.find(_k)!=objects.end())
 		{
 			return objects[_k];
@@ -349,8 +349,8 @@ void FFEADContext::clear(const std::string& appName)
 {
 	std::map<std::string, void*>::iterator it;
 	for(it=objects.begin();it!=objects.end();++it) {
-		if(it->first.find(appName)!=0) continue;
-		std::string k = StringUtil::replaceFirstCopy(it->first, appName, "");
+		if(it->first.find(appName+";")!=0) continue;
+		std::string k = StringUtil::replaceFirstCopy(it->first, appName+";", "");
 		k = k.substr(k.find(";")+1);
 		reflector->destroy(it->second, k, appName);
 	}
@@ -418,7 +418,7 @@ void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool,
 		{
 			type = bean.clas;
 		}
-		std::string _k = bean.appName + bean.name + ";" + type;
+		std::string _k = bean.appName + ";" + bean.name + ";" + type;
 		if(servingContexts.find(bean.appName)!=servingContexts.end() && bean.scope!="prototype" && objects.find(_k)==objects.end())
 		{
 			std::string scappName = bean.appName;
