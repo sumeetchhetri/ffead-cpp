@@ -39,7 +39,7 @@ build_openssl() {
 
 build_unixodbc() {
 	echo "=== Building unixodbc-${UNIXODBC_VERSION} (${TARGET})..."
-	curl -sLo- http://www.unixodbc.org/unixODBC-${UNIXODBC_VERSION}.tar.gz | tar xz -C ${BUILD_DIR}
+	curl -sLo- https://ftp.osuosl.org/pub/blfs/conglomeration/unixODBC/unixODBC-${UNIXODBC_VERSION}.tar.gz | tar xz -C ${BUILD_DIR}
 	pushd ${BUILD_DIR}/unixODBC-${UNIXODBC_VERSION}
 		env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib C_INCLUDE_PATH=${STAGE_DIR}/include \
 			./configure --host="${TARGET}" --prefix=${STAGE_DIR}

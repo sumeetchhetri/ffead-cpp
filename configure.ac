@@ -1395,6 +1395,7 @@ if test "x$mod_sdormsql" = "xyes"; then
 	AC_CONFIG_FILES([web/t3/src/autotools/Makefile
 				web/t4/src/autotools/Makefile
 				web/t5/src/autotools/Makefile])
+fi
 AC_OUTPUT
 
 echo "Host: $host"

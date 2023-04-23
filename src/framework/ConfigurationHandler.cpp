@@ -219,7 +219,8 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		std::string defpath = webdirs.at(var);
 		std::string name = webdirs1.at(var);
 
-		if(std::filesystem::exists(defpath+".nobuild")) {
+		std::string nbf = defpath+".nobuild";
+		if(access(nbf.c_str(), F_OK)!=-1) {
 			logger.info("Skipping web directory " + name + " as it is marked as no build");
 			continue;
 		}

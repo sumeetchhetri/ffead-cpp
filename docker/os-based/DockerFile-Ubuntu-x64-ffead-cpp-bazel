@@ -5,7 +5,7 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 RUN apt update -yqq && apt install -yqq gcc g++ software-properties-common cmake unzip libpcre3-dev zlib1g-dev libpq-dev \
 	libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat \
 	rapidjson-dev libpugixml-dev pkg-config zip && rm -rf /var/lib/apt/lists/*
-RUN wget -q wget https://github.com/bazelbuild/bazel/releases/download/6.1.2/bazel-6.1.2-installer-linux-x86_64.sh
+RUN wget -q https://github.com/bazelbuild/bazel/releases/download/6.1.2/bazel-6.1.2-installer-linux-x86_64.sh
 RUN chmod +x bazel-6.1.2-installer-linux-x86_64.sh && ./bazel-6.1.2-installer-linux-x86_64.sh --user
 ENV PATH $HOME/bin:$PATH
 #RUN wget -q https://github.com/sumeetchhetri/shellb/releases/download/1.0.1/shellb -P /usr/local/bin && chmod +x /usr/local/bin/shellb 

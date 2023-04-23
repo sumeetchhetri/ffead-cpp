@@ -78,7 +78,7 @@ build_openssl() {
 
 build_unixodbc() {
 	echo "=== Building unixodbc-${UNIXODBC_VERSION} (${TARGET})..."
-	curl -sLo- http://www.unixodbc.org/unixODBC-${UNIXODBC_VERSION}.tar.gz | tar xz -C ${BUILD_DIR}
+	curl -sLo- https://ftp.osuosl.org/pub/blfs/conglomeration/unixODBC/unixODBC-${UNIXODBC_VERSION}.tar.gz | tar xz -C ${BUILD_DIR}
 	pushd ${BUILD_DIR}/unixODBC-${UNIXODBC_VERSION}
 		if [ "$1" = "android" ]
     	then

@@ -8,7 +8,7 @@ make install
 cd /tmp
 rm -rf libcuckoo-master
 
-wget -q http://www.unixodbc.org/unixODBC-2.3.7.tar.gz
+wget -q https://ftp.osuosl.org/pub/blfs/conglomeration/unixODBC/unixODBC-2.3.7.tar.gz
 tar zxf unixODBC-2.3.7.tar.gz
 cd unixODBC-2.3.7
 ./configure

@@ -24,7 +24,7 @@ RUN pacman -S --noconfirm --noprogressbar gcc gcc-libs glibc libtool mingw-w64-g
 ENV TARGET=x86_64-w64-mingw32
 
 WORKDIR /tmp
-RUN wget -q http://www.unixodbc.org/unixODBC-2.3.7.tar.gz
+RUN wget -q https://ftp.osuosl.org/pub/blfs/conglomeration/unixODBC/unixODBC-2.3.7.tar.gz
 RUN tar zxvf unixODBC-2.3.7.tar.gz
 RUN rm -f unixODBC-2.3.7.tar.gz
 WORKDIR unixODBC-2.3.7

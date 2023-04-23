@@ -3,6 +3,15 @@ import shutil
 import json
 import SCons.Conftest
 
+import json
+class SetDeqEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+        elif isinstance(obj, deque):
+            return list(obj)
+        return json.JSONEncoder.default(self, obj)
+
 vars = Variables('scons_options.py')
 vars.Add(BoolVariable('MOD_DEBUG', 'Enable Debug', False))
 vars.Add(BoolVariable('MOD_MEMORY', 'Enable Memory Cache module', True))
@@ -293,8 +302,8 @@ for lb in libs:
 
 Delete("rtdcf/sconstruct")
 subst = Environment(tools = ['textfile'])
-substitutions = {'@CPPPATH@': json.dumps(common_env.get('CPPPATH')), '@LIBPATH@': json.dumps(common_env.get('LIBPATH')), '@CPPFLAGS@': json.dumps(cppFlags),
-	'@CXXFLAGS@': json.dumps(cxxFlags), '@LIBS@': json.dumps(all_libs), '@CPPDEFINES@': json.dumps(common_env.get('CPPDEFINES'))}
+substitutions = {'@CPPPATH@': json.dumps(common_env.get('CPPPATH'), cls=SetDeqEncoder), '@LIBPATH@': json.dumps(common_env.get('LIBPATH'), cls=SetDeqEncoder), '@CPPFLAGS@': json.dumps(cppFlags, cls=SetDeqEncoder),
+	'@CXXFLAGS@': json.dumps(cxxFlags, cls=SetDeqEncoder), '@LIBS@': json.dumps(all_libs, cls=SetDeqEncoder), '@CPPDEFINES@': json.dumps(common_env.get('CPPDEFINES'), cls=SetDeqEncoder)}
 subst.Substfile('rtdcf/sconstruct.in', SUBST_DICT = substitutions)
 
 

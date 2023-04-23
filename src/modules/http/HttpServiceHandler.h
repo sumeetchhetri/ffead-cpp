@@ -26,7 +26,7 @@
 #include "Task.h"
 #include "CommonUtils.h"
 #include "WebSockHandler.h"
-#include "ServiceTask.h"
+//#include "ServiceTask.h"
 
 class HttpServiceHandler;
 
