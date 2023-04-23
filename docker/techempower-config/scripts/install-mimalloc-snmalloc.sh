@@ -1,4 +1,4 @@
-apt install -y clang-format-9 ninja-build
+apt install -y clang-format-11 ninja-build
 
 wget -q https://github.com/microsoft/mimalloc/archive/v2.0.2.tar.gz
 tar xf mimalloc-2.0.2.tar.gz

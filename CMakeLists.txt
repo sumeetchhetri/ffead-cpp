@@ -809,7 +809,7 @@ configure_file (
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/modules)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/framework)
 add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
-add_subdirectory(${PROJECT_SOURCE_DIR}/temp)
+#add_subdirectory(${PROJECT_SOURCE_DIR}/temp)
 
 #Add any web diectories here
 add_subdirectory(${PROJECT_SOURCE_DIR}/web/default)

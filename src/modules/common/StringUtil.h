@@ -22,6 +22,7 @@
 
 #ifndef STRINGUTIL_H_
 #define STRINGUTIL_H_
+#include "Compatibility.h"
 #include "string"
 #include <algorithm>
 #include <sstream>
@@ -30,7 +31,6 @@
 #include <stdio.h>
 #include "cstring"
 #include "string_view"
-
 
 class StringUtil {
 	static std::string whitespaces;

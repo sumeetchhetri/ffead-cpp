@@ -65,7 +65,7 @@ jobs:
     #    uses a compiled language
 
     - run: |
-        sudo apt update -yqq && sudo apt install --no-install-recommends -yqq ninja-build libpq-dev libcurl4-openssl-dev autoconf-archive unzip uuid-dev odbc-postgresql unixodbc unixodbc-dev apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev zlib1g-dev cmake make clang-format-9 ninja-build libjsoncpp-dev libjansson-dev libc-ares-dev libboost-all-dev
+        sudo apt update -yqq && sudo apt install --no-install-recommends -yqq ninja-build libpq-dev libcurl4-openssl-dev autoconf-archive unzip uuid-dev odbc-postgresql unixodbc unixodbc-dev apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev zlib1g-dev cmake make clang-format-11 ninja-build libjsoncpp-dev libjansson-dev libc-ares-dev libboost-all-dev
         pushd /tmp
         wget -q https://github.com/efficient/libcuckoo/archive/master.zip
         unzip master.zip
