@@ -386,7 +386,7 @@ class FpgWire : public PgReadTask, public BaseSocket {
 					if(isAsync) {
 						#ifdef OS_MINGW
 							u_long iMode = 1;
-							ioctlsocket(sockfd, FIONBIO, &iMode);
+							ioctlsocket(fd, FIONBIO, &iMode);
 						#else
 							fcntl(fd, F_SETFL, fcntl(fd, F_GETFD, 0) | O_NONBLOCK);
 						#endif
