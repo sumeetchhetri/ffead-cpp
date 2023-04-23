@@ -127,8 +127,28 @@ Quickstart (Using scons)
 
 Quickstart (Using shellb)
 ===========
-- Install shell with `wget -q https://github.com/sumeetchhetri/shellb/releases/download/1.0.0/shellb -P /usr/local/bin && chmod +x /usr/local/bin/shellb ` and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
-- shellb ffead-cpp-shellb (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
+- Install shellb with `wget -q https://github.com/sumeetchhetri/shellb/releases/download/1.0.0/shellb -P . && chmod +x ./shellb ` and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites), Always check for the latest version or use the one available already in the package
+- chmod +x ./shellb && ./shellb ffead-cpp-shellb (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
+- Sip some coffee
+- cd shellb_out/ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
+- chmod +x *.sh
+- ./server.sh (Startup ffead-cpp !!)
+
+Quickstart (Using bazel)
+===========
+- Install [bazel](https://github.com/sumeetchhetri/ffead-cpp/blob/master/docker/os-based/DockerFile-Ubuntu-x64-ffead-cpp-bazel)
+- chmod +x ./shellb && ./shellb ffead-cpp-bazel (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
+- The above command will auto-generate BUILD/WORKSPACE/OTHER bazel files for building with bazel
+- Sip some coffee
+- cd shellb_out/ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
+- chmod +x *.sh
+- ./server.sh (Startup ffead-cpp !!)
+
+Quickstart (Using buck2)
+===========
+- Install [buck2](https://github.com/sumeetchhetri/ffead-cpp/blob/master/docker/os-based/DockerFile-Ubuntu-x64-ffead-cpp-buck2)
+- chmod +x ./shellb && ./shellb ffead-cpp-buck2 (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
+- The above command will auto-generate .buckconfig/prelude/BUCK buck files for building with buck2
 - Sip some coffee
 - cd shellb_out/ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh

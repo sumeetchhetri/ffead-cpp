@@ -57,7 +57,7 @@
 #include "CacheManager.h"
 #include "SearchEngineManager.h"
 #include "CommonUtils.h"
-
+#include <filesystem>
 class ConfigurationHandler {
 	static Marker getRestFunctionMarker(std::map<std::string, std::vector<Marker> >& markers);
 	static Marker getRestFunctionParamMarker(std::map<std::string, std::vector<Marker> >& markers);
