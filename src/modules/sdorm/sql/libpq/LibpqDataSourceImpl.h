@@ -387,7 +387,7 @@ class FpgWire : public PgReadTask, public BaseSocket {
 						#ifdef OS_MINGW
 							u_long iMode = 1;
 							ioctlsocket(sockfd, FIONBIO, &iMode);
-						#elif
+						#else
 							fcntl(fd, F_SETFL, fcntl(fd, F_GETFD, 0) | O_NONBLOCK);
 						#endif
 					}
