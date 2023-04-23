@@ -106,7 +106,6 @@ libffead_framework_la_SOURCES = \
 				../../framework/SoapHandler.cpp \
 				../../framework/TemplateGenerator.cpp \
 				../../framework/WsUtil.cpp \
-				../../framework/WebSockHandler.cpp \
 				../../framework/ServerInitUtil.cpp \
 				../../framework/c_interface.cpp
 libffead_modules_la_SOURCES += \
@@ -170,6 +169,7 @@ libffead_modules_la_SOURCES += \
 						../../modules/http/HttpServiceHandler.cpp \
 						../../modules/http/HttpSession.cpp \
 						../../modules/http/MultipartContent.cpp \
+						../../modules/http/WebSockHandler.cpp \
 						../../modules/interpreter/CppInterpreter.cpp \
 						../../modules/ioc/FFEADContext.cpp \
 						../../modules/jobs/CronTimer.cpp \
@@ -280,7 +280,6 @@ libffead_framework_la_SOURCES = \
 		../../framework/SoapHandler.cpp \
 		../../framework/TemplateGenerator.cpp \
 		../../framework/WsUtil.cpp \
-		../../framework/WebSockHandler.cpp \
 		../../framework/ServerInitUtil.cpp \
 		../../framework/c_interface.cpp
 libffead_modules_la_SOURCES += \
@@ -324,6 +323,7 @@ libffead_modules_la_SOURCES += \
 				../../modules/http/HttpServiceHandler.cpp \
 				../../modules/http/HttpSession.cpp \
 				../../modules/http/MultipartContent.cpp \
+				../../modules/http/WebSockHandler.cpp \
 				../../modules/interpreter/CppInterpreter.cpp \
 				../../modules/ioc/FFEADContext.cpp \
 				../../modules/jobs/CronTimer.cpp \
@@ -538,7 +538,6 @@ libffead_framework_la_SOURCES = \
 		../../framework/ScriptHandler.cpp \
 		../../framework/SecurityHandler.cpp \
 		../../framework/ServiceTask.cpp \
-		../../framework/WebSockHandler.cpp \
 		../../framework/ServerInitUtil.cpp \
 		../../framework/c_interface.cpp
 

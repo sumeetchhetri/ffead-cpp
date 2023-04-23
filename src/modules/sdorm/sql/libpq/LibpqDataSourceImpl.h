@@ -384,7 +384,12 @@ class FpgWire : public PgReadTask, public BaseSocket {
                 int is = readInt32();
                 if(is==0) {
 					if(isAsync) {
-                    	fcntl(fd, F_SETFL, fcntl(fd, F_GETFD, 0) | O_NONBLOCK);
+						#ifdef OS_MINGW
+							u_long iMode = 1;
+							ioctlsocket(sockfd, FIONBIO, &iMode);
+						#elif
+							fcntl(fd, F_SETFL, fcntl(fd, F_GETFD, 0) | O_NONBLOCK);
+						#endif
 					}
                     std::cout << "logged in successfully" << std::endl;
                 } else {

@@ -155,7 +155,7 @@ function do_start() {
 		set_inc_src "web/t5/include" "web/t5/src" "shared:t5" "ffead-framework,ffead-modules"
 	fi
 	templatize "rtdcf/inter-shellb.bazel.buck2.sh.tem" "rtdcf/inter-shellb.sh" "CPPFLAGS,LFLAGS,LIBS,BUILD_SYS"
-	do_postbuild "$apps_to_build"
+	trigger_build "$apps_to_build"
 }
 function do_install() {
 	install_here "." "ffead-cpp" "script@*.sh,*.key,*.pem,*.crt" "resources" "public" "rtdcf"

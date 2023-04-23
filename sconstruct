@@ -2,8 +2,8 @@ import os
 import shutil
 import json
 import SCons.Conftest
+from collections import deque
 
-import json
 class SetDeqEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, set):
