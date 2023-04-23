@@ -32,6 +32,80 @@ Client::~Client() {
 	closeConnection();
 }
 
+int Client::conn(const std::string& host, const int& port) {
+	int sockfd = create_tcp_socket();
+
+	struct sockaddr_in *remote;
+	remote = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in *));
+	remote->sin_family = AF_INET;
+
+	if(host!="localhost" && host!="0.0.0.0" && host!="127.0.0.1") {
+		char* ip = get_ip((char*)host.c_str());
+		fprintf(stderr, "IP is %s\n", ip);
+		int tmpres = inet_pton(AF_INET, ip, (void *)(&(remote->sin_addr.s_addr)));
+		if( tmpres < 0)
+		{
+			free(remote);
+			perror("Can't set remote->sin_addr.s_addr");
+			return false;
+		}
+		else if(tmpres == 0)
+		{
+			free(remote);
+			fprintf(stderr, "%s is not a valid IP address\n", ip);
+			return false;
+		}
+		remote->sin_addr.s_addr = inet_addr(ip);
+		remote->sin_port = htons(port);
+		free(ip);
+
+		if(connect(sockfd, (struct sockaddr *)remote, sizeof(struct sockaddr)) < 0 && (errno != EINPROGRESS)) {
+			perror("Could not connect");
+		} else {
+		}
+
+		free(remote);
+	} else {
+		struct addrinfo hints, *servinfo, *p;
+		int rv;
+
+		memset(&hints, 0, sizeof hints);
+		hints.ai_family = AF_UNSPEC;
+		hints.ai_socktype = SOCK_STREAM;
+
+		std::string ports = CastUtil::lexical_cast<std::string>(port);
+
+		if ((rv = getaddrinfo(host.c_str(), ports.c_str(), &hints, &servinfo)) != 0) {
+			fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+			return 1;
+		}
+
+		// loop through all the results and connect to the first we can
+		for(p = servinfo; p != NULL; p = p->ai_next) {
+			if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+				perror("client: socket");
+				continue;
+			}
+
+			if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+				close(sockfd);
+				//perror("client: connect");
+				continue;
+			}
+
+			break;
+		}
+
+		if (p == NULL) {
+			perror("client: failed to connect\n");
+			return false;
+		}
+
+		freeaddrinfo(servinfo);
+	}
+	return sockfd;
+}
+
 bool Client::connection(const std::string& host, const int& port)
 {
 	sockfd = create_tcp_socket();
@@ -57,6 +131,7 @@ bool Client::connection(const std::string& host, const int& port)
 			return false;
 		}
 		remote->sin_addr.s_addr = inet_addr(ip);
+		remote->sin_port = htons(port);
 		free(ip);
 
 		if(connect(sockfd, (struct sockaddr *)remote, sizeof(struct sockaddr)) < 0 && (errno != EINPROGRESS)) {

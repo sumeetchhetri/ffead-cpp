@@ -59,6 +59,7 @@ public:
 	static std::string base64decodeStr(const std::string& input);
 	static char* base64encode(const unsigned char *input, const int& length);
 	static char* base64decode(unsigned char *input, const int& length);
+	static std::string md5(unsigned char* buf, unsigned int buf_size);
 };
 
 #endif /* CRYPTOHANDLER_H_ */

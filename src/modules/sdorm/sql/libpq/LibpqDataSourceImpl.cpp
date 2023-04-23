@@ -21,19 +21,30 @@ DSType LibpqDataSourceImpl::getType() {
 	return SD_RAW_SQLPG;
 }
 
-LibpqDataSourceImpl::LibpqDataSourceImpl(const std::string& url, bool isAsync, bool isBatch) {
+LibpqDataSourceImpl::LibpqDataSourceImpl(const std::string& url, bool isAsync, bool isBatch, bool isWire) {
 	this->url = url;
 #ifdef HAVE_LIBPQ
 	conn = NULL;
+#else
+	if(!isWire) {
+		fprintf(stderr, "No libpq found and isWire is set to false, will not proceed further\n");
+		exit(0);
+	}
 #endif
 	this->isAsync = isAsync;
 	this->isBatch = isBatch;
+	this->isWire = isWire;
 	fd = -1;
 	stEvhMode = false;
 	cvar = false;
 }
 
 LibpqDataSourceImpl::~LibpqDataSourceImpl() {
+	done = true;
+	if(isWire) {
+		delete wire;
+		return;
+	}
 #ifdef HAVE_LIBPQ
 	done = true;
 	Thread::sSleep(3);
@@ -44,6 +55,49 @@ LibpqDataSourceImpl::~LibpqDataSourceImpl() {
 }
 
 bool LibpqDataSourceImpl::init() {
+	if(isWire) {
+		wire = new FpgWire(this, isAsync);
+		this->fd = wire->fd;
+		if(isAsync) {
+			bool rHandler = RequestReaderHandler::getInstance()!=NULL || RequestHandler2::getInstance()!=NULL || Writer::isPicoEvAsyncBackendMode;
+			if(rHandler) {
+	#if defined(OS_LINUX) && !defined(OS_ANDROID) && !defined(DISABLE_BPF)
+				Server::set_cbpf(fd, get_nprocs());
+	#endif
+	#ifdef USE_IO_URING
+				stEvhMode = true;
+				if(RequestReaderHandler::getInstance()!=NULL) {
+					eh = &(RequestReaderHandler::getInstance()->selector);
+				} else {
+					eh = &(RequestHandler2::getInstance()->selector);
+				}
+				Thread* pthread = new Thread(&handle, this);
+				pthread->execute();
+	#else
+				if(Writer::isPicoEvAsyncBackendMode) {
+					Writer::pvregfd(fd, this);
+				} else if(RequestReaderHandler::getInstance()!=NULL) {
+					RequestReaderHandler::getInstance()->selector.registerRead(this, false, false, true);
+				} else {
+					RequestHandler2::getInstance()->selector.registerRead(this, false, false, true);
+				}
+	#endif
+			} else {
+				stEvhMode = true;
+	#if defined(OS_LINUX) && !defined(OS_ANDROID) && !defined(DISABLE_BPF)
+				Server::set_cbpf(fd, get_nprocs());
+	#endif
+				if(RequestReaderHandler::getInstance()!=NULL) {
+					eh = &(RequestReaderHandler::getInstance()->selector);
+				} else {
+					eh = &(RequestHandler2::getInstance()->selector);
+				}
+				Thread* pthread = new Thread(&handle, this);
+				pthread->execute();
+			}
+		}
+		return true;
+	}
 #ifdef HAVE_LIBPQ
 	if(conn!=NULL) return true;
 	conn = PQconnectdb(url.c_str());
@@ -169,6 +223,12 @@ void LibpqDataSourceImpl::rollbackAsync(LibpqAsyncReq* areq) {
 }
 
 bool LibpqDataSourceImpl::begin() {
+	if(isWire) {
+		if(isAsync) return false;
+		LibpqQuery q;
+		q.withUpdateQuery("BEGIN", true);
+		return wire->updateQuery(q);
+	}
 #ifdef HAVE_LIBPQ
 	PGresult *res = PQexec(conn, "BEGIN");
 	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
@@ -183,6 +243,12 @@ bool LibpqDataSourceImpl::begin() {
 }
 
 bool LibpqDataSourceImpl::commit() {
+	if(isWire) {
+		if(isAsync) return false;
+		LibpqQuery q;
+		q.withUpdateQuery("COMMIT", true);
+		return wire->updateQuery(q);
+	}
 #ifdef HAVE_LIBPQ
 	PGresult *res = PQexec(conn, "COMMIT");
 	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
@@ -197,6 +263,12 @@ bool LibpqDataSourceImpl::commit() {
 }
 
 bool LibpqDataSourceImpl::rollback() {
+	if(isWire) {
+		if(isAsync) return false;
+		LibpqQuery q;
+		q.withUpdateQuery("ROLLBACK", true);
+		return wire->updateQuery(q);
+	}
 #ifdef HAVE_LIBPQ
 	PGresult *res = PQexec(conn, "ROLLBACK");
 	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
@@ -558,6 +630,12 @@ void PgReadTask::submit(LibpqAsyncReq* nitem) {
 						} else if(it->t==3) {//long
 							paramValues[var] = (char *)&it->l;
 							paramLengths[var] = 8;
+						} else if(it->t==6) {//double
+							paramValues[var] = (char *)&it->d;
+							paramLengths[var] = 4;
+						} else if(it->t==-1) {//null
+							paramValues[var] = NULL;
+							paramLengths[var] = 0;
 						} else {
 							paramValues[var] = it->sv.p;
 							paramLengths[var] = it->sv.l;
@@ -584,6 +662,12 @@ void PgReadTask::submit(LibpqAsyncReq* nitem) {
 						} else if(it->t==3) {//long
 							paramValues[var] = (char *)&it->l;
 							paramLengths[var] = 8;
+						} else if(it->t==6) {//double
+							paramValues[var] = (char *)&it->d;
+							paramLengths[var] = 4;
+						} else if(it->t==-1) {//null
+							paramValues[var] = NULL;
+							paramLengths[var] = 0;
 						} else {
 							paramValues[var] = it->sv.p;
 							paramLengths[var] = it->sv.l;
@@ -686,6 +770,12 @@ PGresult* LibpqDataSourceImpl::executeSync(LibpqQuery* q) {
 				} else if(it->t==3) {//long
 					paramValues[var] = (char *)&it->l;
 					paramLengths[var] = 8;
+				} else if(it->t==6) {//double
+					paramValues[var] = (char *)&it->d;
+					paramLengths[var] = 4;
+				} else if(it->t==-1) {//null
+					paramValues[var] = NULL;
+					paramLengths[var] = 0;
 				} else {
 					paramValues[var] = it->sv.p;
 					paramLengths[var] = it->sv.l;
@@ -711,6 +801,12 @@ PGresult* LibpqDataSourceImpl::executeSync(LibpqQuery* q) {
 				} else if(it->t==3) {//long
 					paramValues[var] = (char *)&it->l;
 					paramLengths[var] = 8;
+				} else if(it->t==6) {//double
+					paramValues[var] = (char *)&it->d;
+					paramLengths[var] = 4;
+				} else if(it->t==-1) {//null
+					paramValues[var] = NULL;
+					paramLengths[var] = 0;
 				} else {
 					paramValues[var] = it->sv.p;
 					paramLengths[var] = it->sv.l;
@@ -746,6 +842,15 @@ LibpqAsyncReq* LibpqDataSourceImpl::getAsyncRequest() {
 }
 
 void LibpqDataSourceImpl::executeMultiQuery(LibpqQuery* q) {
+	if(isWire) {
+		if(isAsync) return;
+		q->isSelect = true;
+		q->isMulti = true;
+		q->isPrepared = false;
+		wire->q = q;
+		wire->selectQuery(*q);
+		return;
+	}
 #ifdef HAVE_LIBPQ
 	q->isSelect = true;
 	q->isMulti = true;
@@ -858,6 +963,14 @@ void LibpqDataSourceImpl::executeMultiQuery(LibpqQuery* q) {
 }
 
 void LibpqDataSourceImpl::executeUpdateMultiQuery(LibpqQuery* q) {
+	if(isWire) {
+		if(isAsync) return;
+		q->isMulti = true;
+		q->isPrepared = false;
+		wire->q = q;
+		wire->selectQuery(*q);
+		return;
+	}
 #ifdef HAVE_LIBPQ
 	q->isMulti = true;
 	q->isPrepared = false;
@@ -887,6 +1000,13 @@ void LibpqDataSourceImpl::executeUpdateMultiQuery(LibpqQuery* q) {
 }
 
 void LibpqDataSourceImpl::executeQuery(LibpqQuery* q) {
+	if(isWire) {
+		if(isAsync) return;
+		q->isSelect = true;
+		wire->q = q;
+		wire->selectQuery(*q);
+		return;
+	}
 #ifdef HAVE_LIBPQ
 	q->isSelect = true;
 	PGresult *res = executeSync(q);
@@ -977,6 +1097,11 @@ void LibpqDataSourceImpl::executeQuery(LibpqQuery* q) {
 }
 
 bool LibpqDataSourceImpl::executeUpdateQuery(LibpqQuery* q) {
+	if(isWire) {
+		if(isAsync) return false;
+		wire->q = q;
+		return wire->updateQuery(*q);
+	}
 #ifdef HAVE_LIBPQ
 	PGresult *res = executeSync(q);
 	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
@@ -1399,6 +1524,12 @@ void PgBatchReadTask::batchQueries(LibpqAsyncReq* nitem, int& numQueriesInBatch)
 					} else if(it->t==3) {//long
 						paramValues[var] = (char *)&it->l;
 						paramLengths[var] = 8;
+					} else if(it->t==6) {//double
+						paramValues[var] = (char *)&it->d;
+						paramLengths[var] = 4;
+					} else if(it->t==-1) {//null
+						paramValues[var] = NULL;
+						paramLengths[var] = 0;
 					} else {
 						paramValues[var] = it->sv.p;
 						paramLengths[var] = it->sv.l;
@@ -1425,6 +1556,12 @@ void PgBatchReadTask::batchQueries(LibpqAsyncReq* nitem, int& numQueriesInBatch)
 					} else if(it->t==3) {//long
 						paramValues[var] = (char *)&it->l;
 						paramLengths[var] = 8;
+					} else if(it->t==6) {//double
+						paramValues[var] = (char *)&it->d;
+						paramLengths[var] = 4;
+					} else if(it->t==-1) {//null
+						paramValues[var] = NULL;
+						paramLengths[var] = 0;
 					} else {
 						paramValues[var] = it->sv.p;
 						paramLengths[var] = it->sv.l;
@@ -1474,6 +1611,11 @@ void LibpqQuery::withParamInt8(long long i) {
 	par.t = 3;
 }
 
+void LibpqQuery::withNull() {
+	LibpqParam& par = pvals.emplace_back();
+	par.t = -1;
+}
+
 void LibpqQuery::withParamStr(const char *i) {
 	LibpqParam& par = pvals.emplace_back();
 	//LibpqParam& par = pvals.back();
@@ -1488,6 +1630,13 @@ void LibpqQuery::withParamBin(const char *i, size_t len) {
 	par.sv.p = i;
 	par.sv.l = len;
 	par.t = 5;
+}
+
+void LibpqQuery::withParamFloat(double i) {
+	LibpqParam& par = pvals.emplace_back();
+	//LibpqParam& par = pvals.back();
+	StringUtil::to_nbo(i, &par.d);
+	par.t = 6;
 }
 
 /*void LibpqQuery::withParamStr(std::string& str) {
@@ -1571,6 +1720,7 @@ void LibpqQuery::reset() {
 	cb6 = NULL;
 	fcb = NULL;
 	cbType = 0;
+	rows = 0;
 	isSelect = false;
 	isPrepared = false;
 	prepared = false;
@@ -1594,6 +1744,7 @@ LibpqQuery::LibpqQuery() {
 	prepared = false;
 	isMulti = false;
 	ctx = NULL;
+	rows = 0;
 }
 
 /*

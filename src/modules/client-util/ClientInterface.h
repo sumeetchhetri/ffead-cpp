@@ -69,7 +69,7 @@ public:
 	virtual bool isReady(int mode)=0;
 	int getLengthCl(const std::string& header, const int& size);
 	void *get_in_addr(struct sockaddr *sa);
-	SOCKET create_tcp_socket();
+	static SOCKET create_tcp_socket();
 	static char* get_ip(char *host);
 	static bool isReady(const SOCKET& fd, int mode);
 	virtual ~ClientInterface(){}

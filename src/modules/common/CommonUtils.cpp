@@ -212,6 +212,25 @@ unsigned long long CommonUtils::charArrayToULongLong(const std::string& l, int i
 	return t;
 }
 
+unsigned long long CommonUtils::btn(char* buf, const int& ind)
+{
+    unsigned long long t = 0;
+    for (int i = 0; i < ind; i++)
+    {
+        t = (t << 8) + ((unsigned char)buf[i] & 0xff);
+    }
+    return t;
+}
+
+void CommonUtils::ntb(std::string& result, const unsigned long long& lon, int ind)
+{
+    for (int i = 0; i<ind; i++)
+    {
+        int offset = (ind - 1 - i) * 8;
+        result.push_back((char) ((lon >> offset) & 0xFF));
+    }
+}
+
 unsigned long long CommonUtils::charArrayToULongLong(const std::vector<unsigned char>& l)
 {
 	unsigned long long t = 0;

@@ -1,0 +1,9 @@
+{
+	"version": "2.0.0",
+    "tasks": [{
+        "label": "permissions",
+        "command": "chmod +x ${workspaceFolder}/ffead-cpp-6.0-bin/ffead-cpp && chmod 700 ${workspaceFolder}/ffead-cpp-6.0-bin/resources/*.sh && chmod 700 ${workspaceFolder}/ffead-cpp-6.0-bin/rtdcf/autotools/*.sh && chmod 700 ${workspaceFolder}/ffead-cpp-6.0-bin/tests/* && chmod 700 ${workspaceFolder}/ffead-cpp-6.0-bin/rtdcf/*", // Could be any other shell command
+        "args": [],
+        "type": "shell"
+    }]
+}

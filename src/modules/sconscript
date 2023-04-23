@@ -15,10 +15,12 @@ env.Append(CPPPATH=['../framework'])
 # and add their contents are build targets
 matches = []
 for root, dirnames, filenames in os.walk('./'):
+	#print('checking dir: %s' % dirnames)
 	filenames = [f for f in filenames if not f[0] == '.']
 	dirnames[:] = [d for d in dirnames if not d[0] == '.']
 	for dirname in dirnames:
 		dirPath = os.path.join(root,dirname)
+		#print('checking dir: %s' % dirPath)
 		if env['PLATFORM'] != 'mingw' and 'wepoll' in dirPath:
 			continue
 		if 'gtm' in dirPath:

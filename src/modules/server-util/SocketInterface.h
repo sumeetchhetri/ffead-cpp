@@ -76,6 +76,8 @@ public:
 		return 1;
 	}
 	int readFrom();
+	int readSync();
+	int checkReadSync();
 	int writeData(void* data) {
 		std::string* cont = (std::string*)data;
 		return writeDirect(*cont);
@@ -107,6 +109,7 @@ public:
 	virtual int secureWriteDirect(const char* d, size_t len, int off = 0){return -1;};
 	virtual int secureWriteTo(ResponseData* d){return -1;};
 	virtual int secureReadFrom(){return -1;};
+	virtual int secureReadSync(){return -1;};
 
 	virtual bool handle() {
 		return false;
@@ -145,6 +148,7 @@ public:
 	int secureWriteDirect(const char* d, size_t len, int off = 0);
 	int secureWriteTo(ResponseData* d);
 	int secureReadFrom();
+	int secureReadSync();
 	void closeSocket();
 	bool flush();
 	bool isSecure();

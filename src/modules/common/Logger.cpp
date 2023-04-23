@@ -86,7 +86,7 @@ Logger::~Logger()
 	this->config = NULL;
 }
 
-void Logger::writeInternl(const std::string& msg, const std::string& mod, const bool& newline)
+void Logger::writeInternal(const std::string& msg, const std::string& mod, const bool& newline)
 {
 	if(config==NULL)return;
 	Date dat;
@@ -115,27 +115,27 @@ void Logger::writeToStream(std::ostream& (*pf) (std::ostream&), const std::strin
 void Logger::fatal(const std::string& msg)
 {
 	if(config==NULL)return;
-	if(levelMap[config->level]>=4)
+	if(levelMap[config->level]>=7)
 	{
-		writeInternl(msg,LEVEL_FATAL,true);
+		writeInternal(msg,LEVEL_FATAL,true);
 	}
 }
 
 void Logger::error(const std::string& msg)
 {
 	if(config==NULL)return;
-	if(levelMap[config->level]>=4)
+	if(levelMap[config->level]>=6)
 	{
-		writeInternl(msg,LEVEL_ERROR,true);
+		writeInternal(msg,LEVEL_ERROR,true);
 	}
 }
 
 void Logger::warn(const std::string& msg)
 {
 	if(config==NULL)return;
-	if(levelMap[config->level]>=4)
+	if(levelMap[config->level]>=5)
 	{
-		writeInternl(msg,LEVEL_WARN,true);
+		writeInternal(msg,LEVEL_WARN,true);
 	}
 }
 
@@ -144,25 +144,25 @@ void Logger::info(const std::string& msg)
 	if(config==NULL)return;
 	if(levelMap[config->level]>=4)
 	{
-		writeInternl(msg,LEVEL_INFO,true);
+		writeInternal(msg,LEVEL_INFO,true);
 	}
 }
 
 void Logger::debug(const std::string& msg)
 {
 	if(config==NULL)return;
-	if(levelMap[config->level]==2 || levelMap[config->level]==3)
+	if(levelMap[config->level]>=3)
 	{
-		writeInternl(msg,LEVEL_DEBUG,true);
+		writeInternal(msg,LEVEL_DEBUG,true);
 	}
 }
 
 void Logger::trace(const std::string& msg)
 {
 	if(config==NULL)return;
-	if(levelMap[config->level]==2)
+	if(levelMap[config->level]>=2)
 	{
-		writeInternl(msg,LEVEL_TRACE,true);
+		writeInternal(msg,LEVEL_TRACE,true);
 	}
 }
 

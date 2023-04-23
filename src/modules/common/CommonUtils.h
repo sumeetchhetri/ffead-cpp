@@ -85,6 +85,8 @@ public:
 	static void clearInstance();
 	static int getProcessorCount();
 	static unsigned long long charArrayToULongLong(const std::string& l, int ind);
+	static unsigned long long btn(char* buf, const int& ind);
+	static void ntb(std::string& result, const unsigned long long& lon, int ind);
 	static unsigned long long charArrayToULongLong(const std::string& l);
 	static std::string ulonglongTocharArray(const unsigned long long& lon, const int& provind= -1);
 	static unsigned long long charArrayToULongLong(const std::vector<unsigned char>& l);

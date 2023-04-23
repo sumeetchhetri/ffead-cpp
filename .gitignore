@@ -82,3 +82,9 @@ ffead-cpp-interface-test-lib/\.*
 .sconf_temp
 shellb_out
 .shellb
+buck-out
+bazel-bin
+bazel-out
+bazel-testlogs
+bazel-ffead-cpp
+code-snippets-build/

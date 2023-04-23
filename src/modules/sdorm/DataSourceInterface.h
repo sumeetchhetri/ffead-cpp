@@ -48,6 +48,7 @@ struct LibpqParam {
 		unsigned short s;
 		unsigned int i;
 		long long l;
+		double d;
 		_string_view sv;
 	};
 	int t;

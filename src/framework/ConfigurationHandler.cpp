@@ -217,6 +217,13 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	{
 		//logger <<  webdirs.at(0) << std::flush;
 		std::string defpath = webdirs.at(var);
+		std::string name = webdirs1.at(var);
+
+		if(std::filesystem::exists(defpath+".nobuild")) {
+			logger.info("Skipping web directory " + name + " as it is marked as no build");
+			continue;
+		}
+
 		std::string dcppath = defpath + "dcp/";
 		RegexUtil::replace(dcppath,"[/]+","/");
 		std::string webpubpath = defpath + "public/";
@@ -229,7 +236,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		RegexUtil::replace(usrincludes,"[/]+","/");
 		//propMap srp = pread.getProperties(defpath+"config/app.prop");
 
-		std::string name = webdirs1.at(var);
+		
 		StringUtil::replaceAll(name,"/","");
 		rundyncontent += "cp -Rf $FFEAD_CPP_PATH/public/* $FFEAD_CPP_PATH/web/"+name+"/public/\n";
 		ConfigurationData::getInstance()->servingContexts[name] = true;

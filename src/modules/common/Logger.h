@@ -80,12 +80,12 @@ public:
 		if(config==NULL) return;
 		int size_s = snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
 		if( size_s <= 0 ) {
-			writeInternl(format, level, false);
+			writeInternal(format, level, false);
 			return;
 		}
 		char buf[size_s];
 		snprintf( buf, size_s, format.c_str(), args ... );
-		writeInternl(std::string( &buf[0], size_s - 1 ), level, false);
+		writeInternal(std::string( &buf[0], size_s - 1 ), level, false);
 	}
 private:
 	static std::map<std::string, int> levelMap;
@@ -96,7 +96,7 @@ private:
 	Logger(LoggerConfig *config, const std::string& className, const std::string& level);
 	std::string className, level, oldLevel;
 	LoggerConfig *config;
-	void writeInternl(const std::string& msg, const std::string& mod, const bool& newline);
+	void writeInternal(const std::string& msg, const std::string& mod, const bool& newline);
 	template <typename T>
 	void writeTemplate(const T& tmsg, const std::string& mod, const bool& newline)
 	{

@@ -436,3 +436,33 @@ void CryptoHandler::deSanitizeHtml(std::string& strret) {
 	StringUtil::replaceAll(strret,"&lt;","<");
 	StringUtil::replaceAll(strret,"&gt;",">");
 }
+
+std::string CryptoHandler::md5(unsigned char* buf, unsigned int buf_size)
+{
+	std::string result;
+#ifdef HAVE_SSLINC
+    EVP_MD_CTX *mdctx;
+    unsigned char *md5_digest;
+    unsigned int md5_digest_len = EVP_MD_size(EVP_md5());
+    
+    // MD5_Init
+    mdctx = EVP_MD_CTX_new();
+    EVP_DigestInit_ex(mdctx, EVP_md5(), NULL);
+
+    // MD5_Update
+    EVP_DigestUpdate(mdctx, buf, buf_size);
+
+    // MD5_Final
+    md5_digest = (unsigned char *)OPENSSL_malloc(md5_digest_len);
+    EVP_DigestFinal_ex(mdctx, md5_digest, &md5_digest_len);
+    EVP_MD_CTX_free(mdctx);
+    
+    result.reserve(32);  // C++11 only, otherwise ignore
+    for (std::size_t i = 0; i != md5_digest_len; ++i)
+    {
+        result += "0123456789abcdef"[md5_digest[i] / 16];
+        result += "0123456789abcdef"[md5_digest[i] % 16];
+    }
+#endif   
+    return result;
+}

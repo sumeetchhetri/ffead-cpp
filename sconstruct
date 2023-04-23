@@ -29,6 +29,7 @@ cppFlags 		= ['-Wall']
 cxxFlags 		= ['-std=c++17']
 cppPath			= []
 
+#shutil.rmtree('build')
 shutil.copy2('src/modules/common/AppDefines.scons.h.in', 'src/modules/common/AppDefines.h')
 
 # define the attributes of the build environment shared between
@@ -44,7 +45,7 @@ if platform == 'darwin':
 
 library_paths.append("/usr/local/lib")
 cppPath.append("/usr/local/include")
-#print("library_paths = %s" % library_paths)
+print("library_paths = %s" % library_paths)
 
 common_env.Append(CPPPATH 		= cppPath)
 common_env.Append(LIBPATH 		= library_paths)
@@ -396,7 +397,7 @@ for root, dirnames, filenames in os.walk('web'):
 	dirnames[:] = [d for d in dirnames if not d[0] == '.']
 	for dirname in dirnames:
 		dirPath = os.path.join(root, dirname, 'include')
-		if bool(mod_mongo) and 't1' in dirPath:
+		if bool(mod_mongo) and 't2' in dirPath:
 			continue
 		if bool(mod_sql) and ('t3' in dirPath or 't4' in dirPath or 't5' in dirPath):
 			continue

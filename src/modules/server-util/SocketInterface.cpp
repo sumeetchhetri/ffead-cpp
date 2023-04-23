@@ -537,6 +537,80 @@ int BaseSocket::readFrom()
 	return 1;
 }
 
+int BaseSocket::readSync()
+{
+#if defined(USE_IO_URING)
+	return 1;
+#endif
+	if(!isSecure()) {
+		int er = 0;
+		do {
+			er = recv(fd, buff, 8192, 0);
+			switch(er) {
+				case -1:
+				case 0:
+					if (er == -1 && errno == EAGAIN) {
+						return -1;
+					} else {
+#if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL)
+						eh->unRegisterRead(fd);
+#endif
+						closeSocket();
+						return 0;
+					}
+				default:
+					buffer.append(buff, er);
+					break;
+			}
+		} while(er==8192);
+	} else {
+		return secureReadSync();
+	}
+	return 1;
+}
+
+int BaseSocket::checkReadSync()
+{
+#if defined(USE_IO_URING)
+	return 1;
+#endif
+	return recv(fd, buff, 1, MSG_PEEK|MSG_DONTWAIT);
+}
+
+int BaseSecureSocket::secureReadSync()
+{
+#ifdef HAVE_SSLINC
+	int er = 0;
+	int ser = 0;
+	do {
+#if defined USE_IO_URING
+		er  = BIO_read(io, buff, 2048);
+#else
+		er = BIO_read(io, buff, 8192);
+#endif
+		ser = SSL_get_error(ssl, er);
+		switch(ser) {
+			case SSL_ERROR_WANT_READ:
+				return -1;
+			case SSL_ERROR_NONE:
+				buffer.append(buff, er);
+				break;
+			default:
+#if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL)
+				eh->unRegisterRead(fd);
+#endif
+				closeSocket();
+				return 0;
+		}
+#if defined USE_IO_URING
+	} while(er==2048);
+#else
+	} while(er==8192);
+#endif
+#endif
+	return 1;
+}
+
 int BaseSecureSocket::secureReadFrom()
 {
 #ifdef HAVE_SSLINC

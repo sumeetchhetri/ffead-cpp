@@ -33,6 +33,7 @@ class Client : public ClientInterface {
 public:
 	Client();
 	virtual ~Client();
+	static int conn(const std::string&, const int&);
 	bool connection(const std::string&, const int&);
 	bool connectionNB(const std::string&, const int&);
 	//bool connectionUnresolv(const std::string& host, const int& port);

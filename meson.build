@@ -400,12 +400,13 @@ meson_post_install = meson.source_root() + '/meson_postinstall.sh'
 bin_dir = meson.current_source_dir()+'/'+meson.project_name()+'-'+meson.project_version()+'-bin/'
 run_command('rm', '-rf', bin_dir, check: true)
 run_command('mkdir', bin_dir, check: true)
+run_command('mkdir', bin_dir+'web', check: true)
 
 subdir('src/modules')
 subdir('src/framework')
 subdir('tests')
 
-#Add all web application directories herer
+#Add all web application directories here
 subdir('web/default')
 subdir('web/flexApp')
 subdir('web/markers')
@@ -443,6 +444,21 @@ executable('ffead-cpp', 'src/server/embedded/CHServer.cpp', include_directories:
 install_subdir('resources', install_dir: bin_dir)
 install_subdir('public', install_dir: bin_dir)
 install_subdir('rtdcf', install_dir: bin_dir)
-install_subdir('web', install_dir: bin_dir)
+#install_subdir('web', install_dir: bin_dir)
+install_subdir('web/default', install_dir: bin_dir+'web')
+install_subdir('web/flexApp', install_dir: bin_dir+'web')
+install_subdir('web/markers', install_dir: bin_dir+'web')
+install_subdir('web/oauthApp', install_dir: bin_dir+'web')
+install_subdir('web/peer-server', install_dir: bin_dir+'web')
+install_subdir('web/te-benchmark', install_dir: bin_dir+'web')
+install_subdir('web/t1', install_dir: bin_dir+'web')
+if get_option('MOD_SDORM_MONGO') == true
+	install_subdir('web/t2', install_dir: bin_dir+'web')
+endif
+if get_option('MOD_SDORM_SQL') == true
+	install_subdir('web/t3', install_dir: bin_dir+'web')
+	install_subdir('web/t4', install_dir: bin_dir+'web')
+	install_subdir('web/t5', install_dir: bin_dir+'web')
+endif
 
 meson.add_install_script(meson_post_install, bin_dir, meson.source_root())

@@ -1379,7 +1379,7 @@ if test "x$generate_apache_module" = "xyes"; then
 	AC_CONFIG_FILES([modules/apache_mod_ffeadcpp/autotools/Makefile])
 fi
 if test "x$generate_nginx_module" = "xyes"; then
-	AC_CONFIG_FILES(modules/nginx_mod_ffeadcpp/autotools/Makefile[])
+	AC_CONFIG_FILES([modules/nginx_mod_ffeadcpp/autotools/Makefile])
 fi
 AC_CONFIG_FILES([web/default/src/autotools/Makefile
 				web/flexApp/src/autotools/Makefile
@@ -1387,9 +1387,12 @@ AC_CONFIG_FILES([web/default/src/autotools/Makefile
 				web/markers/src/autotools/Makefile
 				web/peer-server/src/autotools/Makefile
 				web/te-benchmark/src/autotools/Makefile
-				web/t1/src/autotools/Makefile
-				web/t2/src/autotools/Makefile
-				web/t3/src/autotools/Makefile
+				web/t1/src/autotools/Makefile])
+if test "x$mod_sdormmongo" = "xyes"; then
+	AC_CONFIG_FILES([web/t2/src/autotools/Makefile])
+fi
+if test "x$mod_sdormsql" = "xyes"; then
+	AC_CONFIG_FILES([web/t3/src/autotools/Makefile
 				web/t4/src/autotools/Makefile
 				web/t5/src/autotools/Makefile])
 AC_OUTPUT

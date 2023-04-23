@@ -2,7 +2,7 @@ option('MOD_MEMORY', type: 'boolean', description: 'Enable Memory Cache module',
 option('MOD_MEMCACHED', type: 'boolean', description: 'Enable Memcached Cache module', value: true)
 option('MOD_REDIS', type: 'boolean', description: 'Enable Redis Cache module', value: true)
 option('MOD_SDORM_SQL', type: 'boolean', description: 'Enable SQL Sdorm module', value: true)
-option('MOD_SDORM_MONGO', type: 'boolean', description: 'Enable Mongo Sdorm module', value: true)
+option('MOD_SDORM_MONGO', type: 'boolean', description: 'Enable Mongo Sdorm module', value: false)
 option('MOD_SDORM_SCYLLA', type: 'boolean', description: 'Enable Scylla Sdorm module', value: false)
 option('MOD_SOLR', type: 'boolean', description: 'Enable SOLR Search module', value: true)
 option('MOD_ELASTIC', type: 'boolean', description: 'Enable Elasticsearch Search module', value: false)
