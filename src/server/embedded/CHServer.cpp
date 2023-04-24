@@ -842,10 +842,12 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " scons";
 #elif defined(BUILD_BAZEL)
 			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " bazel";
+#elif defined(BUILD_BUCK2)
+			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " buck2";
 #elif defined(BUILD_SHELLB)
 			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory + " shellb";
 #else
-			logger << "Invalid Build Type specified, only cmake, xmake, meson, scons, bazel and shellb supported...\n" << std::endl;
+			logger << "Invalid Build Type specified, only cmake, xmake, meson, scons, shellb, bazel and buck2 supported...\n" << std::endl;
 #endif
 			std::string output = ScriptHandler::execute(compres, true);
 			logger << "Intermediate code generation task\n\n" << std::endl;

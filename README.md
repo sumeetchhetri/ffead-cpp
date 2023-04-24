@@ -127,7 +127,7 @@ Quickstart (Using scons)
 
 Quickstart (Using shellb)
 ===========
-- Install shellb with `wget -q https://github.com/sumeetchhetri/shellb/releases/download/1.0.0/shellb -P . && chmod +x ./shellb ` and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites), Always check for the latest version or use the one available already in the package
+- Install shellb with `wget -q https://github.com/sumeetchhetri/shellb/releases/download/2.0.0/shellb -P . && chmod +x ./shellb ` and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites), Always check for the latest version or use the one available already in the package
 - chmod +x ./shellb && ./shellb ffead-cpp-shellb (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
 - cd shellb_out/ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)

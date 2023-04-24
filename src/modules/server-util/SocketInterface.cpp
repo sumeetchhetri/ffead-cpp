@@ -576,7 +576,7 @@ int BaseSocket::checkReadSync()
 #endif
 	#ifdef OS_MINGW
 		unsigned long l;
-		int bytes = ioctlsocket(s, FIONREAD, &l);
+		int bytes = ioctlsocket(fd, FIONREAD, &l);
 		return recv(fd, buff, 1, MSG_PEEK);
 	#else
 		return recv(fd, buff, 1, MSG_PEEK|MSG_DONTWAIT);

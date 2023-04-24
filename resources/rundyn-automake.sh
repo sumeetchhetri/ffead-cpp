@@ -61,11 +61,17 @@ then
 	 scons
 elif [ "$TYPE" = "bazel" ]
 then
-	:
+	chmod +x ./shellb
+	./shellb inter-shellb-bazel
+elif [ "$TYPE" = "buck2" ]
+then
+	chmod +x ./shellb
+	./shellb inter-shellb-buck2
 elif [ "$TYPE" = "shellb" ]
 then
 	rm -rf .bin || true
-	shellb inter-shellb
+	chmod +x ./shellb
+	./shellb inter-shellb
 else
 	echo "Invalid Build Type specified, only cmake, xmake, meson, scons, bazel and shellb supported..."
 fi

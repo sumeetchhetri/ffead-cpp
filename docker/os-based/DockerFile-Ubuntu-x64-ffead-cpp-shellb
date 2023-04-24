@@ -5,7 +5,7 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 RUN apt update -yqq && apt install -yqq gcc g++ software-properties-common cmake unzip libpcre3-dev zlib1g-dev libpq-dev \
 	libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat \
 	rapidjson-dev libpugixml-dev && rm -rf /var/lib/apt/lists/*
-RUN wget -q https://github.com/sumeetchhetri/shellb/releases/download/1.0.0/shellb -P /usr/local/bin && chmod +x /usr/local/bin/shellb 
+RUN wget -q https://github.com/sumeetchhetri/shellb/releases/download/2.0.0/shellb -P /usr/local/bin && chmod +x /usr/local/bin/shellb 
 
 #Install libcuckoo headers
 WORKDIR /tmp
@@ -51,7 +51,7 @@ RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
 
-RUN rm -f /usr/local/bin/shellb && wget -q https://github.com/sumeetchhetri/shellb/releases/download/1.0.0/shellb -P /usr/local/bin && chmod +x /usr/local/bin/shellb
+RUN rm -f /usr/local/bin/shellb && wget -q https://github.com/sumeetchhetri/shellb/releases/download/2.0.0/shellb -P /usr/local/bin && chmod +x /usr/local/bin/shellb
 
 RUN shellb ffead-cpp-shellb
 RUN mv /tmp/ffead-cpp-src/shellb_out/ffead-cpp-6.0-bin /tmp/

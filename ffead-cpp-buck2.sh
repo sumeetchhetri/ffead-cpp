@@ -37,7 +37,7 @@ function do_start() {
 	add_inc_path "/usr/local/opt/openssl/include" "/usr/local/include" "/usr/include/libmongoc-1.0"
 	add_inc_path "/usr/include/libbson-1.0" "/usr/local/include/libmongoc-1.0" "/usr/local/include/libbson-1.0"
 	add_inc_path "/usr/include/postgresql" "/usr/include/pgsql" "/usr/local/include/postgresql" "/usr/local/include/pgsql"
-	add_def "OS_${OS_NAME}" "BUILD_BAZEL" "INC_WEBSVC" "INC_TPE" "INC_DVIEW" "INC_DCP" "INC_XMLSER"
+	add_def "OS_${OS_NAME}" "BUILD_BUCK2" "INC_WEBSVC" "INC_TPE" "INC_DVIEW" "INC_DCP" "INC_XMLSER"
 	if [ "$OS_DARWIN" = "1" ]; then 
 		add_def "APPLE"; 
 		l_flags "--ld-path=/usr/local/opt/llvm/bin/ld64.lld"
@@ -158,7 +158,7 @@ function do_start() {
 		set_inc_src "web/t4/include" "web/t4/src" "shared:t4" "ffead-framework,ffead-modules"
 		set_inc_src "web/t5/include" "web/t5/src" "shared:t5" "ffead-framework,ffead-modules"
 	fi
-	templatize "rtdcf/inter-shellb.bazel.buck2.sh.tem" "rtdcf/inter-shellb.sh" "CPPFLAGS,LFLAGS,LIBS,BUILD_SYS"
+	templatize "rtdcf/inter-shellb.bazel.buck2.sh.tem" "rtdcf/inter-shellb-buck2.sh" "CPPFLAGS,LFLAGS,LIBS,BUILD_SYS"
 	trigger_build "$apps_to_build"
 }
 function do_install() {

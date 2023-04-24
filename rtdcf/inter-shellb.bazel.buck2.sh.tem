@@ -21,11 +21,13 @@ function do_start() {
 		wedbdir="${wedbdir##*/}"
 		add_inc_path "../web/$wedbdir/include"
 		if [ -f "../lib/lib${wedbdir}.${SHLIB_EXT}" ]; then
-			add_lib "-l${wedbdir}"
+			add_lib "${wedbdir}"
 		fi
 	done
-	set_src_files "ReflectorInterface.cpp,SerializeInterface.cpp,AjaxInterface.cpp,WsInterface.cpp" "shared:inter" "ffead-framework,ffead-modules"
-	set_src_files "DCPInterface.cpp,TemplateInterface.cpp" "shared:dinter" "ffead-framework,ffead-modules"
+	add_lib "ffead-framework" "ffead-modules"
+
+	set_src_files "ReflectorInterface.cpp,SerializeInterface.cpp,AjaxInterface.cpp,WsInterface.cpp" "shared:inter"
+	set_src_files "DCPInterface.cpp,TemplateInterface.cpp" "shared:dinter"
 	trigger_build "inter,dinter"
 }
 function do_install() {
