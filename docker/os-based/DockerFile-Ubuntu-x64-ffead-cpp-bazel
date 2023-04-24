@@ -7,7 +7,7 @@ RUN apt update -yqq && apt install -yqq gcc g++ software-properties-common cmake
 	rapidjson-dev libpugixml-dev pkg-config zip && rm -rf /var/lib/apt/lists/*
 RUN wget -q https://github.com/bazelbuild/bazel/releases/download/6.1.2/bazel-6.1.2-installer-linux-x86_64.sh
 RUN chmod +x bazel-6.1.2-installer-linux-x86_64.sh && ./bazel-6.1.2-installer-linux-x86_64.sh --user
-ENV PATH $HOME/bin:$PATH
+ENV PATH="/root/bin:${PATH}"
 #RUN wget -q https://github.com/sumeetchhetri/shellb/releases/download/1.0.1/shellb -P /usr/local/bin && chmod +x /usr/local/bin/shellb 
 
 #Install libcuckoo headers

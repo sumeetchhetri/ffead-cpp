@@ -574,7 +574,13 @@ int BaseSocket::checkReadSync()
 #if defined(USE_IO_URING)
 	return 1;
 #endif
-	return recv(fd, buff, 1, MSG_PEEK|MSG_DONTWAIT);
+	#ifdef OS_MINGW
+		unsigned long l;
+		int bytes = ioctlsocket(s, FIONREAD, &l);
+		return recv(fd, buff, 1, MSG_PEEK);
+	#else
+		return recv(fd, buff, 1, MSG_PEEK|MSG_DONTWAIT);
+	#endif
 }
 
 int BaseSecureSocket::secureReadSync()

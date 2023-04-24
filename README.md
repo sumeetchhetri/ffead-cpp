@@ -23,7 +23,7 @@ directives can now be used to drive the entire configuration in ffead-cpp, so yo
 All in all ffead-cpp is the gap in the world of C++ web application or enterprise application development which I have tried to fill
 with my humble/honest effort.
 
-**cmake**, **autoconf**, **meson**, **xmake**, **scons** and **[shellb](https://github.com/sumeetchhetri/shellb)** builds are supported
+**cmake**, **autoconf**, **meson**, **xmake**, **scons**, **[shellb](https://github.com/sumeetchhetri/shellb)**, **bazel** and **buck2** builds are supported
 
 Detailed OS specific instructions, instructions for installing the available server backends and docker/docker-compose scripts are located at [docker](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker)
 
