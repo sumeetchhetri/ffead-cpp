@@ -74,6 +74,33 @@ Features
 - Sample app for Webrtc Signalling (websocket + api) (horizontally scalable peerjs compatible signalling server)
 - Embedded HTTP2.0 Server support (experimental)
 
+Examples (as per feedback from HN)
+- REST API example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/te-benchmark/include/TeBkRestController.h
+- Template example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/markers/tpe/mark.tpe & https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/DefTemp.cpp
+- Dynamic C++ page example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/dcp/test.dcp
+- Action based view example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/fviews/test.html & https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/TestFormController.cpp
+- XML driven configuration example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/config/application.xml
+- Annotation (#pragma) driven example - https://github.com/sumeetchhetri/ffead-cpp/tree/master/web/markers/include
+- ORM example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/config/sdorm-mysql.xml
+- Caching example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/config/cache.xml
+- Script execution example - https://github.com/sumeetchhetri/ffead-cpp/tree/master/web/default/scripts
+- Programming language integration examples - https://github.com/sumeetchhetri/ffead-cpp/tree/master/lang-server-backends
+- OS Build scripts - https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based
+- Cross compiling (android, mingw54, dockcross) - https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker
+- ffead-cpp modules - https://github.com/sumeetchhetri/ffead-cpp/tree/master/src/modules
+- ThreadPool - https://github.com/sumeetchhetri/ffead-cpp/tree/master/src/modules/threads
+- Backend Server integration - https://github.com/sumeetchhetri/ffead-cpp/tree/master/src/server
+- Server modules (apache/nginx/openlitespeed\*) - https://github.com/sumeetchhetri/ffead-cpp/tree/master/modules
+- Websocket example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/DefaultWebSocketHandler.cpp
+- Wefilter example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/DefaultIOFilter.cpp
+- Webcontroller example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/DefaultController.cpp
+- Cron Jobs module - https://github.com/sumeetchhetri/ffead-cpp/tree/master/src/modules/jobs
+- SOLR-Zookeeper/Elasticsearch (Search module) - https://github.com/sumeetchhetri/ffead-cpp/tree/master/src/modules/search
+- Toy/Useless interpreter - https://github.com/sumeetchhetri/ffead-cpp/tree/master/src/modules/interpreter
+- Solaris/BSD vagrant builds - https://github.com/sumeetchhetri/ffead-cpp/tree/master/vagrant
+- A Dumb code autogenerator - https://github.com/sumeetchhetri/ffead-cpp/blob/master/ffead_gen.sh
+- All github workflows for build validations - https://github.com/sumeetchhetri/ffead-cpp/tree/master/.github/workflows
+
 Quickstart (Using cmake/make)
 ===========
 - Install cmake >= 3.8.2 and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
