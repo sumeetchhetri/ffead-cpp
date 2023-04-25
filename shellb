@@ -482,26 +482,29 @@ BZL_DONE_REPOS=
 function bzl_gen_build_file() {
 	BZL_LINKOPTS="$LPATHSQ$4"
 	BZL_LINKOPTS="${BZL_LINKOPTS%?}"
-	BZL_COPTS="${PINCSQ%?}"
 	BZL_SRCES="${BZL_SRCES%?}"
 	BZL_HDRS="${BZL_HDRS%?}"
 	BZL_DEPS="$3"
 	count=1
-	for ex_ in ${INCSQ//,/ }
+	ex3_=
+	for ex3_ in ${INCSQ//,/ }
 	do
-		if [[ $ex_ != "/"* ]]; then
+		if [[ $ex3_ != "/"* ]] && [[ $ex3_ != "."* ]]; then
+			PINCSQ+="\"-I$ex3_\","
+		fi
+		if [[ $ex3_ != "/"* ]]; then
 			continue
 		fi
-		BZL_SRC_NAME_R=$(sanitize_var1 ${ex_})
+		BZL_SRC_NAME_R=$(sanitize_var1 ${ex3_})
 		if [[ $BZL_SRC_NAME_R = "_"* ]]; then
 			BZL_SRC_NAME_R="${BZL_SRC_NAME_R:1}"
 		fi
 		BZL_DEPS+="\"@${BZL_SRC_NAME_R}-r//:${BZL_SRC_NAME_R}-rd\","
-		if [[ $BZL_DONE_REPOS = *"${ex_} "* ]]; then
+		if [[ $BZL_DONE_REPOS = *"${ex3_} "* ]]; then
 			continue
 		fi
-		BZL_DONE_REPOS+="${ex_} "
-		BZL_REPO_PATH="$ex_"
+		BZL_DONE_REPOS+="${ex3_} "
+		BZL_REPO_PATH="$ex3_"
 		BZL_REPO_BUILD_FILE="BUILD_$count.bazel"
 		printf "$bzl_ws_new_ext_repo_build_\n" > /tmp/.bzl_ws_new_ext_repo_build_
 		templatize "/tmp/.bzl_ws_new_ext_repo_build_" /tmp/.bzl_ws_new_ext_repo_build__ "BZL_SRC_NAME_R,BZL_REPO_PATH,BZL_REPO_BUILD_FILE,count"
@@ -512,6 +515,7 @@ function bzl_gen_build_file() {
 		count=$((count+1))
 	done
 
+	BZL_COPTS="${PINCSQ%?}"
 	BZL_DEPS="${BZL_DEPS%?}"
 	BZL_SRC_PATH="$1"
 	printf "$bzl_ws_local_repo_build_\n" > /tmp/.bzl_ws_local_repo_build_
@@ -558,15 +562,25 @@ function bzl_gen_build_file() {
 		kvset "BN_$(get_key $BZL_SRC_NAME)" "//$src:$BZL_SRC_SO_NAME"
 	fi
 
-	templatize "/tmp/.bzl_bin_build_" "$DIR/$src/BUILD.bazel" "BZL_SRC_NAME,BZL_SRCES,BZL_DEFINES,BZL_LINKOPTS,BZL_COPTS,BZL_DEPS,BZL_HDRS,SHLIB_EXT,BZL_SRC_SO_NAME"
+	if [ ! -d ".bztmp/$src" ]; then
+		mkdir -p ".bztmp/$src"
+	fi
+	templatize "/tmp/.bzl_bin_build_" ".bztmp/$src/.bzl_bin_build_" "BZL_SRC_NAME,BZL_SRCES,BZL_DEFINES,BZL_LINKOPTS,BZL_COPTS,BZL_DEPS,BZL_HDRS,SHLIB_EXT,BZL_SRC_SO_NAME"
+	if [ ! -f ".bztmp/$src/BUILD.bazel" ]; then
+		cat ".bztmp/$src/.bzl_bin_build_" > ".bztmp/$src/BUILD.bazel"
+	else
+		cat ".bztmp/$src/.bzl_bin_build_" >> ".bztmp/$src/BUILD.bazel"
+	fi
+	cp ".bztmp/$src/BUILD.bazel" "$DIR/$src/BUILD.bazel"
 	#cat "$DIR/$1/BUILD.bazel"
 }
 
 function do_bazel_build() {
-	for ex_ in ${1//,/ }
+	ex4_=
+	for ex4_ in ${1//,/ }
 	do
-		if [ "$ex_" != "" ]; then
-			tmp=$(get_key $ex_)
+		if [ "$ex4_" != "" ]; then
+			tmp=$(get_key $ex4_)
 			tmp=$(kvget "BN_$tmp")
 			if [ "$tmp" != "" ]; then
 				ret=`bazel build $tmp`
@@ -579,9 +593,12 @@ function do_bazel_build() {
 			fi
 		fi
 	done
+	rm -rf .bztmp
 }
 
 function do_bazel_pre_build() {
+	rm -rf .bztmp || true
+	mkdir .bztmp
 	echo "" > "$DIR/WORKSPACE.bazel"
 }
 
@@ -733,31 +750,38 @@ function bck2_gen_build_file() {
 	BCK2_SRCES="${BCK2_SRCES%?}"
 	BCK2_HDRS="${BCK2_HDRS%?}"
 	BCK2_DEPS="$3"
-	for ex_ in ${CPPFLAGS// / }
+	ex5_=
+	for ex5_ in ${CPPFLAGS// / }
 	do
-		if [[ $BCK2_EX_FLAGS != *"\"$ex_\""* ]]; then
-			BCK2_EX_FLAGS+="\"$ex_\","
+		if [[ $BCK2_EX_FLAGS != *"\"$ex5_\""* ]]; then
+			BCK2_EX_FLAGS+="\"$ex5_\","
 		fi
 	done
-	for ex_ in ${INCSQ//,/ }
+	ex6_=
+	for ex6_ in ${INCSQ//,/ }
 	do
-		if [[ $ex_ != "/"* ]]; then
+		if [[ $ex6_ = "../"* ]]; then
+			if [[ $BCK2_EX_FLAGS != *"\"-I$ex6_\""* ]]; then
+				BCK2_EX_FLAGS+="\"-I$ex6_\","
+			fi
+		fi
+		if [[ $ex6_ != "/"* ]]; then
 			continue
 		fi
-		if [[ $BCK2_DONE_REPOS = *"${ex_} "* ]]; then
+		if [[ $BCK2_DONE_REPOS = *"${ex6_} "* ]]; then
 			continue
 		fi
-		BCK2_DONE_REPOS+="${ex_} "
-		if [[ $ex_ != "/usr/include/"* ]] && [[ $ex_ != "/usr/local/include/"* ]]; then
-			BCK2_EXT_INCS+="$ex_/.*, "
+		BCK2_DONE_REPOS+="${ex6_} "
+		if [[ $ex6_ != "/usr/include/"* ]] && [[ $ex6_ != "/usr/local/include/"* ]]; then
+			BCK2_EXT_INCS+="$ex6_/.*, "
 		fi
-		if [[ $BCK2_EX_FLAGS != *"\"-I$ex_\""* ]]; then
-			BCK2_EX_FLAGS+="\"-I$ex_\","
+		if [[ $BCK2_EX_FLAGS != *"\"-I$ex6_\""* ]]; then
+			BCK2_EX_FLAGS+="\"-I$ex6_\","
 		fi
 	done
 
 	BCK2_DEPS="${BCK2_DEPS%?}"
-	if [[ $BCK2_EX_FLAGS != *"," ]]; then
+	if [[ $BCK2_EX_FLAGS = *"," ]]; then
 		BCK2_EX_FLAGS="${BCK2_EX_FLAGS%?}"
 	fi
 	BCK2_SRC_PATH="$1"
@@ -814,11 +838,11 @@ function do_buck2_build() {
 	printf "$bck2_bconfig_build_\n" > /tmp/.bck2_bconfig_build_
 	templatize "/tmp/.bck2_bconfig_build_" /tmp/.bck2_bconfig_build___ "BCK2_EXT_INCS,CPPFLAGS"
 	cat /tmp/.bck2_bconfig_build___ >> "$DIR/.buckconfig"
-
-	for ex_ in ${1//,/ }
+	ex7_=
+	for ex7_ in ${1//,/ }
 	do
-		if [ "$ex_" != "" ]; then
-			tmp=$(get_key $ex_)
+		if [ "$ex7_" != "" ]; then
+			tmp=$(get_key $ex7_)
 			tmp=$(kvget "BN_$tmp")
 			if [ "$tmp" != "" ]; then
 				#buck2 build $tmp --show-full-output
@@ -833,9 +857,10 @@ function do_buck2_build() {
 }
 
 function do_buck2_pre_build() {
-	rm -rf prelude
+	rm -rf prelude || true
 	wget https://github.com/facebook/buck2-prelude/archive/refs/heads/main.zip && unzip main.zip && mv buck2-prelude-main prelude
 	buck2 clean
+	rm -f main.zip
 	echo "" > "$DIR/.buckconfig"
 	echo "" > "$DIR/BUCK"
 }
@@ -1415,16 +1440,28 @@ function b_prepare_sources() {
 
 	srces_=
 	files=
+	ex1_=
 	if [ "$sources" = "" ]; then
-		for ex_ in ${ext//,/ }
-		do
-			if [ "$ex_" != "" ]; then
-				srces_+=$(find ${src_} -type f -name "$ex_" -print|xargs ls -ltr|awk '{print $9"|"$6$7$8}')
-				srces_+=$'\n'
-				files+=$(find ${src_} -type f -name "$ex_")
-				files+=$'\n'
-			fi
-		done
+		if [ "$ext" = "cpp" ]; then
+			srces_+=$(find ${src_} -type f \( -name '*.h' -o -name '*.hh' -o -name '*.hpp' -o -name '*.cc' -o -name '*.cxx' -o -name '*.cpp' \) -print|xargs ls -ltr|awk '{print $9"|"$6$7$8}')
+			srces_+=$'\n'
+			files+=$(find ${src_} -type f \( -name '*.h' -o -name '*.hh' -o -name '*.hpp' -o -name '*.cc' -o -name '*.cxx' -o -name '*.cpp' \))
+			files+=$'\n'
+		else
+			srces_+=$(find ${src_} -type f \( -name '*.h' -o -name '*.c' \) -print|xargs ls -ltr|awk '{print $9"|"$6$7$8}')
+			srces_+=$'\n'
+			files+=$(find ${src_} -type f \( -name '*.h' -o -name '*.c' \))
+			files+=$'\n'
+		fi
+		#for ex1_ in ${ext//,/ }
+		#do
+		#	if [ "$ex1_" != "" ]; then
+		#		srces_+=$(find ${src_} -type f -name "$ex1_" -print|xargs ls -ltr|awk '{print $9"|"$6$7$8}')
+		#		srces_+=$'\n'
+		#		files+=$(find ${src_} -type f -name "$ex1_")
+		#		files+=$'\n'
+		#	fi
+		#done
 	else
 		sources_=(${sources//,/ })
 		srces_=$(find ${sources_} -type f -print|xargs ls -ltr|awk '{print $9"|"$6$7$8}')
@@ -1433,15 +1470,27 @@ function b_prepare_sources() {
 	if [ "$BUILD_SYS" = "bazel" ] || [ "$BUILD_SYS" = "buck2" ]; then
 		for idir in ${4//,/ }
 		do
-			for ex_ in ${ext//,/ }
-			do
-				if [ "$ex_" != "" ]; then
-					srces_+=$(find ${idir} -type f -name "$ex_" -print|xargs ls -ltr|awk '{print $9"|"$6$7$8}')
-					srces_+=$'\n'
-					files+=$(find ${idir} -type f -name "$ex_")
-					files+=$'\n'
-				fi
-			done
+			if [ "$ext" = "cpp" ]; then
+				srces_+=$(find ${idir} -type f \( -name '*.h' -o -name '*.hh' -o -name '*.hpp' \) -print|xargs ls -ltr|awk '{print $9"|"$6$7$8}')
+				srces_+=$'\n'
+				files+=$(find ${idir} -type f \( -name '*.h' -o -name '*.hh' -o -name '*.hpp' \))
+				files+=$'\n'
+			else
+				srces_+=$(find ${idir} -type f -name '*.h' -print|xargs ls -ltr|awk '{print $9"|"$6$7$8}')
+				srces_+=$'\n'
+				files+=$(find ${idir} -type f -name '*.h')
+				files+=$'\n'
+			fi
+			#ex2_=
+			#for ex2_ in ${ext//,/ }
+			#do
+			#	if [ "$ex2_" != "" ]; then
+			#		srces_+=$(find ${idir} -type f -name "$ex2_" -print|xargs ls -ltr|awk '{print $9"|"$6$7$8}')
+			#		srces_+=$'\n'
+			#		files+=$(find ${idir} -type f -name "$ex2_")
+			#		files+=$'\n'
+			#	fi
+			#done
 		done
 	fi
 
@@ -1462,7 +1511,11 @@ function b_compile() {
 		sources_=(${sources//,/ })
 	fi
 	if [ "$4" = "" ] && [ "$src_" != "" ]; then
-		includes=$(find ${src_} -type f \( -name '*.h' -o -name '*.hh' -o -name '*.hpp' \) | sed -r 's|/[^/]+$||' |sort |uniq); 
+		if [ "$ext" = "cpp" ]; then
+			includes=$(find ${src_} -type f \( -name '*.h' -o -name '*.hh' -o -name '*.hpp' \) | sed -r 's|/[^/]+$||' |sort |uniq)
+		else
+			includes=$(find ${src_} -type f -name '*.h' | sed -r 's|/[^/]+$||' |sort |uniq)
+		fi 
 	elif [ "$4" != "" ]; then
 		for idir in ${4//,/ }
 		do
@@ -1619,17 +1672,17 @@ function b_c_build() {
 		percent_denom=$((percent_denom+5))
 	fi
 
-	ext__="*.c"
+	ext__="c"
 	if [ "$BUILD_SYS" = "bazel" ]; then
 		BZL_SRCES=""
 		BZL_HDRS=""
 		#PINCSQ="$PINCSD"
-		ext__="*.c,*.h,*.hpp,*.hh"
+		#ext__="*.c,*.h,*.hpp,*.hh"
 	elif [ "$BUILD_SYS" = "buck2" ]; then
 		BCK2_SRCES=""
 		BCK2_HDRS=""
 		#PINCSQ="$PINCSD"
-		ext__="*.c,*.h,*.hpp,*.hh"
+		#ext__="*.c,*.h,*.hpp,*.hh"
 	fi
 
 	b_prepare_sources "${MY_CC}" "$1" "$ext__" "$4" "$5" "$2"
@@ -1736,17 +1789,19 @@ function b_cpp_build() {
 		percent_denom=$((percent_denom+5))
 	fi
 
-	ext__="*.cpp"
+	ext__="cpp"
 	if [ "$BUILD_SYS" = "bazel" ]; then
 		BZL_SRCES=""
 		BZL_HDRS=""
 		#PINCSQ="$PINCSD"
-		ext__="*.cpp,*.h,*.hpp,*.hh,*.cc,*.cxx"
+		#ext__="-name '*.h' -o -name '*.hh' -o -name '*.hpp' -o -name '*.cc' -o -name '*.cxx' -o -name '*.cpp'"
+		#ext__="*.cpp,*.h,*.hpp,*.hh,*.cc,*.cxx"
 	elif [ "$BUILD_SYS" = "buck2" ]; then
 		BCK2_SRCES=""
 		BCK2_HDRS=""
 		#PINCSQ="$PINCSD"
-		ext__="*.cpp,*.h,*.hpp,*.hh,*.cc,*.cxx"
+		#ext__="-name '*.h' -o -name '*.hh' -o -name '*.hpp' -o -name '*.cc' -o -name '*.cxx' -o -name '*.cpp'"
+		#ext__="*.cpp,*.h,*.hpp,*.hh,*.cc,*.cxx"
 	fi
 
 	b_prepare_sources "${MY_CPP}" "$1" "$ext__" "$4" "$5" "$2"
@@ -1960,6 +2015,7 @@ function set_out() {
 	then
 		mkdir -p $SB_OUTDIR
 	fi
+	SB_INSDIR=".bin"
 	if [ ! -d "$SB_OUTDIR/.bin" ]
 	then
 		mkdir -p $SB_OUTDIR/.bin
@@ -2055,7 +2111,7 @@ function set_exclude_files() {
 function templatize() {
 	if [ "$1" != "" ] && [ -f "$1" ] && [ "$2" != "" ] && [ "$3" != "" ]
 	then
-		rm -f "$2" | true
+		rm -f "$2" || true
 		cp -f "$1" "$2"
 		if [ "$2" != "" ]; then
 			for tv_ in ${3//,/ }
@@ -2111,8 +2167,12 @@ function install_here() {
 	if [[ "$1" != "." ]]; then
 		kv_validate_key "$1" || {
 			if ! [[ "$1" =~ "^." ]]; then
-				echo "Invalid install subdirectory $1, should be a valid directory name or ."
-				exit 1;
+				if [ -d "$SB_OUTDIR/$SB_INSDIR/$1" ]; then
+					echo "WARNING>> Install path $SB_OUTDIR/$SB_INSDIR/$1 may be outside the project tree, exercise caution...."
+				else
+					echo "Invalid install subdirectory $1, should be a valid directory name or ."
+					exit 1;
+				fi
 			fi
 		}
 		ldir="$SB_OUTDIR/$SB_INSDIR/$1"

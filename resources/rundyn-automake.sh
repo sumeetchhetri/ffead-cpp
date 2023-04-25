@@ -66,6 +66,7 @@ then
 elif [ "$TYPE" = "buck2" ]
 then
 	chmod +x ./shellb
+	touch .buckroot
 	./shellb inter-shellb-buck2
 elif [ "$TYPE" = "shellb" ]
 then

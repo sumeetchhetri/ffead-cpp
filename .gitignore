@@ -88,3 +88,5 @@ bazel-out
 bazel-testlogs
 bazel-ffead-cpp
 code-snippets-build/
+.bztmp
+prelude

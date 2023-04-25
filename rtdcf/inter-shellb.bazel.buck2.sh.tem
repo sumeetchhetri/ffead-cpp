@@ -12,14 +12,27 @@ function do_start() {
 	add_inc_path "/usr/local/opt/openssl/include" "/usr/local/include" "/usr/include/libmongoc-1.0"
 	add_inc_path "/usr/include/libbson-1.0" "/usr/local/include/libmongoc-1.0" "/usr/local/include/libbson-1.0"
 	add_inc_path "/usr/include/postgresql" "/usr/include/pgsql" "/usr/local/include/postgresql" "/usr/local/include/pgsql"
-	add_lib "@LIBS@"
-	add_inc_path "../include"
-	add_lib_path "../lib"
+	tmp_="@LIBS@"
+	for tl_ in ${tmp_// / }
+	do
+		add_lib "$tl_"
+	done
+	cwdir="../"
+	if [ "$BUILD_SYS" = "bazel" ]; then
+		cwdir=`pwd`
+		cwdir=${cwdir//rtdcf/}
+	fi
+	add_inc_path "${cwdir}include"
+	add_lib_path "${cwdir}lib"
 	for wedbdir in ../web/*
 	do
 		wedbdir=${wedbdir%*/}
 		wedbdir="${wedbdir##*/}"
-		add_inc_path "../web/$wedbdir/include"
+		minc_="../web/$wedbdir/include"
+		if [ "$BUILD_SYS" = "bazel" ]; then
+			minc_="${cwdir}${wedbdir}/include"
+		fi
+		add_inc_path "$minc_"
 		if [ -f "../lib/lib${wedbdir}.${SHLIB_EXT}" ]; then
 			add_lib "${wedbdir}"
 		fi
@@ -31,5 +44,5 @@ function do_start() {
 	trigger_build "inter,dinter"
 }
 function do_install() {
-	install_here "../lib/" "lib*.${SHLIB_EXT}"
+	mv ".bin/libinter.${SHLIB_EXT}" ".bin/libdinter.${SHLIB_EXT}" ../lib/
 }
