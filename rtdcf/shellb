@@ -1,0 +1,2370 @@
+#!/usr/bin/env bash
+
+# Sourced from https://raw.githubusercontent.com/damphat/kv-bash/master/kv-bash
+# ABOUT kv-bash: 
+#    key/value dabatase
+#    database store in HOME directory
+#    each user has 1 database
+#    imports 5 bash functions via ```$ source kv-bash```
+#
+# Author: damphat
+# Version: 0.1
+# Requirements: unix-like environement, no dependencies
+#
+# USAGE:
+#    source ./kv-bash        # import kv-bash functions
+#    kvset <key> <value>     # assign value to key
+#    kvget <key>             # get value of key
+#    kvdel <key>             # kvdelete by key
+#    kvlist                  # list all current key/value pairs
+#    kvclear                 # clear database
+#
+# EXAMPLES: 
+#    $ source ./kv-bash
+#    $ kvset user mr.bob
+#    $ kvset pass abc@123
+#    $ kvlist
+#      user mr.bob
+#      pass abc@123
+#    $ kvget user
+#      mr.bob
+#    $ kvget pass
+#      abc@123
+#    $ kvdel pass
+#    $ kvget pass
+#
+#    $ kvclear
+
+########################
+# CONSTANTS
+########################
+
+KV_USER_DIR="$HOME/.kv-bash"
+
+########################
+# LOCAL FUNCTIONS
+########################
+
+# print to stderr, red color
+kv_echo_err() {
+	echo -e "\e[01;31m$@\e[0m" >&2
+}
+
+# Usage: kv_echo_err_box <err-msg> <function-name>
+kv_echo_err_box() {
+	kv_echo_err "  +-------------------------------+"
+	kv_echo_err "  | ERROR: $1"
+	kv_echo_err "  | function: $2"
+	kv_echo_err "  +-------------------------------+"
+}
+
+# Usage: kv_validate_key <key>
+kv_validate_key() {
+	[[ "$1" =~ ^[0-9a-zA-Z._:-]+$  ]]
+}
+
+########################
+# ENSURE THIS-FILE IS CALL BY 'source ./kv-bash'
+########################
+
+#[[ "${BASH_SOURCE[0]}" != "${0}" ]] || {
+#	kv_echo_err "  +------------------------------------------------+"
+#	kv_echo_err "  | FALTAL ERROR: wrong usage :(                   |"
+#	kv_echo_err "  | You should use this via source                 |"
+#	kv_echo_err "  |     $ source ./kv-bash                         |"	
+#	kv_echo_err "  |                                                |"
+#	kv_echo_err "  | Examples:                                      |"
+#	kv_echo_err "  |     $ source ./kv-bash                         |"
+#	kv_echo_err "  |     $ kvset user mr.bob                        |"
+#	kv_echo_err "  |     $ kvset pass abc@123                       |"
+#	kv_echo_err "  |     $ kvlist                                   |"
+#	kv_echo_err "  |       user mr.bob                              |"
+#	kv_echo_err "  |       pass abc@123                             |"
+#	kv_echo_err "  |     $ kvget user                               |"
+#	kv_echo_err "  |       mr.bob                                   |"
+#	kv_echo_err "  |     $ kvget pass                               |"
+#	kv_echo_err "  |       abc@123                                  |"
+#	kv_echo_err "  |     $ kvdel pass                               |"
+#	kv_echo_err "  |     $ kvget pass                               |"
+#	kv_echo_err "  |                                                |"
+#	kv_echo_err "  |     $ kvclear                                  |"
+#	kv_echo_err "  +------------------------------------------------+"
+#	exit 1
+#}
+
+########################
+# PUBLIC FUNCTIONS
+########################
+
+# Usage: kvget <key>
+kvget() {
+	key="$1"
+	kv_validate_key "$key" || {
+		kv_echo_err_box 'invalid param "key"' 'kvget()'
+		return 1
+	}
+	VALUE="$([ -f "$KV_USER_DIR/$key" ] && cat "$KV_USER_DIR/$key")"
+	echo "$VALUE"
+	
+	[ "$VALUE" != "" ]
+}
+
+# Usage: kvset <key> [value] 
+kvset() {
+	key="$1"
+	value="$2"
+	kv_validate_key "$key" || {
+		kv_echo_err_box 'invalid param "key"' 'kvset()'"$key"
+		return 1
+	}
+	test -d "$KV_USER_DIR" || mkdir "$KV_USER_DIR"
+	echo "$value" > "$KV_USER_DIR/$key"
+}
+
+# Usage: kvdel <key>
+kvdel() {
+	key="$1"
+	kv_validate_key "$key" || {
+		kv_echo_err_box 'invalid param "key"' 'kvdel()'
+		return 1
+	}
+	test -f "$KV_USER_DIR/$key" && rm -f "$KV_USER_DIR/$key"
+}
+
+# list all key/value pairs to stdout
+# Usage: kvlist
+kvlist() {
+	for i in "$KV_USER_DIR/"*; do
+		if [ -f "$i" ]; then
+			key="$(basename "$i")"
+			echo "$key" "$(kvget "$key")"
+		fi
+	done 
+}
+
+# clear all key/value pairs in database
+# Usage: kvclear
+kvclear() {
+	rm -rf "$KV_USER_DIR"
+}
+
+
+#utils/commands.sh
+# Removes any non-alphabetical and non numeric characters from a possible
+# shell variable name, allows only underscore
+function sanitize_var() {
+	echo $(echo ${1} | sed -e "s|[^a-zA-Z0-9_]||g")
+}
+
+# Removes any non-alphabetical and non numeric characters from a possible
+# shell variable name, allows only underscore
+function sanitize_var1() {
+	echo $(echo ${1} | sed -e "s|[^a-zA-Z0-9_]|_|g")
+}
+
+# Maintains a list of process ids of background processes
+BG_PIDS=
+
+# Execute a background process
+# if LOG_MODE=1, then echo the message passed and then execute the command
+# if LOG_MODE=2, then echo the command itself before executing the command
+function bexe() {
+	if [ "$LOG_MODE" = "1" ]; then
+		echo -e "$1" >> $cmds_log_file
+		shift
+		"$@" >> $cmds_log_file 2>&1 &
+	else
+		shift
+		echo "\$ $@" >> $cmds_log_file
+		"$@" >> $cmds_log_file 2>&1 &
+	fi
+	BG_PIDS+=" $!"
+}
+
+function wait_bexe() {
+	# Wait for all processes to finish, will take max 14s
+	# as it waits in order of launch, not order of finishing
+	for p in $BG_PIDS; do
+		BG_PIDS=$(echo ${BG_PIDS/$p /})
+		if wait $p; then
+			:
+		else
+			: #exit 1
+		fi
+	done
+}
+
+# Execute a foreground process
+# if LOG_MODE=1, then echo the message passed and then execute the command
+# if LOG_MODE=2, then echo the command itself before executing the command
+function exe() {
+	if [ "$LOG_MODE" = "1" ]; then
+		#echo -e "$1"
+		shift
+		"$@" >> $cmds_log_file 2>&1
+	else
+		shift
+		echo "\$ $@" >> $cmds_log_file 2>&1
+		"$@" >> $cmds_log_file 2>&1
+	fi
+	return $?
+}
+
+# Remove any relative path identifiers from a path variable
+function remove_relative_path() {
+	tem_=$1
+	if [[ "$1" =~ ^../ ]]; then
+		tem_=$(echo "${tem_#../}")
+		remove_relative_path "$tem_"
+	elif [[ "$1" =~ ^./ ]]; then
+		tem_=$(echo "${tem_#./}")
+		remove_relative_path "$tem_"
+	elif [[ "$1" =~ ^/ ]]; then
+		tem_=$(echo "${tem_#/}")
+		remove_relative_path "$tem_"
+	else
+		echo $tem_
+	fi
+}
+
+# Check if a command exists in the PATH
+function exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# Get an md5sum value of a string value
+function get_key() {
+	t_=`echo -n $1 | md5sum | xargs`
+	t_=${t_% *}
+	echo $t_
+}
+
+# Get the value from key-value map -- kv-bash
+function get_cmd() {
+	kvget "SH_$(get_key ${1})"
+}
+
+# Find an executable among the various options provided if it exists on PATH
+function find_cmd() {
+	cmd_=
+	for ((i = 3; i <= $#; i++ ))
+	do
+		if exists ${!i}
+		then
+			cmd_=${!i}
+			break
+		fi
+	done
+	if [ "$cmd_" = "" ]
+	then
+		echo "no $1 command found"
+		if [ "$2" != "" ]
+		then
+			exit 1
+		fi
+	else
+		#echo "$1 command found... $cmd_"
+		echo "$cmd_"
+	fi
+}
+
+function showprogress() {
+	if [ "$BUILD_SYS" = "emb" ]; then
+		percent_numer=$((percent_numer+$1))
+		ProgressBar "$percent_numer" "$percent_denom" "$2"
+	fi
+}
+
+function completeprogress() {
+	ProgressBar "$percent_denom" "$percent_denom" "$1"
+}
+
+_maxlen=0
+#https://github.com/fearside/ProgressBar/blob/master/progressbar.sh
+# 1. Create ProgressBar function
+# 1.1 Input is currentState($1) and totalState($2)
+function ProgressBar {
+# Process data
+	let _progress=(${1}*100/${2}*100)/100
+	let _done=(${_progress}*4)/10
+	let _left=40-$_done
+# Build progressbar string lengths
+	_done=$(printf "%${_done}s")
+	_left=$(printf "%${_left}s")
+	_msg="Progress"
+	if [ "$1" != "" ]; then
+		_msg="$3"
+	fi
+	mlen=${#_msg}
+	if [ "$mlen" -lt 8 ]
+	then
+		rem_=$((8-mlen))
+		for i in $(seq 1 $rem_)
+		do 
+			_msg+=' '
+		done
+	fi
+	if [ $mlen -gt $_maxlen ]
+	then
+		_maxlen=$mlen
+	fi
+	#echo $_maxlen
+	rmsg=""
+	rem_=$((_maxlen-8))
+	for i in $(seq 1 $_maxlen)
+	do 
+		rmsg+=' '
+	done
+# 1.2 Build progressbar strings and print the ProgressBar line
+# 1.2.1 Output example:
+# 1.2.1.1 Progress : [########################################] 100%
+printf "\r${_msg} : [${_done// /#}${_left// /-}] ${_progress}%%${rmsg}"
+
+}
+
+
+
+#tools/bazel/bazel-util.sh
+
+BZL_SRCES=
+BZL_DEFINES=
+BZL_LINKOPTS=
+BZL_COPTS=
+BZL_DEPS=
+BZL_HDRS=
+BZL_REPO_PATH=
+BZL_REPO_BUILD_FILE=
+BZL_REPO_HDRS=
+BZL_SRC_PATH=
+BZL_SRC_NAME=
+BZL_SRC_NAME_R=
+count=0
+
+bzl_bin_build_=$(cat <<-END
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
+cc_import(
+    name = "@BZL_SRC_NAME@-inc",
+    hdrs = glob(["**/*.h"]),
+    visibility = ["//visibility:public"]
+)
+
+cc_binary(
+    name = "@BZL_SRC_NAME@",
+    srcs = [@BZL_SRCES@],
+    local_defines = [@BZL_DEFINES@],
+    linkopts = [@BZL_LINKOPTS@],
+    copts = [@BZL_COPTS@],
+    deps = [@BZL_DEPS@],
+    visibility = ["//visibility:public"]
+)
+
+END
+)
+
+bzl_libst_build_=$(cat <<-END
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_import(
+    name = "@BZL_SRC_NAME@-inc",
+    hdrs = glob(["**/*.h"]),
+    visibility = ["//visibility:public"]
+)
+
+cc_library(
+    name = "@BZL_SRC_NAME@",
+    srcs = [@BZL_SRCES@],
+    local_defines = [@BZL_DEFINES@],
+    linkopts = [@BZL_LINKOPTS@],
+    copts = [@BZL_COPTS@],
+    deps = [@BZL_DEPS@],
+    hdrs = [@BZL_HDRS@],
+    visibility = ["//visibility:public"]
+)
+
+END
+)
+
+bzl_libso_build_=$(cat <<-END
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_import(
+    name = "@BZL_SRC_NAME@-inc",
+    hdrs = glob(["**/*.h"]),
+    shared_library = "lib@BZL_SRC_NAME@.@SHLIB_EXT@",
+    visibility = ["//visibility:public"]
+)
+
+cc_binary(
+    linkshared = True,
+    name = "@BZL_SRC_SO_NAME@",
+    srcs = [@BZL_SRCES@],
+    local_defines = [@BZL_DEFINES@],
+    linkopts = [@BZL_LINKOPTS@],
+    copts = [@BZL_COPTS@],
+    deps = [@BZL_DEPS@],
+    visibility = ["//visibility:public"]
+)
+
+END
+)
+
+bzl_libstso_build_=$(cat <<-END
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_import(
+    name = "@BZL_SRC_NAME@-inc",
+    hdrs = glob(["**/*.h"]),
+    shared_library = "lib@BZL_SRC_NAME@.@SHLIB_EXT@",
+    visibility = ["//visibility:public"]
+)
+
+cc_binary(
+    linkshared = True,
+    name = "@BZL_SRC_SO_NAME@",
+    srcs = [@BZL_SRCES@],
+    local_defines = [@BZL_DEFINES@],
+    linkopts = [@BZL_LINKOPTS@],
+    copts = [@BZL_COPTS@],
+    deps = [@BZL_DEPS@],
+    visibility = ["//visibility:public"]
+)
+
+cc_library(
+    name = "@BZL_SRC_NAME@",
+    srcs = [@BZL_SRCES@],
+    local_defines = [@BZL_DEFINES@],
+    linkopts = [@BZL_LINKOPTS@],
+    copts = [@BZL_COPTS@],
+    deps = [@BZL_DEPS@],
+    hdrs = [@BZL_HDRS@],
+    visibility = ["//visibility:public"]
+)
+
+END
+)
+
+bzl_ws_local_repo_build_=$(cat <<-END
+local_repository(
+    name = "@BZL_SRC_NAME@-repo",
+    path = "@BZL_SRC_PATH@",
+)
+
+END
+)
+
+bzl_ws_new_ext_repo_build_=$(cat <<-END
+new_local_repository(
+    name = "@BZL_SRC_NAME_R@-r",
+    path = "@BZL_REPO_PATH@",
+    build_file = "@BZL_REPO_BUILD_FILE@"
+)
+
+END
+)
+
+bzl_ws_local_repodef_build_=$(cat <<-END
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "@BZL_SRC_NAME_R@-rd",
+    hdrs = @BZL_REPO_HDRS@,
+    includes = [
+        "."
+    ],
+    visibility = ["//visibility:public"]
+)
+
+END
+)
+
+BZL_DONE_REPOS=
+function bzl_gen_build_file() {
+	BZL_LINKOPTS="$LPATHSQ$4"
+	BZL_LINKOPTS="${BZL_LINKOPTS%?}"
+	BZL_COPTS="${PINCSQ%?}"
+	BZL_SRCES="${BZL_SRCES%?}"
+	BZL_HDRS="${BZL_HDRS%?}"
+	BZL_DEPS="$3"
+	count=1
+	for ex_ in ${INCSQ//,/ }
+	do
+		if [[ $ex_ != "/"* ]]; then
+			continue
+		fi
+		BZL_SRC_NAME_R=$(sanitize_var1 ${ex_})
+		if [[ $BZL_SRC_NAME_R = "_"* ]]; then
+			BZL_SRC_NAME_R="${BZL_SRC_NAME_R:1}"
+		fi
+		BZL_DEPS+="\"@${BZL_SRC_NAME_R}-r//:${BZL_SRC_NAME_R}-rd\","
+		if [[ $BZL_DONE_REPOS = *"${ex_} "* ]]; then
+			continue
+		fi
+		BZL_DONE_REPOS+="${ex_} "
+		BZL_REPO_PATH="$ex_"
+		BZL_REPO_BUILD_FILE="BUILD_$count.bazel"
+		printf "$bzl_ws_new_ext_repo_build_\n" > /tmp/.bzl_ws_new_ext_repo_build_
+		templatize "/tmp/.bzl_ws_new_ext_repo_build_" /tmp/.bzl_ws_new_ext_repo_build__ "BZL_SRC_NAME_R,BZL_REPO_PATH,BZL_REPO_BUILD_FILE,count"
+		cat /tmp/.bzl_ws_new_ext_repo_build__ >> "$DIR/WORKSPACE.bazel"
+		BZL_REPO_HDRS="glob([\"**/*.h\"]) + glob([\"**/*.hh\"]) + glob([\"**/*.hpp\"])"
+		printf "$bzl_ws_local_repodef_build_\n" > /tmp/.bzl_ws_local_repo_build_
+		templatize "/tmp/.bzl_ws_local_repo_build_" "$DIR/$BZL_REPO_BUILD_FILE" "BZL_SRC_NAME_R,BZL_REPO_HDRS,count"
+		count=$((count+1))
+	done
+
+	BZL_DEPS="${BZL_DEPS%?}"
+	BZL_SRC_PATH="$1"
+	printf "$bzl_ws_local_repo_build_\n" > /tmp/.bzl_ws_local_repo_build_
+	templatize "/tmp/.bzl_ws_local_repo_build_" /tmp/.bzl_ws_local_repo_build__ "BZL_SRC_NAME,BZL_SRC_PATH,count"
+	cat /tmp/.bzl_ws_local_repo_build__ >> "$DIR/WORKSPACE.bazel"
+	count=$((count+1))
+	
+	src="$1"
+	#BZL_SRCES=${BZL_SRCES//$1\//}
+	if [ "$5" != "" ]; then
+		for idir in ${5//,/ }
+		do
+			src1=`printf "%s\n%s\n" "$src" "$idir" | sed -e 'N;s/^\(.*\).*\n\1.*$/\1/'`
+			#echo "$src -- $idir -- $src1"
+			src="$src1"
+			BZL_COPTS+=",\"-I$idir\""
+		done
+		#BZL_COPTS="${BZL_COPTS%?}"
+		BZL_HDRS=${BZL_HDRS//$src/}
+		BZL_SRCES=${BZL_SRCES//$src/}
+	else
+		BZL_HDRS=${BZL_HDRS//$src\//}
+		BZL_SRCES=${BZL_SRCES//$src\//}
+	fi
+	#echo "$src"
+	if [[ $src = *"/" ]]; then
+		src="${src%?}"
+	fi
+
+	kvset "BN_$(get_key $BZL_SRC_NAME-inc)" "//$src:$BZL_SRC_NAME-inc"
+	if [ "$2" = "binary" ]; then
+		printf "$bzl_bin_build_\n" > /tmp/.bzl_bin_build_
+		kvset "BN_$(get_key $BZL_SRC_NAME)" "//$src:$BZL_SRC_NAME"
+	elif [ "$2" = "shared" ]; then
+		BZL_SRC_SO_NAME="lib$BZL_SRC_NAME.$SHLIB_EXT"
+		printf "$bzl_libso_build_\n" > /tmp/.bzl_bin_build_
+		kvset "BN_$(get_key $BZL_SRC_NAME)" "//$src:$BZL_SRC_SO_NAME"
+	elif [ "$2" = "static" ]; then
+		printf "$bzl_libst_build_\n" > /tmp/.bzl_bin_build_
+		kvset "BN_$(get_key $BZL_SRC_NAME)" "//$src:$BZL_SRC_NAME"
+	elif [ "$2" = "stared" ]; then
+		BZL_SRC_SO_NAME="lib$BZL_SRC_NAME.$SHLIB_EXT"
+		printf "$bzl_libstso_build_\n" > /tmp/.bzl_bin_build_
+		kvset "BN_$(get_key $BZL_SRC_NAME)" "//$src:$BZL_SRC_SO_NAME"
+	fi
+
+	templatize "/tmp/.bzl_bin_build_" "$DIR/$src/BUILD.bazel" "BZL_SRC_NAME,BZL_SRCES,BZL_DEFINES,BZL_LINKOPTS,BZL_COPTS,BZL_DEPS,BZL_HDRS,SHLIB_EXT,BZL_SRC_SO_NAME"
+	#cat "$DIR/$1/BUILD.bazel"
+}
+
+function do_bazel_build() {
+	for ex_ in ${1//,/ }
+	do
+		if [ "$ex_" != "" ]; then
+			tmp=$(get_key $ex_)
+			tmp=$(kvget "BN_$tmp")
+			if [ "$tmp" != "" ]; then
+				ret=`bazel build $tmp`
+				if [ "$?" -eq "0" ]; then
+					tmp="${tmp:1}"
+					tmp=${tmp//:/\/}
+					echo "bazel-bin$tmp"
+					exe "" cp -f "bazel-bin$tmp" $SB_OUTDIR/.bin
+				fi
+			fi
+		fi
+	done
+}
+
+function do_bazel_pre_build() {
+	echo "" > "$DIR/WORKSPACE.bazel"
+}
+
+
+#tools/buck2/buck2-util.sh
+
+BCK2_SRCES=
+BCK2_DEFINES=
+BCK2_LINKOPTS=
+BCK2_COPTS=
+BCK2_DEPS=
+BCK2_HDRS=
+BCK2_REPO_PATH=
+BCK2_REPO_BUILD_FILE=
+BCK2_REPO_HDRS=
+BCK2_SRC_PATH=
+BCK2_SRC_NAME=
+BCK2_SRC_NAME_R=
+BCK2_EXT_INCS=
+BCK2_EX_FLAGS="\"-I/usr/local/include\","
+count=0
+
+bck2_bin_build_=$(cat <<-END
+
+cxx_binary(
+    name = "@BCK2_SRC_NAME@",
+    srcs = [@BCK2_SRCES@],
+    linker_flags = [@BCK2_LINKOPTS@],
+    include_directories = [@BCK2_COPTS@],
+    compiler_flags = [@BCK2_EX_FLAGS@],
+    deps = [@BCK2_DEPS@],
+    visibility = ["PUBLIC"]
+)
+
+END
+)
+
+bck2_libst_build_=$(cat <<-END
+
+cxx_library(
+    name = "@BCK2_SRC_NAME@",
+    srcs = [@BCK2_SRCES@],
+    linker_flags = [@BCK2_LINKOPTS@],
+    link_style = "static",
+    include_directories = [@BCK2_COPTS@],
+    compiler_flags = [@BCK2_EX_FLAGS@],
+    deps = [@BCK2_DEPS@],
+    exported_headers = [@BCK2_HDRS@],
+    visibility = ["PUBLIC"]
+)
+
+END
+)
+
+bck2_libso_build_=$(cat <<-END
+cxx_library(
+    name = "@BCK2_SRC_SO_NAME@",
+    soname = "@BCK2_SRC_SO_NAME@",
+    srcs = [@BCK2_SRCES@],
+    linker_flags = [@BCK2_LINKOPTS@],
+    link_style = "shared",
+    include_directories = [@BCK2_COPTS@],
+    compiler_flags = [@BCK2_EX_FLAGS@],
+    deps = [@BCK2_DEPS@],
+    exported_headers = [@BCK2_HDRS@],
+    visibility = ["PUBLIC"]
+)
+
+END
+)
+
+bck2_libstso_build_=$(cat <<-END
+cxx_library(
+    name = "@BCK2_SRC_NAME@",
+    srcs = [@BCK2_SRCES@],
+    linker_flags = [@BCK2_LINKOPTS@],
+    link_style = "static",
+    include_directories = [@BCK2_COPTS@],
+    compiler_flags = [@BCK2_EX_FLAGS@],
+    deps = [@BCK2_DEPS@],
+    exported_headers = [@BCK2_HDRS@],
+    visibility = ["PUBLIC"]
+)
+
+cxx_library(
+    name = "@BCK2_SRC_SO_NAME@",
+    soname = "@BCK2_SRC_SO_NAME@",
+    srcs = [@BCK2_SRCES@],
+    linker_flags = [@BCK2_LINKOPTS@],
+    link_style = "shared",
+    include_directories = [@BCK2_COPTS@],
+    compiler_flags = [@BCK2_EX_FLAGS@],
+    deps = [@BCK2_DEPS@],
+    exported_headers = [@BCK2_HDRS@],
+    visibility = ["PUBLIC"]
+)
+
+END
+)
+
+bck2_bconfig_build_=$(cat <<-END
+[project]
+  ignore = .git
+
+[repositories]
+  root = .
+  prelude = prelude
+  toolchains = toolchains
+  none = none
+
+[repository_aliases]
+  config = prelude
+  fbcode = none
+  fbsource = none
+  buck = none
+
+[parser]
+  default_build_file_syntax = SKYLARK
+  target_platform_detector_spec = target:root//...->prelude//platforms:default
+
+[cxx]
+  cxxflags = @CPPFLAGS@
+  should_remap_host_platform = true
+  ; untracked_headers = error
+  untracked_headers_whitelist = /usr/include/.*, /usr/local/include/.*, /usr/lib/.*, @BCK2_EXT_INCS@
+  ldflags = -L/usr/local/lib
+
+END
+)
+
+bck2_prebuilt_dep_build_=$(cat <<-END
+prebuilt_cxx_library(
+  name = '@DEP@', 
+  header_namespace = '', 
+  header_only = True, 
+  exported_linker_flags = [
+    '-l@DEP@', 
+  ], 
+)
+
+END
+)
+
+BCK2_DONE_REPOS=
+function bck2_gen_build_file() {
+	BCK2_LINKOPTS="$LPATHSQ"
+	BCK2_LINKOPTS="${BCK2_LINKOPTS%?}"
+	BCK2_COPTS="${PINCSQ%?}"
+	BCK2_SRCES="${BCK2_SRCES%?}"
+	BCK2_HDRS="${BCK2_HDRS%?}"
+	BCK2_DEPS="$3"
+	for ex_ in ${CPPFLAGS// / }
+	do
+		if [[ $BCK2_EX_FLAGS != *"\"$ex_\""* ]]; then
+			BCK2_EX_FLAGS+="\"$ex_\","
+		fi
+	done
+	for ex_ in ${INCSQ//,/ }
+	do
+		if [[ $ex_ != "/"* ]]; then
+			continue
+		fi
+		if [[ $BCK2_DONE_REPOS = *"${ex_} "* ]]; then
+			continue
+		fi
+		BCK2_DONE_REPOS+="${ex_} "
+		if [[ $ex_ != "/usr/include/"* ]] && [[ $ex_ != "/usr/local/include/"* ]]; then
+			BCK2_EXT_INCS+="$ex_/.*, "
+		fi
+		if [[ $BCK2_EX_FLAGS != *"\"-I$ex_\""* ]]; then
+			BCK2_EX_FLAGS+="\"-I$ex_\","
+		fi
+	done
+
+	BCK2_DEPS="${BCK2_DEPS%?}"
+	if [[ $BCK2_EX_FLAGS != *"," ]]; then
+		BCK2_EX_FLAGS="${BCK2_EX_FLAGS%?}"
+	fi
+	BCK2_SRC_PATH="$1"
+	
+	src="$1"
+	#BCK2_SRCES=${BCK2_SRCES//$1\//}
+	if [ "$5" != "" ]; then
+		for idir in ${5//,/ }
+		do
+			src1=`printf "%s\n%s\n" "$src" "$idir" | sed -e 'N;s/^\(.*\).*\n\1.*$/\1/'`
+			#echo "$src -- $idir -- $src1"
+			src="$src1"
+			BCK2_COPTS+=",\"-I$idir\""
+		done
+		#BCK2_COPTS="${BCK2_COPTS%?}"
+		#BCK2_HDRS=${BCK2_HDRS//$src/}
+		#BCK2_SRCES=${BCK2_SRCES//$src/}
+		#BCK2_COPTS=${BCK2_COPTS//$src/}
+	else
+		#BCK2_HDRS=${BCK2_HDRS//$src\//}
+		#BCK2_SRCES=${BCK2_SRCES//$src\//}
+		#BCK2_COPTS=${BCK2_COPTS//$src\//}
+		:
+	fi
+	#BCK2_COPTS=${BCK2_COPTS//\"$src\"/}
+	BCK2_COPTS=${BCK2_COPTS//\"-I/\"}
+	#echo "$src"
+	if [[ $src = *"/" ]]; then
+		src="${src%?}"
+	fi
+
+	#kvset "BN_$(get_key $BCK2_SRC_NAME-inc)" "//$src:$BCK2_SRC_NAME-inc"
+	if [ "$2" = "binary" ]; then
+		printf "$bck2_bin_build_\n" > /tmp/.bck2_bin_build_
+		kvset "BN_$(get_key $BCK2_SRC_NAME)" "//:$BCK2_SRC_NAME"
+	elif [ "$2" = "shared" ]; then
+		BCK2_SRC_SO_NAME="lib$BCK2_SRC_NAME.$SHLIB_EXT"
+		printf "$bck2_libso_build_\n" > /tmp/.bck2_bin_build_
+		kvset "BN_$(get_key $BCK2_SRC_NAME)" "//:$BCK2_SRC_SO_NAME"
+	elif [ "$2" = "static" ]; then
+		printf "$bck2_libst_build_\n" > /tmp/.bck2_bin_build_
+		kvset "BN_$(get_key $BCK2_SRC_NAME)" "//:$BCK2_SRC_NAME"
+	elif [ "$2" = "stared" ]; then
+		BCK2_SRC_SO_NAME="lib$BCK2_SRC_NAME.$SHLIB_EXT"
+		printf "$bck2_libstso_build_\n" > /tmp/.bck2_bin_build_
+		kvset "BN_$(get_key $BCK2_SRC_NAME)" "//:$BCK2_SRC_SO_NAME"
+	fi
+
+	templatize "/tmp/.bck2_bin_build_" "/tmp/.bck2_bin_build__" "BCK2_EX_FLAGS,BCK2_SRC_NAME,BCK2_SRCES,BCK2_DEFINES,BCK2_LINKOPTS,BCK2_COPTS,BCK2_DEPS,BCK2_HDRS,SHLIB_EXT,BCK2_SRC_SO_NAME"
+	cat /tmp/.bck2_bin_build__ >> "$DIR/BUCK"
+}
+
+function do_buck2_build() {
+	printf "$bck2_bconfig_build_\n" > /tmp/.bck2_bconfig_build_
+	templatize "/tmp/.bck2_bconfig_build_" /tmp/.bck2_bconfig_build___ "BCK2_EXT_INCS,CPPFLAGS"
+	cat /tmp/.bck2_bconfig_build___ >> "$DIR/.buckconfig"
+
+	for ex_ in ${1//,/ }
+	do
+		if [ "$ex_" != "" ]; then
+			tmp=$(get_key $ex_)
+			tmp=$(kvget "BN_$tmp")
+			if [ "$tmp" != "" ]; then
+				#buck2 build $tmp --show-full-output
+				out_path=`buck2 build $tmp --show-full-output | cut -d' ' -f2-`
+				echo "$out_path"
+				if [ "$out_path" != "" ]; then
+					exe "" cp -f "$out_path" $SB_OUTDIR/.bin
+				fi
+			fi
+		fi
+	done
+}
+
+function do_buck2_pre_build() {
+	rm -rf prelude
+	wget https://github.com/facebook/buck2-prelude/archive/refs/heads/main.zip && unzip main.zip && mv buck2-prelude-main prelude
+	buck2 clean
+	echo "" > "$DIR/.buckconfig"
+	echo "" > "$DIR/BUCK"
+}
+
+
+#platform/c_cpp/checks.sh
+# The c compiler
+MY_CC=
+# The c++ compiler
+MY_CPP=
+# The static library archiver
+MY_AR=
+
+# The list of #define(s) to be declared post a configuration check succeeds
+define_=
+# The error message to be displayed in case of a configuration check failure
+error_=
+
+COUNT=0
+# The platform setup variable identifying the #defines include header file
+DEFS_FILE=$DIR/.shellb/.AppDefs.h
+# All the #define preprocessor macros defined 
+ALL_DEFS=
+# The list of all library paths to be used during shared library builds
+LPATHS=
+# Unused
+LPATHSQ=
+# The list of all libraries to be used during shared library builds
+LIBS=
+# The list of all include directories to be used during compilation
+INCS=
+INCSQ=
+PINCSQ=
+PINCSD=
+# The c compiler flags for build
+CFLAGS=
+# The c++ compiler flags for build
+CPPFLAGS=
+# The linker flags for build
+LFLAGS=
+# The standard shared library extension
+SHLIB_EXT="so"
+# The standard static library extension
+STLIB_EXT="a"
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+	SHLIB_EXT="dylib"
+fi
+
+test_c_code_=$(cat <<-END
+#include "INC_FILE"
+int main() {return 0;}
+END
+)
+test_func_code_=$(cat <<-END
+#include <assert.h>
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char FUNC_NAME();
+
+#if _MSC_VER && !__INTEL_COMPILER
+    #pragma function(accept4)
+#endif
+
+int main(void) {
+#if defined (__stub_accept4) || defined (__stub___accept4)
+  fail fail fail
+#else
+  FUNC_NAME();
+#endif
+
+  return 0;
+}
+END
+)
+test_lib_code_=$(cat <<-END
+int main() {return 0;}
+END
+)
+
+# The additional set of directores to be considered as include/library paths
+EX_DIR=
+# Are we building c or c++ files
+BUILD_TYPE=c
+
+# Add #define macros, will be passed to the $DEFS_FILE or passed as a compiler flag (-D)
+function add_def() {
+	if [ "$1" = "" ]
+	then
+		echo "Invalid defines"
+	fi
+	for ((i = 1; i <= $#; i++ ))
+	do
+		s_def=$(sanitize_var ${!i})
+		if [ "${!i}" = "$s_def" ]
+		then
+			if [[ $ALL_DEFS != *";${!i};"* ]]; then
+				ALL_DEFS+=";${!i};"
+				eval "$(sanitize_var ${!i})"='1'
+				if [ -f "$DEFS_FILE" ]; then
+					echo "#define ${!i} 1" >> $DEFS_FILE
+				else
+					CFLAGS+="-D$1=1 "
+					CPPFLAGS+="-D$1=1 "
+				fi
+			fi
+		else
+			echo "Invalid defines ${!i}"
+			exit 1
+		fi
+	done
+}
+
+# Specify library path to be used during linking
+function add_lib_path() {
+	for ((i = 1; i <= $#; i++ ))
+	do
+		if [ "${!i}" != "" ] && [ -d "${!i}" ]
+		then
+			if [[ $LPATHS != *"-L${!i} "* ]]; then
+				LPATHS+="-L${!i} "
+				LPATHSQ+="\"-L${!i}\","
+			fi
+		else
+			echo "Skipping invalid library path ${!i}"
+		fi
+	done
+}
+
+# Specify library to be used during linking
+function add_lib() {
+	for ((i = 1; i <= $#; i++ ))
+	do
+		if [ "${!i}" != "" ]
+		then
+			if [[ $LIBS != *"-l${!i} "* ]]; then
+				if [[ "${!i}" =~ ^-l ]]; then
+					LIBS+="${!i} "
+					LPATHSQ+="\"${!i}\","
+				else
+					LIBS+="-l${!i} "
+					LPATHSQ+="\"-l${!i}\","
+				fi
+			fi
+		else
+			: #echo "Skipping invalid library name ${!i}"
+		fi
+	done
+}
+
+# Specify include path to be used during compilation
+function add_inc_path() {
+	for ((i = 1; i <= $#; i++ ))
+	do
+		if [ "${!i}" != "" ] && [ -d "${!i}" ]
+		then
+			if [[ $INCS != *"-I${!i} "* ]]; then 
+				INCS+="-I${!i} "
+				INCSQ+="${!i},"
+				if [[ ${!i} != "/"* ]]; then
+					PINCSD="\"-I${!i}\","
+				fi
+			fi
+		else
+			echo "skipping invalid include path ${!i}"
+		fi
+	done
+}
+
+# Specify c flags for compilation
+function c_flags() {
+	if [ "$1" = "" ]
+	then
+		: #echo "Skipping invalid c compiler flags"
+	fi
+	CFLAGS+="$1 "
+}
+
+# Specify c++ flags for compilation
+function cpp_flags() {
+	if [ "$1" = "" ]
+	then
+		: #echo "skipping invalid c++ compiler flags"
+	else
+		CPPFLAGS+="$1 "
+		if [ "$BUILD_SYS" != "buck2" ]; then
+			PINCSQ+="\"$1\","
+		fi
+	fi
+}
+
+function l_flags() {
+	if [ "$1" = "" ]
+	then
+		: #echo "skipping invalid linker flags"
+	else
+		LFLAGS+="$1"
+		LPATHS+="$1 "
+		LPATHSQ+="\"$1\","
+	fi
+}
+
+# Check whether a macro is defined
+function defined() {
+	if [ "$1" != "" ] && [[ $ALL_DEFS == *";$1;"* ]]; then return; fi
+	false
+}
+
+# Find a valid c++ compiler, c compiler and archiver and set the required variable
+function finc_cpp_compiler() {
+	BUILD_TYPE=cpp
+	err_=
+	if [ "$1" = "" ]; then err_="$1"; fi
+	MY_CC=$(find_cmd c "$err [c compiler not found]" clang gcc c)
+	if [ "$MY_CC" != "" ]; then echo "c compiler found $MY_CC"; fi
+	MY_CPP=$(find_cmd c++ "$err [c++ compiler not found]" clang++ g++ c++)
+	if [ "$MY_CPP" != "" ]; then echo "c++ compiler found $MY_CPP"; fi
+	MY_AR=$(find_cmd ar "$err [ar not found]" ar)
+	if [ "$MY_AR" != "" ]; then echo "static library archiver found $MY_AR"; fi
+}
+
+# Find a valid c compiler and archiver and set the required variable
+function finc_c_compiler() {
+	MY_CC=$(find_cmd c "$err [c compiler not foun]" clang gcc c)
+	if [ "$MY_CC" != "" ]; then echo "c compiler found $MY_CC"; fi
+	MY_AR=$(find_cmd ar "$err [ar not found]" ar)
+	if [ "$MY_AR" != "" ]; then echo "static library archiver found $MY_AR"; fi
+}
+
+function c_init() {
+	b_init
+	define_=$2
+	error_=$3
+	EX_DIR1=$4
+	EX_DIR2=$5
+	pushd .shellb > /dev/null
+}
+
+function c_finalize() {
+	if [ ! -z "$COUNT" ] && [ $COUNT -eq 0 ]
+	then
+		for i in ${define_//,/ }
+		do
+			add_def "$i"
+		done
+		echo "success " >> $configs_log_file
+		popd > /dev/null
+		return
+	else
+		if [ "$error_" != "" ]
+		then
+			echo "error: $error_" >> $configs_log_file
+		else
+			echo "error " >> $configs_log_file
+		fi
+		popd > /dev/null
+		false
+	fi
+	#showprogress 3
+}
+
+# Check whether a c include file exists and can be compiled
+function c_hdr() {
+	c_init "$@"
+	echo "\$ c_init $@" >> $configs_log_file
+	printf "$test_c_code_\n" > ./.test.c
+	sed -i'' -e "s|INC_FILE|$1|g" .test.c
+	b_test cc .test.c
+	if c_finalize; then return; fi
+	false
+}
+
+# Check whether a c library file exists and can be used for linking
+function c_lib() {
+	c_init "$@"
+	echo "\$ c_lib $@" >> $configs_log_file
+	printf "$test_lib_code_\n" > ./.testlib.c
+	b_test cccl .testlib.c "$1"
+	if c_finalize; then return; fi
+	false
+}
+
+# Check whether a c include file exists and can be compiled &
+# Check whether a c library file exists and can be used for linking
+function c_hdr_lib() {
+	c_init "$@"
+	define_=$3
+	error_=$4
+	EX_DIR1=$5
+	EX_DIR2=$6
+	echo "\$ c_hdr_lib $@" >> $configs_log_file
+	printf "$test_c_code_\n" > ./.testlibhdr.c
+	sed -i'' -e "s|INC_FILE|$1|g" .testlibhdr.c
+	b_test cccl .testlibhdr.c "$2"
+	if c_finalize; then return; fi
+	false
+}
+
+# Check whether the c code can be compiled
+function c_code() {
+	c_init "$@"
+	echo "\$ c_code $@" >> $configs_log_file
+	printf "$1\n" > ./.testcode.c
+	b_test cc .testcode.c
+	if c_finalize; then return; fi
+	false
+}
+
+# Check whether the c function is availabe
+function c_func() {
+	c_init "$@"
+	echo "\$ c_func $@" >> $configs_log_file
+	printf "$test_func_code_\n" > ./.testfunc.c
+	sed -i'' -e "s|FUNC_NAME|$1|g" .testfunc.c
+	b_test cccl .testfunc.c
+	if c_finalize; then return; fi
+	false
+}
+
+# Check whether a c++ include file exists and can be compiled
+function cpp_hdr() {
+	c_init "$@"
+	echo "\$ cpp_hdr $@" >> $configs_log_file
+	printf "$test_c_code_\n" > ./.test.cpp
+	sed -i'' -e "s|INC_FILE|$1|g" .test.cpp
+	b_test cppc .test.cpp
+	if c_finalize; then return; fi
+	false
+}
+
+# Check whether a c++ library file exists and can be used for linking
+function cpp_lib() {
+	c_init "$@"
+	echo "\$ cpp_lib $@" >> $configs_log_file
+	printf "$test_lib_code_\n" > ./.testlib.cpp
+	b_test cppccppl .testlib.cpp "$1"
+	if c_finalize; then return; fi
+	false
+}
+
+# Check whether a c++ include file exists and can be compiled &
+# Check whether a c++ library file exists and can be used for linking
+function cpp_hdr_lib() {
+	c_init "$@"
+	define_=$3
+	error_=$4
+	EX_DIR1=$5
+	EX_DIR2=$6
+	echo "\$ cpp_hdr_lib $@" >> $configs_log_file
+	printf "$test_c_code_\n" > ./.testlibhdr.cpp
+	sed -i'' -e "s|INC_FILE|$1|g" .testlibhdr.cpp
+	b_test cppccppl .testlibhdr.cpp "$2"
+	if c_finalize; then return; fi
+	false
+}
+
+# Check whether the c++ code can be compiled
+function cpp_code() {
+	c_init "$@"
+	echo "\$ cpp_code $@" >> $configs_log_file
+	printf "$1\n" > ./.testcode.cpp
+	b_test cppc .testcode.cpp
+	if c_finalize; then return; fi
+	false
+}
+
+
+
+#platform/c_cpp/build.sh
+all_objs_=
+all_absobjs_=
+src_=
+l_paths=
+
+function b_init() {
+	#echo $MY_CC
+	:
+}
+
+function b_test() {
+	incs_=$INCS
+	incsq_=$INCSQ
+	libs_=$LPATHS
+	if [ "$EX_DIR1" != "" ] && [ -d "$EX_DIR1" ] && [ "$EX_DIR2" != "" ] && [ -d "$EX_DIR2" ]; then
+		if [ "$1" = "cccl" ] || [ "$1" = "cppccppl" ]; then
+			incs_+="-I$EX_DIR1 "
+			incsq_+="$EX_DIR1,"
+			libs_+="-L$EX_DIR2 "
+		elif [ "$1" = "cc" ] || [ "$1" = "cppc" ]; then
+			incs_+="-I$EX_DIR1 "
+			incsq_+="$EX_DIR1,"
+		elif [ "$1" = "cl" ] || [ "$1" = "cppl" ]; then
+			libs_+="-L$EX_DIR2 "
+		fi
+	elif [ "$EX_DIR1" != "" ] && [ -d "$EX_DIR1" ]; then
+		if [ "$1" = "cc" ] || [ "$1" = "cppc" ]; then
+			incs_+="-I$EX_DIR1 "
+			incsq_+="$EX_DIR1,"
+		elif [ "$1" = "cl" ] || [ "$1" = "cppl" ]; then
+			libs_+="-L$EX_DIR1 "
+		fi
+	elif [ "$EX_DIR2" != "" ] && [ -d "$EX_DIR2" ]; then
+		if [ "$1" = "cc" ] || [ "$1" = "cppc" ]; then
+			incs_+="-I$EX_DIR2 "
+			incsq_+="$EX_DIR2,"
+		elif [ "$1" = "cl" ] || [ "$1" = "cppl" ]; then
+			libs_+="-L$EX_DIR2 "
+		fi
+	fi
+	out_=$(echo ${2} | sed -e "s|[^a-zA-Z0-9]||g")
+	lib_=
+	if [ "$3" != "" ]; then lib_="-l$3"; fi
+	if [ "$1" = "cc" ]; then
+		COUNT=$(${MY_CC} -o $out_.o -c ${CFLAGS} $incs_ $2 2>&1|grep "error"|wc -l)
+	elif [ "$1" = "cl" ]; then
+		COUNT=$(${MY_CC} -o ${out_}.inter ${out_}.o $libs_ ${lib_} 2>&1|grep "error"|wc -l)
+	elif [ "$1" = "cccl" ]; then
+		COUNT=$(${MY_CC} -o ${out_}.o -c ${CFLAGS} $incs_ $2 2>&1|grep "error"|wc -l)
+		COUNT=$(${MY_CC} -o ${out_}.inter ${out_}.o $libs_ ${lib_} 2>&1|grep "error"|wc -l)
+	elif [ "$1" = "cppc" ]; then
+		COUNT=$(${MY_CPP} -o ${out_}.o -c ${CPPFLAGS} $incs_ $2 2>&1|grep "error"|wc -l)
+	elif [ "$1" = "cppl" ]; then
+		COUNT=$(${MY_CPP} -o ${out_}.inter ${out_}.o $libs_ ${lib_} 2>&1|grep "error"|wc -l)
+	elif [ "$1" = "cppccppl" ]; then
+		COUNT=$(${MY_CPP} -o ${out_}.o -c ${CPPFLAGS} $incs_ $2 2>&1|grep "error"|wc -l)
+		COUNT=$(${MY_CPP} -o ${out_}.inter ${out_}.o $libs_ ${lib_} 2>&1|grep "error"|wc -l) 
+	fi
+
+	if [ ! -z "$COUNT" ] && [ $COUNT -eq 0 ]; then
+		if [[ $INCS != *"$incs_"* ]]; then 
+			INCS=$incs_
+			INCSQ=$incsq_
+		fi
+		if [[ $LPATHS != *"$libs_"* ]]; then LPATHS=$libs_; fi
+		if [ "$3" != "" ]; then add_lib "$3"; fi
+	fi
+}
+
+# Generate a static library artifact
+function b_static_lib() {
+	prog="$1"
+	out_file="$2"
+	pushd "$SB_OUTDIR" > /dev/null
+	#echo `pwd`
+	exe "" ${prog} rcs .bin/${out_file} ${all_objs_}
+	popd > /dev/null
+}
+
+# Generate a shared library artifact
+function b_shared_lib() {
+	prog="$1"
+	out_file="$2"
+	deps="$3"
+	pushd "$SB_OUTDIR" > /dev/null
+	#echo `pwd`
+	if defined "OS_DARWIN"; then
+		exe "" ${prog} -dynamiclib -L.bin/ $LPATHS ${all_objs_} -o .bin/${out_file} $deps
+	else
+		exe "" ${prog} -shared -L.bin/ $LPATHS ${all_objs_} -o .bin/${out_file} $deps
+	fi
+	popd > /dev/null
+}
+
+# Generate a binary artifact
+function b_binary() {
+	prog="$1"
+	out_file="$2"
+	deps="$3"
+	pushd "$SB_OUTDIR" > /dev/null
+	exe ""  ${prog} -L.bin/ $LPATHS ${all_objs_} -o .bin/${out_file} $deps
+	popd > /dev/null
+}
+
+bg_pids=""
+# Compile a single file usign the said flags and skip andy exclude directories/files
+function _b_compile_single() {
+	file="$1"
+	if [ "$file" = "" ]; then
+		return
+	fi
+	tincs="$2"
+	if [ ! -z "$IS_RUN" ] && [ "$IS_RUN" -eq 0 ]; then
+		echo "Got kill signal...shutting down...";
+		exit 1
+	fi
+	fdir="$(dirname "${file}")"
+	ffil="$(basename "${file}")"
+	ofln=$ffil
+	if [[ ${EXC_SRC} == *";$fdir;"* ]]; then
+		#echo "Skipping file ${file}..."
+		return
+	fi
+	if [[ ${EXC_FLS} == *";$fdir/$ffil;"* ]]; then
+		#echo "Skipping file ${file}..."
+		return
+	fi
+
+	if [ "$BUILD_SYS" = "bazel" ]; then
+		BZL_SRCES+="\"$file\","
+		if [[ $file == *".h" ]] || [[ $file == *".hh" ]] || [[ $file == *".hpp" ]]; then
+			BZL_HDRS+="\"$file\","
+		fi
+		return
+	elif [ "$BUILD_SYS" = "buck2" ]; then
+		if [[ $file == *".h" ]] || [[ $file == *".hh" ]] || [[ $file == *".hpp" ]]; then
+			BCK2_HDRS+="\"$file\","
+		else
+			BCK2_SRCES+="\"$file\","
+		fi
+		return
+	fi
+
+	count=$((count+1))
+	fdir=$(remove_relative_path ${fdir})
+	if [ ! -d "$SB_OUTDIR/${fdir}" ];then
+		mkdir -p "$SB_OUTDIR/${fdir}"
+	fi
+	ffil="$fdir/$ffil"
+	#mkdir -p -- "$(dirname -- "$file")"
+	
+	cflags_=
+	if [ "$BUILD_TYPE" = "cpp" ]; then
+		cflags_="${CPPFLAGS}";
+	else
+		cflags_="${CFLAGS}";
+	fi
+	if [[ "$ffil" =~ ^./ ]]; then
+		ffil=$(echo "${ffil#./}")
+	fi
+
+	sbdir_="$SB_OUTDIR/"
+	if [[ "$sbdir_" = "./" ]]; then
+		sbdir_=""
+	fi
+	add_fpic=
+	chkfil=
+	if [ "$isshared" = 1 ]; then 
+		add_fpic="-fPIC"
+		all_objs_+="${ffil}.fo "
+		all_absobjs_+="${sbdir_}${ffil}.fo "
+		chkfil="${sbdir_}${ffil}.fo"
+	else
+		all_objs_+="${ffil}.o "
+		all_absobjs_+="${sbdir_}${ffil}.o "
+		chkfil="${sbdir_}${ffil}.o"
+	fi	
+	if [ ! -f "$chkfil" ]; then
+		bexe "Compiling ${file}..." ${compiler} -MD -MP -MF "${sbdir_}${ffil}.d" ${add_fpic} -c ${cflags_} ${tincs} -o ${chkfil} ${file}
+		showprogress 1 "${ofln}"
+	else
+		showprogress 1 "${ofln}"
+	fi
+	if [ "$count" = "$NUM_CPU" ]; then
+		wait_bexe
+		count=0
+	fi
+}
+
+count=0
+isshared=1
+srces_=
+files=
+total_srces_=
+# The compilation function, also creates dependency files and tracks whether to compile the file 
+# or not based on the file modified datetime
+function b_prepare_sources() {
+	compiler="$1"
+	src_="$2"
+	ext="$3"
+	includes=
+	sources="$5"
+	exe_key="$6"
+	tincs="$INCS"
+	tincsq="$PINCSQ"
+
+	srces_=
+	files=
+	if [ "$sources" = "" ]; then
+		for ex_ in ${ext//,/ }
+		do
+			if [ "$ex_" != "" ]; then
+				srces_+=$(find ${src_} -type f -name "$ex_" -print|xargs ls -ltr|awk '{print $9"|"$6$7$8}')
+				srces_+=$'\n'
+				files+=$(find ${src_} -type f -name "$ex_")
+				files+=$'\n'
+			fi
+		done
+	else
+		sources_=(${sources//,/ })
+		srces_=$(find ${sources_} -type f -print|xargs ls -ltr|awk '{print $9"|"$6$7$8}')
+	fi
+
+	if [ "$BUILD_SYS" = "bazel" ] || [ "$BUILD_SYS" = "buck2" ]; then
+		for idir in ${4//,/ }
+		do
+			for ex_ in ${ext//,/ }
+			do
+				if [ "$ex_" != "" ]; then
+					srces_+=$(find ${idir} -type f -name "$ex_" -print|xargs ls -ltr|awk '{print $9"|"$6$7$8}')
+					srces_+=$'\n'
+					files+=$(find ${idir} -type f -name "$ex_")
+					files+=$'\n'
+				fi
+			done
+		done
+	fi
+
+	kvset "SH_$(get_key $exe_key)" "$srces_"
+	total_srces_=$(cat $KV_USER_DIR/SH_$(get_key $exe_key)|wc -l)
+}
+function b_compile() {
+	compiler="$1"
+	src_="$2"
+	ext="$3"
+	includes=
+	sources="$5"
+	exe_key="$6"
+	tincs="$INCS"
+	tincsq="$PINCSQ"
+	
+	if [ "$sources" != "" ]; then
+		sources_=(${sources//,/ })
+	fi
+	if [ "$4" = "" ] && [ "$src_" != "" ]; then
+		includes=$(find ${src_} -type f \( -name '*.h' -o -name '*.hh' -o -name '*.hpp' \) | sed -r 's|/[^/]+$||' |sort |uniq); 
+	elif [ "$4" != "" ]; then
+		for idir in ${4//,/ }
+		do
+			if [ ! -z "$IS_RUN" ] && [ "$IS_RUN" -eq 0 ]; then echo "got kill signal...shutting down..."; wait; exit 1; fi
+			if [[ ${EXC_SRC} == *";$idir;"* ]]; then
+				continue
+			fi
+			tincs+="-I$idir "
+			tincsq+="\"-I$idir\","
+		done
+	fi
+	
+	#src_=$(remove_relative_path ${src_})
+	#if [ ! -d "$SB_OUTDIR/${src_}" ];then
+	#	mkdir -p $SB_OUTDIR/${src_}
+	#fi
+	#echo "${EXC_SRC}"
+	if [ "$includes" != "" ]; then
+		while IFS= read -r idir
+		do
+			if [ ! -z "$IS_RUN" ] && [ "$IS_RUN" -eq 0 ]; then echo "got kill signal...shutting down..."; wait; exit 1; fi
+			if [[ ${EXC_SRC} == *";$idir;"* ]]; then
+				continue
+			fi
+			tincs+="-I$idir "
+			tincsq+="\"-I$idir\","
+		done <<< "$includes"
+	fi
+	if [ "$4" = "" ]; then 
+		INCS=$tincs 
+		PINCSQ=$tincsq
+	fi
+	#echo "$tincs"
+	#echo "Count: $(echo -n "$1" | wc -l)"
+	all_objs_=
+	all_absobjs_=
+	count=0
+	
+	if [ "$sources" = "" ]; then
+		while IFS= read -r file
+		do
+			if [ "$file" != "" ]; then
+				_b_compile_single "$file" "$tincs"
+			fi
+		done <<< "$files"
+	else
+		for file in ${sources//,/ }
+		do
+			if [ "$file" != "" ]; then
+				_b_compile_single "$file" "$tincs"
+			fi
+		done
+	fi
+	if [ ! -z "$count" ] && [ "$count" -gt 0 ]; then
+		wait_bexe
+	fi
+	#if [ "$BUILD_SYS" = "bazel" ]; then
+	#	BZL_SRCES="$BZL_SRCES"
+	#elif [ "$BUILD_SYS" = "buck2" ]; then
+	#	BCK2_SRCES="$BCK2_SRCES"
+	#fi
+	#echo $all_objs_
+}
+
+# Build the provided include directories & source files and generate requested artifacts (c_cpp specific only)
+function set_inc_src_files() {
+	if [ "$SB_OUTDIR" = "" ]; then echo "Please set output directory first..." && exit 1; fi
+
+	inc_="$1"
+	srces_="$2"
+	src_out_="$3"
+	src_deps_="$4"
+	shift
+	shift
+	set_src "" "$src_out_" "$src_deps_" "$inc_" "$srces_"
+}
+
+# Build the provided include directories & source directories and generate requested artifacts (c_cpp specific only)
+function set_inc_src() {
+	if [ "$SB_OUTDIR" = "" ]; then echo "Please set output directory first..." && exit 1; fi
+	
+	inc_="$1"
+	src_="$2"
+	src_out_="$3"
+	src_deps_="$4"
+	shift
+	set_src "$src_" "$src_out_" "$src_deps_" "$inc_"
+}
+
+function do_set_src() {
+	if [ "$SB_OUTDIR" = "" ]; then echo "Please set output directory first..." && exit 1; fi
+	
+	src_="$1"
+	src_out_="$2"
+	src_deps_="$3"
+	src_incs_="$4"
+	src_files_="$5"
+	
+	if [ "$1" = "" ] && [ "$src_files_" = "" ]
+	then
+		echo "Blank source directory provided ----"
+		exit 1;
+	fi
+
+	if [ ! -d "$src_" ]; then
+		if [ "$src_files_" = "" ]; then
+			echo "Invalid source directory $src_"
+			exit 1;
+		fi
+	fi
+	
+	if [ "$src_out_" = "" ]; then
+		echo "Build artifact name cannot be empty"
+		exit 1;
+	fi
+	src_type="${src_out_:0:7}"
+	if [[ "$src_type" != "binary:" ]] && [[ "$src_type" != "shared:" ]] && [[ "$src_type" != "static:" ]] && [[ "$src_type" != "stared:" ]]; then
+		echo "Invalid Build output format [$src_out_], should be of format (binary|static|shared|stared):<name>"
+		exit 1;
+	fi
+
+	if [ "$src_files_" != "" ]; then
+		for sf_ in ${src_files_//,/ }
+		do
+			if [ ! -f "$sf_" ]; then
+				echo "Non-existant source file specified...$sf_"
+			fi
+		done
+	fi
+
+	if [ ! -z "$IS_RUN" ] && [ "$IS_RUN" -eq 0 ]; then echo "Got kill signal...shutting down shellb..."; exit 1; fi
+	do_build "$src_" "$src_out_" "$src_deps_" "$src_incs_" "$src_files_"
+}
+
+function do_build() {
+	if [ "$BUILD_TYPE" = "cpp" ]; then 
+		b_cpp_build "$@"
+	else 
+		b_c_build "$@"
+	fi
+}
+
+# Trigger a c build, first compilation and then followed by static library/shared library/binary creation
+function b_c_build() {
+	type_=${2%:*}
+	if [ "$type_" = "static" ] || [ "$type_" = "stared" ] || [ "$type_" = "binary" ]; then
+		isshared=0
+	else
+		isshared=1
+	fi
+
+	percent_denom=$((percent_denom+5))
+	if [ "$type_" = "stared" ]; then
+		percent_denom=$((percent_denom+5))
+	fi
+
+	ext__="*.c"
+	if [ "$BUILD_SYS" = "bazel" ]; then
+		BZL_SRCES=""
+		BZL_HDRS=""
+		#PINCSQ="$PINCSD"
+		ext__="*.c,*.h,*.hpp,*.hh"
+	elif [ "$BUILD_SYS" = "buck2" ]; then
+		BCK2_SRCES=""
+		BCK2_HDRS=""
+		#PINCSQ="$PINCSD"
+		ext__="*.c,*.h,*.hpp,*.hh"
+	fi
+
+	b_prepare_sources "${MY_CC}" "$1" "$ext__" "$4" "$5" "$2"
+	percent_denom=$((percent_denom+total_srces_))
+
+	if [ "$type_" = "stared" ]; then
+		percent_denom=$((percent_denom+total_srces_))
+	fi
+
+	#echo "$total_srces_ - $percent_numer of $percent_denom"
+
+	if [ "$is_init_progress_done" = 0 ]; then
+		#for do_config
+		showprogress 5 "Config Setup..."
+
+		#for do_config
+		showprogress "$percent_checks" "Config Checks..."
+
+		is_init_progress_done=1
+	fi
+
+	b_compile "${MY_CC}" "$1" "$ext__" "$4" "$5" "$2"
+	
+	if [ "$type_" = "" ]; then
+		echo "Please specify Build output type, static, shared, stared or binary)"
+		exit 1
+	fi
+	deps=
+	elibs=
+	for ilib in ${3//,/ }
+	do
+		if [ "$ilib" != "" ]; then 
+			if [ "$BUILD_SYS" = "emb" ]; then
+				deps+="-l$ilib "
+			else
+				elibs+="\"-l$ilib\","
+				tmp=$(get_key $ilib)
+				tmp=$(kvget "BN_$tmp")
+				if [ "$tmp" = "" ]; then
+					deps+="\"$ilib\","
+				else
+					deps+="\"$tmp\","
+					if [ "$BUILD_SYS" = "bazel" ]; then
+						tmp=$(get_key $ilib-inc)
+						tmp=$(kvget "BN_$tmp")
+						deps+="\"$tmp\","
+					fi
+				fi
+			fi
+		fi
+		: #echo "dependency -- $ilib"
+	done
+
+	out_file_="${2#*:}"
+	l_paths+="-L$bld_src "
+
+	if [ "$BUILD_SYS" = "bazel" ]; then
+		BZL_SRC_NAME="$out_file_"
+		bzl_gen_build_file "$1" "$type_" "$deps" "$elibs" "$4"
+		return
+	elif [ "$BUILD_SYS" = "buck2" ]; then
+		BCK2_SRC_NAME="$out_file_"
+		bck2_gen_build_file "$1" "$type_" "$deps" "" "$4"
+		return
+	fi
+	#Use the below key/value pair to add exact lib file path to the dependent lpaths
+	#kvset "SH_$(get_key $out_file_)" "$bld_src"
+	if [ "$type_" != "binary" ]; then 
+		out_file_="lib${out_file_}"; 
+	fi
+
+	if [ "$type_" = "static" ]; then
+		b_static_lib "${MY_AR}" "${out_file_}.${STLIB_EXT}" "$LIBS$deps"
+		showprogress 5 "${out_file_}.${STLIB_EXT}.."
+	elif [ "$type_" = "binary" ]; then
+		b_binary "${MY_CC}" "${out_file_}" "$LIBS$deps"
+		showprogress 5 "${out_file_}.."
+	elif [ "$type_" = "shared" ]; then
+		b_shared_lib "${MY_CC}" "${out_file_}.${SHLIB_EXT}" "$LIBS$deps"
+		showprogress 5 "${out_file_}.${SHLIB_EXT}.."
+	elif [ "$type_" = "stared" ]; then
+		b_static_lib "${MY_AR}" "${out_file_}.${STLIB_EXT}" "$LIBS$deps"
+		showprogress 5 "${out_file_}.${STLIB_EXT}.."
+		rm -f ${all_absobjs_}
+		isshared=1
+		b_compile "${MY_CC}" "$1" "$ext__" "$4" "$5" "$2"
+		b_shared_lib "${MY_CC}" "${out_file_}.${SHLIB_EXT}" "$LIBS$deps"
+		showprogress 5 "${out_file_}.${SHLIB_EXT}.."
+	fi
+}
+
+is_init_progress_done=0
+# Trigger a c++ build, first compilation and then followed by static library/shared library/binary creation
+function b_cpp_build() {
+	type_=${2%:*}
+	if [ "$type_" = "static" ] || [ "$type_" = "stared" ] || [ "$type_" = "binary" ]; then
+		isshared=0
+	else
+		isshared=1
+	fi
+
+	percent_denom=$((percent_denom+5))
+	if [ "$type_" = "stared" ]; then
+		percent_denom=$((percent_denom+5))
+	fi
+
+	ext__="*.cpp"
+	if [ "$BUILD_SYS" = "bazel" ]; then
+		BZL_SRCES=""
+		BZL_HDRS=""
+		#PINCSQ="$PINCSD"
+		ext__="*.cpp,*.h,*.hpp,*.hh,*.cc,*.cxx"
+	elif [ "$BUILD_SYS" = "buck2" ]; then
+		BCK2_SRCES=""
+		BCK2_HDRS=""
+		#PINCSQ="$PINCSD"
+		ext__="*.cpp,*.h,*.hpp,*.hh,*.cc,*.cxx"
+	fi
+
+	b_prepare_sources "${MY_CPP}" "$1" "$ext__" "$4" "$5" "$2"
+	percent_denom=$((percent_denom+total_srces_))
+
+	if [ "$type_" = "stared" ]; then
+		percent_denom=$((percent_denom+total_srces_))
+	fi
+
+	#echo "$total_srces_ - $percent_numer of $percent_denom"
+
+	if [ "$is_init_progress_done" = 0 ]; then
+		#for do_config
+		showprogress 5 "Config Setup..."
+
+		#for do_config
+		showprogress "$percent_checks" "Config Checks..."
+
+		is_init_progress_done=1
+	fi
+	
+	b_compile "${MY_CPP}" "$1" "$ext__" "$4" "$5" "$2"
+
+	if [ "$type_" = "" ]; then
+		echo "Please specify Build output type, static, shared, stared or binary)"
+		exit 1
+	fi
+	deps=
+	elibs=
+	for ilib in ${3//,/ }
+	do
+		if [ "$ilib" != "" ]; then 
+			if [ "$BUILD_SYS" = "emb" ]; then
+				deps+="-l$ilib "
+			else
+				elibs+="\"-l$ilib\","
+				tmp=$(get_key $ilib)
+				tmp=$(kvget "BN_$tmp")
+				if [ "$tmp" = "" ]; then
+					deps+="\"$ilib\","
+				else
+					deps+="\"$tmp\","
+					if [ "$BUILD_SYS" = "bazel" ]; then
+						tmp=$(get_key $ilib-inc)
+						tmp=$(kvget "BN_$tmp")
+						deps+="\"$tmp\","
+					fi
+				fi
+			fi
+		fi
+		: #echo "dependency -- $ilib"
+	done
+
+	out_file_="${2#*:}"
+	l_paths+="-L$bld_src "
+
+	if [ "$BUILD_SYS" = "bazel" ]; then
+		BZL_SRC_NAME="$out_file_"
+		bzl_gen_build_file "$1" "$type_" "$deps" "$elibs" "$4"
+		return
+	elif [ "$BUILD_SYS" = "buck2" ]; then
+		BCK2_SRC_NAME="$out_file_"
+		bck2_gen_build_file "$1" "$type_" "$deps" "" "$4"
+		return
+	fi
+
+	#Use the below key/value pair to add exact lib file path to the dependent lpaths
+	#kvset "SH_$(get_key $out_file_)" "$bld_src"
+	if [ "$type_" != "binary" ]; then 
+		out_file_="lib${out_file_}"; 
+	fi
+
+	if [ "$type_" = "static" ]; then
+		#delete existing object files and compile without fpic 
+		b_static_lib "${MY_AR}" "${out_file_}.${STLIB_EXT}" "$LIBS$deps"
+		showprogress 5 "${out_file_}.${STLIB_EXT}.."
+	elif [ "$type_" = "binary" ]; then
+		b_binary "${MY_CPP}" "${out_file_}" "$LIBS$deps"
+		showprogress 5 "${out_file_}.."
+	elif [ "$type_" = "shared" ]; then
+		b_shared_lib "${MY_CPP}" "${out_file_}.${SHLIB_EXT}" "$LIBS$deps"
+		showprogress 5 "${out_file_}.${SHLIB_EXT}.."
+	elif [ "$type_" = "stared" ]; then
+		b_static_lib "${MY_AR}" "${out_file_}.${STLIB_EXT}" "$LIBS$deps"
+		showprogress 5 "${out_file_}.${STLIB_EXT}.."
+		#echo -e "rm -f ${all_absobjs_}"
+		#rm -f ${all_absobjs_}
+		isshared=1
+		b_compile "${MY_CPP}" "$1" "$ext__" "$4" "$5" "$2"
+		b_shared_lib "${MY_CPP}" "${out_file_}.${SHLIB_EXT}" "$LIBS$deps"
+		showprogress 5 "${out_file_}.${SHLIB_EXT}.."
+	fi
+}
+
+
+
+#shellb.sh
+# First find out the current directory  -- from a stackoverflow thread
+myreadlink() { [ ! -h "$1" ] && echo "$1" || (local link="$(expr "$(command ls -ld -- "$1")" : '.*-> \(.*\)$')"; cd $(dirname $1); myreadlink "$link" | sed "s|^\([^/].*\)\$|$(dirname $1)/\1|"); }
+whereis() { echo $1 | sed "s|^\([^/].*/.*\)|$(pwd)/\1|;s|^\([^/]*\)$|$(which -- $1)|;s|^$|$1|"; } 
+whereis_realpath() { local SCRIPT_PATH=$(whereis $1); myreadlink ${SCRIPT_PATH} | sed "s|^\([^/].*\)\$|$(dirname ${SCRIPT_PATH})/\1|"; } 
+DIR=$(dirname $(whereis_realpath "$0"))
+if [[ "$(type -t kv_echo_err)" == 'function' ]]; then
+	DIR=$(pwd)
+fi
+echo "Home directory is... $DIR"
+
+#Project name for bazel builds
+BUILD_PROJ_NAME=
+# Variable to define/control the target build system (embedded being the default)
+BUILD_SYS=emb
+
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+
+if [[ "$(type -t kv_echo_err)" == 'function' ]]; then
+	:
+else
+	. "$DIR/utils/kv-bash"
+fi
+if [[ "$(type -t sanitize_var)" == 'function' ]]; then
+	:
+else
+	. "$DIR/utils/commands.sh"
+fi
+
+if [ "$BUILD_SYS" = "bazel" ]; then
+	if [[ "$(type -t bzl_gen_build_file)" == 'function' ]]; then
+		:
+	else
+		. "$DIR/tools/bazel/bazel-util.sh"
+	fi
+fi
+
+if [ "$BUILD_SYS" = "buck2" ]; then
+	if [[ "$(type -t bck2_gen_build_file)" == 'function' ]]; then
+		:
+	else
+		. "$DIR/tools/buck2/buck2-util.sh"
+	fi
+fi
+
+# Trap SIGKILL signal -- execute stop function
+trap "stop" 2
+
+# Variable to define/control the target platform/language c_cpp being the default
+BUILD_PLATFORM=c_cpp
+
+# The list of source directories to exclude from the build
+EXC_SRC=
+
+# The list of source files to exclude from the build
+EXC_FLS=
+
+# The list of allowed configuration paramaters for the build
+ALLOWED_PARAMS=
+
+# The actual parameters passed to the build at runtime
+PARAMS=
+
+# The output build directory path
+SB_OUTDIR=
+
+# The output install directory path
+SB_INSDIR=
+
+# The OS type
+OS="$OSTYPE"
+
+# What level of logging do we need
+LOG_MODE=2
+
+# The number of identified #cpu's found in the machine
+NUM_CPU=1
+
+# The target platform or OS name (linux|darwin|bsd|cygwin|mingw|android..), aliases follow
+OS_NAME=
+OS_LINUX=
+OS_DARWIN=
+OS_BSD=
+OS_CYGWIN=
+OS_MINGW=
+
+# Do we continue execution or stop in case of a signal received
+IS_RUN=1
+
+percent_denom=0
+percent_numer=0
+percent_checks=0
+
+configs_log_file="$DIR/.shellb/checks.log"
+cmds_log_file="$DIR/.shellb/commands.log"
+
+# Update PATH and LD_LIBRARY_PATH to include /usr/local as well
+export PATH=/usr/local/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+
+# Directory to store kv-hash files -- key-value pairs
+KV_USER_DIR="$DIR/.shellb/.kv-bash"
+
+# Set the build output directory, if not found create it
+function set_out() {
+	if [ "$1" = "" ]
+	then
+		echo "Build output directory is mandatory..."
+		exit 1;
+	fi
+	if [ "$SB_OUTDIR" = "" ]; then
+		SB_OUTDIR=$1
+	fi
+	if [ ! -d "$SB_OUTDIR" ]
+	then
+		mkdir -p $SB_OUTDIR
+	fi
+	if [ ! -d "$SB_OUTDIR/.bin" ]
+	then
+		mkdir -p $SB_OUTDIR/.bin
+	fi
+}
+
+# Set the build install directory name, if it does not exist create it
+function set_install() {
+	if [ "$SB_OUTDIR" = "" ]; then echo "Please set output directory first..." && exit 1; fi
+	if [ "$1" = "" ]
+	then
+		echo "Blank install dir specified, any install commands won't work.."
+		#exit 1;
+	else
+		kv_validate_key "$1" || {
+			echo "Invalid install dir $1, should be a valid directory name"
+			exit 1;
+		}
+		SB_INSDIR="$1"
+		if [ -d "$SB_OUTDIR/$SB_INSDIR" ]; then rm -rf $SB_OUTDIR/$SB_INSDIR; fi
+		mkdir $SB_OUTDIR/$SB_INSDIR || true
+	fi
+}
+
+# Build the provided source files and generate requested artifacts
+function set_src_files() {
+	if [ "$SB_OUTDIR" = "" ]; then echo "Please set output directory first..." && exit 1; fi
+	
+	srces_="$1"
+	src_out_="$2"
+	src_deps_="$3"
+	src_incs_="$4"
+	shift
+	set_src "" "$src_out_" "$src_deps_" "$src_incs_" "$srces_"
+}
+
+# Build the provided source directories and generate requested artifacts
+function set_src() {
+	if [[ "$(type -t do_start)" == 'function' ]]; then
+		do_set_src "$@"
+	fi
+}
+
+# Exclude some source directories from build
+function set_exclude_src() {
+	for ((i = 1; i <= $#; i++ ))
+	do
+		if [ "${!i}" = "/*" ]
+		then
+			echo "Invalid exclude source directory ${!i}"
+			continue
+		fi
+		if [ "${!i}" != "" ] && [ -d "${!i}" ]
+		then
+			if [[ $EXC_SRC != *";${!i};"* ]]; 
+			then
+				srces_=`find "${!i}" -type d \( -name '.*' -prune -o -print \)`
+				while IFS= read -r idir
+				do
+					EXC_SRC+=";$idir;"
+				done <<< "$srces_"
+			else
+				:
+			fi
+		else
+			echo "Skipping invalid exclude source directory ${!i}"
+		fi
+	done
+}
+
+# Exclude some source files from build
+function set_exclude_files() {
+	for ((i = 1; i <= $#; i++ ))
+	do
+		if [ "${!i}" = "/*" ]
+		then
+			echo "Invalid exclude source file ${!i}"
+			continue
+		fi
+		if [ "${!i}" != "" ] && [ -f "${!i}" ]
+		then
+			if [[ $EXC_FLS != *";$1;"* ]]; then EXC_FLS+=";$1;"; fi
+		else
+			echo "skipping invalid exclude src file ${!i}"
+		fi
+	done
+}
+
+# Template a given file using the list of variables defined
+# #1 - template file path (file should contain variables to be replaced withs syntax --- @VAR@)
+# #2 - resultant file path -- assuming the directory path for the file is present, does not create parent directories
+# #3 - list of comma separated variables to be replaced
+function templatize() {
+	if [ "$1" != "" ] && [ -f "$1" ] && [ "$2" != "" ] && [ "$3" != "" ]
+	then
+		rm -f "$2" | true
+		cp -f "$1" "$2"
+		if [ "$2" != "" ]; then
+			for tv_ in ${3//,/ }
+			do
+				sed -i'' -e "s|@$tv_@|${!tv_}|g" "$2"
+			done
+		else
+			:
+		fi
+	else
+		echo "Skipping invalid template file $1"
+	fi
+}
+
+# If the configuration parameter passed allowed and is set to true
+function is_config() {
+	if [[ $PARAMS = *";$1=1;"* ]]; then
+		return
+	else
+		if [[ $ALLOWED_PARAMS = *";$1=1;"* ]]; then
+			return
+		else
+			false
+		fi
+	fi
+}
+
+# Handle the configuration information provided, parse it and update allowed parameter list
+# 'SOME_CONFIG|Some description for the config|1\n' 1|0 for true|false
+function handle_configs() {
+	if [ "$1" != "" ]; then
+		while IFS='\n' read -r con_
+		do
+			con_=(${con_// /_})
+			cp_=(${con_//|/ })
+			val_=0
+			if [ "${cp_[2]}" = "1" ] || [ "${cp_[2]}" = "yes" ] || [ "${cp_[2]}" = "true" ] || [ "${cp_[2]}" = "on" ]; then
+				val_=1
+			fi
+			if [[ $ALLOWED_PARAMS != *";${cp_[0]}=${val_};"* ]]; then ALLOWED_PARAMS+=";${cp_[0]}=${val_};"; fi
+		done <<< "$1"
+	fi
+}
+
+# Install the said files/directories to the install directory
+# #1 - Target subdirectory within the install directory
+# following arguments specify either,
+#    files to be installed
+#    directories to be installed
+#    "../path/to/source@*.sh,*.key,*.pem,*.crt" -- pattern after @ character for installing multiple files
+function install_here() {
+	if [ "$SB_INSDIR" = "" ]; then echo "Please set install directory first...using [set_install]" && exit 1; fi
+	if [[ "$1" != "." ]]; then
+		kv_validate_key "$1" || {
+			if ! [[ "$1" =~ "^." ]]; then
+				echo "Invalid install subdirectory $1, should be a valid directory name or ."
+				exit 1;
+			fi
+		}
+		ldir="$SB_OUTDIR/$SB_INSDIR/$1"
+	else
+		ldir="$SB_OUTDIR/$SB_INSDIR"
+	fi
+	
+	if [ ! -d "$ldir" ]; then
+		mkdir -p "$ldir"
+	fi
+	shift
+	for ((i = 1; i <= $#; i++ ))
+	do
+		if [[ "${!i}" = *"@"* ]]; then
+			var_="${!i}"
+			pth_="${var_%%@*}"
+			wld_="${var_#*@}"
+			if [ -d "$DIR/$pth_" ]; then
+				pth_="$DIR/$pth_"
+			elif [ -d "${!i}" ]; then
+				:
+			fi
+			(set -f
+				for ex in ${wld_//,/ } ; do
+					exe "" find $pth_ -type f -name "$ex" -exec cp "{}" "$ldir" \;
+				done
+			)
+		else
+			#fck_=$(remove_relative_path ${!i})
+			(set -f
+				if [ -f "$SB_OUTDIR/.bin/${!i}" ]; then
+					exe "" cp -f "$SB_OUTDIR/.bin/${!i}" "$ldir"
+				elif [ -d "$DIR/${!i}" ]; then
+					exe "" cp -rf "$DIR/${!i}" "$ldir"
+				elif [ -d "${!i}" ]; then
+					exe "" cp -rf "${!i}" "$ldir"
+				elif [ -f "$DIR/${!i}" ]; then
+					exe "" cp -f "$DIR/${!i}" "$ldir"
+				elif [ -f "${!i}" ]; then
+					exe "" cp -f "${!i}" "$ldir"
+				else
+					exe "" find $SB_OUTDIR/.bin/ -name "${!i}" -type f -exec cp "{}" "$ldir" \;
+				fi
+			)
+		fi
+	done
+	showprogress 3 "Installing..."
+}
+
+# Install the said files/directories to the install directory
+# #1 - Target subdirectory within the install directory
+# following arguments specify either,
+#    files to be installed
+#    directories to be installed
+#    "../path/to/source@*.sh,*.key,*.pem,*.crt" -- pattern after @ character for installing multiple files
+function install_mkdir() {
+	if [ "$SB_INSDIR" = "" ]; then echo "Please set install directory first...using [set_install]" && exit 1; fi
+	if [[ "$1" != "." ]]; then
+		kv_validate_key "$1" || {
+			if ! [[ "$1" =~ "^." ]]; then
+				echo "Invalid install subdirectory $1, should be a valid directory name or ."
+				exit 1;
+			fi
+		}
+		ldir="$SB_OUTDIR/$SB_INSDIR/$1"
+	else
+		ldir="$SB_OUTDIR/$SB_INSDIR"
+	fi
+	
+	if [ ! -d "$ldir" ]; then
+		mkdir -p "$ldir"
+	fi
+	showprogress 3 "Installing..."
+}
+
+# Display help for the configuration parameters
+function show_help() {
+	if [ "$1" != "" ]; then
+		echo $'Allowed configuration paramaters are,'
+		while IFS='\n' read -r con_
+		do
+			con_=(${con_// /_})
+			cp_=(${con_//|/ })
+			cd_=${cp_[1]//_/ }
+			val_="${cp_[0]} - [$cd_] [Default: "
+			if [ "${cp_[2]}" = "1" ] || [ "${cp_[2]}" = "yes" ] || [ "${cp_[2]}" = "true" ] || [ "${cp_[2]}" = "on" ]; then
+				val_+="enabled]"
+			else
+				val_+="disabled]"
+			fi
+			echo -e "  $val_"
+		done <<< "$1"
+		echo $'\n\n'
+	fi
+}
+
+# Trap SIGKILL handler function
+function stop() {
+	IS_RUN=0
+	#echo $BG_PIDS
+	for i in $BG_PIDS ; do
+		while kill -0 $i > /dev/null 2>&1
+		do
+			wait $i
+			BG_PIDS=$(echo ${BG_PIDS/$i /})
+		done
+	done
+}
+
+# Perform certain platform specific actions based on platform/build tool
+function trigger_build() {
+	if [ "$BUILD_SYS" = "bazel" ]; then
+		do_bazel_build "$@"
+	elif [ "$BUILD_SYS" = "buck2" ]; then
+		do_buck2_build "$@"
+	fi
+}
+
+# Perform certain platform specific actions based on platform/build tool
+function do_prebuild() {
+	if [ "$BUILD_SYS" = "bazel" ]; then
+		do_bazel_pre_build "$@"
+	elif [ "$BUILD_SYS" = "buck2" ]; then
+		do_buck2_pre_build "$@"
+	fi
+}
+
+# Start shellb build process
+# Requirements - bash, sed, printf, awk, find, grep, ls
+# A valid shellb script should contain following functions,
+#     do_setup - define/set build options 
+#     do_start - kick off the actual configuration checks and build process
+# Following functions are optional
+#     do_config - define the configuration parameters
+#     do_install - define the installation steps to create a resulting artifact
+function start() {
+	if [ "$BUILD_PLATFORM" = "c_cpp" ]; then
+		if [[ "$(type -t add_def)" == 'function' ]]; then
+			:
+		else
+			. "$DIR/platform/c_cpp/checks.sh"
+		fi
+		if [[ "$(type -t b_init)" == 'function' ]]; then
+			:
+		else
+			. "$DIR/platform/c_cpp/build.sh"
+		fi
+	fi
+
+	if [ "$1" != "" ]; then
+		bfile=
+		if [ -f "$1" ]; then 
+			bfile=$(remove_relative_path ${1})
+		elif [ -f "${1}.sh" ]; then 
+			bfile=$(remove_relative_path ${1}.sh)
+		fi
+		
+		if [ -f "$bfile" ]; then
+			if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+				OS_NAME="LINUX"
+				OS_LINUX=1
+				NUM_CPU=$(getconf _NPROCESSORS_ONLN)
+			elif [[ "$OSTYPE" == "darwin"* ]]; then
+				OS_NAME="DARWIN"
+				OS_DARWIN=1
+				NUM_CPU=$(getconf _NPROCESSORS_ONLN)
+			elif [[ "$OSTYPE" == "cygwin" ]]; then
+				OS_NAME="CYGWIN"
+				OS_CYGWIN=1
+				NUM_CPU=$(getconf _NPROCESSORS_ONLN)
+			elif [[ "$OSTYPE" == "msys" ]]; then
+				OS_NAME="MINGW"
+				OS_MINGW=1
+				NUM_CPU=$(getconf _NPROCESSORS_ONLN)
+			elif [[ "$OSTYPE" == "freebsd"* ]]; then
+				OS_NAME="BSD"
+				OS_BSD=1
+				NUM_CPU=$(getconf NPROCESSORS_ONLN)
+			else
+				OS_NAME="UNKNOWN"
+				NUM_CPU=$(getconf NPROCESSORS_ONLN)
+			fi
+
+			. "$bfile"
+
+			if [[ "$(type -t do_config)" == 'function' ]]; then
+				configs=$(do_config)
+				handle_configs "$configs"
+				percent_denom=$((percent_denom+5))
+			fi
+
+			if [[ "$(type -t do_start)" == 'function' ]]; then
+				code_chdr_=$(type -a do_start|grep "c_hdr"|wc -l)
+				code_clib_=$(type -a do_start|grep "c_lib"|wc -l)
+				code_cfunc_=$(type -a do_start|grep "c_func"|wc -l)
+				code_ccode_=$(type -a do_start|grep "c_code"|wc -l)
+				code_cpphdr_=$(type -a do_start|grep "cpp_hdr"|wc -l)
+				code_cpplib_=$(type -a do_start|grep "cpp_lib"|wc -l)
+				code_cppcode_=$(type -a do_start|grep "cpp_code"|wc -l)
+				percent_checks=$((code_chdr_+code_clib_+code_cfunc_+code_ccode_+code_cpphdr_+code_cpplib_+code_cppcode_))
+				percent_checks=$((percent_checks+percent_checks+percent_checks))
+				percent_denom=$((percent_denom+percent_checks))
+				#echo "$percent_checks"
+			fi
+
+			if [[ "$(type -t do_install)" == 'function' ]]; then
+				code_install_here_=$(type -a do_install|grep "install_here"|wc -l)
+				code_install_here_=$((code_install_here_+code_install_here_+code_install_here_))
+				percent_denom=$((percent_denom+code_install_here_))
+				#echo "$code_install_here_"
+			fi
+
+			if [ "$2" = "help" ]; then
+				show_help "$configs"
+				exit 0
+			fi
+
+			for ((i = 2; i <= $#; i++ ))
+			do
+				if [[ $PARAMS != *";${!i};"* ]]; then PARAMS+=";${!i};"; fi
+			done
+
+			rm -rf .shellb || true
+			mkdir .shellb
+
+			touch $configs_log_file
+			touch $cmds_log_file
+
+			do_setup
+			DEFS_FILE="$DIR/$DEFS_FILE"
+			if [ -f "$DEFS_FILE" ]; then
+				rm -f "$DEFS_FILE"
+			fi
+			touch "$DEFS_FILE"
+
+			if [ "$BUILD_SYS" = "bazel" ] || [ "$BUILD_SYS" = "buck2" ]; then
+				do_prebuild
+			fi
+
+			if [[ "$(type -t do_start)" == 'function' ]]; then
+				do_start
+			else
+				echo "Please provide a valid shellb script with a do_start function implementation"
+			fi
+			if [[ "$(type -t do_install)" == 'function' ]]; then
+				do_install
+			fi
+
+			#rm -rf .shellb
+			completeprogress "Finishing..."
+		fi
+	fi
+}
+
+start "$@"
