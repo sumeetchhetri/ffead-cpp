@@ -30,7 +30,7 @@ function do_start() {
 		wedbdir="${wedbdir##*/}"
 		minc_="../web/$wedbdir/include"
 		if [ "$BUILD_SYS" = "bazel" ]; then
-			minc_="${cwdir}${wedbdir}/include"
+			minc_="${cwdir}web/${wedbdir}/include"
 		fi
 		add_inc_path "$minc_"
 		if [ -f "../lib/lib${wedbdir}.${SHLIB_EXT}" ]; then
