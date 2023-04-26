@@ -35,8 +35,8 @@ public:
 		cl = PooledDistoCacheConnectionFactory::getConnection();
 		try {
 			cl->allocate(cacheKey, "queue");
-		} catch(const std::exception& err) {
-			if(err!="Entry already exists") {
+		} catch(const std::runtime_error& err) {
+			if(std::string(err.what())!="Entry already exists") {
 				throw err;
 			}
 		}

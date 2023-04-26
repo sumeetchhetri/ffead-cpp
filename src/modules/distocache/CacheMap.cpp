@@ -47,7 +47,7 @@ CacheMap::CacheMap() {
 void CacheMap::allocate(const std::string& cacheKey, const std::string& type) {
 	if(checkExistance(cacheKey))
 	{
-		throw ERR_ALLOCENTEXISTS;
+		throw std::runtime_error(ERR_ALLOCENTEXISTS);
 	}
 
 	void *entry = NULL;
@@ -77,7 +77,7 @@ void CacheMap::allocate(const std::string& cacheKey, const std::string& type) {
 	}
 	else
 	{
-		throw ERR_INVCONTAINER;
+		throw std::runtime_error(ERR_INVCONTAINER);
 	}
 	if(entry!=NULL)
 	{
@@ -102,7 +102,7 @@ void CacheMap::deallocate(const std::string& cacheKey) {
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 }
 
@@ -133,7 +133,7 @@ std::string CacheMap::getObjectEntryValue(const std::string& key) {
 	instance->objMapMutex.unlock();
 	if(error)
 	{
-		throw ERR_NOVALUEFOUND;
+		throw std::runtime_error(ERR_NOVALUEFOUND);
 	}
 	return value;
 }
@@ -151,7 +151,7 @@ void CacheMap::addMapEntry(const std::string& cacheKey, const std::string& key, 
 	}
 	else
 	{
-		throw ERR_NOTAMAPCONT;
+		throw std::runtime_error(ERR_NOTAMAPCONT);
 	}
 }
 
@@ -168,7 +168,7 @@ void CacheMap::removeMapEntry(const std::string& cacheKey, const std::string& ke
 	}
 	else
 	{
-		throw ERR_NOTAMAPCONT;
+		throw std::runtime_error(ERR_NOTAMAPCONT);
 	}
 }
 
@@ -228,12 +228,12 @@ void CacheMap::addCollectionEntry(const std::string& cacheKey, const std::string
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 }
 
@@ -264,13 +264,13 @@ std::string CacheMap::getMapEntryValue(const std::string& cacheKey, const std::s
 		}
 		else
 		{
-			throw ERR_NOVALUEFOUND;
+			throw std::runtime_error(ERR_NOVALUEFOUND);
 		}
 		instance->valueLocks[cacheKey]->unlock();
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 	return value;
 }
@@ -292,13 +292,13 @@ std::string CacheMap::getMapEntryValueByPosition(const std::string& cacheKey, co
 		}
 		else
 		{
-			throw ERR_INDGRTCONTSIZ;
+			throw std::runtime_error(ERR_INDGRTCONTSIZ);
 		}
 		instance->valueLocks[cacheKey]->unlock();
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 	return value;
 }
@@ -319,13 +319,13 @@ void CacheMap::setMapEntryValueByPosition(const std::string& cacheKey, const int
 		}
 		else
 		{
-			throw ERR_INDGRTCONTSIZ;
+			throw std::runtime_error(ERR_INDGRTCONTSIZ);
 		}
 		instance->valueLocks[cacheKey]->unlock();
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 }
 
@@ -391,20 +391,20 @@ void CacheMap::setCollectionEntryAt(const std::string& cacheKey, const int& posi
 		}
 		else if(type==QUEUE)
 		{
-			throw ERR_OPNOTSUPP;
+			throw std::runtime_error(ERR_OPNOTSUPP);
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 	if(error)
 	{
-		throw ERR_INDGRTCONTSIZ;
+		throw std::runtime_error(ERR_INDGRTCONTSIZ);
 	}
 }
 
@@ -490,20 +490,20 @@ std::string CacheMap::getCollectionEntryAt(const std::string& cacheKey, const in
 		}
 		else if(type==QUEUE)
 		{
-			throw ERR_OPNOTSUPP;
+			throw std::runtime_error(ERR_OPNOTSUPP);
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 	if(error)
 	{
-		throw ERR_INDGRTCONTSIZ;
+		throw std::runtime_error(ERR_INDGRTCONTSIZ);
 	}
 	return value;
 }
@@ -575,12 +575,12 @@ long CacheMap::size(const std::string& cacheKey) {
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 	return value;
 }
@@ -665,20 +665,20 @@ void CacheMap::removeCollectionEntryAt(const std::string& cacheKey, const int& p
 		}
 		else if(type==QUEUE)
 		{
-			throw ERR_OPNOTSUPP;
+			throw std::runtime_error(ERR_OPNOTSUPP);
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 	if(error)
 	{
-		throw ERR_INDGRTCONTSIZ;
+		throw std::runtime_error(ERR_INDGRTCONTSIZ);
 	}
 }
 
@@ -749,12 +749,12 @@ bool CacheMap::isEmpty(const std::string& cacheKey) {
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 	return value;
 }
@@ -815,12 +815,12 @@ void CacheMap::clear(const std::string& cacheKey) {
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 }
 
@@ -903,20 +903,20 @@ void CacheMap::insert(const std::string& cacheKey, const std::string& value, con
 		}
 		else if(type==QUEUE)
 		{
-			throw ERR_OPNOTSUPP;
+			throw std::runtime_error(ERR_OPNOTSUPP);
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 	if(error)
 	{
-		throw ERR_INDGRTCONTSIZ;
+		throw std::runtime_error(ERR_INDGRTCONTSIZ);
 	}
 }
 
@@ -980,20 +980,20 @@ void CacheMap::insert(const std::string& cacheKey, const std::string& value, con
 		}
 		else if(type==QUEUE)
 		{
-			throw ERR_OPNOTSUPP;
+			throw std::runtime_error(ERR_OPNOTSUPP);
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 	if(error)
 	{
-		throw ERR_INDGRTCONTSIZ;
+		throw std::runtime_error(ERR_INDGRTCONTSIZ);
 	}
 }
 
@@ -1020,21 +1020,21 @@ void CacheMap::popValueQueue(const std::string& cacheKey) {
 			instance->valueLocks[cacheKey]->unlock();
 			if(error)
 			{
-				throw ERR_NOELEMENTS;
+				throw std::runtime_error(ERR_NOELEMENTS);
 			}
 		}
 		else if(type==LIST || type==VECTOR || type==SET || type==DEQUE)
 		{
-			throw ERR_OPNOTSUPP;
+			throw std::runtime_error(ERR_OPNOTSUPP);
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 }
 
@@ -1063,21 +1063,21 @@ std::string CacheMap::popGetValueQueue(const std::string& cacheKey) {
 			instance->valueLocks[cacheKey]->unlock();
 			if(error)
 			{
-				throw ERR_NOELEMENTS;
+				throw std::runtime_error(ERR_NOELEMENTS);
 			}
 		}
 		else if(type==LIST || type==VECTOR || type==SET || type==DEQUE)
 		{
-			throw ERR_OPNOTSUPP;
+			throw std::runtime_error(ERR_OPNOTSUPP);
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 	return resp;
 }
@@ -1108,16 +1108,16 @@ void CacheMap::pushBackValue(const std::string& cacheKey, const std::string& val
 		}
 		else if(type==QUEUE || type==VECTOR || type==SET)
 		{
-			throw ERR_OPNOTSUPP;
+			throw std::runtime_error(ERR_OPNOTSUPP);
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 }
 
@@ -1147,16 +1147,16 @@ void CacheMap::pushFrontValue(const std::string& cacheKey, const std::string& va
 		}
 		else if(type==QUEUE || type==VECTOR || type==SET)
 		{
-			throw ERR_OPNOTSUPP;
+			throw std::runtime_error(ERR_OPNOTSUPP);
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 }
 
@@ -1201,20 +1201,20 @@ void CacheMap::popFrontValue(const std::string& cacheKey) {
 		}
 		else if(type==QUEUE || type==VECTOR || type==SET)
 		{
-			throw ERR_OPNOTSUPP;
+			throw std::runtime_error(ERR_OPNOTSUPP);
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 	if(error)
 	{
-		throw ERR_NOELEMENTS;
+		throw std::runtime_error(ERR_NOELEMENTS);
 	}
 }
 
@@ -1259,20 +1259,20 @@ void CacheMap::popBackValue(const std::string& cacheKey) {
 		}
 		else if(type==QUEUE || type==VECTOR || type==SET)
 		{
-			throw ERR_OPNOTSUPP;
+			throw std::runtime_error(ERR_OPNOTSUPP);
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 	if(error)
 	{
-		throw ERR_NOELEMENTS;
+		throw std::runtime_error(ERR_NOELEMENTS);
 	}
 }
 
@@ -1320,20 +1320,20 @@ std::string CacheMap::popGetFrontValue(const std::string& cacheKey) {
 		}
 		else if(type==QUEUE || type==VECTOR || type==SET)
 		{
-			throw ERR_OPNOTSUPP;
+			throw std::runtime_error(ERR_OPNOTSUPP);
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 	if(error)
 	{
-		throw ERR_NOELEMENTS;
+		throw std::runtime_error(ERR_NOELEMENTS);
 	}
 	return resp;
 }
@@ -1382,20 +1382,20 @@ std::string CacheMap::popGetBackValue(const std::string& cacheKey) {
 		}
 		else if(type==QUEUE || type==VECTOR || type==SET)
 		{
-			throw ERR_OPNOTSUPP;
+			throw std::runtime_error(ERR_OPNOTSUPP);
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 	if(error)
 	{
-		throw ERR_NOELEMENTS;
+		throw std::runtime_error(ERR_NOELEMENTS);
 	}
 	return resp;
 }
@@ -1476,20 +1476,20 @@ std::string CacheMap::getFrontValue(const std::string& cacheKey) {
 		}
 		else if(type==SET)
 		{
-			throw ERR_OPNOTSUPP;
+			throw std::runtime_error(ERR_OPNOTSUPP);
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 	if(error)
 	{
-		throw ERR_NOELEMENTS;
+		throw std::runtime_error(ERR_NOELEMENTS);
 	}
 	return value;
 }
@@ -1570,20 +1570,20 @@ std::string CacheMap::getBackValue(const std::string& cacheKey) {
 		}
 		else if(type==SET)
 		{
-			throw ERR_OPNOTSUPP;
+			throw std::runtime_error(ERR_OPNOTSUPP);
 		}
 		else
 		{
-			throw ERR_INVCONTAINER;
+			throw std::runtime_error(ERR_INVCONTAINER);
 		}
 	}
 	else
 	{
-		throw ERR_NOKEYCACHEMAP;
+		throw std::runtime_error(ERR_NOKEYCACHEMAP);
 	}
 	if(error)
 	{
-		throw ERR_NOELEMENTS;
+		throw std::runtime_error(ERR_NOELEMENTS);
 	}
 	return value;
 }
