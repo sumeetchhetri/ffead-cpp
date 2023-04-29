@@ -1,5 +1,31 @@
 # The ffead-cpp Framework
 
+[![CodeQL](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/codeql-analysis.yml)
+
+[![Almalinux](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-almalinux.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-almalinux.yml)
+[![Alpine](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-alpine.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-alpine.yml)
+[![Archlinux](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-archlinux.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-archlinux.yml)
+[![Gentoo](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-gentoo.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-gentoo.yml)
+[![MacOS](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-macos.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-macos.yml)
+[![Opensuse](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-opensuse.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-opensuse.yml)
+[![Ubuntu](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-ubuntu.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-ubuntu.yml)
+[![Windows Cygwin](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-win-cygwin.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-win-cygwin.yml)
+[![Windows Mingw-w64](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-win-mingw.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-win-mingw.yml)
+
+[![Musl Cross Compilation](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-cross-musl.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-cross-musl.yml)
+[![Dockcross uclibc-wrt Compilation](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-dockcross-uclibc-wrt.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-dockcross-uclibc-wrt.yml)
+[![Android Cross Compilation](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-cross-android.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-cross-android.yml)
+[![Mingw-w64 Cross Compilation](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-cross-mingw-w64.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-cross-mingw-w64.yml)
+
+[![Bazel build](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-bazel.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-bazel.yml)
+[![Buck2 build](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-buck2.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-buck2.yml)
+[![Meson build](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-meson.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-meson.yml)
+[![Scons build](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-scons.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-scons.yml)
+[![Shellb build](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-shellb.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-shellb.yml)
+[![Xmake build](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-xmake.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-xmake.yml)
+
+[![Nodejs and Emscripten](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-emscripten-nodejs.yml/badge.svg)](https://github.com/sumeetchhetri/ffead-cpp/actions/workflows/ci-emscripten-nodejs.yml)
+
 **According to the latest tfb results, ffead-cpp [embedded+v-picov] is currently the 12th fastest web/http/sql framework in the world** [Latest Techempower benchmarks](https://tfb-status.techempower.com)
 
 ffead-cpp is a web-framework, application framework, utilities all bundled into one. 
@@ -77,6 +103,9 @@ Features
 Examples (as per feedback from HN)
 - REST API example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/te-benchmark/include/TeBkRestController.h
 - Template example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/markers/tpe/mark.tpe & https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/DefTemp.cpp
+- Websocket example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/DefaultWebSocketHandler.cpp
+- Wefilter example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/DefaultIOFilter.cpp
+- Webcontroller example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/DefaultController.cpp
 - Dynamic C++ page example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/dcp/test.dcp
 - Action based view example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/fviews/test.html & https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/TestFormController.cpp
 - XML driven configuration example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/config/application.xml
@@ -87,13 +116,10 @@ Examples (as per feedback from HN)
 - Programming language integration examples - https://github.com/sumeetchhetri/ffead-cpp/tree/master/lang-server-backends
 - OS Build scripts - https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based
 - Cross compiling (android, mingw54, dockcross) - https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker
-- ffead-cpp modules - https://github.com/sumeetchhetri/ffead-cpp/tree/master/src/modules
+- I/O Multiplexing - https://github.com/sumeetchhetri/ffead-cpp/blob/master/src/modules/server-util/SelEpolKqEvPrt.h
 - ThreadPool - https://github.com/sumeetchhetri/ffead-cpp/tree/master/src/modules/threads
 - Backend Server integration - https://github.com/sumeetchhetri/ffead-cpp/tree/master/src/server
 - Server modules (apache/nginx/openlitespeed\*) - https://github.com/sumeetchhetri/ffead-cpp/tree/master/modules
-- Websocket example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/DefaultWebSocketHandler.cpp
-- Wefilter example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/DefaultIOFilter.cpp
-- Webcontroller example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/DefaultController.cpp
 - Cron Jobs module - https://github.com/sumeetchhetri/ffead-cpp/tree/master/src/modules/jobs
 - SOLR-Zookeeper/Elasticsearch (Search module) - https://github.com/sumeetchhetri/ffead-cpp/tree/master/src/modules/search
 - Toy/Useless interpreter - https://github.com/sumeetchhetri/ffead-cpp/tree/master/src/modules/interpreter
