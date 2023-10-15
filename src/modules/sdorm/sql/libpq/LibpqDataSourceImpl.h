@@ -120,11 +120,11 @@ public:
 #ifdef HAVE_LIBPQ
 typedef void (*LipqCbFunc0) (void** ctx, PGresult* res);
 typedef void (*LipqCbFuncF) (void** ctx, bool status, std::vector<PGresult*>* results, const std::string& query, int counter);
-typedef void (*LipqCbFuncF0) (void** ctx, bool status, const std::string& query, int counter);
 #else
 typedef void (*LipqCbFunc0) (void** ctx, void* res);
 typedef void (*LipqCbFuncF) (void** ctx, bool status, void* results, const std::string& query, int counter);
 #endif
+typedef void (*LipqCbFuncF0) (void** ctx, bool status, const std::string& query, int counter);
 
 typedef void (*LipqCbFunc1) (void** ctx, bool endofdata, int row, int col, char* name, char* value, int vlen);
 typedef void (*LipqCbFunc2) (void** ctx, bool endofdata, int row, int col, char* value, int vlen);
@@ -133,6 +133,7 @@ typedef void (*LipqCbFunc4) (void** ctx, int row, int col, char* name, char* val
 typedef void (*LipqCbFunc5) (void** ctx, int row, int col, char* value, int vlen);
 typedef void (*LipqCbFunc6) (void** ctx, int row, int col, char* value);
 typedef void (*LipqCbFunc7) (void** ctx, int row, FpgIter* iter);
+
 
 
 class LibpqQuery {

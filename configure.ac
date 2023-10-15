@@ -1394,7 +1394,9 @@ fi
 if test "x$mod_sdormsql" = "xyes"; then
 	AC_CONFIG_FILES([web/t3/src/autotools/Makefile
 				web/t4/src/autotools/Makefile
-				web/t5/src/autotools/Makefile])
+				web/t5/src/autotools/Makefile
+				web/t6/src/autotools/Makefile
+				web/t7/src/autotools/Makefile])
 fi
 AC_OUTPUT
 
