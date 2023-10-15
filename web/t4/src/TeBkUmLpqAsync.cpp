@@ -131,8 +131,8 @@ void TeBkUmLpqAsyncRouter::dbAsync(Writer* sif) {
 	LibpqQuery* q = areq->getQuery();
 	q->withParamInt4(rid);
 #ifdef HAVE_LIBPQ
-	q->withSelectQuery(WORLD_ONE_QUERY).withContext(sif).withCb0([](void* ctx, PGresult* res) {
-		Writer* sif = (Writer*)ctx;
+	q->withSelectQuery(WORLD_ONE_QUERY).withContext(sif).withCb0([](void** ctx,PGresult* res) {
+		Writer* sif = (Writer*)ctx[0];
 		AsyncReqData* reqdt = (AsyncReqData*)sif->getData();
 		reqdt->reset();
 		TeBkUmLpqAsyncWorld w(ntohl(*((uint32_t *) PQgetvalue(res, 0, 0))), ntohl(*((uint32_t *) PQgetvalue(res, 0, 1))));
@@ -158,8 +158,8 @@ void TeBkUmLpqAsyncRouter::queriesAsync(const char* q, int ql, Writer* sif) {
 		q->withSelectQuery(WORLD_ONE_QUERY);
 	}
 #ifdef HAVE_LIBPQ
-	areq->withFinalCb(sif, [](void* ctx, bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
-		Writer* sif = (Writer*)ctx;
+	areq->withContext(sif).withFinalCb([](void** ctx,bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
+		Writer* sif = (Writer*)ctx[0];
 		std::vector<TeBkUmLpqAsyncWorld> vec;
 		vec.reserve((int)results->size());
 		for (int i = 0; i < (int)results->size(); ++i) {
@@ -206,8 +206,8 @@ void TeBkUmLpqAsyncRouter::queriesMultiAsync(const char* q, int ql, Writer* sif)
 	LibpqQuery* qu = areq->getQuery();
 	qu->withSelectQuery(query).withMulti();
 #ifdef HAVE_LIBPQ
-	areq->withFinalCb(sif, [](void* ctx, bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
-		Writer* sif = (Writer*)ctx;
+	areq->withContext(sif).withFinalCb([](void** ctx,bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
+		Writer* sif = (Writer*)ctx[0];
 		std::vector<TeBkUmLpqAsyncWorld> vec;
 		vec.reserve((int)results->size());
 		for (int i = 0; i < (int)results->size(); ++i) {
@@ -243,8 +243,8 @@ void TeBkUmLpqAsyncRouter::updatesMulti(const char* q, int ql, AsyncUpdatesReq* 
 	LibpqQuery* qu = areq->getQuery();
 	qu->withSelectQuery(query).withMulti();
 #ifdef HAVE_LIBPQ
-	areq->withFinalCb(req, [](void* ctx, bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
-		AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
+	areq->withContext(req).withFinalCb([](void** ctx,bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
+		AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx[0];
 		if(status) {
 			int queryCount = (int)results->size();
 
@@ -279,8 +279,8 @@ void TeBkUmLpqAsyncRouter::updatesMulti(const char* q, int ql, AsyncUpdatesReq* 
 			LibpqQuery* qu = areq->getQuery();
 			qu->withUpdateQuery(ss.str()).withMulti();
 
-			areq->withFinalCb(req, [](void* ctx, bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
-				AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
+			areq->withContext(req).withFinalCb([](void** ctx,bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
+				AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx[0];
 				if(status) {
 					AsyncReqData* reqdt = (AsyncReqData*)req->sif->getData();
 					reqdt->reset();
@@ -343,8 +343,8 @@ void TeBkUmLpqAsyncRouter::updatesAsyncb(const char* q, int ql, AsyncUpdatesReq*
 		q->withSelectQuery(WORLD_ONE_QUERY);
 	}
 #ifdef HAVE_LIBPQ
-	areq->withFinalCb(req, [](void* ctx, bool status, std::vector<PGresult*>* results, const std::string& query, int counter) {
-		AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
+	areq->withContext(req).withFinalCb([](void** ctx,bool status, std::vector<PGresult*>* results, const std::string& query, int counter) {
+		AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx[0];
 
 		int queryCount = (int)results->size();
 
@@ -384,8 +384,8 @@ void TeBkUmLpqAsyncRouter::updatesAsyncb(const char* q, int ql, AsyncUpdatesReq*
 		}
 		req->sqli->commitAsync(areq);
 
-		areq->withFinalCb(req, [](void* ctx, bool status, std::vector<PGresult*>* results, const std::string& query, int counter) {
-			AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
+		areq->withContext(req).withFinalCb([](void** ctx,bool status, std::vector<PGresult*>* results, const std::string& query, int counter) {
+			AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx[0];
 			if(status) {
 				AsyncReqData* reqdt = (AsyncReqData*)req->sif->getData();
 				reqdt->reset();
@@ -421,8 +421,8 @@ void TeBkUmLpqAsyncRouter::updatesAsync(const char* q, int ql, AsyncUpdatesReq* 
 		qu->withSelectQuery(WORLD_ONE_QUERY);
 	}
 #ifdef HAVE_LIBPQ
-	areq->withFinalCb(req, [](void* ctx, bool status, std::vector<PGresult*>* results, const std::string& query, int counter) {
-		AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
+	areq->withContext(req).withFinalCb([](void** ctx,bool status, std::vector<PGresult*>* results, const std::string& query, int counter) {
+		AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx[0];
 		LibpqAsyncReq* areq = req->sqli->getAsyncRequest();
 
 		for (int i = 0; i < (int)results->size(); ++i) {
@@ -465,8 +465,8 @@ void TeBkUmLpqAsyncRouter::updatesAsync(const char* q, int ql, AsyncUpdatesReq* 
 			}*/
 		}
 
-		areq->withFinalCb(req, [](void* ctx, bool status, std::vector<PGresult*>* results, const std::string& query, int counter) {
-			AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx;
+		areq->withContext(req).withFinalCb([](void** ctx,bool status, std::vector<PGresult*>* results, const std::string& query, int counter) {
+			AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx[0];
 			AsyncReqData* reqdt = (AsyncReqData*)req->sif->getData();
 			reqdt->reset();
 			if(status) {
@@ -492,8 +492,8 @@ void TeBkUmLpqAsyncRouter::updateCache() {
 
 	LibpqAsyncReq* areq = sqli->getAsyncRequest();
 	LibpqQuery* q = areq->getQuery();
-	q->withSelectQuery(WORLD_ALL_QUERY).withContext(req).withCb3([](void* ctx, bool endofdata, int row, int col, char* value) {
-		AsyncCacheReq* req = (AsyncCacheReq*)ctx;
+	q->withSelectQuery(WORLD_ALL_QUERY).withContext(req).withCb3([](void** ctx,bool endofdata, int row, int col, char* value) {
+		AsyncCacheReq* req = (AsyncCacheReq*)ctx[0];
 		if(col==0) {
 			req->vec.emplace_back(ntohl(*((uint32_t *) value)));
 		} else {
@@ -552,8 +552,8 @@ void TeBkUmLpqAsyncRouter::fortunes(Writer* sif) {
 	LibpqAsyncReq* areq = sqli->getAsyncRequest();
 	LibpqQuery* q = areq->getQuery();
 #ifdef HAVE_LIBPQ
-	q->withSelectQuery(FORTUNE_ALL_QUERY).withContext(sif).withCb0([](void* ctx, PGresult* res) {
-		Writer* sif = (Writer*)ctx;
+	q->withSelectQuery(FORTUNE_ALL_QUERY).withContext(sif).withCb0([](void** ctx,PGresult* res) {
+		Writer* sif = (Writer*)ctx[0];
 		std::vector<TeBkUmLpqAsyncFortune*> flst;
 		int rows = PQntuples(res);
 		flst.reserve((size_t)rows+1);

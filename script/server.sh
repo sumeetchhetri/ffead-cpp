@@ -42,7 +42,12 @@ SINGLE_PROCESS=`grep "EVH_SINGLE=true" $FFEAD_CPP_PATH/resources/server.prop |wc
 if [ $SINGLE_PROCESS -ge 1 ]
 then
 	for i in $(seq 0 $(($(nproc --all)-1))); do
-	  taskset -c $i ./ffead-cpp $FFEAD_CPP_PATH > ffead.$i.log 2>&1 &
+		if ! command -v taskset &> /dev/null
+		then
+			./ffead-cpp $FFEAD_CPP_PATH > ffead.$i.log 2>&1 &
+		else
+			taskset -c $i ./ffead-cpp $FFEAD_CPP_PATH > ffead.$i.log 2>&1 &
+		fi
 	done
 else
 	./ffead-cpp $FFEAD_CPP_PATH > ffead.log 2>&1

@@ -809,6 +809,8 @@ includes("web/t2")
 includes("web/t3")
 includes("web/t4")
 includes("web/t5")
+includes("web/t6")
+includes("web/t7")
 
 target("ffead-cpp")
 	set_languages("c++17")

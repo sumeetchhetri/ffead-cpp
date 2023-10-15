@@ -226,7 +226,7 @@ HttpResponse& HttpResponse::sendStatus(HTTPResponseStatus& status, Writer* wr) {
 			content.append(ContentLength);
 			content.append(":0");
 			content.append(HDR_END);
-			content.append(HDR_FIN);
+			content.append(HDR_END);
 			wr->writeData(&content);
 			break;
 		}

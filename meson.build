@@ -421,6 +421,8 @@ if get_option('MOD_SDORM_SQL') == true
 	subdir('web/t3')
 	subdir('web/t4')
 	subdir('web/t5')
+	subdir('web/t6')
+	subdir('web/t7')
 endif
 
 emb_includes = ['src/modules/common','src/modules/cache','src/modules/cache/memory','src/modules/cache/redis',
@@ -459,6 +461,8 @@ if get_option('MOD_SDORM_SQL') == true
 	install_subdir('web/t3', install_dir: bin_dir+'web')
 	install_subdir('web/t4', install_dir: bin_dir+'web')
 	install_subdir('web/t5', install_dir: bin_dir+'web')
+	install_subdir('web/t6', install_dir: bin_dir+'web')
+	install_subdir('web/t7', install_dir: bin_dir+'web')
 endif
 
 meson.add_install_script(meson_post_install, bin_dir, meson.source_root())

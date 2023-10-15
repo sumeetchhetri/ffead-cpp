@@ -169,6 +169,7 @@ public:
 	static inline bool naiveStrToNum(const char* p, int len, int& ret) {
 	    ret = 0;
 	    int c = 0;
+		if (p==NULL) return true;
 	    while (*p >= '0' && *p <= '9') {
 	        ret = (ret*10) + (*p - '0');
 	        ++p;

@@ -1,0 +1,51 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/src/modules/common",
+				"${workspaceFolder}/src/modules/cache",
+				"${workspaceFolder}/src/modules/cache/memory",
+				"${workspaceFolder}/src/modules/cache/redis",
+				"${workspaceFolder}/src/modules/cache/memcached",
+				"${workspaceFolder}/src/modules/client-util",
+				"${workspaceFolder}/src/modules/http",
+				"${workspaceFolder}/src/modules/http/http11",
+				"${workspaceFolder}/src/modules/http/http20",
+				"${workspaceFolder}/src/modules/ioc",
+				"${workspaceFolder}/src/modules/interpreter",
+				"${workspaceFolder}/src/modules/jobs",
+				"${workspaceFolder}/src/modules/reflection",
+				"${workspaceFolder}/src/modules/sdorm",
+				"${workspaceFolder}/src/modules/sdorm/sql",
+				"${workspaceFolder}/src/modules/sdorm/sql/libpq",
+				"${workspaceFolder}/src/modules/client-util/ssl",
+				"${workspaceFolder}/src/modules/sdorm/mongo",
+				"${workspaceFolder}/src/modules/sdorm/mongo/raw",
+				"${workspaceFolder}/src/modules/search",
+				"${workspaceFolder}/src/modules/serialization",
+				"${workspaceFolder}/src/modules/serialization/xml",
+				"${workspaceFolder}/src/modules/serialization/json",
+				"${workspaceFolder}/src/modules/server-util",
+				"${workspaceFolder}/src/modules/ssl",
+				"${workspaceFolder}/src/modules/threads",
+				"${workspaceFolder}/src/framework",
+				"${workspaceFolder}/src/modules/search/solr",
+				"${workspaceFolder}/src/modules/search/elasticsearch",
+				"${workspaceFolder}/src/server/embedded",
+				"${workspaceFolder}/src/framework",
+                "${workspaceFolder}/web/**",
+                "/usr/local/include",
+                "/usr/local/opt/openssl/include"
+            ],
+            "defines": [],
+            "macFrameworkPath": [],
+            "compilerPath": "/usr/bin/c++",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "macos-gcc-x64",
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ],
+    "version": 4
+}

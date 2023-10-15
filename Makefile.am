@@ -276,6 +276,8 @@ else
 	rm -rf ${prefix}/web/t3
 	rm -rf ${prefix}/web/t4
 	rm -rf ${prefix}/web/t5
+	rm -rf ${prefix}/web/t6
+	rm -rf ${prefix}/web/t7
 endif
 	cp -Rf script/* ${prefix}/
 	-rm -f ${prefix}/lib/*.la ${prefix}/lib/*.lai

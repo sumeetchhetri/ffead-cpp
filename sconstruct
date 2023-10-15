@@ -325,6 +325,8 @@ release_env.VariantDir('build/release/web/t2', 'web/t2', duplicate=0)
 release_env.VariantDir('build/release/web/t3', 'web/t3', duplicate=0)
 release_env.VariantDir('build/release/web/t4', 'web/t4', duplicate=0)
 release_env.VariantDir('build/release/web/t5', 'web/t5', duplicate=0)
+release_env.VariantDir('build/release/web/t6', 'web/t6', duplicate=0)
+release_env.VariantDir('build/release/web/t7', 'web/t7', duplicate=0)
 
 # We define our debug build environment in a similar fashion...
 debug_env = common_env.Clone()
@@ -344,6 +346,8 @@ debug_env.VariantDir('build/debug/web/t2', 'web/t2', duplicate=0)
 debug_env.VariantDir('build/debug/web/t3', 'web/t3', duplicate=0)
 debug_env.VariantDir('build/debug/web/t4', 'web/t4', duplicate=0)
 debug_env.VariantDir('build/debug/web/t5', 'web/t5', duplicate=0)
+debug_env.VariantDir('build/debug/web/t6', 'web/t6', duplicate=0)
+debug_env.VariantDir('build/debug/web/t7', 'web/t7', duplicate=0)
 
 build_env=release_env
 mode='release'
@@ -369,6 +373,8 @@ if bool(mod_sql):
 	build_env.SConscript('%s/web/t3/sconscript' % modeDir, {'env': build_env})
 	build_env.SConscript('%s/web/t4/sconscript' % modeDir, {'env': build_env})
 	build_env.SConscript('%s/web/t5/sconscript' % modeDir, {'env': build_env})
+	build_env.SConscript('%s/web/t6/sconscript' % modeDir, {'env': build_env})
+	build_env.SConscript('%s/web/t7/sconscript' % modeDir, {'env': build_env})
 
 Delete("ffead-cpp-6.0-bin")
 Mkdir("ffead-cpp-6.0-bin")
@@ -408,7 +414,7 @@ for root, dirnames, filenames in os.walk('web'):
 		dirPath = os.path.join(root, dirname, 'include')
 		if bool(mod_mongo) and 't2' in dirPath:
 			continue
-		if bool(mod_sql) and ('t3' in dirPath or 't4' in dirPath or 't5' in dirPath):
+		if bool(mod_sql) and ('t3' in dirPath or 't4' in dirPath or 't5' in dirPath or 't6' in dirPath or 't7' in dirPath):
 			continue
 		#delete src and other build files from web directories
 build_env.Install('ffead-cpp-6.0-bin/lib', source = Glob(modeDir+'/bin/lib*'))

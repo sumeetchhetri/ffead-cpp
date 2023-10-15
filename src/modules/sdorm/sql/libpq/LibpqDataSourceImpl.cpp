@@ -57,7 +57,10 @@ LibpqDataSourceImpl::~LibpqDataSourceImpl() {
 bool LibpqDataSourceImpl::init() {
 	if(isWire) {
 		wire = new FpgWire(this, isAsync);
+		wire->connect(url, isAsync);
 		this->fd = wire->fd;
+		wire->sif = this;
+		rdTsk = wire;
 		if(isAsync) {
 			bool rHandler = RequestReaderHandler::getInstance()!=NULL || RequestHandler2::getInstance()!=NULL || Writer::isPicoEvAsyncBackendMode;
 			if(rHandler) {
@@ -200,6 +203,7 @@ void LibpqDataSourceImpl::beginAsync(LibpqAsyncReq* areq) {
 #ifdef HAVE_LIBPQ
 		LibpqQuery* q = areq->getQuery();
 		q->query = "BEGIN";
+		q->isMulti = true;
 #endif
 	}
 }
@@ -209,6 +213,7 @@ void LibpqDataSourceImpl::commitAsync(LibpqAsyncReq* areq) {
 #ifdef HAVE_LIBPQ
 		LibpqQuery* q = areq->getQuery();
 		q->query = "COMMIT";
+		q->isMulti = true;
 #endif
 	}
 }
@@ -218,6 +223,7 @@ void LibpqDataSourceImpl::rollbackAsync(LibpqAsyncReq* areq) {
 #ifdef HAVE_LIBPQ
 		LibpqQuery* q = areq->getQuery();
 		q->query = "ROLLBACK";
+		q->isMulti = true;
 #endif
 	}
 }
@@ -226,7 +232,7 @@ bool LibpqDataSourceImpl::begin() {
 	if(isWire) {
 		if(isAsync) return false;
 		LibpqQuery q;
-		q.withUpdateQuery("BEGIN", true);
+		q.withMulti().withUpdateQuery("BEGIN");
 		return wire->updateQuery(q);
 	}
 #ifdef HAVE_LIBPQ
@@ -246,7 +252,7 @@ bool LibpqDataSourceImpl::commit() {
 	if(isWire) {
 		if(isAsync) return false;
 		LibpqQuery q;
-		q.withUpdateQuery("COMMIT", true);
+		q.withMulti().withUpdateQuery("COMMIT", true);
 		return wire->updateQuery(q);
 	}
 #ifdef HAVE_LIBPQ
@@ -266,7 +272,7 @@ bool LibpqDataSourceImpl::rollback() {
 	if(isWire) {
 		if(isAsync) return false;
 		LibpqQuery q;
-		q.withUpdateQuery("ROLLBACK", true);
+		q.withMulti().withUpdateQuery("ROLLBACK", true);
 		return wire->updateQuery(q);
 	}
 #ifdef HAVE_LIBPQ
@@ -609,7 +615,6 @@ void PgReadTask::submit(LibpqAsyncReq* nitem) {
 					q->prepared = true;
 				}
 			}
-
 
 			int qs = -1;
 			if(q->prepared) {
@@ -1660,8 +1665,12 @@ LibpqQuery& LibpqQuery::withUpdateQuery(const std::string &query, bool isPrepare
 	return *this;
 }
 
-LibpqQuery& LibpqQuery::withContext(void* ctx) {
-	this->ctx = ctx;
+LibpqQuery& LibpqQuery::withContext(void* ctx, void* ctx1, void* ctx2, void* ctx3, void* ctx4) {
+	this->ctx[0] = ctx;
+	this->ctx[1] = ctx1;
+	this->ctx[2] = ctx2;
+	this->ctx[3] = ctx3;
+	this->ctx[4] = ctx4;
 	return *this;
 }
 
@@ -1701,9 +1710,23 @@ LibpqAsyncReq::~LibpqAsyncReq() {
 }
 
 LibpqAsyncReq::LibpqAsyncReq() {
-	ctx = NULL;
+	ctx[0] = NULL;
+	ctx[1] = NULL;
+	ctx[2] = NULL;
+	ctx[3] = NULL;
+	ctx[4] = NULL;
 	fcb = NULL;
+	fcb1 = NULL;
 	cnt = 0;
+}
+
+LibpqAsyncReq& LibpqAsyncReq::withContext(void* ctx, void* ctx1, void* ctx2, void* ctx3, void* ctx4) {
+	this->ctx[0] = ctx;
+	this->ctx[1] = ctx1;
+	this->ctx[2] = ctx2;
+	this->ctx[3] = ctx3;
+	this->ctx[4] = ctx4;
+	return *this;
 }
 
 void LibpqAsyncReq::pop() {
@@ -1718,7 +1741,9 @@ void LibpqQuery::reset() {
 	cb4 = NULL;
 	cb5 = NULL;
 	cb6 = NULL;
+	cb7 = NULL;
 	fcb = NULL;
+	fcb1 = NULL;
 	cbType = 0;
 	rows = 0;
 	isSelect = false;
@@ -1726,7 +1751,11 @@ void LibpqQuery::reset() {
 	prepared = false;
 	isMulti = false;
 	pvals.clear();
-	ctx = NULL;
+	ctx[0] = NULL;
+	ctx[1] = NULL;
+	ctx[2] = NULL;
+	ctx[3] = NULL;
+	ctx[4] = NULL;
 }
 
 LibpqQuery::LibpqQuery() {
@@ -1737,13 +1766,19 @@ LibpqQuery::LibpqQuery() {
 	cb4 = NULL;
 	cb5 = NULL;
 	cb6 = NULL;
+	cb7 = NULL;
 	fcb = NULL;
+	fcb1 = NULL;
 	cbType = -1;
 	isSelect = false;
 	isPrepared = false;
 	prepared = false;
 	isMulti = false;
-	ctx = NULL;
+	ctx[0] = NULL;
+	ctx[1] = NULL;
+	ctx[2] = NULL;
+	ctx[3] = NULL;
+	ctx[4] = NULL;
 	rows = 0;
 }
 
@@ -1767,3 +1802,695 @@ LibpqParamsBase* LibpqDataSourceImpl::getParams(int size) {
 	}
 	return NULL;
 }*/
+
+
+FpgWire::FpgWire(SocketInterface* sif, bool isAsync): PgReadTask(sif), pos(0), state('0'), pstat(false), bstat(false), rowNum(-1), querystatus(0) {
+	this->isAsync = isAsync;
+}
+bool FpgWire::connect(std::string url, bool isAsync) {
+	std::vector<std::string> parts = StringUtil::splitAndReturn<std::vector<std::string> >(url, " ");
+	std::string host, database, user, password;
+	int port = 5432;
+	for(std::string part: parts) {
+		std::vector<std::string> kv = StringUtil::splitAndReturn<std::vector<std::string> >(part, "=");
+		if(StringUtil::toLowerCopy(StringUtil::trimCopy(kv.at(0)))=="host") {
+			host = StringUtil::trimCopy(kv.at(1));
+		} else if(StringUtil::toLowerCopy(StringUtil::trimCopy(kv.at(0)))=="user") {
+			user = StringUtil::trimCopy(kv.at(1));
+		} else if(StringUtil::toLowerCopy(StringUtil::trimCopy(kv.at(0)))=="password") {
+			password = StringUtil::trimCopy(kv.at(1));
+		} else if(StringUtil::toLowerCopy(StringUtil::trimCopy(kv.at(0)))=="dbname") {
+			database = StringUtil::trimCopy(kv.at(1));
+		} else if(StringUtil::toLowerCopy(StringUtil::trimCopy(kv.at(0)))=="port") {
+			port = CastUtil::toInt(StringUtil::trimCopy(kv.at(1)));
+		}
+	}
+	connect(host, port, isAsync, database, user, password);
+}
+bool FpgWire::connect(std::string host, int port, bool isAsync, std::string database, std::string user, std::string password) {
+	std::string rp = password + user;
+	upmd5 = CryptoHandler::md5((unsigned char*)rp.data(), (unsigned int)rp.size());
+	fd = Client::conn(host, port);
+	if(fd==-1) return false;
+	this->password = password;
+	this->isAsync = isAsync;
+	return sendStart(user, database);
+}
+void FpgWire::reset() {
+	pos = 0; 
+	//state = '0';
+	pstat = false;
+	bstat = false;
+	rowNum = -1;
+	querystatus = 0;
+	rows.clear();
+	currentMD.clear();
+}
+bool FpgWire::updateQuery(LibpqQuery& q) {
+	if(!isAsync) {
+		if(!q.isPrepared || q.isMulti) {
+			if(!query(q.query)) return false;
+		} else {
+			if(!preparedQuery(q)) return false;
+		}
+		state = '0';
+		while(state!='I' && state!='T') {
+			handleSync();
+		}
+		if(q.fcb1!=NULL) q.fcb1(q.ctx, querystatus!=-1, q.query, 1);
+		return querystatus;
+	}
+	return true;
+}
+std::vector<FpgWireRow>& FpgWire::selectQuery(LibpqQuery& q) {
+	if(!isAsync) {
+		if(!q.isPrepared || q.isMulti) {
+			if(!query(q.query)) return rows;
+		} else {
+			if(!preparedQuery(q)) return rows;
+		}
+		state = '0';
+		while(state!='I' && state!='T') {
+			handleSync();
+		}
+		if(q.fcb1!=NULL) q.fcb1(q.ctx, querystatus!=-1, q.query, 1);
+	}
+	return rows;
+}
+bool FpgWire::handleSync() {
+	if(readSync()==0) {
+		return true;
+	}
+	
+	while(buffer.length()>0) {
+		handleResponse();
+		buffer = buffer.substr(pos);
+		pos = 0;
+	}
+	
+	if(isClosed()) {
+		return true;
+	} else {
+		doneRead();
+	}
+	return false;
+}
+
+int FpgWire::readInt32() {
+	int irv =(int)CommonUtils::btn(&buffer[pos], 4);
+	pos += 4;
+	return irv;
+}
+int FpgWire::readInt16() {
+	int irv =(int)CommonUtils::btn(&buffer[pos], 2);
+	pos += 2;
+	return irv;
+}
+char FpgWire::readChar() {
+	pos++;
+	return (char)buffer[pos-1];
+}
+std::string FpgWire::readString(int ml) {
+	pos += ml;
+	return buffer.substr(pos-ml, ml);
+}
+std::string FpgWire::readString() {
+	size_t npos = buffer.find('\0', pos);
+	if(npos==std::string::npos) {
+		return "";
+	}
+	int opos = pos;
+	pos = npos+1;
+	return buffer.substr(opos, pos);
+}
+void FpgWire::writeString(const std::string& str, std::string& sendBuf) {
+	if(str.length()>0)sendBuf.append(str);
+	sendBuf.push_back('\0');
+}
+void FpgWire::writeString(const char* buf, size_t len, std::string& sendBuf) {
+	sendBuf.append(buf, len);
+	sendBuf.push_back('\0');
+}
+void FpgWire::writeStringNn(const char* buf, size_t len, std::string& sendBuf) {
+	sendBuf.append(buf, len);
+}
+void FpgWire::writeMsgType(FpgReq type, std::string& sendBuf) {
+	sendBuf.push_back(type);
+}
+void FpgWire::writeInt32(int num, std::string& sendBuf) {
+	CommonUtils::ntb(sendBuf, num, 4);
+}
+void FpgWire::writeInt16(int num, std::string& sendBuf) {
+	CommonUtils::ntb(sendBuf, num, 2);
+}
+void FpgWire::writeChar(char num, std::string& sendBuf) {
+		sendBuf.push_back(num);
+}
+std::string_view FpgWire::next() {
+	int length = readInt32();
+	pos += length;
+	std::string_view a = std::string_view(&buffer[pos-length], (size_t)length);
+	return a;
+}
+void FpgWire::handleResponse() {
+	//std::cout << "buffer.size " << buffer.length() << " pos " << pos << std::endl;
+	//if(buffer.length()==0) {
+		//std::cout << "No data" << std::endl;
+	//	return;
+	//}
+	//std::cout << buffer[pos] << std::endl;
+	switch(buffer[pos++]) {
+		case FpgRes::AuthenticationOk: {
+			readInt32();
+			int is = readInt32();
+			if(is==0) {
+				if(isAsync) {
+					#ifdef OS_MINGW
+						u_long iMode = 1;
+						ioctlsocket(fd, FIONBIO, &iMode);
+					#else
+						fcntl(fd, F_SETFL, fcntl(fd, F_GETFD, 0) | O_NONBLOCK);
+					#endif
+				}
+				std::cout << "logged in successfully" << std::endl;
+			} else {
+				std::string req;
+				if(is==3) {
+					std::string rp = password;
+					req.push_back(FpgReq::Password);
+					CommonUtils::ntb(req, 4+rp.length(), 4);
+					rp.push_back('\0');
+					req.append(rp);
+				} else if(is==5) {
+					std::string rp = upmd5;
+					rp.push_back(buffer[pos++]);
+					rp.push_back(buffer[pos++]);
+					rp.push_back(buffer[pos++]);
+					rp.push_back(buffer[pos++]);
+					rp = "md5" + CryptoHandler::md5((unsigned char*)rp.data(), (unsigned int)rp.size());
+					rp.push_back('\0');
+					req.push_back(FpgReq::Password);
+					CommonUtils::ntb(req, 4+rp.length(), 4);
+					req.append(rp);
+				} else {
+					perror("Only plaintext/md5 authentication supported");
+				}
+				
+				if(send(fd, req.c_str(), req.length(), 0)<=0) {
+					perror("Can't send start packet to postgres");
+				}
+				char buff[2048];
+				int er = recv(fd, buff, 2048, 0);
+				if(er<=0) {
+					perror("Can't receive auth packet from postgres");
+				}
+				buffer.append(buff, er);
+				//std::cout << "buffer.size " << buffer.length() << " pos " << pos << std::endl;
+			}
+			break;
+		}
+		case FpgRes::ErrorResponse: {
+			int ml = readInt32();
+			err = readString(ml-4);
+			std::cout << "error received = " << err << std::endl;
+			querystatus = -1;
+			if(ritem!=NULL) {
+				ritem->cnt--;
+			}
+			state = 'I';
+			break;
+		}
+		case FpgRes::ParameterStatus: {
+			int ml = readInt32();
+			std::string pvstr = readString(ml-4);
+			std::string nc;
+			nc.push_back('\0');
+			std::vector<std::string> pv = StringUtil::splitAndReturn<std::vector<std::string> >(pvstr, nc);
+			//std::cout << pv[0] << "=" << pv[1] << std::endl;
+			break;
+		}
+		case FpgRes::BackendKeyData: {
+			readInt32();
+			int pi = readInt32();
+			int sec = readInt32();
+			//std::cout << "Cancellation Key Data , process and secret are " << pi << "," << sec << std::endl;
+			break;
+		}
+		case FpgRes::ReadyForQuery: {
+			readInt32();
+			state = readChar();//I - Idle, T - In Trx, E - In Failed Trx, Q - In Query(custom)
+			break;
+		}
+		case FpgRes::RowDescription: {
+			currentMD.clear();
+			rows.clear();
+			rowNum = -1;
+			int ml = readInt32();
+			int cc = readInt16();
+			for(int i=0;i<cc;++i) {
+				FpgWireColumnMD& c = currentMD[i];
+				c.name = readString();//column name
+				c.tabOID = readInt32();//if column belongs to table, then table oid
+				c.indx = readInt16();//if column belongs to table, attribute number of column
+				c.typOID = readInt32();//column type oid
+				c.length = readInt16();//data type size
+				c.mod = readInt32();//data type modifier
+				c.format = readInt16();//zero (text) or one (binary)
+			}
+			break;
+		}
+		case FpgRes::DataRow: {
+			int ml = readInt32();
+			int cols = readInt16();
+			/*if(isAsync) {
+				rowNum++;
+				for(int i=0;i<cols;++i) {
+					int cl = readInt32();
+					//cb(rowNum, i, cl, readString(cl), &(currentMD[i]));
+				}
+			} else {
+				FpgWireRow& row = rows.emplace_back();
+				for(int i=0;i<cols;++i) {
+					FpgWireColumn& col = row.cols.emplace_back();
+					col.length = readInt32();
+					col.data = readString(col.length);
+					col.md = &(currentMD[i]);
+				}
+				rowNum++;
+			}*/
+			switch(q->cbType) {
+				case 0: {
+					q->cb7(q->ctx, rowNum++, this);
+					break;
+				}
+				case 1: {
+					for (int j = 0; j < cols; ++j) {
+						int length = readInt32();
+						q->cb1(q->ctx, false, rowNum++, j, (char*)currentMD[j].name.c_str(), (char*)readString(length).c_str(), length);
+					}
+					break;
+				}
+				case 2: {
+					for (int j = 0; j < cols; ++j) {
+						int length = readInt32();
+						q->cb2(q->ctx, false, rowNum++, j, (char*)readString(length).c_str(), length);
+					}
+					break;
+				}
+				case 3: {
+					for (int j = 0; j < cols; ++j) {
+						int length = readInt32();
+						q->cb3(q->ctx, false, rowNum++, j, (char*)readString(length).c_str());
+					}
+					break;
+				}
+				case 4: {
+					for (int j = 0; j < cols; ++j) {
+						int length = readInt32();
+						q->cb4(q->ctx, rowNum++, j, (char*)currentMD[j].name.c_str(), (char*)readString(length).c_str(), length);
+					}
+					break;
+				}
+				case 5: {
+					for (int j = 0; j < cols; ++j) {
+						int length = readInt32();
+						q->cb5(q->ctx, rowNum++, j, (char*)readString(length).c_str(), length);
+					}
+					break;
+				}
+				case 6: {
+					for (int j = 0; j < cols; ++j) {
+						int length = readInt32();
+						q->cb3(q->ctx, false, rowNum++, j, (char*)readString(length).c_str());
+					}
+					break;
+				}
+				default: {
+					FpgWireRow& row = rows.emplace_back();
+					for(int i=0;i<cols;++i) {
+						FpgWireColumn& col = row.cols.emplace_back();
+						col.length = readInt32();
+						col.data = readString(col.length);
+						col.md = &(currentMD[i]);
+					}
+					rowNum++;
+					break;
+				}
+			}
+			break;
+		}
+		case FpgRes::CommandComplete: {
+			int ml = readInt32();
+			readString(ml-4);
+			querystatus = 2;
+			if(ritem!=NULL) {
+				ritem->cnt--;
+			}
+			state = 'I';
+			break;
+		}
+		case FpgRes::PortalSuspended: {
+			int ml = readInt32();
+			readString(ml-4);
+			querystatus = 2;
+			state = 'I';
+			break;
+		}
+		case FpgRes::EmptyQueryResponse: {
+			readInt32();
+			querystatus = 2;
+			if(ritem!=NULL) {
+				ritem->cnt--;
+			}
+			state = 'I';
+			break;
+		}
+		case FpgRes::NoticeResponse: {
+			int ml = readInt32();
+			readString(ml-4);
+			break;
+		}
+		case FpgRes::NotificationResponse: {
+			readInt32();
+			readInt32();
+			readString();
+			readString();
+			break;
+		}
+		case FpgRes::ParseComplete: {
+			readInt32();
+			pstat = true;
+			if(q!=NULL) {
+				q->prepared = true;
+			}
+			break;
+		}
+		case FpgRes::BindComplete: {
+			readInt32();
+			bstat = true;
+			break;
+		}
+		default:
+			break;
+	}
+	//std::cout << "buffer.size " << buffer.length() << " pos " << pos << std::endl;
+	//
+}
+
+bool FpgWire::sendStart(std::string user, std::string database) {
+	std::string sp, req;
+	sp.append("user");
+	sp.push_back((char)'\0');
+	sp.append(user);
+	sp.push_back((char)'\0');
+	sp.append("database");
+	sp.push_back((char)'\0');
+	sp.append(database);
+	sp.push_back((char)'\0');
+	sp.append("client_encoding");
+	sp.push_back((char)'\0');
+	sp.append("UTF8");
+	sp.push_back((char)'\0');
+	sp.append("DateStyle");
+	sp.push_back((char)'\0');
+	sp.append("ISO");
+	sp.push_back((char)'\0');
+	sp.push_back((char)'\0');
+	CommonUtils::ntb(req, 4+4+sp.length(), 4);
+	CommonUtils::ntb(req, FPG_PROTOCOL(3, 0), 4);
+	req.append(sp);
+	if(send(fd, req.c_str(), req.length(), 0)<=0) {
+		perror("Can't send start packet to postgres");
+		return false;
+	}
+	handleSync();
+	return state=='I';
+}
+void FpgWire::sendSync() {
+	std::string sbuff;
+	writeMsgType(FpgReq::Ext_Sync, sbuff);
+	writeInt32(4, sbuff);
+	if(send(fd, sbuff.c_str(), sbuff.length(), 0)<=0) {
+		perror("Can't send Ext_Sync packet to postgres");
+		return;
+	}
+}
+bool FpgWire::sendPortalDescribe() {
+	std::string sbuff;
+	writeMsgType(FpgReq::Ext_Describe, sbuff);
+	writeInt32(4+1+1, sbuff);
+	writeChar('P', sbuff);
+	writeString("", sbuff);
+	if(send(fd, sbuff.c_str(), sbuff.length(), 0)<=0) {
+		perror("Can't send sync query packet to postgres");
+		return false;
+	}
+	return true;
+}
+void FpgWire::sendPrepStDescribe() {
+	std::string sbuff;
+	writeMsgType(FpgReq::Ext_Describe, sbuff);
+	writeInt32(4+1+1, sbuff);
+	writeChar('S', sbuff);
+	writeString("", sbuff);
+	if(send(fd, sbuff.c_str(), sbuff.length(), 0)<=0) {
+		perror("Can't send Ext_Describe packet to postgres");
+		return;
+	}
+}
+void FpgWire::sendFlush() {
+	std::string sbuff;
+	writeMsgType(FpgReq::Ext_Flush, sbuff);
+	writeInt32(4, sbuff);
+	if(send(fd, sbuff.c_str(), sbuff.length(), 0)<=0) {
+		perror("Can't send Ext_Flush packet to postgres");
+		return;
+	}
+}
+bool FpgWire::query(const std::string& q) {
+	if(state!='I' && state!='T') return false;
+	std::string sbuff;
+	writeMsgType(FpgReq::Simple_Query, sbuff);
+	writeInt32(4+1+(int)q.length(), sbuff);
+	writeString(q, sbuff);
+	if(send(fd, sbuff.c_str(), sbuff.length(), 0)<=0) {
+		perror("Can't send simple Simple_Query to postgres");
+		return false;
+	}
+	state = '0';
+	querystatus = 1;
+	flux = true;
+	//sendSync();
+	return true;
+}
+bool FpgWire::preparedQuery(LibpqQuery& q) {
+	return sendParse(q) && sendBind(q) && sendExecute(q);
+}
+bool FpgWire::sendExecute(LibpqQuery& q) {
+	std::string sbuff;
+	writeMsgType(FpgReq::Ext_Execute, sbuff);
+	writeInt32(4+1+4, sbuff);
+	writeString("", sbuff);
+	writeInt32(q.rows>0?q.rows:0, sbuff);
+	if(send(fd, sbuff.c_str(), sbuff.length(), 0)<=0) {
+		perror("Can't send Ext_Execute packet to postgres");
+		return false;
+	}
+	state = '0';
+	querystatus = 1;
+	sendSync();
+	return true;
+}
+bool FpgWire::sendParse(LibpqQuery& q) {
+	if(state!='I' && state!='T') return false;
+	pstat = false;
+	std::map<std::string, std::string>::iterator it;
+	if(q.isPrepared && (it=prepStMap.find(q.query))!=prepStMap.end()) {
+		q.ps = it->second;
+		return true;
+	}
+	if(q.isPrepared) {
+		q.ps = std::to_string(prepStMap.size()+1);
+		prepStMap.insert(std::pair<std::string, std::string>(q.query, q.ps));
+	} else {
+		q.ps = "";
+	}
+	std::string sbuff;
+	writeMsgType(FpgReq::Ext_Parse, sbuff);
+	int nParams = q.pvals.size();
+	writeInt32(4+1+(int)q.query.length()+1+q.ps.length()+2, sbuff);
+	writeString(q.ps, sbuff);
+	writeString(q.query, sbuff);
+	writeInt16(0, sbuff);
+	/*if(nParams>=0) {
+		for(std::list<LibpqParam>::iterator it=q.pvals.begin(); it != q.pvals.end(); ++it) {
+			writeInt32(0, sbuff);
+		}
+	}*/
+	if(send(fd, sbuff.c_str(), sbuff.length(), 0)<=0) {
+		perror("Can't send Ext_Parse packet to postgres");
+		return false;
+	}
+	//state = '0';
+	return true;
+}
+bool FpgWire::sendBind(LibpqQuery& q) {
+	if(state!='I' && state!='T') return false;
+	bstat = false;
+	std::string sbuff;
+	writeMsgType(FpgReq::Ext_Bind, sbuff);
+	int pvlen = 0;
+	int nParams = q.pvals.size();
+	if(nParams>0) {
+		for(LibpqParam pt: q.pvals) {
+			if(pt.t==1) {//short
+				pvlen += 2;
+			} else if(pt.t==2) {//int
+				pvlen += 4;
+			} else if(pt.t==3) {//long
+				pvlen += 8;
+			} else if(pt.t==6) {//double
+				pvlen += 4;
+			} else if(pt.t==-1) {//null
+				pvlen += 0;
+			} else {
+				pvlen += pt.sv.l;
+			}
+		}
+	}
+	pvlen += 2;//result format code
+	std::map<std::string, std::string>::iterator it;
+	writeInt32(4+1+1+q.ps.length()+2+2*nParams+2+4*nParams+pvlen+2, sbuff);
+	writeString("", sbuff);
+	writeString(q.ps, sbuff);
+	if(nParams>0) {
+		//Write formats first
+		writeInt16(nParams, sbuff);
+		for(LibpqParam pt: q.pvals) {
+			writeInt16(1, sbuff);//binary always?
+		}
+		//Write numparams now
+		writeInt16(nParams, sbuff);
+		//Write values
+		for(LibpqParam pt: q.pvals) {
+			if(pt.t==1) {//short
+				writeInt32(2, sbuff);//length
+				writeStringNn((char *)&pt.s, 2, sbuff);
+			} else if(pt.t==2) {//int
+				writeInt32(4, sbuff);//length
+				writeStringNn((char *)&pt.i, 4, sbuff);
+			} else if(pt.t==3) {//long
+				writeInt32(8, sbuff);//length
+				writeStringNn((char *)&pt.l, 8, sbuff);
+			} else if(pt.t==6) {//double
+				writeInt32(4, sbuff);//length
+				writeStringNn((char *)&pt.d, 4, sbuff);
+			} else if(pt.t==-1) {//null
+				writeInt32(-1, sbuff);
+			} else {
+				writeInt32(pt.sv.l, sbuff);//length
+				writeStringNn(pt.sv.p, pt.sv.l, sbuff);
+			}
+		}
+		writeInt16(1, sbuff);
+		writeInt16(1, sbuff);
+	} else {
+		writeInt16(0, sbuff);
+		writeInt16(0, sbuff);
+		writeInt16(1, sbuff);
+		writeInt16(1, sbuff);
+	}
+	if(send(fd, sbuff.c_str(), sbuff.length(), 0)<=0) {
+		perror("Can't send Ext_Bind packet to postgres");
+		return false;
+	}
+	//state = '0';
+	return true;
+}
+
+void FpgWire::run() {
+	if(readFrom()==0) {
+		return;
+	}
+	
+	while(buffer.length()>0) {
+		handleResponse();
+		if(pos>buffer.length()) {
+			return;
+		}
+		buffer = buffer.substr(pos);
+		pos = 0;
+	}
+	
+	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)this->sif;
+	if(ritem!=NULL && querystatus==-1) {
+		fprintf(stderr, "Query failed: %s\n", err.c_str());
+		if(ritem->fcb1!=NULL) {
+			ritem->fcb1(ritem->ctx, false, q->query, counter);
+		} else if(q->fcb1!=NULL) {
+			q->fcb1(q->ctx, false, q->query, counter);
+		}
+		ritem = NULL;
+		ths->pop();
+		counter = -1;
+		flux = false;
+	} else if(ritem!=NULL && querystatus==2) {
+		if(ritem->cnt==-1) {
+			if(ritem->fcb1!=NULL) {
+				ritem->fcb1(ritem->ctx, true, q->query, counter);
+			}
+			if(q->isMulti) {
+				ritem->pop();
+			}
+			q = NULL;
+			ritem = NULL;
+			ths->pop();
+			counter = -1;
+			flux = false;
+		} else {
+			if(!q->isMulti || q->query=="BEGIN" || q->query=="COMMIT" || q->query=="ROLLBACK") {
+				if(ritem!=NULL) ritem->pop();
+				q = NULL;
+			}
+		}
+	}
+	
+	if(isClosed()) {
+		return;
+	} else {
+		doneRead();
+	}
+
+	if(querystatus==2) submit(NULL);
+}
+void FpgWire::submit(LibpqAsyncReq* nitem) {
+	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)this->sif;
+
+	if(flux && nitem!=NULL) {
+		return;
+	}
+
+	if(ritem==NULL) {
+		ritem = ths->peek();
+	}
+
+	if(ritem!=NULL) {
+		if(ritem->q.size()>0) {
+			if(q==NULL) {
+				counter ++;
+				q = ritem->peek();
+			}
+
+			if(q->isMulti) {
+				query(q->query);
+				return;
+			}
+
+			preparedQuery(*q);
+			flux = true;
+		} else {
+			ritem = NULL;
+			ths->pop();
+		}
+	}
+}

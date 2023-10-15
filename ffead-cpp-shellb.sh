@@ -147,6 +147,8 @@ function do_start() {
 		set_inc_src "web/t3/include" "web/t3/src" "shared:t3" "ffead-framework,ffead-modules"
 		set_inc_src "web/t4/include" "web/t4/src" "shared:t4" "ffead-framework,ffead-modules"
 		set_inc_src "web/t5/include" "web/t5/src" "shared:t5" "ffead-framework,ffead-modules"
+		set_inc_src "web/t6/include" "web/t6/src" "shared:t6" "ffead-framework,ffead-modules"
+		set_inc_src "web/t7/include" "web/t7/src" "shared:t7" "ffead-framework,ffead-modules"
 	fi
 	templatize "rtdcf/inter-shellb.sh.tem" "rtdcf/inter-shellb.sh" "CPPFLAGS,LFLAGS,LIBS"
 }
@@ -158,7 +160,7 @@ function do_install() {
 		install_here "web" "web/t2"
 	fi
 	if is_config "MOD_SDORM_SQL"; then
-		install_here "web" "web/t3" "web/t4" "web/t5"
+		install_here "web" "web/t3" "web/t4" "web/t5" "web/t6" "web/t7"
 	fi
 	install_here "lib" "lib*.${SHLIB_EXT}"
 	install_here "include" "src/framework@*.h" "src/modules@*.h"

@@ -337,20 +337,15 @@ SOCKET Server::createListener(const int& port, const bool& block, bool isSinglEV
 		}
 	#endif
 #else
-	#ifdef CYGWIN
-		#ifdef HAVE_SO_REUSEADDR
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-			perror("setsockopt");
-		}
-		#endif
-	#else
-		#if defined(HAVE_SO_REUSEADDR) && defined(HAVE_SO_REUSEPORT)
-		if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), &yes, sizeof(int)) == -1) {
-		#else
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-		#endif
-			perror("setsockopt");
-		}
+	#ifdef HAVE_SO_REUSEADDR
+	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+		perror("setsockopt");
+	}
+	#endif
+	#ifdef HAVE_SO_REUSEPORT
+	if (isSinglEVH && setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof(int)) == -1) {
+		perror("setsockopt");
+	}
 	#endif
 	#ifdef HAVE_TCP_QUICKACK
 		if (setsockopt(sockfd, IPPROTO_TCP, TCP_QUICKACK, &yes, sizeof(int)) == -1) {
@@ -364,6 +359,9 @@ SOCKET Server::createListener(const int& port, const bool& block, bool isSinglEV
 	#endif
 	#ifdef HAVE_TCP_FASTOPEN
 		option = 4096;
+		#ifdef OS_DARWIN
+		option = 1;
+		#endif
 		if (setsockopt(sockfd, IPPROTO_TCP, TCP_FASTOPEN, &option, sizeof(int)) == -1) {
 			perror("setsockopt");
 		}
@@ -477,20 +475,15 @@ SOCKET Server::createListener(const std::string& ipAddress, const int& port, con
 		}
 	#endif
 #else
-	#ifdef CYGWIN
-		#ifdef HAVE_SO_REUSEADDR
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-			perror("setsockopt");
-		}
-		#endif
-	#else
-		#if defined(HAVE_SO_REUSEADDR) && defined(HAVE_SO_REUSEPORT)
-		if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), &yes, sizeof(int)) == -1) {
-		#else
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-		#endif
-			perror("setsockopt");
-		}
+	#ifdef HAVE_SO_REUSEADDR
+	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+		perror("setsockopt");
+	}
+	#endif
+	#ifdef HAVE_SO_REUSEPORT
+	if (isSinglEVH && setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof(int)) == -1) {
+		perror("setsockopt");
+	}
 	#endif
 	#ifdef HAVE_TCP_QUICKACK
 		if (setsockopt(sockfd, IPPROTO_TCP, TCP_QUICKACK, &yes, sizeof(int)) == -1) {
@@ -504,7 +497,10 @@ SOCKET Server::createListener(const std::string& ipAddress, const int& port, con
 	#endif
 	#ifdef HAVE_TCP_FASTOPEN
 		option = 4096;
-		if (setsockopt(sockfd, IPPROTO_TCP, TCP_FASTOPEN, &option, sizeof(int)) == -1) {
+		#ifdef OS_DARWIN
+		option = 1;
+		#endif
+		if (setsockopt(sockfd, IPPROTO_TCP, TCP_FASTOPEN, (const void *)&option, sizeof(option)) == -1) {
 			perror("setsockopt");
 		}
 	#endif
