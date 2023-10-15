@@ -119,12 +119,12 @@ public:
 		return tokens;
 	}
 	static inline void to_nbo(double in, double *out) {
-		uint64_t *i = (uint64_t *)&in;
-		uint32_t *r = (uint32_t *)out;
+		unsigned long long *i = (unsigned long long *)&in;
+		unsigned int *r = (unsigned int *)out;
 
 		/* convert input to network byte order */
-		r[0] = htonl((uint32_t)((*i) >> 32));
-		r[1] = htonl((uint32_t)*i);
+		r[0] = htonl((unsigned int)((*i) >> 32));
+		r[1] = htonl((unsigned int)*i);
 	}
 	static int countOccurrences(const std::string& input, const std::string& delimiter);
 	static void trim(std::string& str);
