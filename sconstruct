@@ -376,15 +376,15 @@ if bool(mod_sql):
 	build_env.SConscript('%s/web/t6/sconscript' % modeDir, {'env': build_env})
 	build_env.SConscript('%s/web/t7/sconscript' % modeDir, {'env': build_env})
 
-Delete("ffead-cpp-6.0-bin")
-Mkdir("ffead-cpp-6.0-bin")
-Mkdir("ffead-cpp-6.0-bin/include")
-Mkdir("ffead-cpp-6.0-bin/lib")
-Mkdir("ffead-cpp-6.0-bin/tests")
-Mkdir("ffead-cpp-6.0-bin/logs")
-build_env.Install('ffead-cpp-6.0-bin', source = ['resources', 'public', 'web', 'rtdcf', modeDir+'/bin/ffead-cpp'])
-build_env.Install('ffead-cpp-6.0-bin', source = Glob('script/*.sh') + Glob('script/*.key') + Glob('script/*.pem') + Glob('script/*.crt'))
-build_env.Install('ffead-cpp-6.0-bin/include', source = Glob('src/framework/*.h') + Glob('src/modules/*.h'))
+Delete("ffead-cpp-7.0-bin")
+Mkdir("ffead-cpp-7.0-bin")
+Mkdir("ffead-cpp-7.0-bin/include")
+Mkdir("ffead-cpp-7.0-bin/lib")
+Mkdir("ffead-cpp-7.0-bin/tests")
+Mkdir("ffead-cpp-7.0-bin/logs")
+build_env.Install('ffead-cpp-7.0-bin', source = ['resources', 'public', 'web', 'rtdcf', modeDir+'/bin/ffead-cpp'])
+build_env.Install('ffead-cpp-7.0-bin', source = Glob('script/*.sh') + Glob('script/*.key') + Glob('script/*.pem') + Glob('script/*.crt'))
+build_env.Install('ffead-cpp-7.0-bin/include', source = Glob('src/framework/*.h') + Glob('src/modules/*.h'))
 for root, dirnames, filenames in os.walk('src/modules'):
 	filenames = [f for f in filenames if not f[0] == '.']
 	dirnames[:] = [d for d in dirnames if not d[0] == '.']
@@ -406,7 +406,7 @@ for root, dirnames, filenames in os.walk('src/modules'):
 		if 'elasticsearch' in dirPath:
 			if not mod_elastic:
 				continue
-		build_env.Install('ffead-cpp-6.0-bin/include', source = Glob("%s/*.h" % dirPath))
+		build_env.Install('ffead-cpp-7.0-bin/include', source = Glob("%s/*.h" % dirPath))
 for root, dirnames, filenames in os.walk('web'):
 	filenames = [f for f in filenames if not f[0] == '.']
 	dirnames[:] = [d for d in dirnames if not d[0] == '.']
@@ -417,5 +417,5 @@ for root, dirnames, filenames in os.walk('web'):
 		if bool(mod_sql) and ('t3' in dirPath or 't4' in dirPath or 't5' in dirPath or 't6' in dirPath or 't7' in dirPath):
 			continue
 		#delete src and other build files from web directories
-build_env.Install('ffead-cpp-6.0-bin/lib', source = Glob(modeDir+'/bin/lib*'))
-build_env.Install('ffead-cpp-6.0-bin/tests', source = Glob('tests/*.sh') + Glob('tests/*.csv') + Glob('tests/*.prop') + Glob('tests/*.pem') + [modeDir+'/bin/tests'])
+build_env.Install('ffead-cpp-7.0-bin/lib', source = Glob(modeDir+'/bin/lib*'))
+build_env.Install('ffead-cpp-7.0-bin/tests', source = Glob('tests/*.sh') + Glob('tests/*.csv') + Glob('tests/*.prop') + Glob('tests/*.pem') + [modeDir+'/bin/tests'])

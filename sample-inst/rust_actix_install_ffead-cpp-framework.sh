@@ -7,7 +7,7 @@ WRIT_THREADS=$(( $MAX_THREADS / 3 ))
 SERV_THREADS=$(( $MAX_THREADS - $WRIT_THREADS ))
 
 rm -rf nginxfc
-rm -rf ffead-cpp-6.0/
+rm -rf ffead-cpp-7.0/
 
 if [ ! -d "rust-actix" ]
 then
@@ -65,7 +65,7 @@ rm -f /usr/local/lib/libt5.so*
 rm -f /usr/local/lib/libinter.so
 rm -f /usr/local/lib/libdinter.so
 
-cd ffead-cpp-6.0-bin
+cd ffead-cpp-7.0-bin
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 ./server.sh &
 while [ ! -f lib/libinter.so ]
@@ -79,10 +79,10 @@ done
 pkill ffead-cpp
 
 cd /root/ffead-cpp
-cp -rf ffead-cpp-6.0-bin /root/ffead-cpp-6.0
-rm -rf ffead-cpp-6.0-bin
+cp -rf ffead-cpp-7.0-bin /root/ffead-cpp-7.0
+rm -rf ffead-cpp-7.0-bin
 
-cd /root/ffead-cpp-6.0
+cd /root/ffead-cpp-7.0
 cp -f lib/* /usr/local/lib
 ldconfig
 
@@ -92,4 +92,4 @@ chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 
 cd /root/ffead-cpp/lang-server-backends/rust/actix-ffead-cpp
 cargo build
-cp target/debug/actix-ffead-cpp /root/ffead-cpp/ffead-cpp-6.0-bin/
+cp target/debug/actix-ffead-cpp /root/ffead-cpp/ffead-cpp-7.0-bin/

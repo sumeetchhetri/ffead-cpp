@@ -2,7 +2,7 @@ mkdir /tmp/profile-data
 
 rm -rf $IROOT/ffead-cpp-6.0-sql
 
-if [ "$1" = "batch-old" ]
+if [ "$1" = "batch-experimental-unused" ]
 then
 	apt remove -yqq libpq-dev
 	apt autoremove -yqq
@@ -26,7 +26,7 @@ then
 	cp ../../../src/include/postgres_ext.h ../../../src/include/pg_config_ext.h libpq-fe.h /usr/include
 fi
 
-if [ "$1" = "batch" ]
+if [ "$1" = "batch-use-pipeline-instead" ]
 then
 	apt remove -yqq libpq-dev
 	apt autoremove -yqq

@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.8.2)
-project (ffead-cpp-6.0)
+project (ffead-cpp-7.0)
 include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 include(CheckSymbolExists)

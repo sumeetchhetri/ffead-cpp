@@ -27,15 +27,15 @@ RUN cd hiredis-1.0.0/ && cmake . && make install
 WORKDIR /tmp
 RUN rm -rf hiredis-1.0.0
 
-RUN wget -q https://github.com/sewenew/redis-plus-plus/archive/refs/tags/1.3.3.tar.gz
-RUN tar xf 1.3.3.tar.gz
-RUN rm -f 1.3.3.tar.gz
-WORKDIR redis-plus-plus-1.3.3/
+RUN wget -q https://github.com/sewenew/redis-plus-plus/archive/refs/tags/1.3.10.tar.gz
+RUN tar xf 1.3.10.tar.gz
+RUN rm -f 1.3.10.tar.gz
+WORKDIR redis-plus-plus-1.3.10/
 RUN mkdir build
 WORKDIR build
 RUN cmake -DREDIS_PLUS_PLUS_CXX_STANDARD=17 .. && make && make install
 WORKDIR /tmp
-RUN rm -rf redis-plus-plus-1.3.3
+RUN rm -rf redis-plus-plus-1.3.10
 
 #Install mongodb c driver
 RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
@@ -56,7 +56,7 @@ WORKDIR /tmp/ffead-cpp-src
 #RUN rm -f /usr/local/bin/shellb && wget -q https://github.com/sumeetchhetri/shellb/releases/download/2.0.0/shellb -P /usr/local/bin && chmod +x /usr/local/bin/shellb
 
 RUN chmod +x ./shellb && ./shellb ffead-cpp-buck2
-RUN mv /tmp/ffead-cpp-src/shellb_out/ffead-cpp-6.0-bin /tmp/
+RUN mv /tmp/ffead-cpp-src/shellb_out/ffead-cpp-7.0-bin /tmp/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src
 

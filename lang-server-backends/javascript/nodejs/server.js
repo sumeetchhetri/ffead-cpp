@@ -171,7 +171,7 @@ var server = http.createServer(function(request, response) {
 });
 
 var args = process.argv.slice(2);
-var server_dir = (args.length>1 && args[1].trim()!="")?args[1].trim():"/installs/ffead-cpp-6.0";
+var server_dir = (args.length>1 && args[1].trim()!="")?args[1].trim():"/installs/ffead-cpp-7.0";
 var debug = (args.length>2 && args[2].toLowerCase().trim()=="true");
 
 libffeadcpp.ffead_cpp_bootstrap(server_dir, server_dir.length, 27);

@@ -88,9 +88,9 @@ mkdir build
 cd build
 cmake -G "MinGW Makefiles" -DSRV_EMB=on -DMOD_REDIS=ON -DMOD_SDORM_MONGO=ON -DCMAKE_INC_PATH=/mingw64/ ..
 mingw32-make -j4 install
-mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
-cd /tmp/ffead-cpp-6.0-bin && chmod +x *.sh
-export PATH=/tmp/ffead-cpp-6.0-bin/lib:/mingw64/bin:/mingw64/lib:$PATH
+mv /tmp/ffead-cpp-src/ffead-cpp-7.0-bin /tmp/
+cd /tmp/ffead-cpp-7.0-bin && chmod +x *.sh
+export PATH=/tmp/ffead-cpp-7.0-bin/lib:/mingw64/bin:/mingw64/lib:$PATH
 nohup bash -c "./server.sh > ffead.log &"
 echo "Waiting for ffead-cpp to launch on port 8080..."
 COUNTER=0

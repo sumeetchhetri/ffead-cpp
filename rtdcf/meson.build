@@ -1,4 +1,4 @@
-project('ffead-cpp-inter', 'cpp', version : '6.0', license : 'Apache', default_options : ['cpp_std=c++17'])
+project('ffead-cpp-inter', 'cpp', version : '7.0', license : 'Apache', default_options : ['cpp_std=c++17'])
 
 cc = meson.get_compiler('cpp')
 

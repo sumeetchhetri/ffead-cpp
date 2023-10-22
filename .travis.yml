@@ -11,7 +11,7 @@ services:
 script:
   - cd ../../
   - git clone https://github.com/TechEmpower/FrameworkBenchmarks
-  - cp -rf sumeetchhetri/ffead-cpp/docker/techempower-config/* FrameworkBenchmarks/frameworks/C++/ffead-cpp
+  - cp -rf sumeetchhetri/ffead-cpp/docker/te/* FrameworkBenchmarks/frameworks/C++/ffead-cpp
   - cp -f sumeetchhetri/ffead-cpp/web/t1/include/*.h FrameworkBenchmarks/frameworks/C++/ffead-cpp/t1/include/
   - cp -f sumeetchhetri/ffead-cpp/web/t1/src/*.cpp FrameworkBenchmarks/frameworks/C++/ffead-cpp/t1/src/
   - cp -f sumeetchhetri/ffead-cpp/web/t2/include/*.h FrameworkBenchmarks/frameworks/C++/ffead-cpp/t2/include/

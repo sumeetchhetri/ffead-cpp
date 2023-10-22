@@ -186,7 +186,7 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 }
 
 fn main() {
-	mut server_directory := '/installs/ffead-cpp-6.0'
+	mut server_directory := '/installs/ffead-cpp-7.0'
 	mut server_port := 8080
 
 	mut fp := flag.new_flag_parser(os.args)

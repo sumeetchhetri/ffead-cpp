@@ -399,7 +399,7 @@ protected:
 	void submit(LibpqAsyncReq* nitem);
 public:
     FpgWire(SocketInterface* sif, bool isAsync = false);
-	bool connect(std::string url, bool isAsync);
+	bool connect(std::string url, bool isAsync, bool isAutoCommit);
     bool connect(std::string host, int port, bool isAsync, std::string database, std::string user, std::string password);
 	void reset();
     bool updateQuery(LibpqQuery& q);
@@ -414,6 +414,7 @@ class LibpqDataSourceImpl : public DataSourceType, public SocketInterface {
 	bool isAsync;
 	bool isBatch;
 	bool isWire;
+	bool isAutoCommitMode;
 	bool stEvhMode;//seperate event handler thread mode
 	std::deque<LibpqAsyncReq> Q;
 	static std::atomic<bool> done;
@@ -435,7 +436,7 @@ class LibpqDataSourceImpl : public DataSourceType, public SocketInterface {
 	//friend class PgWireReadTask;
 public:
 	DSType getType();
-	LibpqDataSourceImpl(const std::string&, bool isAsync, bool isBatch, bool isWire = false);
+	LibpqDataSourceImpl(const ConnectionNode&, const ConnectionProperties&);
 	virtual ~LibpqDataSourceImpl();
 	//LibpqParamsBase* getParams(int size);
 

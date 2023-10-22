@@ -87,7 +87,7 @@ find_char_fast(const char *buf, size_t i, size_t size, __m128i range, size_t ran
 {
   size_t left = (size - i) & ~15;
   do {
-    __m128i b16 = _mm_loadu_si128((void *)(buf + i));
+    __m128i b16 = _mm_loadu_si128((const __m128i_u*)(buf + i));
     int index = _mm_cmpestri(range, range_size, b16, 16, _SIDD_CMP_EQUAL_ANY);
     if (unlikely(index != 16)) {
       i += index;
@@ -130,7 +130,7 @@ std::string_view hesc_escape_html(const uint8_t *buf, size_t size, std::string& 
   while (likely(size - i >= 16)) {
     int found = 0;
     if (unlikely((esc_i = HTML_ESCAPE_TABLE[buf[i]]) == 0)) {
-      i = find_char_fast(buf, i, size, escapes5, 5, &found);
+      i = find_char_fast((const char *)buf, i, size, escapes5, 5, &found);
       if (!found) break;
       esc_i = HTML_ESCAPE_TABLE[buf[i]];
     }

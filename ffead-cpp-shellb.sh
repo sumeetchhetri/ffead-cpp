@@ -26,7 +26,7 @@ function do_config() {
 }
 function do_start() {
 	set_out "shellb_out"
-	set_install "ffead-cpp-6.0-bin"
+	set_install "ffead-cpp-7.0-bin"
 	finc_cpp_compiler "Please install a c++ compiler to proceed"
 	cpp_flags "-std=c++17 -Wall"
 	l_flags ""

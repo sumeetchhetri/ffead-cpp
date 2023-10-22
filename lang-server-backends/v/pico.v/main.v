@@ -269,7 +269,7 @@ fn set_date() {
 __global pv picoev.Picoev
 
 fn main() {
-	mut server_directory := '/installs/ffead-cpp-6.0'
+	mut server_directory := '/installs/ffead-cpp-7.0'
 	mut server_port := 8080
 	mut is_async := false
 

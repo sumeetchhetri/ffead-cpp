@@ -85,15 +85,15 @@ RUN cd hiredis-1.0.0/ && cmake . && make install
 WORKDIR /tmp
 RUN rm -rf hiredis-1.0.0
 
-RUN wget -q https://github.com/sewenew/redis-plus-plus/archive/refs/tags/1.3.3.tar.gz
-RUN tar xf 1.3.3.tar.gz
-RUN rm -f 1.3.3.tar.gz
-WORKDIR redis-plus-plus-1.3.3/
+RUN wget -q https://github.com/sewenew/redis-plus-plus/archive/refs/tags/1.3.10.tar.gz
+RUN tar xf 1.3.10.tar.gz
+RUN rm -f 1.3.10.tar.gz
+WORKDIR redis-plus-plus-1.3.10/
 RUN mkdir build
 WORKDIR build
 RUN cmake -DREDIS_PLUS_PLUS_CXX_STANDARD=17 .. && make && make install
 WORKDIR /tmp
-RUN rm -rf redis-plus-plus-1.3.3
+RUN rm -rf redis-plus-plus-1.3.10
 
 #WRK
 WORKDIR /tmp/wrk
@@ -156,36 +156,36 @@ RUN mkdir build
 WORKDIR /tmp/ffead-cpp-src/build
 RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DDEBUG=on -DWITH_IOURING=on ..
 RUN ninja install && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2 && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw-async-iouring && cd .. && rm -rf build && mkdir build
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-7.0-bin/web/t1 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-7.0-bin/web/t3 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-7.0-bin/web/t2 && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-7.0-bin /tmp/ffead-cpp-sql-raw-async-iouring && cd .. && rm -rf build && mkdir build
 
 WORKDIR /tmp/ffead-cpp-src/build
 RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DDEBUG=on ..
 RUN ninja install && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2 && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw-async && cd .. && rm -rf build && mkdir build
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-7.0-bin/web/t1 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-7.0-bin/web/t3 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-7.0-bin/web/t2 && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-7.0-bin /tmp/ffead-cpp-sql-raw-async && cd .. && rm -rf build && mkdir build
 
 WORKDIR /tmp/ffead-cpp-src/build
 RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DDEBUG=on -DWITH_PICOEV=on ..
 RUN ninja install && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2 && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw-async-picoev && cd .. && rm -rf build && mkdir build
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-7.0-bin/web/t1 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-7.0-bin/web/t3 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-7.0-bin/web/t2 && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-7.0-bin /tmp/ffead-cpp-sql-raw-async-picoev && cd .. && rm -rf build && mkdir build
 
 WORKDIR /tmp/ffead-cpp-src/build
 RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DDEBUG=on ..
 RUN ninja install && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t3/config/cache.xml && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t1 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t2 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t4 && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-6.0-bin/web/t5 && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-sql-raw && cd .. && rm -rf build
+	cp -f /tmp/ffead-cpp-src/ffead-cpp-7.0-bin/web/t3/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-7.0-bin/web/t3/config/cache.xml && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-7.0-bin/web/t1 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-7.0-bin/web/t2 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-7.0-bin/web/t4 && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-7.0-bin/web/t5 && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-7.0-bin /tmp/ffead-cpp-sql-raw && cd .. && rm -rf build
 
 COPY pico.v /tmp/pico.v
 RUN wget -q https://github.com/vlang/v/releases/download/0.1.29/v_linux.zip && unzip -q v_linux.zip && cp /tmp/pico.v/picoev.v v/vlib/picoev/picoev.v && cd v && chmod +x v && ./v symlink && cd .. && rm -f v_linux.zip

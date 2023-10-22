@@ -1,1 +1,1 @@
-./fasthttp-ffead-cpp --server_directory=/root/ffead-cpp-6.0 -addr=8080
+./fasthttp-ffead-cpp --server_directory=/root/ffead-cpp-7.0 -addr=8080

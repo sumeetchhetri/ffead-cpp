@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-base:6.0
+FROM sumeetchhetri/ffead-cpp-base:7.0
 
 #seastar needs ubuntu 20 and boost >= 1.66
 WORKDIR ${IROOT}
@@ -6,14 +6,14 @@ WORKDIR ${IROOT}
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/libinter.so /usr/local/lib/libdinter.so && \
-	ln -s ${IROOT}/ffead-cpp-6.0/lib/libt1.so /usr/local/lib/libt1.so && \
-	ln -s ${IROOT}/ffead-cpp-6.0/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
-	ln -s ${IROOT}/ffead-cpp-6.0/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
-	ln -s ${IROOT}/ffead-cpp-6.0/lib/libinter.so /usr/local/lib/libinter.so && \
-	ln -s ${IROOT}/ffead-cpp-6.0/lib/libdinter.so /usr/local/lib/libdinter.so && \
+	ln -s ${IROOT}/ffead-cpp-7.0/lib/libt1.so /usr/local/lib/libt1.so && \
+	ln -s ${IROOT}/ffead-cpp-7.0/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
+	ln -s ${IROOT}/ffead-cpp-7.0/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
+	ln -s ${IROOT}/ffead-cpp-7.0/lib/libinter.so /usr/local/lib/libinter.so && \
+	ln -s ${IROOT}/ffead-cpp-7.0/lib/libdinter.so /usr/local/lib/libdinter.so && \
 	ldconfig
 
-ENV FFEAD_CPP_PATH=${IROOT}/ffead-cpp-6.0
+ENV FFEAD_CPP_PATH=${IROOT}/ffead-cpp-7.0
 ENV LD_LIBRARY_PATH=${IROOT}/:${IROOT}/lib:${FFEAD_CPP_PATH}/lib:/usr/local/lib:$LD_LIBRARY_PATH
 
 #seastar need hwloc 2
@@ -43,7 +43,7 @@ COPY SeastarFfeadCpp.cpp run.sh ${IROOT}/lang-server-backends/c++/seastar/
 
 WORKDIR ${IROOT}/lang-server-backends/c++/seastar
 
-#RUN cp /tmp/stop_signal.hh . &&  g++ -g SeastarFfeadCpp.cpp -I/home/mavuser/ffead-cpp-6.0/include/ -I/usr/include/libmongoc-1.0 \
+#RUN cp /tmp/stop_signal.hh . &&  g++ -g SeastarFfeadCpp.cpp -I/home/mavuser/ffead-cpp-7.0/include/ -I/usr/include/libmongoc-1.0 \
 #	-I/usr/include/libbson-1.0 -I. -I/usr/local/include $(pkg-config --libs --cflags --static seastar) -lffead-framework \
 #	-lffead-modules -o ffead-cpp-seastar
 

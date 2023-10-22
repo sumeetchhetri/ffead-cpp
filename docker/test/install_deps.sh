@@ -99,15 +99,15 @@ cd hiredis-1.0.0/ && cmake . && make install
 cd  /tmp
 rm -rf hiredis-1.0.0
 
-wget -q https://github.com/sewenew/redis-plus-plus/archive/refs/tags/1.3.3.tar.gz
-tar xf 1.3.3.tar.gz
-rm -f 1.3.3.tar.gz
-cd redis-plus-plus-1.3.3/
+wget -q https://github.com/sewenew/redis-plus-plus/archive/refs/tags/1.3.10.tar.gz
+tar xf 1.3.10.tar.gz
+rm -f 1.3.10.tar.gz
+cd redis-plus-plus-1.3.10/
 mkdir build
 cd build
 cmake -DREDIS_PLUS_PLUS_CXX_STANDARD=17 .. && make && make install
 cd /tmp
-rm -rf redis-plus-plus-1.3.3
+rm -rf redis-plus-plus-1.3.10
 
 #Install mongodb c driver
 wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz

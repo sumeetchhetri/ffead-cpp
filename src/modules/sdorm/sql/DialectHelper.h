@@ -47,11 +47,12 @@ public:
 	static int PAGINATION_OFFSET_SQL, PAGINATION_NO_OFFSET_SQL, VALIDDB_FUNCTIONS, IDGEN_SEQUENCE_QUERY,
 				IDGEN_TABLESEL_QUERY, IDGEN_TABLEUPD_QUERY, IS_TRANSACTION_SUPPORTED, IDGEN_IDENTITY_QUERY,
 				IDGEN_TABLESELNOLOCK_QUERY, IDGEN_TABLESELNOLOCKMHL_QUERY, IDGEN_TABLESELMHL_QUERY,
-				IDGEN_TABLEUPDMHL_QUERY, BULK_INSERT_QUERY, BULK_UPDATE_QUERY;
+				IDGEN_TABLEUPDMHL_QUERY, BULK_INSERT_QUERY, BULK_UPDATE_QUERY, AUTOCOMMIT_QUERY;
 	static std::string getSQLString(const std::string& dialect, const int& type, std::string query, StringContext params);
 	static std::string getSQLString(const std::string& dialect, const int& type, StringContext params);
 	static std::string getProperty(const std::string& dialect, const int& type);
 	static bool isTransactionSupported(const std::string& dialect);
+	static std::string getAutoCommitSQLString(const std::string& dialect);
 	static std::string getIdGenerateQueryPre(const std::string& dialect, const DataSourceEntityMapping& dsemp);
 	static std::string getIdGenerateQueryPost(const std::string& dialect, const DataSourceEntityMapping& dsemp);
 	static void load();

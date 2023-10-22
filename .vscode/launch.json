@@ -8,24 +8,24 @@
 		"type": "lldb",
 		"request": "launch",
 		"name": "ffead-cpp",
-		"program": "${workspaceFolder}/ffead-cpp-6.0-bin/ffead-cpp",
+		"program": "${workspaceFolder}/ffead-cpp-7.0-bin/ffead-cpp",
 		"preLaunchTask": "permissions",
-		"args": ["${workspaceFolder}/ffead-cpp-6.0-bin"],
+		"args": ["${workspaceFolder}/ffead-cpp-7.0-bin"],
 		"env": { 
-			"LD_LIBRARY_PATH": "${workspaceFolder}/ffead-cpp-6.0-bin/lib:/usr/local/lib:${env:LD_LIBRARY_PATH}",//For Linux
-			"DYLD_LIBRARY_PATH": "${workspaceFolder}/ffead-cpp-6.0-bin/lib:/usr/local/lib:${env:DYLD_LIBRARY_PATH}",//For Macos
+			"LD_LIBRARY_PATH": "${workspaceFolder}/ffead-cpp-7.0-bin/lib:/usr/local/lib:${env:LD_LIBRARY_PATH}",//For Linux
+			"DYLD_LIBRARY_PATH": "${workspaceFolder}/ffead-cpp-7.0-bin/lib:/usr/local/lib:${env:DYLD_LIBRARY_PATH}",//For Macos
 		}
 	},
 	{
 		"type": "lldb",
 		"request": "launch",
 		"name": "tests",
-		"program": "${workspaceFolder}/ffead-cpp-6.0-bin/tests/tests",
+		"program": "${workspaceFolder}/ffead-cpp-7.0-bin/tests/tests",
 		"preLaunchTask": "permissions",
 		"args": [],
 		"env": { 
-			"LD_LIBRARY_PATH": "${workspaceFolder}/ffead-cpp-6.0-bin/lib:/usr/local/lib:${env:LD_LIBRARY_PATH}",//For Linux
-			"DYLD_LIBRARY_PATH": "${workspaceFolder}/ffead-cpp-6.0-bin/lib:/usr/local/lib:${env:DYLD_LIBRARY_PATH}",//For Macos
+			"LD_LIBRARY_PATH": "${workspaceFolder}/ffead-cpp-7.0-bin/lib:/usr/local/lib:${env:LD_LIBRARY_PATH}",//For Linux
+			"DYLD_LIBRARY_PATH": "${workspaceFolder}/ffead-cpp-7.0-bin/lib:/usr/local/lib:${env:DYLD_LIBRARY_PATH}",//For Macos
 		}
 	},
 	{
@@ -36,8 +36,8 @@
 		"preLaunchTask": "permissions",
 		"args": [],
 		"env": { 
-			"LD_LIBRARY_PATH": "${workspaceFolder}/ffead-cpp-6.0-bin/lib:/usr/local/lib:${env:LD_LIBRARY_PATH}",//For Linux
-			"DYLD_LIBRARY_PATH": "${workspaceFolder}/ffead-cpp-6.0-bin/lib:/usr/local/lib:${env:DYLD_LIBRARY_PATH}",//For Macos
+			"LD_LIBRARY_PATH": "${workspaceFolder}/ffead-cpp-7.0-bin/lib:/usr/local/lib:${env:LD_LIBRARY_PATH}",//For Linux
+			"DYLD_LIBRARY_PATH": "${workspaceFolder}/ffead-cpp-7.0-bin/lib:/usr/local/lib:${env:DYLD_LIBRARY_PATH}",//For Macos
 		}
 	}]
 }

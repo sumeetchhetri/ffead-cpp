@@ -1,7 +1,7 @@
 FROM buildpack-deps:latest
 
 ENV IROOT=/installs
-ENV FFEAD_CPP_PATH=${IROOT}/ffead-cpp-6.0
+ENV FFEAD_CPP_PATH=${IROOT}/ffead-cpp-7.0
 ENV PATH=${FFEAD_CPP_PATH}:${PATH}
 ENV TROOT=/
 

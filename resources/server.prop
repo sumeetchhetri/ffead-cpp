@@ -23,7 +23,7 @@ AUTH_ENAB=false
 NUM_PROC=1
 
 #Is Single event handler thread
-EVH_SINGLE=false
+EVH_SINGLE=true
 
 #Do we parse headers lazily?
 LAZY_HEADER_PARSE=false
@@ -109,5 +109,5 @@ ENABLE_JOBS=true
 ENABLE_STATIC_RESP=true
 STATIC_PATH_RESP=/plaintext|text/plain|Hello, World!
 
-REQUEST_HANDLER=RequestReaderHandler
+REQUEST_HANDLER=RequestHandler2
 QUEUED_WRITES=false

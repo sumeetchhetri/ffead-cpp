@@ -2,7 +2,7 @@ set_project("ffead-cpp")
 
 set_xmakever("2.3.2")
 
-set_version("6.0", {build = "%Y%m%d%H%M"})
+set_version("7.0", {build = "%Y%m%d%H%M"})
 
 if is_mode("debug") then
 	set_warnings("all", "error")
@@ -783,7 +783,7 @@ function setIncludes(target)
 	end
 end
 
-local bindir = "$(projectdir)/ffead-cpp-6.0-bin"
+local bindir = "$(projectdir)/ffead-cpp-7.0-bin"
 
 function getOptions()
 	return {"CHECK_UUID", "LIBPQ", "CHECK_REGEX", "SSL", "ZLIB", "CURL", "GENERIC", "LIBCUCKOO", "WITH_PICOEV",

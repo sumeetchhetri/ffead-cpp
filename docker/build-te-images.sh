@@ -12,7 +12,7 @@ then
 	exit 0
 fi
 
-cd techempower-config
+cd te
 rm -rf temp
 mkdir temp
 cp base/*.dockerfile lang/*.dockerfile scripts/*.sh *.sh *.dockerfile temp/
@@ -43,10 +43,6 @@ docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-async-profiled-base:${VERSION}
 docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-sql-raw-async-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-async-profiled-base:${VERSION} .
 docker push sumeetchhetri/ffead-cpp-sql-raw-async-profiled-base:${VERSION}
 
-docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-async-pool-profiled-base:${VERSION}
-docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-sql-raw-async-pool-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-async-pool-profiled-base:${VERSION} .
-docker push sumeetchhetri/ffead-cpp-sql-raw-async-pool-profiled-base:${VERSION}
-
 docker rmi -f sumeetchhetri/ffead-cpp-v-base:${VERSION}
 docker build --progress plain -f ffead-cpp-v-base.dockerfile -t sumeetchhetri/ffead-cpp-v-base:${VERSION} .
 docker push sumeetchhetri/ffead-cpp-v-base:${VERSION}
@@ -58,35 +54,3 @@ docker push sumeetchhetri/ffead-cpp-v-picov-raw-profiled-base:${VERSION}
 docker rmi -f sumeetchhetri/ffead-cpp-v-picov-raw-async-profiled-base:${VERSION}
 docker build --progress plain -f ffead-cpp-v-picov-raw-async-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-v-picov-raw-async-profiled-base:${VERSION} .
 docker push sumeetchhetri/ffead-cpp-v-picov-raw-async-profiled-base:${VERSION}
-
-docker rmi -f sumeetchhetri/ffead-cpp-v-picov-raw-async-pool-profiled-base:${VERSION}
-docker build --progress plain -f ffead-cpp-v-picov-raw-async-pool-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-v-picov-raw-async-pool-profiled-base:${VERSION} .
-docker push sumeetchhetri/ffead-cpp-v-picov-raw-async-pool-profiled-base:${VERSION}
-
-####docker rmi -f sumeetchhetri/ffead-cpp-java-base:${VERSION}
-####docker build --progress plain -f ffead-cpp-java-base.dockerfile -t sumeetchhetri/ffead-cpp-java-base:${VERSION} .
-####docker push sumeetchhetri/ffead-cpp-java-base:${VERSION}
-
-####docker rmi -f sumeetchhetri/ffead-cpp-rust-base:${VERSION}
-####docker build --progress plain -f ffead-cpp-rust-base.dockerfile -t sumeetchhetri/ffead-cpp-rust-base:${VERSION} .
-####docker push sumeetchhetri/ffead-cpp-rust-base:${VERSION}
-
-####docker rmi -f sumeetchhetri/ffead-cpp-v-picov-raw-clibpqb-profiled-base:${VERSION}
-####docker build --progress plain -f ffead-cpp-v-picov-raw-clibpqb-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-v-picov-raw-clibpqb-profiled-base:${VERSION} .
-####docker push sumeetchhetri/ffead-cpp-v-picov-raw-clibpqb-profiled-base:${VERSION}
-
-####docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-clibpqb-profiled-base:${VERSION}
-####docker build --progress plain -f ffead-cpp-sql-raw-clibpqb-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-clibpqb-profiled-base:${VERSION} .
-####docker push sumeetchhetri/ffead-cpp-sql-raw-clibpqb-profiled-base:${VERSION}
-
-####docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-async-clibpqb-profiled-base:${VERSION}
-####docker build --progress plain -f ffead-cpp-sql-raw-async-clibpqb-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-async-clibpqb-profiled-base:${VERSION} .
-####docker push sumeetchhetri/ffead-cpp-sql-raw-async-clibpqb-profiled-base:${VERSION}
-
-####docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-async-clibpqb-profiled-base-2:${VERSION}
-####docker build --progress plain -f ffead-cpp-sql-raw-async-clibpqb-profiled-base-2.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-async-clibpqb-profiled-base-2:${VERSION} .
-####docker push sumeetchhetri/ffead-cpp-sql-raw-async-clibpqb-profiled-base-2:${VERSION}
-
-####docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-async-clibpqb-pool-profiled-base:${VERSION}
-####docker build --progress plain -f ffead-cpp-sql-raw-async-clibpqb-pool-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-async-clibpqb-pool-profiled-base:${VERSION} .
-####docker push sumeetchhetri/ffead-cpp-sql-raw-async-clibpqb-pool-profiled-base:${VERSION}

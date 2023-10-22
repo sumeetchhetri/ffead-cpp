@@ -1,6 +1,6 @@
 {
   "name": "ffead-cpp-js-node-http",
-  "version": "6.0",
+  "version": "7.0",
   "description": "",
   "main": "server.js",
   "scripts": {

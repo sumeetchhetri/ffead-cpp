@@ -1,6 +1,6 @@
 #!/bin/sh
 
-rm -rf build ffead-cpp-6.0-bin CMakeLists.txt-e CMakeLists.txt.template-e CMakeLists.txt.template.old
+rm -rf build ffead-cpp-7.0-bin CMakeLists.txt-e CMakeLists.txt.template-e CMakeLists.txt.template.old
 rm -f .autotools compile config.guess config.log config.status config.sub configure configure.ac-e
 rm -f configure.ac.old configure.ac.template-e depcomp ffead-cpp install_manifest.txt install-sh libtool
 rm -f ltmain.sh Makefile Makefile.in mingw-64-toolchain.cmake missing

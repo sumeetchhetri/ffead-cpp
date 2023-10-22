@@ -20,15 +20,15 @@ RUN cd hiredis-1.0.0/ && cmake . && make install
 WORKDIR /tmp
 RUN rm -rf hiredis-1.0.0
 
-RUN wget -q https://github.com/sewenew/redis-plus-plus/archive/refs/tags/1.3.3.tar.gz
-RUN tar xf 1.3.3.tar.gz
-RUN rm -f 1.3.3.tar.gz
-WORKDIR redis-plus-plus-1.3.3/
+RUN wget -q https://github.com/sewenew/redis-plus-plus/archive/refs/tags/1.3.10.tar.gz
+RUN tar xf 1.3.10.tar.gz
+RUN rm -f 1.3.10.tar.gz
+WORKDIR redis-plus-plus-1.3.10/
 RUN mkdir build
 WORKDIR build
 RUN cmake -DREDIS_PLUS_PLUS_CXX_STANDARD=17 .. && make && make install
 WORKDIR /tmp
-RUN rm -rf redis-plus-plus-1.3.3
+RUN rm -rf redis-plus-plus-1.3.10
 
 #Install ffead-cpp
 WORKDIR /tmp
@@ -38,7 +38,7 @@ RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
 
-RUN rm -rf web/default web/oauthApp web/flexApp web/markers web/te-benchmark web/t1 web/t2 web/t3 web/t4 web/t5
+RUN rm -rf web/default web/oauthApp web/flexApp web/markers web/te-benchmark web/t1 web/t2 web/t3 web/t4 web/t5 web/t6 web/t7
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/default)||g' CMakeLists.txt
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/flexApp)||g' CMakeLists.txt
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/oauthApp)||g' CMakeLists.txt
@@ -49,6 +49,8 @@ RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/t2)||g' CMakeLists.txt
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/t3)||g' CMakeLists.txt
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/t4)||g' CMakeLists.txt
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/t5)||g' CMakeLists.txt
+RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/t6)||g' CMakeLists.txt
+RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/t7)||g' CMakeLists.txt
 RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/default/libdefault${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/flexApp/libflexApp${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/oauthApp/liboauthApp${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
@@ -59,6 +61,8 @@ RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/t2/libt2${LIB_EXT} DESTINA
 RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/t3/libt3${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/t4/libt4${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/t5/libt5${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/t6/libt5${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/t7/libt5${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 RUN sed -i 's|web/default/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/flexApp/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/oauthApp/src/autotools/Makefile||g' configure.ac
@@ -69,12 +73,14 @@ RUN sed -i 's|web/t2/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/t3/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/t4/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/t5/src/autotools/Makefile||g' configure.ac
+RUN sed -i 's|web/t6/src/autotools/Makefile||g' configure.ac
+RUN sed -i 's|web/t7/src/autotools/Makefile||g' configure.ac
 
 RUN chmod +x autogen.sh
 RUN ./autogen.sh
 RUN ./configure --enable-srv_emb=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes CPPFLAGS="$CPPFLAGS -I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0 -I/usr/include/libmongoc-1.0 -I/usr/include/libbson-1.0" LDFLAGS="$LDFLAGS -L/usr/local/lib"
 RUN make install
-RUN mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-7.0-bin /tmp/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src
 
@@ -85,7 +91,7 @@ COPY *.sh  ./
 RUN chmod +x install_ffead-cpp.sh
 RUN ./install_ffead-cpp.sh
 
-WORKDIR /opt/ffead-cpp-6.0
+WORKDIR /opt/ffead-cpp-7.0
 
 RUN chmod +x server.sh
 CMD ./server.sh

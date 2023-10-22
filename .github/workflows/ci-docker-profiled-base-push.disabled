@@ -14,7 +14,7 @@ concurrency:
 env:
   SQL_RAW_PROFILED_IMAGE_NAME: sumeetchhetri/ffead-cpp-sql-raw-profiled-base
   SQL_RAW_CLIBPQB_PROFILED_IMAGE_NAME: sumeetchhetri/ffead-cpp-sql-raw-clibpqb-profiled-base
-  IMG_VERSION: "6.0"
+  IMG_VERSION: "7.0"
 jobs:
   push:
     runs-on: ubuntu-latest
@@ -22,15 +22,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build base ffead-cpp-6.0-sql-raw-profiled-base image
+      - name: Build base ffead-cpp-7.0-sql-raw-profiled-base image
         run: |
-          cd docker/techempower-config
+          cd docker/techempower-config-deprecated
           docker build . --file ffead-cpp-sql-raw-profiled-base.dockerfile --tag $SQL_RAW_PROFILED_IMAGE_NAME
 
       - name: Log into registry
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
-      - name: Push base ffead-cpp-6.0-sql-raw-profiled-base image
+      - name: Push base ffead-cpp-7.0-sql-raw-profiled-base image
         run: |
           SP_IMAGE_ID=$SQL_RAW_PROFILED_IMAGE_NAME
 
@@ -52,15 +52,15 @@ jobs:
           docker tag $SQL_RAW_PROFILED_IMAGE_NAME $SP_IMAGE_ID:$VERSION
           docker push $SP_IMAGE_ID:$VERSION
 
-      - name: Build base ffead-cpp-6.0-sql-raw-clibpqb-profiled-base image
+      - name: Build base ffead-cpp-7.0-sql-raw-clibpqb-profiled-base image
         run: |
-          cd docker/techempower-config
+          cd docker/techempower-config-deprecated
           docker build . --file ffead-cpp-sql-raw-clibpqb-profiled-base.dockerfile --tag $SQL_RAW_CLIBPQB_PROFILED_IMAGE_NAME
 
       - name: Log into registry
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
-      - name: Push base ffead-cpp-6.0-sql-raw-clibpqb-profiled-base image
+      - name: Push base ffead-cpp-7.0-sql-raw-clibpqb-profiled-base image
         run: |
           SP_IMAGE_ID=$SQL_RAW_CLIBPQB_PROFILED_IMAGE_NAME
 

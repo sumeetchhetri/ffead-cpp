@@ -1,5 +1,5 @@
-FROM gentoo/stage3-amd64
+FROM gentoo/stage3
 
 RUN emerge-webrsync
 RUN emerge -1 --unmerge dev-python/certifi:0 dev-python/setuptools:0
-RUN emerge sys-devel/autoconf-archive sys-devel/autoconf sys-devel/automake sys-devel/libtool dev-db/postgresql dev-db/unixODBC curl libmemcached cmake wget netcat tar gzip zlib
+RUN emerge sys-devel/autoconf-archive sys-devel/autoconf sys-devel/automake sys-devel/libtool dev-db/postgresql dev-db/unixODBC curl libmemcached cmake wget netcat app-arch/tar app-arch/gzip sys-libs/zlib

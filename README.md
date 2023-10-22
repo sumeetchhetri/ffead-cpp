@@ -89,6 +89,7 @@ Features
 - Web Socket Support
 - Advanced ORM - SDORM (sql/monogo)
 - Raw database access (postgresql/mongodb/scylladb)
+- PostgreSQL wire database access
 - Cache API (memcached/redis)
 - Improved Thread/ThreadPool API(s)
 - Marker based configuration (java style annotations)
@@ -134,7 +135,7 @@ Quickstart (Using cmake/make)
 - cmake -DSRV_EMB=on -DMOD_SDORM_MONGO=on ..
 - make install -j4 (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ../ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ../ffead-cpp-7.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp !!)
 
@@ -145,7 +146,7 @@ Quickstart (Using cmake/ninja)
 - cmake -GNinja -DSRV_EMB=on -DMOD_SDORM_MONGO=on ..
 - ninja install (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ../ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ../ffead-cpp-7.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp !!)
 
@@ -155,7 +156,7 @@ Quickstart (Using xmake)
 - xmake f --cxflags="-I/usr/local/include -w" --MOD_SDORM_MONGO=true -v -D -c
 - xmake && xmake install (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ffead-cpp-7.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp !!)
 
@@ -165,7 +166,7 @@ Quickstart (Using meson)
 - meson setup build_meson && cd build_meson
 - ninja install (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ../ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ../ffead-cpp-7.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp !!)
 
@@ -174,7 +175,7 @@ Quickstart (Using scons)
 - Install scons `pip3 install scons` and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
 - scons -Q (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ../ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ../ffead-cpp-7.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp !!)
 
@@ -183,7 +184,7 @@ Quickstart (Using shellb)
 - Install shellb with `wget -q https://github.com/sumeetchhetri/shellb/releases/download/2.0.0/shellb -P . && chmod +x ./shellb ` and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites), Always check for the latest version or use the one available already in the package
 - chmod +x ./shellb && ./shellb ffead-cpp-shellb (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd shellb_out/ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd shellb_out/ffead-cpp-7.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp !!)
 
@@ -193,7 +194,7 @@ Quickstart (Using bazel)
 - chmod +x ./shellb && ./shellb ffead-cpp-bazel (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - The above command will auto-generate BUILD/WORKSPACE/OTHER bazel files for building with bazel
 - Sip some coffee
-- cd shellb_out/ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd shellb_out/ffead-cpp-7.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp !!)
 
@@ -203,7 +204,7 @@ Quickstart (Using buck2)
 - chmod +x ./shellb && ./shellb ffead-cpp-buck2 (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - The above command will auto-generate .buckconfig/prelude/BUCK buck files for building with buck2
 - Sip some coffee
-- cd shellb_out/ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd shellb_out/ffead-cpp-7.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp !!)
 
@@ -214,7 +215,7 @@ Quickstart (Using autoconf)
 - ./configure --enable-srv_emb=yes --enable-mod_sdormmongo=yes
 - make install -j4 (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ffead-cpp-6.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ffead-cpp-7.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp !!)
 

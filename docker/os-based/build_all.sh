@@ -1,5 +1,5 @@
-docker build --progress plain -f DockerFile-Gentoo-x64-base -t sumeetchhetri/gentoo-stage3-amd64:1.0 .
-docker push sumeetchhetri/gentoo-stage3-amd64:1.0
+docker build --progress plain -f DockerFile-Gentoo-x64-base -t sumeetchhetri/gentoo-stage3:1.1 .
+docker push sumeetchhetri/gentoo-stage3:1.1
 
 docker build -f DockerFile-ArchLinux-x64-ffead-cpp --tag sumeetchhetri/ffead-cpp:ffead-cpp-archlinux .
 docker build -f DockerFile-UbuntuBionic-x64-ffead-cpp --tag sumeetchhetri/ffead-cpp:ffead-cpp-ubuntubionic .

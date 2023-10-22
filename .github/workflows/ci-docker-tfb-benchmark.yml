@@ -17,11 +17,11 @@ jobs:
     if: "contains(github.event.head_commit.message, '[docker_bench]')"
     steps:
     - uses: actions/checkout@v2
-    - name: Build and benchmark the ffead-cpp-6.0 base docker image
+    - name: Build and benchmark the ffead-cpp-7.0 base docker image
       run: |
         git clone https://github.com/TechEmpower/FrameworkBenchmarks
-        cd docker/techempower-config/
+        cd docker/te/
         cp -rf benchmark_config.json postgresql base/*.dockerfile lang/*.dockerfile scripts/*.sh *.sh *.dockerfile ../../FrameworkBenchmarks/frameworks/C++/ffead-cpp/
         cd ../../FrameworkBenchmarks
-        ./tfb --mode benchmark --test just drogon ffead-cpp-v-picov ffead-cpp-postgresql-raw-profiled ffead-cpp-postgresql-raw-async-profiled ffead-cpp-postgresql-raw-async-pool-profiled
+        ./tfb --mode benchmark --test just ntex h2o wizzardo-http ffead-cpp-v-picov ffead-cpp-postgresql-raw-profiled ffead-cpp-postgresql-raw-async-profiled ffead-cpp-postgresql-wire-profiled ffead-cpp-postgresql-wire-async-profiled
         cd results/20* && cat results.json

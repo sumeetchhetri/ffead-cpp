@@ -52,6 +52,7 @@ class SQLDataSourceImpl: public DataSourceInterface {
 	std::string appName, dialect;
 	bool isTransaction;
 	bool isSession;
+	bool isAutoCommitMode;
 	Connection *conn;
 	bool allocateStmt(const bool&);
 	void refreshStmt();

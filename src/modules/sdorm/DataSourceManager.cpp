@@ -190,7 +190,7 @@ void* DataSourceManager::getRawImpl(std::string name, std::string appName, bool 
 	if(StringUtil::toLowerCopy(dsnMgr->props.getType())=="sql-raw-pq")
 	{
 #if defined(INC_SDORM_SQL) && defined(HAVE_LIBPQ)
-		t = new LibpqDataSourceImpl(dsnMgr->props.getNodes().at(0).getBaseUrl(), dsnMgr->props.getProperty("async")=="true", dsnMgr->props.getProperty("batch")=="true", dsnMgr->props.getProperty("wire")=="true");
+		t = new LibpqDataSourceImpl(dsnMgr->props.getNodes().at(0), dsnMgr->props);
 		((LibpqDataSourceImpl*)t)->name = name;
 		((LibpqDataSourceImpl*)t)->init();
 #endif

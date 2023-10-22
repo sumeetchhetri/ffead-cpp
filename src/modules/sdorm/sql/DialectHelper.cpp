@@ -24,9 +24,10 @@
 
 int DialectHelper::VALIDDB_FUNCTIONS = 0, DialectHelper::PAGINATION_OFFSET_SQL = 1, DialectHelper::PAGINATION_NO_OFFSET_SQL = 2,
 		DialectHelper::IDGEN_SEQUENCE_QUERY = 3, DialectHelper::IDGEN_TABLESEL_QUERY = 4, DialectHelper::IDGEN_TABLEUPD_QUERY = 5,
-		DialectHelper::IS_TRANSACTION_SUPPORTED = 6, DialectHelper::IDGEN_IDENTITY_QUERY = 7,
-		DialectHelper::IDGEN_TABLESELNOLOCK_QUERY = 8, DialectHelper::IDGEN_TABLESELNOLOCKMHL_QUERY = 9, DialectHelper::IDGEN_TABLESELMHL_QUERY = 10,
-		DialectHelper::IDGEN_TABLEUPDMHL_QUERY = 11, DialectHelper::BULK_INSERT_QUERY = 12, DialectHelper::BULK_UPDATE_QUERY = 13;
+		DialectHelper::IS_TRANSACTION_SUPPORTED = 6, DialectHelper::IDGEN_IDENTITY_QUERY = 7, DialectHelper::IDGEN_TABLESELNOLOCK_QUERY = 8, 
+		DialectHelper::IDGEN_TABLESELNOLOCKMHL_QUERY = 9, DialectHelper::IDGEN_TABLESELMHL_QUERY = 10, 
+		DialectHelper::IDGEN_TABLEUPDMHL_QUERY = 11, DialectHelper::BULK_INSERT_QUERY = 12, DialectHelper::BULK_UPDATE_QUERY = 13,
+		DialectHelper::AUTOCOMMIT_QUERY = 14;
 std::map<std::string, std::map<int, std::string> > DialectHelper::dialectStrMap;
 bool DialectHelper::init = false;
 std::string DialectHelper::ORACLE_DIALECT = "OracleDialect", DialectHelper::MYSQLMYISAM_DIALECT = "MySQLMyISAMDialect",
@@ -117,6 +118,10 @@ bool DialectHelper::isTransactionSupported(const std::string& dialect) {
 	if(getProperty(dialect, IS_TRANSACTION_SUPPORTED)!="true")
 		return false;
 	return true;
+}
+
+std::string DialectHelper::getAutoCommitSQLString(const std::string& dialect) {
+	return getProperty(dialect, AUTOCOMMIT_QUERY);
 }
 
 std::string DialectHelper::getIdGenerateQueryPre(const std::string& dialect, const DataSourceEntityMapping& dsemp) {
@@ -225,6 +230,7 @@ void DialectHelper::loadOracleDialectStrings() {
 	dialectStrMap[ORACLE_DIALECT][PAGINATION_NO_OFFSET_SQL] = PAGINATION_NO_OFFSET;
 	dialectStrMap[ORACLE_DIALECT][VALIDDB_FUNCTIONS] = VALID_DBFUNCS;
 	dialectStrMap[ORACLE_DIALECT][IDGEN_SEQUENCE_QUERY] = "select ${seq_name}.nextval from dual";
+	dialectStrMap[ORACLE_DIALECT][AUTOCOMMIT_QUERY] = "SET AUTOCOMMIT ON";
 
 	dialectStrMap[TIMESTEN_DIALECT][VALIDDB_FUNCTIONS] = ",upper,rtrim,concat,mod,to_char,to_date,sysdate,getdate,nvl,";
 }
@@ -247,12 +253,14 @@ void DialectHelper::loadMySQLDialectStrings() {
 	dialectStrMap[MYSQLMYISAM_DIALECT][PAGINATION_NO_OFFSET_SQL] = PAGINATION_NO_OFFSET;
 	dialectStrMap[MYSQLMYISAM_DIALECT][VALIDDB_FUNCTIONS] = VALID_DBFUNCS;
 	dialectStrMap[MYSQLMYISAM_DIALECT][IDGEN_IDENTITY_QUERY] = "SELECT LAST_INSERT_ID()";
+	dialectStrMap[MYSQLMYISAM_DIALECT][AUTOCOMMIT_QUERY] = "SET AUTOCOMMIT=1";
 
 	dialectStrMap[MYSQLINNODB_DIALECT][PAGINATION_OFFSET_SQL] = PAGINATION_OFFSET;
 	dialectStrMap[MYSQLINNODB_DIALECT][PAGINATION_NO_OFFSET_SQL] = PAGINATION_NO_OFFSET;
 	dialectStrMap[MYSQLINNODB_DIALECT][VALIDDB_FUNCTIONS] = VALID_DBFUNCS;
 	dialectStrMap[MYSQLINNODB_DIALECT][IS_TRANSACTION_SUPPORTED] = "TRUE";
 	dialectStrMap[MYSQLINNODB_DIALECT][IDGEN_IDENTITY_QUERY] = "SELECT LAST_INSERT_ID()";
+	dialectStrMap[MYSQLINNODB_DIALECT][AUTOCOMMIT_QUERY] = "SET AUTOCOMMIT=1";
 
 	dialectStrMap[SQLLITE_DIALECT][PAGINATION_OFFSET_SQL] = PAGINATION_OFFSET;
 	dialectStrMap[SQLLITE_DIALECT][PAGINATION_NO_OFFSET_SQL] = PAGINATION_NO_OFFSET;
@@ -277,6 +285,7 @@ void DialectHelper::loadPostgresDialectStrings() {
 	dialectStrMap[POSTGRES_DIALECT][IDGEN_SEQUENCE_QUERY] = "select nextval('${seq_name}') from dual";
 	dialectStrMap[POSTGRES_DIALECT][IS_TRANSACTION_SUPPORTED] = "TRUE";
 	dialectStrMap[POSTGRES_DIALECT][IDGEN_IDENTITY_QUERY] = "SELECT lastval()";
+	dialectStrMap[POSTGRES_DIALECT][AUTOCOMMIT_QUERY] = "SET AUTOCOMMIT ON";
 }
 
 void DialectHelper::loadSQLServerDialectStrings() {
@@ -290,10 +299,12 @@ void DialectHelper::loadSQLServerDialectStrings() {
 	dialectStrMap[SQLSERVER12_DIALECT][IDGEN_SEQUENCE_QUERY] = "select next value for ${seq_name}";
 	dialectStrMap[SQLSERVER12_DIALECT][IS_TRANSACTION_SUPPORTED] = "TRUE";
 	dialectStrMap[SQLSERVER12_DIALECT][IDGEN_IDENTITY_QUERY] = "SELECT SCOPE_IDENTITY()";
+	dialectStrMap[SQLSERVER12_DIALECT][AUTOCOMMIT_QUERY] = "SET IMPLICIT_TRANSACTIONS OFF";
 
 	dialectStrMap[SQLSERVER_DIALECT][VALIDDB_FUNCTIONS] = VALID_DBFUNCS;
 	dialectStrMap[SQLSERVER_DIALECT][IS_TRANSACTION_SUPPORTED] = "TRUE";
 	dialectStrMap[SQLSERVER_DIALECT][IDGEN_IDENTITY_QUERY] = "SELECT SCOPE_IDENTITY()";
+	dialectStrMap[SQLSERVER_DIALECT][AUTOCOMMIT_QUERY] = "SET IMPLICIT_TRANSACTIONS OFF";
 }
 
 void DialectHelper::loadDB22DialectStrings() {
@@ -312,6 +323,7 @@ void DialectHelper::loadDB22DialectStrings() {
 	dialectStrMap[DB2_DIALECT][VALIDDB_FUNCTIONS] = VALID_DBFUNCS;
 	dialectStrMap[DB2_DIALECT][IDGEN_SEQUENCE_QUERY] = "values nextval for ${seq_name}";
 	dialectStrMap[DB2_DIALECT][IS_TRANSACTION_SUPPORTED] = "TRUE";
+	dialectStrMap[DB2_DIALECT][AUTOCOMMIT_QUERY] = "update command options using c on";
 }
 
 void DialectHelper::getPaginationSQL(const std::string& dialect, std::string& query, const StringContext& params)

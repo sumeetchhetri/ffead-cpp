@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-base:6.0
+FROM sumeetchhetri/ffead-cpp-base:7.0
 
 WORKDIR ${IROOT}
 
@@ -11,4 +11,4 @@ WORKDIR ${IROOT}/lang-server-backends/javascript/nodejs-http
 #COPY server.js package.json .
 RUN npm install http ffi-napi ref-napi ref-struct-di ref-array-di
 
-CMD node server.js 8080 /installs/ffead-cpp-6.0
+CMD node server.js 8080 /installs/ffead-cpp-7.0

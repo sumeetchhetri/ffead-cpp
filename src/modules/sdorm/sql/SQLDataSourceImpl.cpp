@@ -420,6 +420,7 @@ SQLDataSourceImpl::SQLDataSourceImpl(ConnectionPooler* pool, Mapping* mapping) {
 	this->mapping = mapping;
 	std::map<std::string, std::string> props = pool->getProperties().getProperties();
 	this->dialect = props["dialect"];
+	this->isAutoCommitMode = false;//props["auto_commit"]=="true";
 	this->appName = mapping->getAppName();
 	V_OD_hdbc = NULL;
 	V_OD_hstmt = NULL;
@@ -464,6 +465,12 @@ bool SQLDataSourceImpl::allocateStmt(const bool& read) {
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
 		return false;
 	}
+
+	/*if(isAutoCommitMode) {
+		Query q(DialectHelper::getAutoCommitSQLString(dialect));
+		executeQueryInternal(q, false);
+	}*/
+
 	return true;
 #endif
 	return false;
@@ -1320,6 +1327,7 @@ void SQLDataSourceImpl::showError(const char *fn, const SQLHANDLE& handle, const
 
 bool SQLDataSourceImpl::startTransaction()
 {
+	if(isAutoCommitMode) return true;
 #ifdef HAVE_LIBODBC
 	if(!DialectHelper::isTransactionSupported(dialect))return false;
 	bool flagc = allocateStmt(true);
@@ -1344,6 +1352,7 @@ bool SQLDataSourceImpl::startTransaction()
 
 bool SQLDataSourceImpl::commit()
 {
+	if(isAutoCommitMode) return true;
 #ifdef HAVE_LIBODBC
 	if(!DialectHelper::isTransactionSupported(dialect))return false;
 	if(!isTransaction) return false;
@@ -1373,6 +1382,7 @@ bool SQLDataSourceImpl::commit()
 
 bool SQLDataSourceImpl::rollback()
 {
+	if(isAutoCommitMode) return true;
 #ifdef HAVE_LIBODBC
 	if(!DialectHelper::isTransactionSupported(dialect))return false;
 	bool flagc = allocateStmt(true);

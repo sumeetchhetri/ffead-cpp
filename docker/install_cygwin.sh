@@ -33,9 +33,9 @@ mkdir build
 cd build
 cmake -DSRV_EMB=on -DMOD_REDIS=on ..
 make install -j4
-mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/
-cd /tmp/ffead-cpp-6.0-bin && chmod +x *.sh
-export PATH=/tmp/ffead-cpp-6.0-bin/lib:$PATH
+mv /tmp/ffead-cpp-src/ffead-cpp-7.0-bin /tmp/
+cd /tmp/ffead-cpp-7.0-bin && chmod +x *.sh
+export PATH=/tmp/ffead-cpp-7.0-bin/lib:$PATH
 #nohup bash -c "./server.sh > ffead.log &"
 #echo "Waiting for ffead-cpp to launch on port 8080..."
 #COUNTER=0
@@ -79,6 +79,6 @@ export PATH=/tmp/ffead-cpp-6.0-bin/lib:$PATH
 #./autogen.sh
 #CXXFLAGS="-std=c++17" lt_cv_deplibs_check_method=pass_all ./configure --enable-srv_emb=yes --enable-mod_rediscache=yes
 #make install -j4
-#mv /tmp/ffead-cpp-src/ffead-cpp-6.0-bin /tmp/ffead-cpp-6.0-bin_ac
+#mv /tmp/ffead-cpp-src/ffead-cpp-7.0-bin /tmp/ffead-cpp-7.0-bin_ac
 #cd /tmp
 #rm -rf /tmp/ffead-cpp-src

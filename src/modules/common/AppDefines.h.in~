@@ -1,0 +1,514 @@
+/* src/modules/common/AppDefines.h.in.  Generated from configure.ac by autoheader.  */
+
+/* set build system to autoconf/automake */
+#undef BUILD_AUTOCONF
+
+/* set configure mode */
+#undef BUILT_WITH_CONFGURE
+
+/* set OS to cygwin */
+#undef CYGWIN
+
+/* set DEBUG mode */
+#undef DEBUG
+
+/* Define to 1 if you have the `accept4' function. */
+#undef HAVE_ACCEPT4
+
+/* Define to 1 if you have the <arpa/inet.h> header file. */
+#undef HAVE_ARPA_INET_H
+
+/* bsd uuid headers */
+#undef HAVE_BSDUUIDINC
+
+/* Define to 1 */
+#undef HAVE_BSONINC
+
+/* Define to 1 */
+#undef HAVE_CKOHMINC
+
+/* Define to 1 if you have the `clock_gettime' function. */
+#undef HAVE_CLOCK_GETTIME
+
+/* Define if you have clock_nanosleep() */
+#undef HAVE_CLOCK_NANOSLEEP
+
+/* define if the compiler supports basic C++17 syntax */
+#undef HAVE_CXX17
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
+/* Define to 1 if you have the <fcntl.h> header file. */
+#undef HAVE_FCNTL_H
+
+/* Define to 1 if you have the `floor' function. */
+#undef HAVE_FLOOR
+
+/* Define to 1 if you have the `fork' function. */
+#undef HAVE_FORK
+
+/* Define to 1 if you have the `gethostbyname' function. */
+#undef HAVE_GETHOSTBYNAME
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `bson-1.0' library (-lbson-1.0). */
+#undef HAVE_LIBBSON_1_0
+
+/* Define to 1 if you have the `crypto' library (-lcrypto). */
+#undef HAVE_LIBCRYPTO
+
+/* Define to 1 if you have the `gtmshr' library (-lgtmshr). */
+#undef HAVE_LIBGTMSHR
+
+/* Define to 1 if you have the `mongoc-1.0' library (-lmongoc-1.0). */
+#undef HAVE_LIBMONGOC_1_0
+
+/* libodbc presence */
+#undef HAVE_LIBODBC
+
+/* Define to 1 if you have the `ossp-uuid' library (-lossp-uuid). */
+#undef HAVE_LIBOSSP_UUID
+
+/* Define to 1 if you have the `pcreposix' library (-lpcreposix). */
+#undef HAVE_LIBPCREPOSIX
+
+/* Define to 1 if you have the `pq' library (-lpq). */
+#undef HAVE_LIBPQ
+
+/* libpq batch mode */
+#undef HAVE_LIBPQ_BATCH
+
+/* libpq pipeline mode */
+#undef HAVE_LIBPQ_PIPELINE
+
+/* Define to 1 if you have the `pthread' library (-lpthread). */
+#undef HAVE_LIBPTHREAD
+
+/* Define to 1 if you have the `pthreads' library (-lpthreads). */
+#undef HAVE_LIBPTHREADS
+
+/* Define to 1 if you have the `scylla-cpp-driver' library
+   (-lscylla-cpp-driver). */
+#undef HAVE_LIBSCYLLA_CPP_DRIVER
+
+/* Define to 1 if you have the `ssl' library (-lssl). */
+#undef HAVE_LIBSSL
+
+/* Define to 1 if you have the `uuid' library (-luuid). */
+#undef HAVE_LIBUUID
+
+/* Define to 1 if you have the `z' library (-lz). */
+#undef HAVE_LIBZ
+
+/* Define to 1 if the system has the type `long long'. */
+#undef HAVE_LONG_LONG
+
+/* Define to 1 if you have the `malloc' function. */
+#undef HAVE_MALLOC
+
+/* Define to 1 */
+#undef HAVE_MEMCACHEDINC
+
+/* Define to 1 */
+#undef HAVE_MEMCACHEDLIB
+
+/* Define to 1 */
+#undef HAVE_MEMCACHEDUTILLIB
+
+/* Define to 1 if you have the `memset' function. */
+#undef HAVE_MEMSET
+
+/* Define to 1 */
+#undef HAVE_MONGOINC
+
+/* Define to 1 if you have the <netdb.h> header file. */
+#undef HAVE_NETDB_H
+
+/* Define to 1 if you have the <netinet/in.h> header file. */
+#undef HAVE_NETINET_IN_H
+
+/* libuuid headers */
+#undef HAVE_OSSPUUIDINC
+
+/* libuuid headers */
+#undef HAVE_OSSPUUIDINC_2
+
+/* pcreposix.h presence */
+#undef HAVE_PCREREGEX
+
+/* Define to 1 if you have the `pow' function. */
+#undef HAVE_POW
+
+/* Define to 1 */
+#undef HAVE_PQHDR
+
+/* pugixml.hpp presence */
+#undef HAVE_PUGI_XML
+
+/* rapidjson/document.h presence */
+#undef HAVE_RAPID_JSON
+
+/* Define to 1 if you have the `realloc' function. */
+#undef HAVE_REALLOC
+
+/* Define to 1 */
+#undef HAVE_REDISINC
+
+/* Define to 1 */
+#undef HAVE_REDISLIB
+
+/* Define to 1 if you have the `regcomp' function. */
+#undef HAVE_REGCOMP
+
+/* regex.h presence */
+#undef HAVE_REGEX
+
+/* scylla headers */
+#undef HAVE_SCYLLAINC
+
+/* Define to 1 if you have the `select' function. */
+#undef HAVE_SELECT
+
+/* Define to 1 if the system has the type `signed char'. */
+#undef HAVE_SIGNED_CHAR
+
+/* Define to 1 if you have the `socket' function. */
+#undef HAVE_SOCKET
+
+/* SO_ATTACH_REUSEPORT_CBPF */
+#undef HAVE_SO_ATTACH_REUSEPORT_CBPF
+
+/* Define to 1 */
+#undef HAVE_SQLINC
+
+/* Define if ssl is present */
+#undef HAVE_SSLINC
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#undef HAVE_STDIO_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the `strcasecmp' function. */
+#undef HAVE_STRCASECMP
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the `strtol' function. */
+#undef HAVE_STRTOL
+
+/* Define to 1 if you have the `strtoul' function. */
+#undef HAVE_STRTOUL
+
+/* Define if sysinfo is present */
+#undef HAVE_SYSINFO
+
+/* Define to 1 if you have the <sys/ioctl.h> header file. */
+#undef HAVE_SYS_IOCTL_H
+
+/* Define to 1 if you have the <sys/socket.h> header file. */
+#undef HAVE_SYS_SOCKET_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#undef HAVE_SYS_TIME_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* TCP_DEFER_ACCEPT */
+#undef HAVE_TCP_DEFER_ACCEPT
+
+/* TCP_FASTOPEN */
+#undef HAVE_TCP_FASTOPEN
+
+/* TCP_QUICKACK */
+#undef HAVE_TCP_QUICKACK
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* libuuid uuid headers */
+#undef HAVE_UUIDINC
+
+/* Define to 1 if you have the `vfork' function. */
+#undef HAVE_VFORK
+
+/* Define to 1 if you have the <vfork.h> header file. */
+#undef HAVE_VFORK_H
+
+/* Define to 1 if `fork' works. */
+#undef HAVE_WORKING_FORK
+
+/* Define to 1 if `vfork' works. */
+#undef HAVE_WORKING_VFORK
+
+/* enable http framework application flow module */
+#undef INC_APPFLOW
+
+/* enable binary serilaization module */
+#undef INC_BINSER
+
+/* enable client-utility module */
+#undef INC_CLIENTUTIL
+
+/* enable component module */
+#undef INC_CMP
+
+/* enable http framework dynamic c++ pages module */
+#undef INC_DCP
+
+/* enable distocache module */
+#undef INC_DSTC
+
+/* enable http framework dynamic views module */
+#undef INC_DVIEW
+
+/* enable elastic search module */
+#undef INC_ELASTCIC
+
+/* enable sdorm gtm module */
+#undef INC_GTM
+
+/* enable http module */
+#undef INC_HTTP
+
+/* enable http framework module */
+#undef INC_HTTPFRAMEWORK
+
+/* enable c++ interpreter module */
+#undef INC_INTP
+
+/* enable ioc module */
+#undef INC_IOC
+
+/* enable cron/batch jobs module */
+#undef INC_JOBS
+
+/* enable json serilaization module */
+#undef INC_JSONSER
+
+/* enable memcached cache module */
+#undef INC_MEMCACHED
+
+/* enable memory cache module */
+#undef INC_MEMORYCACHE
+
+/* enable method invoker module */
+#undef INC_MI
+
+/* enable message handler module */
+#undef INC_MSGH
+
+/* enable redis cache module */
+#undef INC_REDISCACHE
+
+/* enable reflection module */
+#undef INC_REFLECTION
+
+/* enable http framework scripting support module */
+#undef INC_SCRH
+
+/* enable data-source-orm module */
+#undef INC_SDORM
+
+/* enable data-source-orm-mongo module */
+#undef INC_SDORM_MONGO
+
+/* enable data-source-scylla module */
+#undef INC_SDORM_SCYLLA
+
+/* enable data-source-orm-sql module */
+#undef INC_SDORM_SQL
+
+/* enable server-utility module */
+#undef INC_SERVERUTIL
+
+/* enable solr search module */
+#undef INC_SOLR
+
+/* enable ssl-utility module */
+#undef INC_SSLUTIL
+
+/* enable threads module */
+#undef INC_THREADS
+
+/* enable http framework templates module */
+#undef INC_TPE
+
+/* enable http framework web-service module */
+#undef INC_WEBSVC
+
+/* enable xml serialization module */
+#undef INC_XMLSER
+
+/* Define to 1 if you have sys/sendfile.h */
+#undef IS_SENDFILE
+
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
+#undef LT_OBJDIR
+
+/* unset DEBUG mode */
+#undef NDEBUG
+
+/* set OS to aix */
+#undef OS_AIX
+
+/* set OS to android */
+#undef OS_ANDROID
+
+/* set OS to bsd */
+#undef OS_BSD
+
+/* set OS to cygwin */
+#undef OS_CYGWIN
+
+/* set OS to darwin */
+#undef OS_DARWIN
+
+/* set OS to freebsd */
+#undef OS_FREEBSD
+
+/* set OS to hp-ux */
+#undef OS_HPUX
+
+/* set OS to irix */
+#undef OS_IRIX
+
+/* set OS to linux */
+#undef OS_LINUX
+
+/* set OS to mingw */
+#undef OS_MINGW
+
+/* Define to 1 if you have _mingw_mac.h */
+#undef OS_MINGW_W64
+
+/* set OS to netbsd */
+#undef OS_NETBSD
+
+/* set OS to openbsd */
+#undef OS_OPENBSD
+
+/* set openbsd release number */
+#undef OS_OPENBSD_REL
+
+/* set OS to osf */
+#undef OS_OSF
+
+/* set OS to sco */
+#undef OS_SCO
+
+/* set OS to solaris */
+#undef OS_SOLARIS
+
+/* set OS to sunos */
+#undef OS_SUNOS
+
+/* set OS to svr4 */
+#undef OS_SVR4
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* The size of `long', as computed by sizeof. */
+#undef SIZEOF_LONG
+
+/* The size of `void *', as computed by sizeof. */
+#undef SIZEOF_VOID_P
+
+/* enable all http server engines */
+#undef SRV_ALL
+
+/* enable cinatra http server engine */
+#undef SRV_CINATRA
+
+/* enable drogon http server engine */
+#undef SRV_DROGON
+
+/* enable embedded http server engine */
+#undef SRV_EMB
+
+/* enable lithium http server engine */
+#undef SRV_LITHIUM
+
+/* enable mongols http server engine */
+#undef SRV_MONGOLS
+
+/* enable nghttp2 http server engine */
+#undef SRV_NGHTTP2
+
+/* enable uv-cpp http server engine */
+#undef SRV_UVCPP
+
+/* Define to 1 if all of the C90 standard headers exist (not just the ones
+   required in a freestanding environment). This macro is provided for
+   backward compatibility; new code need not use it. */
+#undef STDC_HEADERS
+
+/* Define to 1 if you have <atomic.h>. */
+#undef USE_ATOMIC_H
+
+/* Define to 1 if you have <cstdatomic.h>. */
+#undef USE_CSTDATOMIC_H
+
+/* Define to 1 if you have <sys/devpoll.h>. */
+#undef USE_DEVPOLL
+
+/* Define to 1 if you have <sys/epoll.h>. */
+#undef USE_EPOLL
+
+/* Define to 1 if you have <port.h>. */
+#undef USE_EVPORT
+
+/* Define to 1 if you have <sys/event.h>. */
+#undef USE_KQUEUE
+
+/* enable picoev engine */
+#undef USE_PICOEV
+
+/* Define to 1 if you have <sys/poll.h>. */
+#undef USE_POLL
+
+/* Define to 1 if you have <sys/select.h>. */
+#undef USE_SELECT
+
+/* use io completion ports on windows */
+#undef USE_WIN_IOCP
+
+/* Define as a signed integer type capable of holding a process identifier. */
+#undef pid_t
+
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#undef size_t
+
+/* Define as `fork' if `vfork' does not work. */
+#undef vfork

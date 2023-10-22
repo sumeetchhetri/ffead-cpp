@@ -196,7 +196,7 @@ defer {
     try! group.syncShutdownGracefully()
 }
 
-var serverPath = "/root/ffead-cpp-6.0"
+var serverPath = "/root/ffead-cpp-7.0"
 var ipAddress = "0.0.0.0"
 var port = 8080
 

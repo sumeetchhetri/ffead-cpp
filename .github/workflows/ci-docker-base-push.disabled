@@ -17,7 +17,7 @@ env:
   RUST_IMAGE_NAME: sumeetchhetri/ffead-cpp-rust-base
   RUST_RKT_IMAGE_NAME: sumeetchhetri/ffead-cpp-rust-rocket-base
   V_IMAGE_NAME: sumeetchhetri/ffead-cpp-v-base
-  IMG_VERSION: "6.0"
+  IMG_VERSION: "7.0"
 jobs:
   push:
     runs-on: ubuntu-latest
@@ -27,7 +27,7 @@ jobs:
 
       - name: Build base ffead-cpp image
         run: |
-          cd docker/techempower-config
+          cd docker/techempower-config-deprecated
           docker build . --file ffead-cpp-base.dockerfile --tag $IMAGE_NAME
 
       - name: Log into registry
@@ -57,7 +57,7 @@ jobs:
 
       - name: Build base ffead-cpp-java image
         run: |
-          cd docker/techempower-config
+          cd docker/techempower-config-deprecated
           docker build . --file ffead-cpp-java-base.dockerfile --tag $JAVA_IMAGE_NAME
 
       - name: Log into registry
@@ -87,7 +87,7 @@ jobs:
 
       - name: Build base ffead-cpp-rust image
         run: |
-          cd docker/techempower-config
+          cd docker/techempower-config-deprecated
           docker build . --file ffead-cpp-rust-base.dockerfile --tag $RUST_IMAGE_NAME
 
       - name: Log into registry
@@ -117,7 +117,7 @@ jobs:
 
       - name: Build base ffead-cpp-rust-rocket image
         run: |
-          cd docker/techempower-config
+          cd docker/techempower-config-deprecated
           docker build . --file ffead-cpp-rust-rocket-base.dockerfile --tag $RUST_RKT_IMAGE_NAME
 
       - name: Log into registry
@@ -147,7 +147,7 @@ jobs:
 
       - name: Build base ffead-cpp-v image
         run: |
-          cd docker/techempower-config
+          cd docker/techempower-config-deprecated
           docker build . --file ffead-cpp-v-base.dockerfile --tag $V_IMAGE_NAME
 
       - name: Log into registry

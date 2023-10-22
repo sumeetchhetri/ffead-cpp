@@ -21,8 +21,8 @@ DSType LibpqDataSourceImpl::getType() {
 	return SD_RAW_SQLPG;
 }
 
-LibpqDataSourceImpl::LibpqDataSourceImpl(const std::string& url, bool isAsync, bool isBatch, bool isWire) {
-	this->url = url;
+LibpqDataSourceImpl::LibpqDataSourceImpl(const ConnectionNode& node, const ConnectionProperties& props) {
+	this->url = node.getBaseUrl();
 #ifdef HAVE_LIBPQ
 	conn = NULL;
 #else
@@ -31,9 +31,10 @@ LibpqDataSourceImpl::LibpqDataSourceImpl(const std::string& url, bool isAsync, b
 		exit(0);
 	}
 #endif
-	this->isAsync = isAsync;
-	this->isBatch = isBatch;
-	this->isWire = isWire;
+	this->isAutoCommitMode = false;//props.getProperty("auto_commit")=="true";
+	this->isAsync = props.getProperty("async")=="true";
+	this->isBatch = props.getProperty("batch")=="true";
+	this->isWire = props.getProperty("wire")=="true";
 	fd = -1;
 	stEvhMode = false;
 	cvar = false;
@@ -57,7 +58,7 @@ LibpqDataSourceImpl::~LibpqDataSourceImpl() {
 bool LibpqDataSourceImpl::init() {
 	if(isWire) {
 		wire = new FpgWire(this, isAsync);
-		wire->connect(url, isAsync);
+		wire->connect(url, isAsync, isAutoCommitMode);
 		this->fd = wire->fd;
 		wire->sif = this;
 		rdTsk = wire;
@@ -112,6 +113,11 @@ bool LibpqDataSourceImpl::init() {
 	}
 	fd = PQsocket(conn);
 	if(isAsync) {
+		/*if(isAutoCommitMode) {
+			LibpqQuery q;
+			q.withUpdateQuery("SET AUTOCOMMIT ON", false);
+			executeQuery(&q);
+		}*/
 		bool rHandler = RequestReaderHandler::getInstance()!=NULL || RequestHandler2::getInstance()!=NULL || Writer::isPicoEvAsyncBackendMode;
 		if(rHandler) {
 #ifdef HAVE_LIBPQ_BATCH
@@ -188,7 +194,11 @@ bool LibpqDataSourceImpl::init() {
 			Thread* pthread = new Thread(&handle, this);
 			pthread->execute();
 		}
-	}
+	}/* else if(isAutoCommitMode) {
+		LibpqQuery q;
+		q.withUpdateQuery("SET AUTOCOMMIT ON", false);
+		executeQuery(&q);
+	}*/
 #endif
 	return true;
 }
@@ -199,6 +209,7 @@ bool LibpqDataSourceImpl::handle() {
 }
 
 void LibpqDataSourceImpl::beginAsync(LibpqAsyncReq* areq) {
+	if(isAutoCommitMode) return;
 	if(isAsync) {
 #ifdef HAVE_LIBPQ
 		LibpqQuery* q = areq->getQuery();
@@ -209,6 +220,7 @@ void LibpqDataSourceImpl::beginAsync(LibpqAsyncReq* areq) {
 }
 
 void LibpqDataSourceImpl::commitAsync(LibpqAsyncReq* areq) {
+	if(isAutoCommitMode) return;
 	if(isAsync) {
 #ifdef HAVE_LIBPQ
 		LibpqQuery* q = areq->getQuery();
@@ -219,6 +231,7 @@ void LibpqDataSourceImpl::commitAsync(LibpqAsyncReq* areq) {
 }
 
 void LibpqDataSourceImpl::rollbackAsync(LibpqAsyncReq* areq) {
+	if(isAutoCommitMode) return;
 	if(isAsync) {
 #ifdef HAVE_LIBPQ
 		LibpqQuery* q = areq->getQuery();
@@ -229,6 +242,7 @@ void LibpqDataSourceImpl::rollbackAsync(LibpqAsyncReq* areq) {
 }
 
 bool LibpqDataSourceImpl::begin() {
+	if(isAutoCommitMode) return true;
 	if(isWire) {
 		if(isAsync) return false;
 		LibpqQuery q;
@@ -249,6 +263,7 @@ bool LibpqDataSourceImpl::begin() {
 }
 
 bool LibpqDataSourceImpl::commit() {
+	if(isAutoCommitMode) return true;
 	if(isWire) {
 		if(isAsync) return false;
 		LibpqQuery q;
@@ -269,6 +284,7 @@ bool LibpqDataSourceImpl::commit() {
 }
 
 bool LibpqDataSourceImpl::rollback() {
+	if(isAutoCommitMode) return true;
 	if(isWire) {
 		if(isAsync) return false;
 		LibpqQuery q;
@@ -1807,7 +1823,7 @@ LibpqParamsBase* LibpqDataSourceImpl::getParams(int size) {
 FpgWire::FpgWire(SocketInterface* sif, bool isAsync): PgReadTask(sif), pos(0), state('0'), pstat(false), bstat(false), rowNum(-1), querystatus(0) {
 	this->isAsync = isAsync;
 }
-bool FpgWire::connect(std::string url, bool isAsync) {
+bool FpgWire::connect(std::string url, bool isAsync, bool isAutoCommitMode) {
 	std::vector<std::string> parts = StringUtil::splitAndReturn<std::vector<std::string> >(url, " ");
 	std::string host, database, user, password;
 	int port = 5432;
@@ -1825,7 +1841,13 @@ bool FpgWire::connect(std::string url, bool isAsync) {
 			port = CastUtil::toInt(StringUtil::trimCopy(kv.at(1)));
 		}
 	}
-	connect(host, port, isAsync, database, user, password);
+	bool success = connect(host, port, isAsync, database, user, password);
+	/*if(success && isAutoCommitMode) {
+		query("\SET AUTOCOMMIT ON");
+		handleSync();
+		success = state=='I';
+	}*/
+	return success;
 }
 bool FpgWire::connect(std::string host, int port, bool isAsync, std::string database, std::string user, std::string password) {
 	std::string rp = password + user;

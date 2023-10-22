@@ -13,7 +13,7 @@ concurrency:
     
 env:
   IMAGE_NAME: sumeetchhetri/ffead-cpp-base
-  IMG_VERSION: 6.0-debug
+  IMG_VERSION: 7.0-debug
 jobs:
   push:
     runs-on: ubuntu-latest
@@ -23,7 +23,7 @@ jobs:
 
       - name: Build base ffead-cpp image
         run: |
-          cd docker/techempower-config
+          cd docker/te
           docker build . --file ffead-cpp-base-debug.dockerfile --tag $IMAGE_NAME
 
       - name: Log into registry

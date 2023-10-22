@@ -69,7 +69,7 @@ jobs:
         sed -i'' -e 's/1.13.1/1.19.1/g' modules/nginx_mod_ffeadcpp/CMakeLists.txt
         cmake -DSRV_EMB=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -GNinja .
         sudo ninja install
-        cd ffead-cpp-6.0-bin
+        cd ffead-cpp-7.0-bin
         sudo chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
         #sed -i'' -e "s|<init>TeBkUmRouter.updateCache</init>||g" web/t1/config/cache.xml
         #sed -i'' -e "s|<init>TeBkRestController.updateCache</init>||g" web/te-benchmark/config/cache.xml

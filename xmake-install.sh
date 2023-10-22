@@ -20,9 +20,13 @@ if [ "$4" != "true" ]; then
 	rm -rf $1/web/t3 || true
 	rm -rf $1/web/t4 || true
 	rm -rf $1/web/t5 || true
+	rm -rf $1/web/t6 || true
+	rm -rf $1/web/t7 || true
 	rm -f $1/lib/libt3.* || true
 	rm -f $1/lib/libt4.* || true
 	rm -f $1/lib/libt5.* || true
+	rm -f $1/lib/libt6.* || true
+	rm -f $1/lib/libt7.* || true
 fi
 
 for d in $1/web/* ; do
