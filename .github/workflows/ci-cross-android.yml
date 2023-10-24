@@ -17,22 +17,22 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip_build]')"
     steps:
     - uses: actions/checkout@v2
-    - name: Cross compile ffead-cpp for android/ubuntu
-      run: |
-        sudo su
-        cd docker
-        chmod +x *.sh
-        echo ${ANDROID_SDK_ROOT}
-        ANDROID_ROOT=/usr/local/lib/android
-        ANDROID_SDK_ROOT=${ANDROID_ROOT}/sdk
-        ANDROID_HOME=${ANDROID_SDK_ROOT}
-        ANDROID_NDK_ROOT=${ANDROID_NDK_LATEST_HOME}
-        ls -ltr ${ANDROID_NDK_ROOT}
-        ls -ltr ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin
-        sudo ./cross-build-deps.sh android ${ANDROID_SDK_ROOT} ${ANDROID_NDK_ROOT} armeabi-v7a 21
-        cp cross-build.sh ../
-        cd ../ && chmod +x cross-build.sh
-        sudo ./cross-build.sh android ${ANDROID_SDK_ROOT} ${ANDROID_NDK_ROOT} armeabi-v7a 21
+    #- name: Cross compile ffead-cpp for android/ubuntu
+    #  run: |
+    #    sudo su
+    #    cd docker
+    #    chmod +x *.sh
+    #    echo ${ANDROID_SDK_ROOT}
+    #    ANDROID_ROOT=/usr/local/lib/android
+    #    ANDROID_SDK_ROOT=${ANDROID_ROOT}/sdk
+    #    ANDROID_HOME=${ANDROID_SDK_ROOT}
+    #    ANDROID_NDK_ROOT=${ANDROID_NDK_LATEST_HOME}
+    #    ls -ltr ${ANDROID_NDK_ROOT}
+    #    ls -ltr ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin
+    #    sudo ./cross-build-deps.sh android ${ANDROID_SDK_ROOT} ${ANDROID_NDK_ROOT} armeabi-v7a 21
+    #    cp cross-build.sh ../
+    #    cd ../ && chmod +x cross-build.sh
+    #    sudo ./cross-build.sh android ${ANDROID_SDK_ROOT} ${ANDROID_NDK_ROOT} armeabi-v7a 21
     - name: Cross compile ffead-cpp for android/docker
       run: |
         sudo su
