@@ -17,6 +17,7 @@ mv /tmp/ffead-cpp-7.0-bin /opt/ffead-cpp-7.0
 chmod +x /opt/ffead-cpp-7.0/*.sh
 
 cd /opt/ffead-cpp-7.0
+sed -i 's|EVH_SINGLE=true|EVH_SINGLE=false|g' /opt/ffead-cpp-7.0/resources/server.prop
 nohup bash -c "./server.sh > ffead.log &"
 echo "Waiting for ffead-cpp to launch on port 8080..."
 COUNTER=0

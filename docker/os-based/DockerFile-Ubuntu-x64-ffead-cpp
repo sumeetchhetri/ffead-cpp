@@ -57,6 +57,7 @@ COPY *.sh  /opt/
 
 WORKDIR /opt
 
+RUN echo "/usr/local/lib64" >> /etc/ld.so.conf && ldconfig
 RUN chmod +x install_ffead-cpp.sh
 RUN ./install_ffead-cpp.sh
 
