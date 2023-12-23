@@ -158,7 +158,7 @@ void TeBkUmLpqAsyncRouter::queriesAsync(const char* q, int ql, Writer* sif) {
 		q->withSelectQuery(WORLD_ONE_QUERY);
 	}
 #ifdef HAVE_LIBPQ
-	areq->withContext(sif).withFinalCb([](void** ctx,bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
+	areq->withContext(sif).withFinalCb([](void** ctx, bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
 		Writer* sif = (Writer*)ctx[0];
 		std::vector<TeBkUmLpqAsyncWorld> vec;
 		vec.reserve((int)results->size());

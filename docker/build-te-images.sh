@@ -15,8 +15,8 @@ fi
 cd te
 rm -rf temp
 mkdir temp
-cp base/*.dockerfile lang/*.dockerfile scripts/*.sh *.sh *.dockerfile temp/
-cp -rf postgresql temp/
+cp base/*.dockerfile scripts/*.sh *.sh *.dockerfile temp/
+#cp -rf postgresql temp/
 cd  temp
 
 find . -type f -name '*.dockerfile' | xargs sed -i'' -e "s|-deps:6.0|-deps:${VERSION}|g"
@@ -24,33 +24,11 @@ find . -type f -name '*.dockerfile' | xargs sed -i'' -e "s|-base:6.0|-base:${VER
 find . -type f -name '*.dockerfile' | xargs sed -i'' -e "s|-base-2:6.0|-base-2:${VERSION}|g"
 find . -type f -name '*.dockerfile' | xargs sed -i'' -e "s|version=\"6.0\"|version=\"${VERSION}\"|g"
 
-if [ ! -z "$2" ] || [ "$2" = "deps" ]
-then
-	docker rmi -f sumeetchhetri/ffead-cpp-deps:${VERSION}
-	docker build --progress plain -f ffead-cpp-deps.dockerfile -t sumeetchhetri/ffead-cpp-deps:${VERSION} .
-	docker push sumeetchhetri/ffead-cpp-deps:${VERSION}
-fi
-
 docker rmi -f sumeetchhetri/ffead-cpp-base:${VERSION}
+#DOCKER_BUILDKIT=0 
 docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-base.dockerfile -t sumeetchhetri/ffead-cpp-base:${VERSION} .
 docker push sumeetchhetri/ffead-cpp-base:${VERSION}
-
-docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-profiled-base:${VERSION}
-docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-sql-raw-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-profiled-base:${VERSION} .
-docker push sumeetchhetri/ffead-cpp-sql-raw-profiled-base:${VERSION}
-
-docker rmi -f sumeetchhetri/ffead-cpp-sql-raw-async-profiled-base:${VERSION}
-docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-sql-raw-async-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-sql-raw-async-profiled-base:${VERSION} .
-docker push sumeetchhetri/ffead-cpp-sql-raw-async-profiled-base:${VERSION}
 
 docker rmi -f sumeetchhetri/ffead-cpp-v-base:${VERSION}
 docker build --progress plain -f ffead-cpp-v-base.dockerfile -t sumeetchhetri/ffead-cpp-v-base:${VERSION} .
 docker push sumeetchhetri/ffead-cpp-v-base:${VERSION}
-
-docker rmi -f sumeetchhetri/ffead-cpp-v-picov-raw-profiled-base:${VERSION}
-docker build --progress plain -f ffead-cpp-v-picov-raw-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-v-picov-raw-profiled-base:${VERSION} .
-docker push sumeetchhetri/ffead-cpp-v-picov-raw-profiled-base:${VERSION}
-
-docker rmi -f sumeetchhetri/ffead-cpp-v-picov-raw-async-profiled-base:${VERSION}
-docker build --progress plain -f ffead-cpp-v-picov-raw-async-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-v-picov-raw-async-profiled-base:${VERSION} .
-docker push sumeetchhetri/ffead-cpp-v-picov-raw-async-profiled-base:${VERSION}

@@ -181,50 +181,50 @@ public:
 	LibpqQuery& withPrepared();
 	LibpqQuery& withContext(void* ctx, void* ctx1 = NULL, void* ctx2 = NULL, void* ctx3 = NULL, void* ctx4 = NULL);
 	LibpqQuery& withMulti();//multi-statement non parameterized queries
-	template<typename Func0>
-	LibpqQuery& withCb0(Func0 cb) {//LibpqQuery& withCb0(std::function< void(void*, PGresult*) > cb) {
+	template<typename FuncCb0>
+	LibpqQuery& withCb0(FuncCb0 cb) {//LibpqQuery& withCb0(std::function< void(void*, PGresult*) > cb) {
 		this->cb0 = cb;
 		this->cbType = 0;
 		return *this;
 	}
-	template<typename Func1>
-	LibpqQuery& withCb1(Func1 cb) {//LibpqQuery& withCb1(std::function< void(void*, bool, int, int, char*, char*, int) > cb) {
+	template<typename FuncCb1>
+	LibpqQuery& withCb1(FuncCb1 cb) {//LibpqQuery& withCb1(std::function< void(void*, bool, int, int, char*, char*, int) > cb) {
 		this->cb1 = cb;
 		this->cbType = 1;
 		return *this;
 	}
-	template<typename Func2>
-	LibpqQuery& withCb2(Func2 cb) {//LibpqQuery& withCb2(std::function< void(void*, bool, int, int, char*, int) > cb) {
+	template<typename FuncCb2>
+	LibpqQuery& withCb2(FuncCb2 cb) {//LibpqQuery& withCb2(std::function< void(void*, bool, int, int, char*, int) > cb) {
 		this->cb2 = cb;
 		this->cbType = 2;
 		return *this;
 	}
-	template<typename Func3>
-	LibpqQuery& withCb3(Func3 cb) {//LibpqQuery& withCb3(std::function< void(void*, bool, int, int, char*) > cb) {
+	template<typename FuncCb3>
+	LibpqQuery& withCb3(FuncCb3 cb) {//LibpqQuery& withCb3(std::function< void(void*, bool, int, int, char*) > cb) {
 		this->cb3 = cb;
 		this->cbType = 3;
 		return *this;
 	}
-	template<typename Func4>
-	LibpqQuery& withCb4(Func4 cb) {//LibpqQuery& withCb4(std::function< void(void*, int, int, char*, char*, int) > cb) {
+	template<typename FuncCb4>
+	LibpqQuery& withCb4(FuncCb4 cb) {//LibpqQuery& withCb4(std::function< void(void*, int, int, char*, char*, int) > cb) {
 		this->cb4 = cb;
 		this->cbType = 4;
 		return *this;
 	}
-	template<typename Func5>
-	LibpqQuery& withCb5(Func5 cb) {//LibpqQuery& withCb5(std::function< void(void*, int, int, char*, int) > cb) {
+	template<typename FuncCb5>
+	LibpqQuery& withCb5(FuncCb5 cb) {//LibpqQuery& withCb5(std::function< void(void*, int, int, char*, int) > cb) {
 		this->cb5 = cb;
 		this->cbType = 5;
 		return *this;
 	}
-	template<typename Func6>
-	LibpqQuery& withCb6(Func6 cb) {//LibpqQuery& withCb6(std::function< void(void*, int, int, char*) > cb) {
+	template<typename FuncCb6>
+	LibpqQuery& withCb6(FuncCb6 cb) {//LibpqQuery& withCb6(std::function< void(void*, int, int, char*) > cb) {
 		this->cb6 = cb;
 		this->cbType = 6;
 		return *this;
 	}
-	template<typename Func7>
-	LibpqQuery& withCb7(Func7 cb) {//LibpqQuery& withCb7(std::function< void(void*, int, const std::function< std::string_view() > ) > cb) {
+	template<typename FuncCb7>
+	LibpqQuery& withCb7(FuncCb7 cb) {//LibpqQuery& withCb7(std::function< void(void*, int, const std::function< std::string_view() > ) > cb) {
 		this->cb7 = cb;
 		this->cbType = 0;
 		return *this;
@@ -276,13 +276,13 @@ public:
 	LibpqAsyncReq();
 	LibpqQuery* getQuery();
 	LibpqAsyncReq& withContext(void* ctx, void* ctx1 = NULL, void* ctx2 = NULL, void* ctx3 = NULL, void* ctx4 = NULL);
-	template<typename FuncF>
-	LibpqAsyncReq& withFinalCb(FuncF cb) {//LibpqAsyncReq& withFinalCb(std::function< void(void*, bool, std::vector<PGresult*>*, const std::string&, int) > fcb) {
-		this->fcb = fcb;
+	template<typename FuncAqCb>
+	LibpqAsyncReq& withFinalCb(FuncAqCb cb) {//LibpqAsyncReq& withFinalCb(std::function< void(void*, bool, std::vector<PGresult*>*, const std::string&, int) > fcb) {
+		this->fcb = cb;
 		return *this;
 	}
-	template<typename FuncF1>
-	LibpqAsyncReq& withFinalCb1(FuncF1 cb) {//LibpqAsyncReq& withFinalCb1(std::function< void(void*, bool, const std::string&, int) > fcb) {
+	template<typename FuncAqCb1>
+	LibpqAsyncReq& withFinalCb1(FuncAqCb1 cb) {//LibpqAsyncReq& withFinalCb1(std::function< void(void*, bool, const std::string&, int) > fcb) {
 		this->fcb1 = cb;
 		return *this;
 	}

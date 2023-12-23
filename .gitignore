@@ -69,6 +69,7 @@ build/
 nginx-*/
 docker/test/src
 docker/test/web
+docker/te/temp
 **/Makefile
 **/*.tar.gz*
 **/.swiftpm

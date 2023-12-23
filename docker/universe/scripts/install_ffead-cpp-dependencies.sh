@@ -56,34 +56,35 @@ cmake . && make install
 cd $IROOT
 rm -rf hiredis-1.0.2
 
-wget -q https://github.com/sewenew/redis-plus-plus/archive/refs/tags/1.3.5.tar.gz
-tar xf 1.3.5.tar.gz
-rm -f 1.3.5.tar.gz
-cd redis-plus-plus-1.3.5/
+wget -q https://github.com/sewenew/redis-plus-plus/archive/refs/tags/1.3.10.tar.gz
+tar xf 1.3.10.tar.gz
+rm -f 1.3.10.tar.gz
+cd redis-plus-plus-1.3.10/
 mkdir build
 cd build
 cmake -DREDIS_PLUS_PLUS_CXX_STANDARD=17 .. && make && make install
 cd $IROOT
-rm -rf redis-plus-plus-1.3.5
+rm -rf redis-plus-plus-1.3.10
 
 cd $IROOT
-wget -q https://github.com/microsoft/mimalloc/archive/v2.0.6.tar.gz
-tar xf v2.0.6.tar.gz
-rm -f v2.0.6.tar.gz
-cd mimalloc-2.0.6
+wget -q https://github.com/microsoft/mimalloc/archive/v2.1.2.tar.gz
+tar xf v2.1.2.tar.gz
+rm -f v2.1.2.tar.gz
+cd mimalloc-2.1.2
 mkdir -p out/release
 cd out/release
 cmake ../.. -DCMAKE_BUILD_TYPE=Release
 make && make install
 cd $IROOT
-rm -rf mimalloc-2.0.6
+rm -rf mimalloc-2.1.2
 
-wget -q https://github.com/microsoft/snmalloc/archive/0.6.0.tar.gz
-tar xf 0.6.0.tar.gz
-rm -f 0.6.0.tar.gz
-cd snmalloc-0.6.0
+wget -q https://github.com/microsoft/snmalloc/archive/0.6.2.tar.gz
+tar xf 0.6.2.tar.gz
+rm -f 0.6.2.tar.gz
+cd snmalloc-0.6.2
 mkdir build
 cd build
 cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Release
 ninja
 cd $IROOT
+rm -rf snmalloc-0.6.2

@@ -25,31 +25,7 @@
 			"versus": "",
 			"tags": []
 		},
-		"v-picov-raw-profiled": {
-			"json_url": "/t3/j",
-			"plaintext_url": "/plaintext",
-			"db_url": "/t3/d",
-			"query_url": "/t3/quer?queries=",
-			"fortune_url": "/t3/fortu",
-			"update_url": "/t3/updt?queries=",
-			"cached_query_url": "/t3/cached-wld?count=",
-			"port": 8080,
-			"approach": "Realistic",
-			"classification": "Fullstack",
-			"database": "postgres",
-			"framework": "ffead-cpp",
-			"language": "C++",
-			"orm": "Raw",
-			"platform": "None",
-			"webserver": "picov",
-			"os": "Linux",
-			"database_os": "Linux",
-			"display_name": "ffead-cpp [v-picov-prof]",
-			"notes": "picov sync profiled",
-			"versus": "",
-			"tags": []
-		},
-		"v-picov-raw-async-profiled": {
+		"v-picov-raw-async": {
 			"json_url": "/t4/j",
 			"plaintext_url": "/t4/plaint",
 			"db_url": "/t4/d",
@@ -68,12 +44,12 @@
 			"webserver": "picov",
 			"os": "Linux",
 			"database_os": "Linux",
-			"display_name": "ffead-cpp [v-picov-async-prof]",
-			"notes": "picov async profiled",
+			"display_name": "ffead-cpp [v-picov-async]",
+			"notes": "picov async",
 			"versus": "",
 			"tags": []
 		},
-		"postgresql-raw-profiled": {
+		"postgresql-raw": {
 			"db_url": "/t3/d",
 			"query_url": "/t3/quer?queries=",
 			"fortune_url": "/t3/fortu",
@@ -89,12 +65,12 @@
 			"webserver": "ffead-cpp",
 			"os": "Linux",
 			"database_os": "Linux",
-			"display_name": "ffead-cpp [pg-sync-prof]",
-			"notes": "sync profiled",
+			"display_name": "ffead-cpp [pg-sync]",
+			"notes": "sync",
 			"versus": "",
 			"tags": []
 		},
-		"postgresql-raw-async-profiled": {
+		"postgresql-raw-async": {
 			"db_url": "/t4/d",
 			"query_url": "/t4/quer?queries=",
 			"fortune_url": "/t4/fortu",
@@ -110,11 +86,11 @@
 			"webserver": "ffead-cpp",
 			"os": "Linux",
 			"database_os": "Linux",
-			"display_name": "ffead-cpp [pg-async-prof]",
-			"notes": "async profiled",
+			"display_name": "ffead-cpp [pg-async]",
+			"notes": "async",
 			"versus": ""
 		},
-		"postgresql-wire-profiled": {
+		"postgresql-wire": {
 			"db_url": "/t6/d",
 			"query_url": "/t6/quer?queries=",
 			"fortune_url": "/t6/fortu",
@@ -130,11 +106,11 @@
 			"webserver": "ffead-cpp",
 			"os": "Linux",
 			"database_os": "Linux",
-			"display_name": "ffead-cpp [pg-wire-prof]",
-			"notes": "sync wire profiled",
+			"display_name": "ffead-cpp [pg-wire]",
+			"notes": "sync wire",
 			"versus": ""
 		},
-		"postgresql-wire-async-profiled": {
+		"postgresql-wire-async": {
 			"db_url": "/t7/d",
 			"query_url": "/t7/quer?queries=",
 			"fortune_url": "/t7/fortu",
@@ -150,8 +126,8 @@
 			"webserver": "ffead-cpp",
 			"os": "Linux",
 			"database_os": "Linux",
-			"display_name": "ffead-cpp [pg-wire-async-prof]",
-			"notes": "async wire profiled",
+			"display_name": "ffead-cpp [pg-wire-async]",
+			"notes": "async wire",
 			"versus": ""
 		}
 	}]

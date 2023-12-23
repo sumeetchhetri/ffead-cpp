@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-deps:7.0
+FROM ubuntu:latest
 LABEL maintainer="Sumeet Chhetri"
 LABEL version="7.0-debug"
 LABEL description="Base ffead-cpp docker image with commit id - master"

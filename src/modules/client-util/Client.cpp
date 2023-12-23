@@ -32,6 +32,17 @@ Client::~Client() {
 	closeConnection();
 }
 
+bool Client::isIPAddress(const char* address)
+{
+	sockaddr_in addr4 = {};
+	sockaddr_in6 addr6 = {};
+
+	int result4 = inet_pton(AF_INET, address, (void*)(&addr4));
+	int result6 = inet_pton(AF_INET6, address, (void*)(&addr6));
+
+	return ((result4 == 1) || (result6 == 1));
+}
+
 int Client::conn(const std::string& host, const int& port) {
 	int sockfd = create_tcp_socket();
 
@@ -40,24 +51,41 @@ int Client::conn(const std::string& host, const int& port) {
 	remote->sin_family = AF_INET;
 
 	if(host!="localhost" && host!="0.0.0.0" && host!="127.0.0.1") {
-		char* ip = get_ip((char*)host.c_str());
-		fprintf(stderr, "IP is %s\n", ip);
-		int tmpres = inet_pton(AF_INET, ip, (void *)(&(remote->sin_addr.s_addr)));
-		if( tmpres < 0)
-		{
-			free(remote);
-			perror("Can't set remote->sin_addr.s_addr");
-			return false;
+		if(!isIPAddress(host.c_str())) {
+			char* ip = get_ip((char*)host.c_str());
+			fprintf(stderr, "IP is %s\n", ip);
+			int tmpres = inet_pton(AF_INET, ip, (void *)(&(remote->sin_addr.s_addr)));
+			if( tmpres < 0)
+			{
+				free(remote);
+				perror("Can't set remote->sin_addr.s_addr");
+				return false;
+			}
+			else if(tmpres == 0)
+			{
+				free(remote);
+				fprintf(stderr, "%s is not a valid IP address\n", ip);
+				return false;
+			}
+			remote->sin_addr.s_addr = inet_addr(ip);
+			free(ip);
+		} else {
+			int tmpres = inet_pton(AF_INET, host.c_str(), (void *)(&(remote->sin_addr.s_addr)));
+			if( tmpres < 0)
+			{
+				free(remote);
+				perror("Can't set remote->sin_addr.s_addr");
+				return false;
+			}
+			else if(tmpres == 0)
+			{
+				free(remote);
+				fprintf(stderr, "%s is not a valid IP address\n", host.c_str());
+				return false;
+			}
+			remote->sin_addr.s_addr = inet_addr(host.c_str());
 		}
-		else if(tmpres == 0)
-		{
-			free(remote);
-			fprintf(stderr, "%s is not a valid IP address\n", ip);
-			return false;
-		}
-		remote->sin_addr.s_addr = inet_addr(ip);
 		remote->sin_port = htons(port);
-		free(ip);
 
 		if(connect(sockfd, (struct sockaddr *)remote, sizeof(struct sockaddr)) < 0 && (errno != EINPROGRESS)) {
 			perror("Could not connect");

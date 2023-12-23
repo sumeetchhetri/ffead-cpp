@@ -48,6 +48,7 @@ public:
 	int receivelen(std::string& buf, const int& len, const int& flag);
 	std::string getData();
 	int sendlen(const std::string& buf, const int& len);
+	static bool isIPAddress(const char* address);
 };
 
 #endif /* CLIENT_H_ */

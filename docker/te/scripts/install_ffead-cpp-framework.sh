@@ -80,6 +80,20 @@ sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/te-benchmark/libte-benchmark${
 sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/peer-server/libpeer-server${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/t1/libt1${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/t2/libt2{LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/default")||g' CMakeLists.txt
+sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/flexApp")||g' CMakeLists.txt
+sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/oauthApp")||g' CMakeLists.txt
+sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/markers")||g' CMakeLists.txt
+sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/peer-server")||g' CMakeLists.txt
+sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/te-benchmark")||g' CMakeLists.txt
+sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/t1")||g' CMakeLists.txt
+sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/default/ DESTINATION ${PROJECT_NAME}-bin/web/default)||g' CMakeLists.txt
+sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/flexApp/ DESTINATION ${PROJECT_NAME}-bin/web/flexApp)||g' CMakeLists.txt
+sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/oauthApp/ DESTINATION ${PROJECT_NAME}-bin/web/oauthApp)||g' CMakeLists.txt
+sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/markers/ DESTINATION ${PROJECT_NAME}-bin/web/markers)||g' CMakeLists.txt
+sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/peer-server/ DESTINATION ${PROJECT_NAME}-bin/web/peer-server)||g' CMakeLists.txt
+sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/te-benchmark/ DESTINATION ${PROJECT_NAME}-bin/web/te-benchmark)||g' CMakeLists.txt
+sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/t1/ DESTINATION ${PROJECT_NAME}-bin/web/t1)||g' CMakeLists.txt
 sed -i 's|web/default/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/flexApp/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/oauthApp/src/autotools/Makefile||g' configure.ac
@@ -95,53 +109,3 @@ cmake -DSRV_EMB=on -DMOD_APACHE=off -DMOD_NGINX=off -DMOD_MEMCACHED=on -DMOD_RED
 
 cd ${IROOT}/ffead-cpp-src/
 ninja install
-
-if [ ! -d "ffead-cpp-7.0-bin" ]
-then
-	exit 1
-fi
-
-cd ffead-cpp-7.0-bin
-#cache related dockerfiles will add the cache.xml accordingly whenever needed
-chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
-./server.sh &
-COUNTER=0
-while [ ! -f lib/libinter.so ]
-do
-    sleep 1
-    COUNTER=$((COUNTER+1))
-    if [ "$COUNTER" = 120 ]
-    then
-    	cat logs/jobs.log
-    	echo "ffead-cpp exiting exiting due to failure...."
-    	exit 1
-    fi
-done
-COUNTER=0
-while [ ! -f lib/libdinter.so ]
-do
-    sleep 1
-    COUNTER=$((COUNTER+1))
-    if [ "$COUNTER" = 120 ]
-    then
-    	cat logs/jobs.log
-    	echo "ffead-cpp exiting exiting due to failure....ddlib"
-    	exit 1
-    fi
-done
-echo "ffead-cpp start successful"
-sleep 5
-cd tests && rm -f test.csv && cp ${IROOT}/ffead-cpp-src/tests/test-te.csv test.csv && chmod +x *.sh && ./runTests.sh
-echo "ffead-cpp normal shutdown"
-pkill ffead-cpp
-
-cd ${IROOT}/ffead-cpp-src/
-cp -rf ffead-cpp-7.0-bin ${IROOT}/ffead-cpp-7.0-sql
-rm -rf ffead-cpp-7.0-bin
-
-cd ${IROOT}/ffead-cpp-7.0-sql
-
-chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
-chmod 755 *.sh
-rm -f *.cntrl
-rm -f tmp/*.sess
