@@ -87,6 +87,7 @@ sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/markers")||g' C
 sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/peer-server")||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/te-benchmark")||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/t1")||g' CMakeLists.txt
+sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/t2")||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/default/ DESTINATION ${PROJECT_NAME}-bin/web/default)||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/flexApp/ DESTINATION ${PROJECT_NAME}-bin/web/flexApp)||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/oauthApp/ DESTINATION ${PROJECT_NAME}-bin/web/oauthApp)||g' CMakeLists.txt
@@ -94,6 +95,7 @@ sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/markers/ DESTINATION ${PRO
 sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/peer-server/ DESTINATION ${PROJECT_NAME}-bin/web/peer-server)||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/te-benchmark/ DESTINATION ${PROJECT_NAME}-bin/web/te-benchmark)||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/t1/ DESTINATION ${PROJECT_NAME}-bin/web/t1)||g' CMakeLists.txt
+sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/t1/ DESTINATION ${PROJECT_NAME}-bin/web/t2)||g' CMakeLists.txt
 sed -i 's|web/default/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/flexApp/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/oauthApp/src/autotools/Makefile||g' configure.ac

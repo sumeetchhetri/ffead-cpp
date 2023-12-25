@@ -142,6 +142,7 @@ class LibpqQuery {
 	bool prepared;
 	bool isSelect;
 	bool isMulti;
+	bool isTrx;
 	int rows;
 	std::string query;
 	std::string ps;
@@ -257,6 +258,7 @@ class LibpqAsyncReq {
 	LipqCbFuncF0 fcb1;
 	void* ctx[5];
 	int cnt;
+	bool processed;
 #ifdef HAVE_LIBPQ
 	std::vector<PGresult*> results;
 #else

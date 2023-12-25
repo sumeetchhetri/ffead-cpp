@@ -12,7 +12,7 @@ RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libt3* /usr/local/lib/libinte
 	ln -s ${IROOT}/ffead-cpp-7.0-sql/lib/libdinter.so /usr/local/lib/libdinter.so && \
 	ldconfig
 	
-RUN apt update -yqq && apt install -y git make && rm -rf /var/lib/apt/lists/*
+RUN apt update -yqq && apt -yqq --fix-broken install && apt install -y git make && rm -rf /var/lib/apt/lists/*
 #For Latest vlang, uncomment the below mentioned line, due to lot of new enhancements and unsafe block handling, vlang has slowed down tremendously
 #RUN git clone https://github.com/vlang/v && cd v && make && ./v symlink
 

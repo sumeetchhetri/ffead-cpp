@@ -131,7 +131,7 @@ void TeBkUmLpqAsyncRouter::dbAsync(Writer* sif) {
 	LibpqQuery* q = areq->getQuery();
 	q->withParamInt4(rid);
 #ifdef HAVE_LIBPQ
-	q->withSelectQuery(WORLD_ONE_QUERY).withContext(sif).withCb0([](void** ctx,PGresult* res) {
+	q->withSelectQuery(WORLD_ONE_QUERY).withContext(sif).withCb0([](void** ctx, PGresult* res) {
 		Writer* sif = (Writer*)ctx[0];
 		AsyncReqData* reqdt = (AsyncReqData*)sif->getData();
 		reqdt->reset();
