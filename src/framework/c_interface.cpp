@@ -232,7 +232,7 @@ void ffead_cpp_handle_picov_clean_sockets()
 }
 void ffead_cpp_handle_picov_ext_fd_cb(int fd, void* data)
 {
-	#ifdef HAVE_LIBPQ
+	#ifdef INC_SDORM_SQL
 	LibpqDataSourceImpl* libpq = (LibpqDataSourceImpl*)data;
 	libpq->handle();
 	#endif
