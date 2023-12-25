@@ -19,7 +19,7 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 
 WORKDIR ${IROOT}
 
-COPY install_ffead-cpp-framework.sh install_post_process.sh server.sh ${IROOT}/
+COPY install_ffead-cpp-dependencies.sh install_ffead-cpp-framework.sh install_post_process.sh server.sh ${IROOT}/
 RUN chmod 755 ${IROOT}/*.sh
 RUN ./install_ffead-cpp-dependencies.sh
 RUN ./install_ffead-cpp-framework.sh

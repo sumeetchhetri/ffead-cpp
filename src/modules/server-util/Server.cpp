@@ -496,13 +496,26 @@ SOCKET Server::createListener(const std::string& ipAddress, const int& port, con
 		}
 	#endif
 	#ifdef HAVE_TCP_FASTOPEN
-		option = 4096;
 		#ifdef OS_DARWIN
-		option = 1;
+			/*sa_endpoints_t endpoints;
+			memset(&endpoints, 0, sizeof(endpoints));
+			endpoints.sae_srcaddr = p->ai_addr;
+			endpoints.sae_srcaddrlen = p->ai_addrlen;
+
+			if(connectx(sockfd, &endpoints, 0, 0, NULL, 0, NULL, NULL)) {
+				perror("connectx");
+			}*/
+			option = 1;
+		#else
+			#ifdef OS_LINUX
+				option = 4096;
+			#else
+				option = 1;
+			#endif
 		#endif
-		if (setsockopt(sockfd, IPPROTO_TCP, TCP_FASTOPEN, (const void *)&option, sizeof(option)) == -1) {
-			perror("setsockopt");
-		}
+			if (setsockopt(sockfd, IPPROTO_TCP, TCP_FASTOPEN, (const void *)&option, sizeof(option)) == -1) {
+				perror("setsockopt");
+			}
 	#endif
 #endif
 

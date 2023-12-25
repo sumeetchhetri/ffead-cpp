@@ -392,6 +392,7 @@ class FpgWire : public PgReadTask, public BaseSocket, public FpgIter {
     bool sendExecute(LibpqQuery& q);
     bool sendParse(LibpqQuery& q);
     bool sendBind(LibpqQuery& q);
+	void checkUnderFlowAndRead(int);
 	std::string_view next();
 	friend class LibpqDataSourceImpl;
 protected:

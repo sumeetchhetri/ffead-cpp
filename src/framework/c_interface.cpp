@@ -232,8 +232,10 @@ void ffead_cpp_handle_picov_clean_sockets()
 }
 void ffead_cpp_handle_picov_ext_fd_cb(int fd, void* data)
 {
+	#ifdef HAVE_LIBPQ
 	LibpqDataSourceImpl* libpq = (LibpqDataSourceImpl*)data;
 	libpq->handle();
+	#endif
 }
 
 void* ffead_cpp_handle_crystal_js_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,

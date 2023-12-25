@@ -312,7 +312,7 @@ void TeBkUmLpqRouter::updatesMulti(const char* q, int ql, std::vector<TeBkUmLpqW
 				}
 			}
 			w.setRandomNumber(newRandomNumber);
-			updt->ss << "when ";
+			updt->ss << " when ";
 			updt->ss << w.getId();
 			updt->ss << " then ";
 			updt->ss << newRandomNumber;

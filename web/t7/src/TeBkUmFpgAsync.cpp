@@ -447,29 +447,29 @@ void TeBkUmFpgAsyncRouter::updateCache() {
 
 	LibpqAsyncReq* areq = sqli->getAsyncRequest();
 	LibpqQuery* q = areq->getQuery();
-	q->withSelectQuery(WORLD_ALL_QUERY).withContext(req).withCb3([](void** ctx, bool endofdata, int row, int col, char* value) {
+	q->withSelectQuery(WORLD_ALL_QUERY).withContext(req).withCb6([](void** ctx, int row, int col, char* value) {
 		AsyncCacheReq1* req = (AsyncCacheReq1*)ctx[0];
 		if(col==0) {
 			req->vec.emplace_back(ntohl(*((uint32_t *) value)));
 		} else {
 			req->vec.back().setRandomNumber(ntohl(*((uint32_t *) value)));
 		}
-
-		if(endofdata) {
-			CacheInterface* cchi = req->cchi;
-			try {
-				for(std::vector<TeBkUmFpgAsyncWorld>::iterator it=req->vec.begin(); it != req->vec.end(); ++it) {
-					char str[12];
-					sprintf(str, "%d;%d", (*it).getId(), (*it).getRandomNumber());
-					cchi->setRaw((*it).getId(), str);
-				}
-				CacheManager::cleanImpl(cchi);
-				delete req;
-				CacheManager::triggerAppInitCompletion("t7");
-			} catch(const std::exception& e) {
-				CacheManager::cleanImpl(cchi);
-				delete req;
+	});
+	areq->withContext(req).withFinalCb1([](void** ctx, bool status, const std::string& query, int counter) {
+		AsyncCacheReq1* req = (AsyncCacheReq1*)ctx[0];
+		CacheInterface* cchi = req->cchi;
+		try {
+			for(std::vector<TeBkUmFpgAsyncWorld>::iterator it=req->vec.begin(); it != req->vec.end(); ++it) {
+				char str[12];
+				sprintf(str, "%d;%d", (*it).getId(), (*it).getRandomNumber());
+				cchi->setRaw((*it).getId(), str);
 			}
+			CacheManager::cleanImpl(cchi);
+			delete req;
+			CacheManager::triggerAppInitCompletion("t7");
+		} catch(const std::exception& e) {
+			CacheManager::cleanImpl(cchi);
+			delete req;
 		}
 	});
 	sqli->postAsync(areq);

@@ -33,9 +33,9 @@ make install
 cd $IROOT
 rm -rf libcuckoo
 
-wget -q https://cdn.mysql.com/Downloads/Connector-ODBC/8.0/mysql-connector-odbc_8.0.29-1ubuntu21.10_amd64.deb
+wget -q https://mirror.csclub.uwaterloo.ca/mysql/Downloads/Connector-ODBC/8.0/mysql-connector-odbc_8.0.29-1ubuntu21.10_amd64.deb
 dpkg -i mysql-connector-odbc_8.0.29-1ubuntu21.10_amd64.deb
-wget -q https://cdn.mysql.com/Downloads/Connector-ODBC/8.0/mysql-connector-odbc-setup_8.0.29-1ubuntu21.10_amd64.deb
+wget -q https://mirror.csclub.uwaterloo.ca/mysql/Downloads/Connector-ODBC/8.0/mysql-connector-odbc-setup_8.0.29-1ubuntu21.10_amd64.deb
 dpkg -i mysql-connector-odbc-setup_8.0.29-1ubuntu21.10_amd64.deb
 rm -f *.deb
 

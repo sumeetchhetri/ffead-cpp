@@ -311,7 +311,7 @@ void TeBkUmFpgRouter::updatesMulti(const char* q, int ql, std::vector<TeBkUmFpgW
 				}
 			}
 			w.setRandomNumber(newRandomNumber);
-			updt->ss << "when ";
+			updt->ss << " when ";
 			updt->ss << w.getId();
 			updt->ss << " then ";
 			updt->ss << newRandomNumber;
@@ -347,10 +347,12 @@ void TeBkUmFpgRouter::updateCache() {
 	std::vector<TeBkUmFpgWorld> wlst;
 
 	LibpqQuery q;
-	q.withSelectQuery(WORLD_ALL_QUERY, false).withContext(&wlst).withCb6([](void** ctx, int row, int cn, char* value) {
+	q.withSelectQuery(WORLD_ALL_QUERY, false).withContext(&wlst).withCb5([](void** ctx, int row, int cn, char* value, int vlen) {
 		std::vector<TeBkUmFpgWorld>* wlst = (std::vector<TeBkUmFpgWorld>*)ctx[0];
-		if(cn==0) wlst->emplace_back(ntohl(*((uint32_t *) value)));
-		else wlst->back().setRandomNumber(ntohl(*((uint32_t *) value)));
+		int tmp = 0;
+		CommonUtils::naiveStrToNum(value, vlen, tmp);
+		if(cn==0) wlst->emplace_back(tmp);
+		else wlst->back().setRandomNumber(tmp);
 	});
 	sqli->executeQuery(&q);
 

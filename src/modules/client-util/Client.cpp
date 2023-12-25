@@ -236,9 +236,7 @@ bool Client::connection(const std::string& host, const int& port)
 bool Client::connectionNB(const std::string& host, const int& port)
 {
 	connection(host, port);
-
 	setSocketNonBlocking(sockfd);
-
 	return connected;
 }
 

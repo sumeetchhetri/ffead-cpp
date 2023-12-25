@@ -1918,25 +1918,40 @@ bool FpgWire::handleSync() {
 	return false;
 }
 
+void FpgWire::checkUnderFlowAndRead(int len) {
+	/*if(len<=0 || len>100000) {
+		std::cout << "ERR" <<std::endl;
+	}*/
+	if((pos+len)>buffer.length()) {
+		readFrom();
+		//std::cout << "read from socket " << pos << " " << len << " " << buffer.length() << std::endl;
+	}
+}
+
 int FpgWire::readInt32() {
+	checkUnderFlowAndRead(4);
 	int irv =(int)CommonUtils::btn(&buffer[pos], 4);
 	pos += 4;
 	return irv;
 }
 int FpgWire::readInt16() {
+	checkUnderFlowAndRead(2);
 	int irv =(int)CommonUtils::btn(&buffer[pos], 2);
 	pos += 2;
 	return irv;
 }
 char FpgWire::readChar() {
+	checkUnderFlowAndRead(1);
 	pos++;
 	return (char)buffer[pos-1];
 }
 std::string FpgWire::readString(int ml) {
+	checkUnderFlowAndRead(ml);
 	pos += ml;
 	return buffer.substr(pos-ml, ml);
 }
 std::string FpgWire::readString() {
+	checkUnderFlowAndRead(1);
 	size_t npos = buffer.find('\0', pos);
 	if(npos==std::string::npos) {
 		return "";
@@ -1971,6 +1986,7 @@ void FpgWire::writeChar(char num, std::string& sendBuf) {
 std::string_view FpgWire::next() {
 	int length = readInt32();
 	pos += length;
+	//if(pos>10000 || pos<0) std::cout << "next()" << pos << std::endl;
 	std::string_view a = std::string_view(&buffer[pos-length], (size_t)length);
 	return a;
 }
@@ -2143,7 +2159,7 @@ void FpgWire::handleResponse() {
 				case 6: {
 					for (int j = 0; j < cols; ++j) {
 						int length = readInt32();
-						q->cb3(q->ctx, false, rowNum++, j, (char*)readString(length).c_str());
+						q->cb6(q->ctx, rowNum++, j, (char*)readString(length).c_str());
 					}
 					break;
 				}
@@ -2437,6 +2453,7 @@ void FpgWire::run() {
 	
 	while(buffer.length()>0) {
 		handleResponse();
+		if(isClosed()) return;
 		if(pos>buffer.length()) {
 			return;
 		}
