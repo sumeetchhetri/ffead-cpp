@@ -28,6 +28,7 @@ import flag
 fn C.ffead_cpp_bootstrap(byteptr, u64, int)
 //no args
 fn C.ffead_cpp_init()
+fn C.ffead_cpp_is_inited() bool
 type Cb_into_pv = fn (hline byteptr, hline_len u64, body byteptr, body_len u64, fd int, pv voidptr) int
 type Cb_into_pv_for_date = fn ()
 type Cb_reg_ext_fd_pv = fn (int, voidptr)
@@ -306,6 +307,16 @@ fn main() {
 		C.ffead_cpp_init_for_pv(&picoev.register_external_fd, &fcp_callback_write, &set_date)
 		go update_date()
 	}
+
+	if is_async {
+		for {
+			C.usleep(1000000)
+			if C.ffead_cpp_is_inited() {
+				break
+			}
+		}
+	}
+
 	println('Initializing ffead-cpp end...')
 	
 	pv.serve()

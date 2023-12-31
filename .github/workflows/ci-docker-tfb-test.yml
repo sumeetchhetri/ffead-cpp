@@ -20,7 +20,7 @@ jobs:
     - name: Verify tfb
       run: |
         git clone https://github.com/TechEmpower/FrameworkBenchmarks
-        cd docker/techempower-config/
-        cp -rf benchmark_config.json postgresql base/*.dockerfile lang/*.dockerfile scripts/*.sh *.sh *.dockerfile ../../FrameworkBenchmarks/frameworks/C++/ffead-cpp/
+        cd docker/te/
+        cp -rf benchmark_config.json base/*.dockerfile scripts/*.sh *.sh *.dockerfile ../../FrameworkBenchmarks/frameworks/C++/ffead-cpp/
         cd ../../FrameworkBenchmarks
         ./tfb --mode verify --test-dir C++/ffead-cpp

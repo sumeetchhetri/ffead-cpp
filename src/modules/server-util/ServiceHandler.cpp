@@ -38,13 +38,14 @@ void ServiceHandler::closeConnectionsInternal() {
 		if((Timer::getTimestamp() - si->cqat)>10 && si->useCounter==0) {
 			cls(si);
 		} else {
+			c++;
 			toBeClosedConns.enqueue(si);
 		}
 		if(t.elapsedMilliSeconds()>900) {
 			CommonUtils::setDate();
 			t.start();
 		}
-		if(c++>=10) {
+		if(c>=10) {
 			break;
 		}
 	}

@@ -327,7 +327,7 @@ void TeBkUmFpgRouter::updatesMulti(const char* q, int ql, std::vector<TeBkUmFpgW
 		return;
 	}
 
-	updt.ss << "else randomnumber end where id in (";
+	updt.ss << " else randomnumber end where id in (";
 	for (int c = 0; c < queryCount; ++c) {
 		updt.ss << wlst.at(c).getId();
 		if(c<queryCount-1) {

@@ -258,7 +258,7 @@ elif [ "$2" = "v-picov" ]
 then
 	cd ${IROOT}
 	sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' $FFEAD_CPP_PATH/resources/server.prop
-	if [ "$3" = "postgresql-raw-async" ]
+	if [[ $3 == *"-async"* ]]
 	then
 		for i in $(seq 0 $(($(nproc --all)-1))); do
 			if [ "$6" = "pool" ]

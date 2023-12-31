@@ -856,7 +856,7 @@ void SelEpolKqEvPrt::picoevRwcb(picoev_loop* loop, int descriptor, int events, v
 }
 #endif
 
-void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
+void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev, SelEpolKqEvPrt* optSel) {
 	BaseSocket df;
 	df.io_uring_type = PROV_BUF;
 
@@ -1012,7 +1012,11 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
 							}
 						}
 						BaseSocket* sifd = ev(this, udata, ACCEPTED, newSocket, NULL, -1, false);
-						registerRead(sifd);
+						if(optSel!=NULL) {
+							optSel->registerRead(sifd);
+						} else {
+							registerRead(sifd);
+						}
 					}
 					reRegisterServerSock(udata);
 				}

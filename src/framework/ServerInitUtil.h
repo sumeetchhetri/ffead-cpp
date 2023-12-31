@@ -73,6 +73,7 @@ public:
 	static void bootstrapIB(std::string, SERVER_BACKEND type);
 	static void initIB();
 	static void initIB(cb_reg_ext_fd_pv pvregfd, cb_into_pv cb, cb_into_pv_for_date cdt);
+	static bool isInited();
 
 	static void cleanUp();
 	static void closeConnection(void* pcwr);

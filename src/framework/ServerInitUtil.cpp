@@ -380,6 +380,10 @@ void ServerInitUtil::initIB(cb_reg_ext_fd_pv pvregfd, cb_into_pv cb, cb_into_pv_
 	init(loggerIB);
 }
 
+bool ServerInitUtil::isInited() {
+	return CacheManager::isInitCompleted() && DataSourceManager::isInitCompleted() && SearchEngineManager::isInitCompleted();
+}
+
 void ServerInitUtil::init(Logger& logger) {
 	logger << "FFEAD in init" << std::endl;
 	logger << "Initializing ffead-cpp....." << std::endl;

@@ -108,6 +108,7 @@ extern "C" void ffead_cpp_bootstrap(const char* srv, size_t srv_len, int type);
 */
 extern "C" void ffead_cpp_init();
 extern "C" void ffead_cpp_init_for_pv(cb_reg_ext_fd_pv pvregfd, cb_into_pv cb, cb_into_pv_for_date cdt);
+extern "C" bool ffead_cpp_is_inited();
 
 /*
     Cleanup the ffead-cpp server framework

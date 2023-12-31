@@ -45,6 +45,7 @@ public:
 };
 
 class RequestHandler2 {
+	SelEpolKqEvPrt acceptor;
 	SelEpolKqEvPrt selector;
 	std::atomic<bool> run;
 	std::atomic<int> complete;
@@ -56,6 +57,7 @@ class RequestHandler2 {
 	SocketInterfaceFactory sf;
 	std::vector<Http11Socket*> clsdConns;
 	bool isActive();
+	static void* handleAcceptor(void* inp);
 	static void* handle(void* inp);
 	static void* handleWrites(void* inp);
 	static RequestHandler2* _i;

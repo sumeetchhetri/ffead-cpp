@@ -262,7 +262,7 @@ public:
 #endif
 	void setCtx(void* ctx);
 	void* getCtx();
-	void loop(eventLoopContinue evlc, onEvent ev);
+	void loop(eventLoopContinue evlc, onEvent ev, SelEpolKqEvPrt* optSel = NULL);
 	void initialize(const int& timeout, eventLoopContinue elcCb = NULL, onEvent eCb = NULL);
 	void initialize(SOCKET sockfd, const int& timeout, eventLoopContinue elcCb = NULL, onEvent eCb = NULL);
 	int getEvents();
