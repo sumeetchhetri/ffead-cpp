@@ -33,6 +33,7 @@ void ServiceHandler::closeConnectionsInternal() {
 	BaseSocket* si;
 	Timer t;
 	t.start();
+	int c = 0;
 	while(toBeClosedConns.try_dequeue(si)) {
 		if((Timer::getTimestamp() - si->cqat)>10 && si->useCounter==0) {
 			cls(si);
@@ -42,6 +43,9 @@ void ServiceHandler::closeConnectionsInternal() {
 		if(t.elapsedMilliSeconds()>900) {
 			CommonUtils::setDate();
 			t.start();
+		}
+		if(c++>=10) {
+			break;
 		}
 	}
 }

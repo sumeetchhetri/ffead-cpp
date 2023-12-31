@@ -205,7 +205,7 @@ void TeBkUmFpgAsyncRouter::queriesMultiAsync(const char* q, int ql, Writer* sif,
 
 	LibpqAsyncReq* areq = sqli->getAsyncRequest();
 	LibpqQuery* qu = areq->getQuery();
-	qu->withSelectQuery(query).withMulti().withContext(vec).withCb7([](void** ctx, int row, FpgIter* iter) {
+	qu->withSelectQuery(query).withMulti(queryCount).withContext(vec).withCb7([](void** ctx, int row, FpgIter* iter) {
 		std::vector<TeBkUmFpgAsyncWorld>* vec = (std::vector<TeBkUmFpgAsyncWorld>*)ctx[0];
 		std::string_view id_ = iter->next();
 		std::string_view rn_ = iter->next();
@@ -225,7 +225,7 @@ void TeBkUmFpgAsyncRouter::queriesMultiAsync(const char* q, int ql, Writer* sif,
 		delete vec;
 	});
 #endif
-	sqli->postAsync(areq, queryCount);
+	sqli->postAsync(areq);
 }
 
 void TeBkUmFpgAsyncRouter::updatesMulti(const char* q, int ql, Writer* sif, HttpResponse* res) {
@@ -243,7 +243,7 @@ void TeBkUmFpgAsyncRouter::updatesMulti(const char* q, int ql, Writer* sif, Http
 	LibpqAsyncReq* areq = sqli->getAsyncRequest();
 	LibpqQuery* qu = areq->getQuery();
 	std::stringstream* ss = new std::stringstream;
-	qu->withSelectQuery(query).withMulti().withContext(vec, ss).withCb7([](void** ctx, int row, FpgIter* iter) {
+	qu->withSelectQuery(query).withMulti(queryCount).withContext(vec, ss).withCb7([](void** ctx, int row, FpgIter* iter) {
 		std::vector<TeBkUmFpgAsyncWorld>* vec = (std::vector<TeBkUmFpgAsyncWorld>*)ctx[0];
 		std::stringstream* ss = (std::stringstream*)ctx[1];
 		int id = 0;
@@ -263,7 +263,7 @@ void TeBkUmFpgAsyncRouter::updatesMulti(const char* q, int ql, Writer* sif, Http
 
 			LibpqAsyncReq* areq = sqli->getAsyncRequest();
 			LibpqQuery* qu = areq->getQuery();
-			qu->withUpdateQuery(ss->str()).withMulti();
+			qu->withUpdateQuery(ss->str()).withMulti((int)vec->size()*3);
 			delete ss;
 
 			areq->withContext(ctx[0], ctx[1], vec).withFinalCb1([](void** ctx, bool status, const std::string& q, int counter) {
@@ -279,11 +279,11 @@ void TeBkUmFpgAsyncRouter::updatesMulti(const char* q, int ql, Writer* sif, Http
 				sif->unUse();
 				delete vec;
 			});
-			sqli->postAsync(areq, (int)vec->size()*3);
+			sqli->postAsync(areq);
 		}
 	});
 #endif
-	sqli->postAsync(areq, queryCount);
+	sqli->postAsync(areq);
 }
 
 std::string& TeBkUmFpgAsyncRouter::getUpdQuery(int count) {
@@ -562,13 +562,7 @@ bool TeBkUmFpgAsyncRouter::route(HttpRequest* req, HttpResponse* res, Writer* si
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		queriesMultiAsync(params[0].val, params[0].val_len, sif, res);
-	} else if(StringUtil::endsWith(req->getPath(), "/updm")) {
-		struct yuarel_param params[1];
-		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
-		updatesMulti(params[0].val, params[0].val_len, sif, res);
-	} else if(StringUtil::endsWith(req->getPath(), "/fortu")) {
-		fortunes(sif, res);
-	} else if(StringUtil::endsWith(req->getPath(), "/bupdt") || StringUtil::endsWith(req->getPath(), "/updt")) {
+	} else if(StringUtil::endsWith(req->getPath(), "/updt")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		updatesAsyncb(params[0].val, params[0].val_len, sif, res);
@@ -576,6 +570,12 @@ bool TeBkUmFpgAsyncRouter::route(HttpRequest* req, HttpResponse* res, Writer* si
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		updatesAsync(params[0].val, params[0].val_len, sif, res);
+	} else if(StringUtil::endsWith(req->getPath(), "/updm")) {
+		struct yuarel_param params[1];
+		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
+		updatesMulti(params[0].val, params[0].val_len, sif, res);
+	} else if(StringUtil::endsWith(req->getPath(), "/fortu")) {
+		fortunes(sif, res);
 	} else if(StringUtil::endsWith(req->getPath(), "/cached-wld")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);

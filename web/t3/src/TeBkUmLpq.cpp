@@ -440,14 +440,14 @@ bool TeBkUmLpqRouter::route(HttpRequest* req, HttpResponse* res, Writer* sif) {
 		db(msg);
 		msg.tmplJson(res->getContentP());
 		res->sendJson(sif);
-	} else if(StringUtil::endsWith(req->getPath(), "/que_")) {
+	} else if(StringUtil::endsWith(req->getPath(), "/quer")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;
 		queries(params[0].val, params[0].val_len, msg);
 		TeBkUmLpqWorld::tmplJson(msg, res->getContentP());
 		res->sendJson(sif);
-	} else if(StringUtil::endsWith(req->getPath(), "/quer")) {
+	} else if(StringUtil::endsWith(req->getPath(), "/quem")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;
@@ -456,14 +456,14 @@ bool TeBkUmLpqRouter::route(HttpRequest* req, HttpResponse* res, Writer* sif) {
 		res->sendJson(sif);
 	} else if(StringUtil::endsWith(req->getPath(), "/fortu")) {
 		handleTemplate(req, res, sif);
-	} else if(StringUtil::endsWith(req->getPath(), "/upd_")) {
+	} else if(StringUtil::endsWith(req->getPath(), "/updt")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;
 		updates(params[0].val, params[0].val_len, msg);
 		TeBkUmLpqWorld::tmplJson(msg, res->getContentP());
 		res->sendJson(sif);
-	} else if(StringUtil::endsWith(req->getPath(), "/updt")) {
+	} else if(StringUtil::endsWith(req->getPath(), "/updm")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;
@@ -557,14 +557,14 @@ bool TeBkUmLpqRouterPicoV::route(HttpRequest *req, HttpResponse *res, Writer *si
 		db(msg);
 		msg.tmplJson(res->getContentP());
 		res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
-	} else if(StringUtil::endsWith(req->getPath(), "/que_")) {
+	} else if(StringUtil::endsWith(req->getPath(), "/quer")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;
 		queries(params[0].val, params[0].val_len, msg);
 		TeBkUmLpqWorld::tmplJson(msg, res->getContentP());
 		res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
-	} else if(StringUtil::endsWith(req->getPath(), "/quer")) {
+	} else if(StringUtil::endsWith(req->getPath(), "/quem")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;
@@ -573,14 +573,14 @@ bool TeBkUmLpqRouterPicoV::route(HttpRequest *req, HttpResponse *res, Writer *si
 		res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
 	} else if(StringUtil::endsWith(req->getPath(), "/fortu")) {
 		handleTemplate(res);
-	} else if(StringUtil::endsWith(req->getPath(), "/upd_")) {
+	} else if(StringUtil::endsWith(req->getPath(), "/updt")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;
 		updates(params[0].val, params[0].val_len, msg);
 		TeBkUmLpqWorld::tmplJson(msg, res->getContentP());
 		res->httpStatus(HTTPResponseStatus::Ok).setContentType(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
-	} else if(StringUtil::endsWith(req->getPath(), "/updt")) {
+	} else if(StringUtil::endsWith(req->getPath(), "/updm")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		std::vector<TeBkUmLpqWorld> msg;

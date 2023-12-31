@@ -144,6 +144,8 @@ class LibpqQuery {
 	bool isMulti;
 	bool isTrx;
 	int rows;
+	int pos;
+	int mulQCnt;
 	std::string query;
 	std::string ps;
 	/*std::function< void(void*, PGresult*) > cb0;
@@ -181,7 +183,7 @@ public:
 	LibpqQuery& withUpdateQuery(const std::string& query, bool isPrepared = true);
 	LibpqQuery& withPrepared();
 	LibpqQuery& withContext(void* ctx, void* ctx1 = NULL, void* ctx2 = NULL, void* ctx3 = NULL, void* ctx4 = NULL);
-	LibpqQuery& withMulti();//multi-statement non parameterized queries
+	LibpqQuery& withMulti(int mulQCnt = 1);//multi-statement non parameterized queries
 	template<typename FuncCb0>
 	LibpqQuery& withCb0(FuncCb0 cb) {//LibpqQuery& withCb0(std::function< void(void*, PGresult*) > cb) {
 		this->cb0 = cb;
@@ -248,6 +250,7 @@ public:
 	void withParamFloat(double i);
 	void withNull();
 	void withParamBin(const char *i, size_t len);
+	void withMultiQueryCount(const int i);
 	//void withParamStr(std::string& str);
 };
 
@@ -257,7 +260,6 @@ class LibpqAsyncReq {
 	LipqCbFuncF fcb;
 	LipqCbFuncF0 fcb1;
 	void* ctx[5];
-	int cnt;
 	bool processed;
 #ifdef HAVE_LIBPQ
 	std::vector<PGresult*> results;
@@ -294,7 +296,6 @@ class PgReadTask : public Task {
 	friend class FpgWire;
 protected:
 	LibpqAsyncReq* ritem;
-	int counter = 0;
 	int type;
 	LibpqQuery* q;
 	SocketInterface* sif;
@@ -311,15 +312,16 @@ public:
 #if defined(HAVE_LIBPQ_BATCH) || defined(HAVE_LIBPQ_PIPELINE)
 class PgBatchReadTask : public PgReadTask {
 protected:
-	std::atomic<bool> queueEntries;
+	//std::atomic<int> in, out;
+	//std::atomic<bool> queueEntries;
 	std::atomic<bool> sendBatch;
-	std::deque<LibpqAsyncReq> lQ;
+	//std::deque<LibpqAsyncReq> lQ;
 	void run();
-	void processPending();
+	//void processPending();
 	void submit(LibpqAsyncReq* item);
 	friend class LibpqDataSourceImpl;
-	LibpqAsyncReq* peek();
-	void pop();
+	//LibpqAsyncReq* peek();
+	//void pop();
 	void batchQueries(LibpqAsyncReq* ritem, int& numQueriesInBatch);
 	LibpqAsyncReq* get();
 public:
@@ -330,7 +332,7 @@ public:
 
 enum FpgReq { Password = 'p', Simple_Query = 'Q', Ext_Parse = 'P', Ext_Bind = 'B', Ext_Describe = 'D', Ext_Execute = 'E', Ext_Flush = 'H', Ext_Sync = 'S' };
 enum FpgRes { ParameterStatus = 'S', AuthenticationOk = 'R', ErrorResponse = 'E', ReadyForQuery = 'Z', BackendKeyData = 'K', CommandComplete = 'C', DataRow = 'D', RowDescription = 'T', ParseComplete = '1', BindComplete = '2', PortalSuspended = 's', EmptyQueryResponse = 'I',
-    NoticeResponse = 'N', NotificationResponse = 'A' };
+    NoticeResponse = 'N', NotificationResponse = 'A', Null = '\0' };
 
 class FpgWireColumnMD {
     std::string name;
@@ -383,17 +385,20 @@ class FpgWire : public PgReadTask, public BaseSocket, public FpgIter {
     void writeInt32(int num, std::string& sendBuf);
     void writeInt16(int num, std::string& sendBuf);
     void writeChar(char num, std::string& sendBuf);
-    void handleResponse();
+    int handleResponse();
     bool sendStart(std::string user, std::string database);
     void sendSync();
+    void sendSync(std::string& sbuff);
     bool sendPortalDescribe();
     void sendPrepStDescribe();
     void sendFlush();
     bool query(const std::string& q);
 	bool preparedQuery(LibpqQuery& q);
-    bool sendExecute(LibpqQuery& q);
-    bool sendParse(LibpqQuery& q);
-    bool sendBind(LibpqQuery& q);
+    bool query(const std::string& q, ResponseData& rd);
+	bool preparedQuery(LibpqQuery& q, ResponseData& rd);
+    bool sendExecute(LibpqQuery& q, std::string& sbuff);
+    bool sendParse(LibpqQuery& q, std::string& sbuff);
+    bool sendBind(LibpqQuery& q, std::string& sbuff);
 	void checkUnderFlowAndRead(int);
 	std::string_view next();
 	friend class LibpqDataSourceImpl;
@@ -415,7 +420,8 @@ class LibpqDataSourceImpl : public DataSourceType, public SocketInterface {
 	Logger logger;
 	std::string url;
 	bool isAsync;
-	bool isBatch;
+	bool isPipelined;
+	bool isPipelinedStreamMode; 
 	bool isWire;
 	bool isAutoCommitMode;
 	bool stEvhMode;//seperate event handler thread mode
@@ -471,7 +477,6 @@ public:
 	void rollbackAsync(LibpqAsyncReq* vitem);
 	LibpqAsyncReq* getAsyncRequest();
 	void postAsync(LibpqAsyncReq* vitem);
-	void postAsync(LibpqAsyncReq* vitem, int numQ);//post async request with n number of multi queries
 	//Asynchronous mode operations, NOT THREAD SAFE
 
 	bool handle();

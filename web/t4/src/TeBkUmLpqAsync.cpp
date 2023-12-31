@@ -204,7 +204,7 @@ void TeBkUmLpqAsyncRouter::queriesMultiAsync(const char* q, int ql, Writer* sif)
 
 	LibpqAsyncReq* areq = sqli->getAsyncRequest();
 	LibpqQuery* qu = areq->getQuery();
-	qu->withSelectQuery(query).withMulti();
+	qu->withSelectQuery(query).withMulti(queryCount);
 #ifdef HAVE_LIBPQ
 	areq->withContext(sif).withFinalCb([](void** ctx,bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
 		Writer* sif = (Writer*)ctx[0];
@@ -225,7 +225,7 @@ void TeBkUmLpqAsyncRouter::queriesMultiAsync(const char* q, int ql, Writer* sif)
 		sif->unUse();
 	});
 #endif
-	sqli->postAsync(areq, queryCount);
+	sqli->postAsync(areq);
 }
 
 void TeBkUmLpqAsyncRouter::updatesMulti(const char* q, int ql, AsyncUpdatesReq* req) {
@@ -241,7 +241,7 @@ void TeBkUmLpqAsyncRouter::updatesMulti(const char* q, int ql, AsyncUpdatesReq* 
 	//req->ss << "begin;";//NEVER USE - this creates a deadlock issue (like, DETAIL:  Process 16 waits for ShareLock on transaction 995; blocked by process 19.)
 	LibpqAsyncReq* areq = req->sqli->getAsyncRequest();
 	LibpqQuery* qu = areq->getQuery();
-	qu->withSelectQuery(query).withMulti();
+	qu->withSelectQuery(query).withMulti(queryCount);
 #ifdef HAVE_LIBPQ
 	areq->withContext(req).withFinalCb([](void** ctx,bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
 		AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx[0];
@@ -277,7 +277,7 @@ void TeBkUmLpqAsyncRouter::updatesMulti(const char* q, int ql, AsyncUpdatesReq* 
 
 			LibpqAsyncReq* areq = req->sqli->getAsyncRequest();
 			LibpqQuery* qu = areq->getQuery();
-			qu->withUpdateQuery(ss.str()).withMulti();
+			qu->withUpdateQuery(ss.str()).withMulti(queryCount*3);
 
 			areq->withContext(req).withFinalCb([](void** ctx,bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
 				AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx[0];
@@ -293,11 +293,11 @@ void TeBkUmLpqAsyncRouter::updatesMulti(const char* q, int ql, AsyncUpdatesReq* 
 				req->sif->unUse();
 				delete req;
 			});
-			req->sqli->postAsync(areq, queryCount*3);
+			req->sqli->postAsync(areq);
 		}
 	});
 #endif
-	req->sqli->postAsync(areq, queryCount);
+	req->sqli->postAsync(areq);
 }
 
 std::string& TeBkUmLpqAsyncRouter::getUpdQuery(int count) {
@@ -609,15 +609,7 @@ bool TeBkUmLpqAsyncRouter::route(HttpRequest* req, HttpResponse* res, Writer* si
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		queriesMultiAsync(params[0].val, params[0].val_len, sif);
-	} else if(StringUtil::endsWith(req->getPath(), "/updm")) {
-		struct yuarel_param params[1];
-		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
-		AsyncUpdatesReq* ar = new AsyncUpdatesReq;
-		ar->sif = sif;
-		updatesMulti(params[0].val, params[0].val_len, ar);
-	} else if(StringUtil::endsWith(req->getPath(), "/fortu")) {
-		fortunes(sif);
-	} else if(StringUtil::endsWith(req->getPath(), "/bupdt") || StringUtil::endsWith(req->getPath(), "/updt")) {
+	} else if(StringUtil::endsWith(req->getPath(), "/updt")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
 		AsyncUpdatesReq* ar = new AsyncUpdatesReq;
@@ -629,6 +621,14 @@ bool TeBkUmLpqAsyncRouter::route(HttpRequest* req, HttpResponse* res, Writer* si
 		AsyncUpdatesReq* ar = new AsyncUpdatesReq;
 		ar->sif = sif;
 		updatesAsync(params[0].val, params[0].val_len, ar);
+	} else if(StringUtil::endsWith(req->getPath(), "/updm")) {
+		struct yuarel_param params[1];
+		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);
+		AsyncUpdatesReq* ar = new AsyncUpdatesReq;
+		ar->sif = sif;
+		updatesMulti(params[0].val, params[0].val_len, ar);
+	} else if(StringUtil::endsWith(req->getPath(), "/fortu")) {
+		fortunes(sif);
 	} else if(StringUtil::endsWith(req->getPath(), "/cached-wld")) {
 		struct yuarel_param params[1];
 		yuarel_parse_query((char*)req->getQueryStr().data(), req->getQueryStr().size(), params, 1);

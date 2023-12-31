@@ -275,6 +275,7 @@ then
 		done
 	else
 		sed -i 's|"TeBkUmLpqRouter"|"TeBkUmLpqRouterPicoV"|g' ${WEB_DIR}/config/application.xml
+		sed -i 's|"TeBkUmFpgRouter"|"TeBkUmFpgRouterPicoV"|g' ${WEB_DIR}/config/application.xml
 		for i in $(seq 0 $(($(nproc --all)-1))); do
 			taskset -c $i ./main --server_dir=$FFEAD_CPP_PATH --server_port=8080 --is_async=false &
 		done

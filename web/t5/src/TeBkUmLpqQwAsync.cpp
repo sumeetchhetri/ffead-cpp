@@ -214,7 +214,7 @@ void TeBkUmLpqQwAsyncRouter::queriesMultiAsync(const char* q, int ql, Writer* si
 
 	LibpqAsyncReq* areq = sqli->getAsyncRequest();
 	LibpqQuery* qu = areq->getQuery();
-	qu->withSelectQuery(query).withMulti();
+	qu->withSelectQuery(query).withMulti(queryCount);
 #ifdef HAVE_LIBPQ
 	areq->withContext(sif).withFinalCb([](void** ctx,bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
 		Writer* sif = (Writer*)ctx[0];
@@ -239,7 +239,7 @@ void TeBkUmLpqQwAsyncRouter::queriesMultiAsync(const char* q, int ql, Writer* si
 		}, vec);
 	});
 #endif
-	sqli->postAsync(areq, queryCount);
+	sqli->postAsync(areq);
 }
 
 void TeBkUmLpqQwAsyncRouter::updatesMulti(const char* q, int ql, AsyncUpdatesReqWq* req) {
@@ -255,7 +255,7 @@ void TeBkUmLpqQwAsyncRouter::updatesMulti(const char* q, int ql, AsyncUpdatesReq
 	//req->ss << "begin;";//NEVER USE - this creates a deadlock issue (like, DETAIL:  Process 16 waits for ShareLock on transaction 995; blocked by process 19.)
 	LibpqAsyncReq* areq = req->sqli->getAsyncRequest();
 	LibpqQuery* qu = areq->getQuery();
-	qu->withSelectQuery(query).withMulti();
+	qu->withSelectQuery(query).withMulti(queryCount);
 #ifdef HAVE_LIBPQ
 	areq->withContext(req).withFinalCb([](void** ctx,bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
 		AsyncUpdatesReqWq* req = (AsyncUpdatesReqWq*)ctx[0];
@@ -291,7 +291,7 @@ void TeBkUmLpqQwAsyncRouter::updatesMulti(const char* q, int ql, AsyncUpdatesReq
 
 			LibpqAsyncReq* areq = req->sqli->getAsyncRequest();
 			LibpqQuery* qu = areq->getQuery();
-			qu->withUpdateQuery(ss.str()).withMulti();
+			qu->withUpdateQuery(ss.str()).withMulti(queryCount*3);
 
 			areq->withContext(req).withFinalCb([](void** ctx,bool status, std::vector<PGresult*>* results, const std::string& q, int counter) {
 				AsyncUpdatesReqWq* req = (AsyncUpdatesReqWq*)ctx[0];
@@ -310,11 +310,11 @@ void TeBkUmLpqQwAsyncRouter::updatesMulti(const char* q, int ql, AsyncUpdatesReq
 					delete req;
 				}, ctx);
 			});
-			req->sqli->postAsync(areq, queryCount*3);
+			req->sqli->postAsync(areq);
 		}
 	});
 #endif
-	req->sqli->postAsync(areq, queryCount);
+	req->sqli->postAsync(areq);
 }
 
 std::string& TeBkUmLpqQwAsyncRouter::getUpdQuery(int count) {

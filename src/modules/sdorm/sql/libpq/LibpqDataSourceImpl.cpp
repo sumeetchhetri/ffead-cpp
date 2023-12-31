@@ -33,7 +33,9 @@ LibpqDataSourceImpl::LibpqDataSourceImpl(const ConnectionNode& node, const Conne
 #endif
 	this->isAutoCommitMode = false;//props.getProperty("auto_commit")=="true";
 	this->isAsync = props.getProperty("async")=="true";
-	this->isBatch = props.getProperty("batch")=="true";
+	this->isPipelined = props.getProperty("batch")=="true" || props.getProperty("pipelined")=="true";
+	this->isPipelinedStreamMode = false;
+	//this->isPipelinedStreamMode = props.getProperty("pipe-stream")=="true";
 	this->isWire = props.getProperty("wire")=="true";
 	fd = -1;
 	stEvhMode = false;
@@ -121,7 +123,7 @@ bool LibpqDataSourceImpl::init() {
 		bool rHandler = RequestReaderHandler::getInstance()!=NULL || RequestHandler2::getInstance()!=NULL || Writer::isPicoEvAsyncBackendMode;
 		if(rHandler) {
 #ifdef HAVE_LIBPQ_BATCH
-			if(isBatch) {
+			if(isPipelined) {
 				if (PQenterBatchMode(conn) == 0)
 				{
 					fprintf(stderr, "PQenterBatchMode error: %s\n?", PQerrorMessage(conn));
@@ -138,7 +140,7 @@ bool LibpqDataSourceImpl::init() {
 				rdTsk = new PgReadTask(this);
 			}
 #elif defined(HAVE_LIBPQ_PIPELINE)
-			if(isBatch) {
+			if(isPipelined) {
 				if (PQenterPipelineMode(conn) == 0)
 				{
 					fprintf(stderr, "PQenterPipelineMode error: %s\n?", PQerrorMessage(conn));
@@ -215,6 +217,7 @@ void LibpqDataSourceImpl::beginAsync(LibpqAsyncReq* areq) {
 		LibpqQuery* q = areq->getQuery();
 		q->query = "BEGIN";
 		q->isTrx = true;
+		q->isPrepared = isPipelined;
 #endif
 	}
 }
@@ -226,6 +229,7 @@ void LibpqDataSourceImpl::commitAsync(LibpqAsyncReq* areq) {
 		LibpqQuery* q = areq->getQuery();
 		q->query = "COMMIT";
 		q->isTrx = true;
+		q->isPrepared = isPipelined;
 #endif
 	}
 }
@@ -237,6 +241,7 @@ void LibpqDataSourceImpl::rollbackAsync(LibpqAsyncReq* areq) {
 		LibpqQuery* q = areq->getQuery();
 		q->query = "ROLLBACK";
 		q->isTrx = true;
+		q->isPrepared = isPipelined;
 #endif
 	}
 }
@@ -398,31 +403,27 @@ void PgReadTask::run() {
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 				fprintf(stderr, "PREPARE failed: %d %s\n", PQresultStatus(res), PQerrorMessage(ths->conn));
 				if(ritem->fcb!=NULL) {
-					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
+					ritem->fcb(ritem->ctx, false, NULL, q->query, q->pos);
 				} else if(q->fcb!=NULL) {
-					q->fcb(q->ctx, false, NULL, q->query, counter);
+					q->fcb(q->ctx, false, NULL, q->query, q->pos);
 				}
 				ritemDone = true;
 				q = NULL;
 				ritem = NULL;
 				ths->pop();
-				counter = -1;
-			} else {
-				ritem->cnt--;
 			}
 			PQclear(res);
 		} else if(q->isSelect) {
 			if (PQresultStatus(res) != PGRES_TUPLES_OK) {
 				fprintf(stderr, "SELECT failed: %s\n", PQerrorMessage(ths->conn));
 				if(ritem->fcb!=NULL) {
-					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
+					ritem->fcb(ritem->ctx, false, NULL, q->query, q->pos);
 				} else if(q->fcb!=NULL) {
-					q->fcb(q->ctx, false, NULL, q->query, counter);
+					q->fcb(q->ctx, false, NULL, q->query, q->pos);
 				}
 				ritemDone = true;
 				ritem = NULL;
 				ths->pop();
-				counter = -1;
 				PQclear(res);
 			} else {
 				switch(q->cbType) {
@@ -507,56 +508,57 @@ void PgReadTask::run() {
 					}
 				}
 
-				if(ritem->cnt--==0) {
+				if(q->isMulti) {
+					q->mulQCnt--;
+					if(q->mulQCnt>0) {
+						continue;
+					}
+				}
+
+				if(ritem->q.size()==1) {
 					if(ritem->fcb!=NULL) {
-						ritem->fcb(ritem->ctx, true, &ritem->results, q->query, counter);
+						ritem->fcb(ritem->ctx, true, &ritem->results, q->query, q->pos);
 					}
 					ritemDone = true;
-					if(q->isMulti) {
-						ritem->pop();
-					}
 					q = NULL;
 					ritem = NULL;
 					ths->pop();
-					counter = -1;
 				} else {
-					if(!q->isMulti) {
-						ritem->pop();
-						q = NULL;
-					}
+					ritem->pop();
+					q = NULL;
 				}
 			}
 		} else {
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 				fprintf(stderr, "UPDATE failed: %s\n", PQerrorMessage(ths->conn));
 				if(ritem->fcb!=NULL) {
-					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
+					ritem->fcb(ritem->ctx, false, NULL, q->query, q->pos);
 				} else if(q->fcb!=NULL) {
-					q->fcb(q->ctx, false, NULL, q->query, counter);
+					q->fcb(q->ctx, false, NULL, q->query, q->pos);
 				}
 				ritemDone = true;
 				ritem = NULL;
 				ths->pop();
-				counter = -1;
 				q = NULL;
 			} else {
-				if(ritem->cnt--==0) {
+				if(q->isMulti) {
+					q->mulQCnt--;
+					if(q->mulQCnt>0) {
+						continue;
+					}
+				}
+
+				if(ritem->q.size()==1) {
 					if(ritem->fcb!=NULL) {
-						ritem->fcb(ritem->ctx, true, NULL, q->query, counter);
+						ritem->fcb(ritem->ctx, true, NULL, q->query, q->pos);
 					}
 					ritemDone = true;
-					if(q->isMulti) {
-						ritem->pop();
-					}
 					q = NULL;
 					ritem = NULL;
 					ths->pop();
-					counter = -1;
 				} else {
-					if(!q->isMulti) {
-						ritem->pop();
-						q = NULL;
-					}
+					ritem->pop();
+					q = NULL;
 				}
 			}
 			PQclear(res);
@@ -591,11 +593,10 @@ void PgReadTask::submit(LibpqAsyncReq* nitem) {
 	if(ritem!=NULL) {
 		if(ritem->q.size()>0) {
 			if(q==NULL) {
-				counter ++;
 				q = ritem->peek();
 			}
 
-			if(q->isMulti) {
+			if(q->isMulti || q->isTrx) {
 				PQsendQuery(ths->conn, q->query.c_str());
 				flux = true;
 				PQflush(ths->conn);
@@ -608,15 +609,14 @@ void PgReadTask::submit(LibpqAsyncReq* nitem) {
 			if(q->isPrepared) {
 				if((it = ths->prepStmtMap.find(q->query))==ths->prepStmtMap.end()) {
 					//fprintf(stdout, "Prepare query....\n");fflush(stdout);
-					ritem->cnt++;
 					ths->prepStmtMap[q->query] = CastUtil::fromNumber(ths->prepStmtMap.size()+1);
 					int qs = PQsendPrepare(ths->conn,ths->prepStmtMap[q->query].c_str(), q->query.c_str(), psize, NULL);
 					if (!qs) {
 						fprintf(stderr, "Failed to prepare query %s\n", PQerrorMessage(ths->conn));
 						if(ritem->fcb!=NULL) {
-							ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
+							ritem->fcb(ritem->ctx, false, NULL, q->query, q->pos);
 						} else if(q->fcb!=NULL) {
-							q->fcb(q->ctx, false, NULL, q->query, counter);
+							q->fcb(q->ctx, false, NULL, q->query, q->pos);
 						}
 						q = NULL;
 						ritem = NULL;
@@ -702,9 +702,9 @@ void PgReadTask::submit(LibpqAsyncReq* nitem) {
 			if (!qs) {
 				fprintf(stderr, "Failed to send query %s\n", PQerrorMessage(ths->conn));
 				if(ritem->fcb!=NULL) {
-					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
+					ritem->fcb(ritem->ctx, false, NULL, q->query, q->pos);
 				} else if(q->fcb!=NULL) {
-					q->fcb(q->ctx, false, NULL, q->query, counter);
+					q->fcb(q->ctx, false, NULL, q->query, q->pos);
 				}
 				q = NULL;
 				ritem = NULL;
@@ -723,21 +723,6 @@ void PgReadTask::submit(LibpqAsyncReq* nitem) {
 
 void LibpqDataSourceImpl::postAsync(LibpqAsyncReq* item) {
 	if(item!=NULL) {
-		if(stEvhMode) {
-			//fprintf(stdout, "Notifying handle\n");
-			c_mutex.lock();
-			cvar = true;
-			c_mutex.conditionalNotifyOne();
-			c_mutex.unlock();
-		} else {
-			((PgReadTask*)rdTsk)->submit(item);
-		}
-	}
-}
-
-void LibpqDataSourceImpl::postAsync(LibpqAsyncReq* item, int numQ) {
-	if(item!=NULL) {
-		item->cnt += numQ-1;
 		if(stEvhMode) {
 			//fprintf(stdout, "Notifying handle\n");
 			c_mutex.lock();
@@ -854,7 +839,6 @@ LibpqAsyncReq* LibpqDataSourceImpl::getAsyncRequest() {
 		if(stEvhMode) {
 			c_mutex.unlock();
 		}
-		item->cnt = -1;
 	}
 	return item;
 #endif
@@ -1147,7 +1131,6 @@ PgReadTask::~PgReadTask() {
 PgReadTask::PgReadTask(SocketInterface* sif) {
 	this->sif = sif;
 	ritem = NULL;
-	counter = -1;
 	q = NULL;
 	flux = false;
 	type = 1;
@@ -1158,12 +1141,14 @@ PgBatchReadTask::~PgBatchReadTask() {
 }
 
 PgBatchReadTask::PgBatchReadTask(SocketInterface* sif): PgReadTask(sif) {
-	queueEntries = false;
+	//queueEntries = false;
 	sendBatch = true;
 	type = 2;
+	//in = 0;
+	//out = 0;
 }
 
-LibpqAsyncReq* PgBatchReadTask::peek() {
+/*LibpqAsyncReq* PgBatchReadTask::peek() {
 	LibpqAsyncReq* ar = NULL;
 	if(lQ.size()>0) {
 		ar = &(lQ.front());
@@ -1175,36 +1160,27 @@ void PgBatchReadTask::pop() {
 	if(lQ.size()>0) {
 		lQ.pop_front();
 	}
-}
+}*/
 
 void PgBatchReadTask::run() {
 #ifdef HAVE_LIBPQ
 	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)sif;
 	//ths->logger.write("run:Resultset ready...Q size %d\n", ths->Q.size());
 
-	int readQueries = 0;
 	while(true) {
-		//ths->logger << ("run:Read Data waiting...\n");
 		if (!PQconsumeInput(ths->conn)) {
 			fprintf(stderr, "Failed to consume pg input: %s\n", PQerrorMessage(ths->conn));
 			throw std::runtime_error("Invalid connection state");
 		}
-
+		//ths->logger << ("run:Read Data waiting...\n");
 		if(PQisBusy(ths->conn)==1) {
-			/*if (!PQconsumeInput(ths->conn)) {
-				fprintf(stderr, "Failed to consume pg input: %s\n", PQerrorMessage(ths->conn));
-				throw std::runtime_error("Invalid connection state");
-			}
-			if(PQisBusy(ths->conn)==1) {
-				return;
-			}*/
-			return;
+			break;
 		}
-
 
 		PGresult* res = PQgetResult(ths->conn);
 		if(res==NULL) {
-			//ths->logger << ("run:Null Resultset...\n");
+			//std::cout << ritem << " " << q << std::endl;
+			//PQsendFlushRequest(ths->conn);
 			continue;
 		}
 
@@ -1216,11 +1192,16 @@ void PgBatchReadTask::run() {
 #endif
 			//ths->logger.write("run:End batch...%d\n", readQueries);
 			sendBatch = true;
+			//out++;
 			PQclear(res);
+			//if(!ths->isPipelinedStreamMode) {
+				//break;
+			//} else {
+			//continue;
 			break;
+			//}
+			//break;
 		}
-
-		readQueries++;
 
 		if(ritem==NULL) {
 			ritem = ths->peek();
@@ -1232,7 +1213,6 @@ void PgBatchReadTask::run() {
 			continue;
 		}
 
-		counter++;
 		q = ritem->peek();
 
 		//std::cout << "r " << q << std::endl;
@@ -1240,30 +1220,27 @@ void PgBatchReadTask::run() {
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 				fprintf(stderr, "PREPARE failed: %d %s\n", PQresultStatus(res), PQerrorMessage(ths->conn));
 				if(ritem->fcb!=NULL) {
-					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
+					ritem->fcb(ritem->ctx, false, NULL, q->query, q->pos);
 				} else if(q->fcb!=NULL) {
-					q->fcb(q->ctx, false, NULL, q->query, counter);
+					q->fcb(q->ctx, false, NULL, q->query, q->pos);
 				}
 				q = NULL;
 				ritem = NULL;
 				ths->pop();
-				counter = -1;
 			} else {
 				q->prepared = true;
-				ritem->cnt--;
 			}
 			PQclear(res);
 		} else if(q->isSelect) {
 			if (PQresultStatus(res) != PGRES_TUPLES_OK) {
 				fprintf(stderr, "SELECT failed: %s\n", PQerrorMessage(ths->conn));
 				if(ritem->fcb!=NULL) {
-					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
+					ritem->fcb(ritem->ctx, false, NULL, q->query, q->pos);
 				} else if(q->fcb!=NULL) {
-					q->fcb(q->ctx, false, NULL, q->query, counter);
+					q->fcb(q->ctx, false, NULL, q->query, q->pos);
 				}
 				ritem = NULL;
 				ths->pop();
-				counter = -1;
 				PQclear(res);
 			} else {
 				switch(q->cbType) {
@@ -1348,39 +1325,46 @@ void PgBatchReadTask::run() {
 					}
 				}
 
-				if(ritem->cnt--==0) {
-					if(ritem->fcb!=NULL) {
-						ritem->fcb(ritem->ctx, true, &ritem->results, q->query, counter);
+				if(q->isMulti) {
+					q->mulQCnt--;
+					if(q->mulQCnt>0) {
+						continue;
 					}
-					if(q->isMulti) {
-						ritem->pop();
+				}
+
+				if(ritem->q.size()==1) {
+					if(ritem->fcb!=NULL) {
+						ritem->fcb(ritem->ctx, true, &ritem->results, q->query, q->pos);
 					}
 					q = NULL;
 					ritem = NULL;
 					ths->pop();
-					counter = -1;
 				} else {
-					if(!q->isMulti) {
-						ritem->pop();
-						q = NULL;
-					}
+					ritem->pop();
+					q = NULL;
 				}
 			}
 		} else {
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 				fprintf(stderr, "UPDATE failed: %s\n", PQerrorMessage(ths->conn));
 				if(ritem->fcb!=NULL) {
-					ritem->fcb(ritem->ctx, false, NULL, q->query, counter);
+					ritem->fcb(ritem->ctx, false, NULL, q->query, q->pos);
 				} else if(q->fcb!=NULL) {
-					q->fcb(q->ctx, false, NULL, q->query, counter);
+					q->fcb(q->ctx, false, NULL, q->query, q->pos);
 				}
 				ths->pop();
 				ritem = NULL;
-				counter = -1;
 			} else {
-				if(ritem->cnt--==0) {
+				if(q->isMulti) {
+					q->mulQCnt--;
+					if(q->mulQCnt>0) {
+						continue;
+					}
+				}
+				
+				if(ritem->q.size()==1) {
 					if(ritem->fcb!=NULL) {
-						ritem->fcb(ritem->ctx, true, NULL, q->query, counter);
+						ritem->fcb(ritem->ctx, true, NULL, q->query, q->pos);
 					}
 					if(q->isMulti) {
 						ritem->pop();
@@ -1388,7 +1372,6 @@ void PgBatchReadTask::run() {
 					q = NULL;
 					ritem = NULL;
 					ths->pop();
-					counter = -1;
 				} else {
 					if(!q->isMulti) {
 						ritem->pop();
@@ -1402,11 +1385,12 @@ void PgBatchReadTask::run() {
 	}
 
 	submit(NULL);
+	//std::cout << "in " << in <<  " out " << out << std::endl;
 	//processPending();
 #endif
 }
 
-void PgBatchReadTask::processPending() {
+/*void PgBatchReadTask::processPending() {
 #ifdef HAVE_LIBPQ
 	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)sif;
 	int numQueriesInBatch = 0;
@@ -1444,7 +1428,7 @@ void PgBatchReadTask::processPending() {
 		queueEntries = true;
 	}
 #endif
-}
+}*/
 
 LibpqAsyncReq* PgBatchReadTask::get() {
 #ifdef HAVE_LIBPQ
@@ -1472,7 +1456,7 @@ void PgBatchReadTask::submit(LibpqAsyncReq* _nitem) {
 					batchQueries(nitem, numQueriesInBatch);
 				}
 			}
-			if(numQueriesInBatch>0) {
+			if(numQueriesInBatch>0 && !ths->isPipelinedStreamMode) {
 	#ifdef HAVE_LIBPQ_PIPELINE
 				if (PQpipelineSync(ths->conn) == 0) {
 					fprintf(stderr, "submit:PQpipelineSync error: %s\n", PQerrorMessage(ths->conn));
@@ -1484,8 +1468,8 @@ void PgBatchReadTask::submit(LibpqAsyncReq* _nitem) {
 				} else {
 					//fprintf(stdout, "submit:PQbatchSendQueue from submit %d, Batch Query Q size %d\n", numQueriesInBatch, ths->Q.size());
 				}
-				PQflush(ths->conn);
-				queueEntries = true;
+				//PQflush(ths->conn);
+				//queueEntries = true;
 				sendBatch = false;
 			}
 		} else {
@@ -1505,108 +1489,6 @@ void PgBatchReadTask::batchQueries(LibpqAsyncReq* nitem, int& numQueriesInBatch)
 		int psize = (int)q->pvals.size();
 
 		if(q->isMulti) {
-			PQsendQuery(ths->conn, q->query.c_str());
-			numQueriesInBatch++;
-			return;
-		}
-
-		std::map<std::string, std::string>::iterator it;
-		//std::cout << "a " << q << std::endl;
-		if(q->isPrepared) {
-			if((it = ths->prepStmtMap.find(q->query))==ths->prepStmtMap.end()) {
-				//ths->logger << ("batchQueries:PQsendPrepare\n");
-				nitem->cnt++;
-				ths->prepStmtMap[q->query] = CastUtil::fromNumber(ths->prepStmtMap.size()+1);
-				int qs = PQsendPrepare(ths->conn, ths->prepStmtMap[q->query].c_str(), q->query.c_str(), psize, NULL);
-				it = ths->prepStmtMap.find(q->query);
-				//printf("ADD PQsendPrepare to batch\n");
-				numQueriesInBatch++;
-
-				if (!qs) {
-					fprintf(stderr, "Failed to prepare query %s\n", PQerrorMessage(ths->conn));
-					if(nitem->fcb!=NULL) {
-						nitem->fcb(nitem->ctx, false, NULL, q->query, i+1);
-					} else if(q->fcb!=NULL) {
-						q->fcb(q->ctx, false, NULL, q->query, i+1);
-					}
-					return;
-				}
-			} else {
-				q->prepared = true;
-			}
-		}
-
-		int qs = -1;
-		if(q->isPrepared) {
-			if(psize==0) {
-				qs = PQsendQueryPrepared(ths->conn, it->second.c_str(), psize, NULL, NULL, NULL, 1);
-			} else {
-				const char *paramValues[psize];
-				int paramLengths[psize];
-				int paramBinary[psize];
-				int var = 0;
-				for(std::list<LibpqParam>::iterator it=q->pvals.begin(); it != q->pvals.end(); ++it, var++) {
-					if(it->t==1) {//short
-						paramValues[var] = (char *)&it->s;
-						paramLengths[var] = 2;
-					} else if(it->t==2) {//int
-						paramValues[var] = (char *)&it->i;
-						paramLengths[var] = 4;
-					} else if(it->t==3) {//long
-						paramValues[var] = (char *)&it->l;
-						paramLengths[var] = 8;
-					} else if(it->t==6) {//double
-						paramValues[var] = (char *)&it->d;
-						paramLengths[var] = 4;
-					} else if(it->t==-1) {//null
-						paramValues[var] = NULL;
-						paramLengths[var] = 0;
-					} else {
-						paramValues[var] = it->sv.p;
-						paramLengths[var] = it->sv.l;
-					}
-					paramBinary[var] = 1;
-				}
-				qs = PQsendQueryPrepared(ths->conn, it->second.c_str(), psize, paramValues, paramLengths, paramBinary, 1);
-			}
-		} else{
-			if(psize==0) {
-				qs = PQsendQueryParams(ths->conn, q->query.c_str(), psize, NULL, NULL, NULL, NULL, 1);
-			} else {
-				const char *paramValues[psize];
-				int paramLengths[psize];
-				int paramBinary[psize];
-				int var = 0;
-				for(std::list<LibpqParam>::iterator it=q->pvals.begin(); it != q->pvals.end(); ++it, var++) {
-					if(it->t==1) {//short
-						paramValues[var] = (char *)&it->s;
-						paramLengths[var] = 2;
-					} else if(it->t==2) {//int
-						paramValues[var] = (char *)&it->i;
-						paramLengths[var] = 4;
-					} else if(it->t==3) {//long
-						paramValues[var] = (char *)&it->l;
-						paramLengths[var] = 8;
-					} else if(it->t==6) {//double
-						paramValues[var] = (char *)&it->d;
-						paramLengths[var] = 4;
-					} else if(it->t==-1) {//null
-						paramValues[var] = NULL;
-						paramLengths[var] = 0;
-					} else {
-						paramValues[var] = it->sv.p;
-						paramLengths[var] = it->sv.l;
-					}
-					paramBinary[var] = 1;
-				}
-				qs = PQsendQueryParams(ths->conn, q->query.c_str(), psize, NULL, paramValues, paramLengths, paramBinary, 1);
-			}
-		}
-		numQueriesInBatch++;
-		//fprintf(stdout, "Send query....\n");fflush(stdout);
-
-		if (!qs) {
-			fprintf(stderr, "Failed to send query %s\n", PQerrorMessage(ths->conn));
 			if(nitem->fcb!=NULL) {
 				nitem->fcb(nitem->ctx, false, NULL, q->query, i+1);
 			} else if(q->fcb!=NULL) {
@@ -1614,7 +1496,125 @@ void PgBatchReadTask::batchQueries(LibpqAsyncReq* nitem, int& numQueriesInBatch)
 			}
 			return;
 		} else {
-			PQflush(ths->conn);
+			std::map<std::string, std::string>::iterator it;
+			//std::cout << "a " << q << std::endl;
+			if(q->isPrepared) {
+				if((it = ths->prepStmtMap.find(q->query))==ths->prepStmtMap.end()) {
+					//ths->logger << ("batchQueries:PQsendPrepare\n");
+					ths->prepStmtMap[q->query] = CastUtil::fromNumber(ths->prepStmtMap.size()+1);
+					int qs = PQsendPrepare(ths->conn, ths->prepStmtMap[q->query].c_str(), q->query.c_str(), psize, NULL);
+					it = ths->prepStmtMap.find(q->query);
+					//printf("ADD PQsendPrepare to batch\n");
+					numQueriesInBatch++;
+
+					if (!qs) {
+						fprintf(stderr, "Failed to prepare query %s\n", PQerrorMessage(ths->conn));
+						if(nitem->fcb!=NULL) {
+							nitem->fcb(nitem->ctx, false, NULL, q->query, i+1);
+						} else if(q->fcb!=NULL) {
+							q->fcb(q->ctx, false, NULL, q->query, i+1);
+						}
+						return;
+					}
+					PQsendFlushRequest(ths->conn);
+				} else {
+					q->prepared = true;
+				}
+			}
+
+			int qs = -1;
+			if(q->isPrepared) {
+				if(psize==0) {
+					qs = PQsendQueryPrepared(ths->conn, it->second.c_str(), psize, NULL, NULL, NULL, 1);
+				} else {
+					const char *paramValues[psize];
+					int paramLengths[psize];
+					int paramBinary[psize];
+					int var = 0;
+					for(std::list<LibpqParam>::iterator it=q->pvals.begin(); it != q->pvals.end(); ++it, var++) {
+						if(it->t==1) {//short
+							paramValues[var] = (char *)&it->s;
+							paramLengths[var] = 2;
+						} else if(it->t==2) {//int
+							paramValues[var] = (char *)&it->i;
+							paramLengths[var] = 4;
+						} else if(it->t==3) {//long
+							paramValues[var] = (char *)&it->l;
+							paramLengths[var] = 8;
+						} else if(it->t==6) {//double
+							paramValues[var] = (char *)&it->d;
+							paramLengths[var] = 4;
+						} else if(it->t==-1) {//null
+							paramValues[var] = NULL;
+							paramLengths[var] = 0;
+						} else {
+							paramValues[var] = it->sv.p;
+							paramLengths[var] = it->sv.l;
+						}
+						paramBinary[var] = 1;
+					}
+					qs = PQsendQueryPrepared(ths->conn, it->second.c_str(), psize, paramValues, paramLengths, paramBinary, 1);
+				}
+			} else {
+				if(psize==0) {
+					qs = PQsendQueryParams(ths->conn, q->query.c_str(), psize, NULL, NULL, NULL, NULL, 1);
+				} else {
+					const char *paramValues[psize];
+					int paramLengths[psize];
+					int paramBinary[psize];
+					int var = 0;
+					for(std::list<LibpqParam>::iterator it=q->pvals.begin(); it != q->pvals.end(); ++it, var++) {
+						if(it->t==1) {//short
+							paramValues[var] = (char *)&it->s;
+							paramLengths[var] = 2;
+						} else if(it->t==2) {//int
+							paramValues[var] = (char *)&it->i;
+							paramLengths[var] = 4;
+						} else if(it->t==3) {//long
+							paramValues[var] = (char *)&it->l;
+							paramLengths[var] = 8;
+						} else if(it->t==6) {//double
+							paramValues[var] = (char *)&it->d;
+							paramLengths[var] = 4;
+						} else if(it->t==-1) {//null
+							paramValues[var] = NULL;
+							paramLengths[var] = 0;
+						} else {
+							paramValues[var] = it->sv.p;
+							paramLengths[var] = it->sv.l;
+						}
+						paramBinary[var] = 1;
+					}
+					qs = PQsendQueryParams(ths->conn, q->query.c_str(), psize, NULL, paramValues, paramLengths, paramBinary, 1);
+				}
+			}
+			numQueriesInBatch++;
+			//fprintf(stdout, "Send query....\n");fflush(stdout);
+
+			if (!qs) {
+				fprintf(stderr, "Failed to send query %s\n", PQerrorMessage(ths->conn));
+				if(nitem->fcb!=NULL) {
+					nitem->fcb(nitem->ctx, false, NULL, q->query, i+1);
+				} else if(q->fcb!=NULL) {
+					q->fcb(q->ctx, false, NULL, q->query, i+1);
+				}
+				return;
+			} else {
+				if(ths->isPipelinedStreamMode) {
+					//in++;
+		#ifdef HAVE_LIBPQ_PIPELINE
+					if (PQpipelineSync(ths->conn) == 0) {
+						fprintf(stderr, "submit:PQpipelineSync error: %s\n", PQerrorMessage(ths->conn));
+		#else
+					if (PQbatchSendQueue(ths->conn) == 0) {
+						fprintf(stderr, "submit:PQbatchSendQueue error: %s\n", PQerrorMessage(ths->conn));
+		#endif
+						//PQfinish(ths->conn);
+					} else {
+						//fprintf(stdout, "submit:PQbatchSendQueue from submit %d, Batch Query Q size %d\n", numQueriesInBatch, ths->Q.size());
+					}
+				}
+			}
 		}
 	}
 #endif
@@ -1700,9 +1700,10 @@ LibpqQuery& LibpqQuery::withContext(void* ctx, void* ctx1, void* ctx2, void* ctx
 	return *this;
 }
 
-LibpqQuery& LibpqQuery::withMulti() {
+LibpqQuery& LibpqQuery::withMulti(int mulQCnt) {
 	this->isMulti = true;
 	this->isPrepared = false;
+	this->mulQCnt = mulQCnt;
 	return *this;
 }
 
@@ -1713,7 +1714,7 @@ LibpqQuery& LibpqQuery::withPrepared() {
 
 LibpqQuery* LibpqAsyncReq::getQuery() {
 	LibpqQuery& query = q.emplace_back();
-	this->cnt++;
+	query.pos = q.size();
 	//LibpqQuery& query = q.back();
 	return &query;
 }
@@ -1743,7 +1744,6 @@ LibpqAsyncReq::LibpqAsyncReq() {
 	ctx[4] = NULL;
 	fcb = NULL;
 	fcb1 = NULL;
-	cnt = 0;
 	processed = false;
 }
 
@@ -1783,6 +1783,8 @@ void LibpqQuery::reset() {
 	ctx[2] = NULL;
 	ctx[3] = NULL;
 	ctx[4] = NULL;
+	pos = 0;
+	mulQCnt = 0;
 }
 
 LibpqQuery::LibpqQuery() {
@@ -1808,6 +1810,8 @@ LibpqQuery::LibpqQuery() {
 	ctx[3] = NULL;
 	ctx[4] = NULL;
 	rows = 0;
+	pos = 0;
+	mulQCnt = 0;
 }
 
 /*
@@ -1882,6 +1886,7 @@ void FpgWire::reset() {
 }
 bool FpgWire::updateQuery(LibpqQuery& q) {
 	if(!isAsync) {
+		ResponseData rd;
 		if(!q.isPrepared || q.isMulti || q.isTrx) {
 			if(!query(q.query)) return false;
 		} else {
@@ -2002,14 +2007,16 @@ std::string_view FpgWire::next() {
 	std::string_view a = std::string_view(&buffer[pos-length], (size_t)length);
 	return a;
 }
-void FpgWire::handleResponse() {
+int FpgWire::handleResponse() {
 	//std::cout << "buffer.size " << buffer.length() << " pos " << pos << std::endl;
 	//if(buffer.length()==0) {
 		//std::cout << "No data" << std::endl;
 	//	return;
 	//}
 	//std::cout << buffer[pos] << std::endl;
-	switch(buffer[pos++]) {
+	int cd = 0;
+	char cmd = buffer[pos++];
+	switch(cmd) {
 		case FpgRes::AuthenticationOk: {
 			readInt32();
 			int is = readInt32();
@@ -2064,9 +2071,7 @@ void FpgWire::handleResponse() {
 			err = readString(ml-4);
 			std::cout << "error received = " << err << std::endl;
 			querystatus = -1;
-			if(ritem!=NULL) {
-				ritem->cnt--;
-			}
+			cd = -1;
 			state = 'I';
 			break;
 		}
@@ -2087,6 +2092,7 @@ void FpgWire::handleResponse() {
 			break;
 		}
 		case FpgRes::ReadyForQuery: {
+			//std::cout << "ReadyForQuery" << std::endl;
 			readInt32();
 			state = readChar();//I - Idle, T - In Trx, E - In Failed Trx, Q - In Query(custom)
 			break;
@@ -2110,6 +2116,7 @@ void FpgWire::handleResponse() {
 			break;
 		}
 		case FpgRes::DataRow: {
+			//std::cout << "DataRow" << std::endl;
 			int ml = readInt32();
 			int cols = readInt16();
 			/*if(isAsync) {
@@ -2128,90 +2135,95 @@ void FpgWire::handleResponse() {
 				}
 				rowNum++;
 			}*/
-			switch(q->cbType) {
-				case 0: {
-					q->cb7(q->ctx, rowNum++, this);
-					break;
+			if(q==NULL) {
+				//std::cout << "impossible" << std::endl;
+				for (int j = 0; j < cols; ++j) {
+					readString(readInt32());
 				}
-				case 1: {
-					for (int j = 0; j < cols; ++j) {
-						int length = readInt32();
-						q->cb1(q->ctx, false, rowNum++, j, (char*)currentMD[j].name.c_str(), (char*)readString(length).c_str(), length);
+			} else {
+				switch(q->cbType) {
+					case 0: {
+						q->cb7(q->ctx, rowNum++, this);
+						break;
 					}
-					break;
-				}
-				case 2: {
-					for (int j = 0; j < cols; ++j) {
-						int length = readInt32();
-						q->cb2(q->ctx, false, rowNum++, j, (char*)readString(length).c_str(), length);
+					case 1: {
+						for (int j = 0; j < cols; ++j) {
+							int length = readInt32();
+							q->cb1(q->ctx, false, rowNum++, j, (char*)currentMD[j].name.c_str(), (char*)readString(length).c_str(), length);
+						}
+						break;
 					}
-					break;
-				}
-				case 3: {
-					for (int j = 0; j < cols; ++j) {
-						int length = readInt32();
-						q->cb3(q->ctx, false, rowNum++, j, (char*)readString(length).c_str());
+					case 2: {
+						for (int j = 0; j < cols; ++j) {
+							int length = readInt32();
+							q->cb2(q->ctx, false, rowNum++, j, (char*)readString(length).c_str(), length);
+						}
+						break;
 					}
-					break;
-				}
-				case 4: {
-					for (int j = 0; j < cols; ++j) {
-						int length = readInt32();
-						q->cb4(q->ctx, rowNum++, j, (char*)currentMD[j].name.c_str(), (char*)readString(length).c_str(), length);
+					case 3: {
+						for (int j = 0; j < cols; ++j) {
+							int length = readInt32();
+							q->cb3(q->ctx, false, rowNum++, j, (char*)readString(length).c_str());
+						}
+						break;
 					}
-					break;
-				}
-				case 5: {
-					for (int j = 0; j < cols; ++j) {
-						int length = readInt32();
-						q->cb5(q->ctx, rowNum++, j, (char*)readString(length).c_str(), length);
+					case 4: {
+						for (int j = 0; j < cols; ++j) {
+							int length = readInt32();
+							q->cb4(q->ctx, rowNum++, j, (char*)currentMD[j].name.c_str(), (char*)readString(length).c_str(), length);
+						}
+						break;
 					}
-					break;
-				}
-				case 6: {
-					for (int j = 0; j < cols; ++j) {
-						int length = readInt32();
-						q->cb6(q->ctx, rowNum++, j, (char*)readString(length).c_str());
+					case 5: {
+						for (int j = 0; j < cols; ++j) {
+							int length = readInt32();
+							q->cb5(q->ctx, rowNum++, j, (char*)readString(length).c_str(), length);
+						}
+						break;
 					}
-					break;
-				}
-				default: {
-					FpgWireRow& row = rows.emplace_back();
-					for(int i=0;i<cols;++i) {
-						FpgWireColumn& col = row.cols.emplace_back();
-						col.length = readInt32();
-						col.data = readString(col.length);
-						col.md = &(currentMD[i]);
+					case 6: {
+						for (int j = 0; j < cols; ++j) {
+							int length = readInt32();
+							q->cb6(q->ctx, rowNum++, j, (char*)readString(length).c_str());
+						}
+						break;
 					}
-					rowNum++;
-					break;
+					default: {
+						FpgWireRow& row = rows.emplace_back();
+						for(int i=0;i<cols;++i) {
+							FpgWireColumn& col = row.cols.emplace_back();
+							col.length = readInt32();
+							col.data = readString(col.length);
+							col.md = &(currentMD[i]);
+						}
+						rowNum++;
+						break;
+					}
 				}
 			}
 			break;
 		}
 		case FpgRes::CommandComplete: {
+			//std::cout << "CommandComplete" << std::endl;
 			int ml = readInt32();
 			readString(ml-4);
-			querystatus = 2;
-			if(ritem!=NULL) {
-				ritem->cnt--;
-			}
+			querystatus = 3;
 			state = 'I';
+			cd = 3;
 			break;
 		}
 		case FpgRes::PortalSuspended: {
 			int ml = readInt32();
 			readString(ml-4);
-			querystatus = 2;
+			querystatus = 4;
+			cd = 4;
 			state = 'I';
 			break;
 		}
 		case FpgRes::EmptyQueryResponse: {
 			readInt32();
 			querystatus = 2;
-			if(ritem!=NULL) {
-				ritem->cnt--;
-			}
+			cd = 2;
 			state = 'I';
 			break;
 		}
@@ -2236,15 +2248,18 @@ void FpgWire::handleResponse() {
 			break;
 		}
 		case FpgRes::BindComplete: {
+			//std::cout << "BindComplete" << std::endl;
 			readInt32();
 			bstat = true;
 			break;
 		}
 		default:
+			cmd = '\0';
 			break;
 	}
 	//std::cout << "buffer.size " << buffer.length() << " pos " << pos << std::endl;
 	//
+	return cd;
 }
 
 bool FpgWire::sendStart(std::string user, std::string database) {
@@ -2285,6 +2300,10 @@ void FpgWire::sendSync() {
 		return;
 	}
 }
+void FpgWire::sendSync(std::string& sbuff) {
+	writeMsgType(FpgReq::Ext_Sync, sbuff);
+	writeInt32(4, sbuff);
+}
 bool FpgWire::sendPortalDescribe() {
 	std::string sbuff;
 	writeMsgType(FpgReq::Ext_Describe, sbuff);
@@ -2317,6 +2336,27 @@ void FpgWire::sendFlush() {
 		return;
 	}
 }
+bool FpgWire::query(const std::string& q, ResponseData& rd) {
+	//if(state!='I' && state!='T') return false;
+	writeMsgType(FpgReq::Simple_Query, rd._b);
+	writeInt32(4+1+(int)q.length(), rd._b);
+	writeString(q, rd._b);
+	/*if(send(fd, sbuff.c_str(), sbuff.length(), 0)<=0) {
+		perror("Can't send simple Simple_Query to postgres");
+		return false;
+	}*/
+	state = '0';
+	querystatus = 1;
+	flux = true;
+	//sendSync();
+	return true;
+}
+bool FpgWire::preparedQuery(LibpqQuery& q, ResponseData& rd) {
+	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)this->sif;
+	bool fl = sendParse(q, rd._b) && sendBind(q, rd._b) && sendExecute(q, rd._b);
+	//std::cout << "preparedQuery" << std::endl;
+	return fl;
+}
 bool FpgWire::query(const std::string& q) {
 	if(state!='I' && state!='T') return false;
 	std::string sbuff;
@@ -2334,25 +2374,25 @@ bool FpgWire::query(const std::string& q) {
 	return true;
 }
 bool FpgWire::preparedQuery(LibpqQuery& q) {
-	return sendParse(q) && sendBind(q) && sendExecute(q);
+	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)this->sif;
+	ResponseData rd;
+	bool fl = sendParse(q, rd._b) && sendBind(q, rd._b) && sendExecute(q, rd._b);
+	ths->writeTo(&rd);
+	//std::cout << "preparedQuery" << std::endl;
+	return fl;
 }
-bool FpgWire::sendExecute(LibpqQuery& q) {
-	std::string sbuff;
+bool FpgWire::sendExecute(LibpqQuery& q, std::string& sbuff) {
 	writeMsgType(FpgReq::Ext_Execute, sbuff);
 	writeInt32(4+1+4, sbuff);
 	writeString("", sbuff);
 	writeInt32(q.rows>0?q.rows:0, sbuff);
-	if(send(fd, sbuff.c_str(), sbuff.length(), 0)<=0) {
-		perror("Can't send Ext_Execute packet to postgres");
-		return false;
-	}
 	state = '0';
 	querystatus = 1;
-	sendSync();
+	sendSync(sbuff);
 	return true;
 }
-bool FpgWire::sendParse(LibpqQuery& q) {
-	if(state!='I' && state!='T') return false;
+bool FpgWire::sendParse(LibpqQuery& q, std::string& sbuff) {
+	//if(state!='I' && state!='T') return false;
 	pstat = false;
 	std::map<std::string, std::string>::iterator it;
 	if(q.isPrepared && (it=prepStMap.find(q.query))!=prepStMap.end()) {
@@ -2365,7 +2405,6 @@ bool FpgWire::sendParse(LibpqQuery& q) {
 	} else {
 		q.ps = "";
 	}
-	std::string sbuff;
 	writeMsgType(FpgReq::Ext_Parse, sbuff);
 	int nParams = q.pvals.size();
 	writeInt32(4+1+(int)q.query.length()+1+q.ps.length()+2, sbuff);
@@ -2377,17 +2416,12 @@ bool FpgWire::sendParse(LibpqQuery& q) {
 			writeInt32(0, sbuff);
 		}
 	}*/
-	if(send(fd, sbuff.c_str(), sbuff.length(), 0)<=0) {
-		perror("Can't send Ext_Parse packet to postgres");
-		return false;
-	}
 	//state = '0';
 	return true;
 }
-bool FpgWire::sendBind(LibpqQuery& q) {
-	if(state!='I' && state!='T') return false;
+bool FpgWire::sendBind(LibpqQuery& q, std::string& sbuff) {
+	//if(state!='I' && state!='T') return false;
 	bstat = false;
-	std::string sbuff;
 	writeMsgType(FpgReq::Ext_Bind, sbuff);
 	int pvlen = 0;
 	int nParams = q.pvals.size();
@@ -2450,10 +2484,6 @@ bool FpgWire::sendBind(LibpqQuery& q) {
 		writeInt16(1, sbuff);
 		writeInt16(1, sbuff);
 	}
-	if(send(fd, sbuff.c_str(), sbuff.length(), 0)<=0) {
-		perror("Can't send Ext_Bind packet to postgres");
-		return false;
-	}
 	//state = '0';
 	return true;
 }
@@ -2462,48 +2492,73 @@ void FpgWire::run() {
 	if(readFrom()==0) {
 		return;
 	}
+
+	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)this->sif;
+	auto fn = [this](LibpqDataSourceImpl* ths, int cd) {
+		if(ritem!=NULL && cd==-1) {
+			fprintf(stderr, "Query failed: %s\n", err.c_str());
+			if(ritem->fcb1!=NULL) {
+				ritem->fcb1(ritem->ctx, false, q->query, q->pos);
+			} else if(q->fcb1!=NULL) {
+				q->fcb1(q->ctx, false, q->query, q->pos);
+			}
+			ritem = NULL;
+			ths->pop();
+			flux = false;
+		} else if(ritem!=NULL && (cd==2 || cd==3)) {
+			if(ritem->q.size()==1) {
+				if(q->isMulti) {
+					q->mulQCnt--;
+					if(q->mulQCnt>0) {
+						return;
+					}
+				}
+				if(ritem->fcb1!=NULL) {
+					ritem->fcb1(ritem->ctx, true, q->query, q->pos);
+				}
+				q = NULL;
+				ritem = NULL;
+				ths->pop();
+				flux = false;
+			} else {
+				if(q->isMulti) {
+					q->mulQCnt--;
+					if(q->mulQCnt>0) {
+						return;
+					}
+				}
+				ritem->pop();
+				q = NULL;
+			}
+		}
+	};
 	
 	while(buffer.length()>0) {
-		handleResponse();
-		if(isClosed()) return;
+		ritem = ths->peek();
+		if(ritem!=NULL) {
+			q = ritem->peek();
+		}
+
+		int cd = handleResponse();
+		if(cd!=0) fn(ths, cd);
+		if(isClosed()) {
+			//handle all pending queries and notify them about connection closure
+			for(int i=0;i<ths->Q.size();i++) {
+				LibpqAsyncReq* nitem = &(ths->Q.at(i));
+				if(nitem->fcb!=NULL) {
+					nitem->fcb(nitem->ctx, false, NULL, "", -1);
+				}
+				if(nitem->fcb1!=NULL) {
+					nitem->fcb1(nitem->ctx, false, "", -1);
+				}
+			}
+			return;
+		}
 		if(pos>buffer.length()) {
 			return;
 		}
 		buffer = buffer.substr(pos);
 		pos = 0;
-	}
-	
-	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)this->sif;
-	if(ritem!=NULL && querystatus==-1) {
-		fprintf(stderr, "Query failed: %s\n", err.c_str());
-		if(ritem->fcb1!=NULL) {
-			ritem->fcb1(ritem->ctx, false, q->query, counter);
-		} else if(q->fcb1!=NULL) {
-			q->fcb1(q->ctx, false, q->query, counter);
-		}
-		ritem = NULL;
-		ths->pop();
-		counter = -1;
-		flux = false;
-	} else if(ritem!=NULL && querystatus==2) {
-		if(ritem->cnt==-1) {
-			if(ritem->fcb1!=NULL) {
-				ritem->fcb1(ritem->ctx, true, q->query, counter);
-			}
-			if(q->isMulti) {
-				ritem->pop();
-			}
-			q = NULL;
-			ritem = NULL;
-			ths->pop();
-			counter = -1;
-			flux = false;
-		} else {
-			if(!q->isMulti || q->query=="BEGIN" || q->query=="COMMIT" || q->query=="ROLLBACK") {
-				if(ritem!=NULL) ritem->pop();
-				q = NULL;
-			}
-		}
 	}
 	
 	if(isClosed()) {
@@ -2512,36 +2567,41 @@ void FpgWire::run() {
 		doneRead();
 	}
 
-	if(querystatus==2) submit(NULL);
+	//if(querystatus==2) {
+		submit(NULL);
+	//}
 }
-void FpgWire::submit(LibpqAsyncReq* nitem) {
+void FpgWire::submit(LibpqAsyncReq* _nitem) {
 	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)this->sif;
 
-	if(flux && nitem!=NULL) {
-		return;
-	}
+	std::vector<int> remove;
+	for(int i=0;i<ths->Q.size();i++) {
+		LibpqAsyncReq* nitem = &(ths->Q.at(i));
+		if(!nitem->processed) {
+			ResponseData rd;
+			for (int j=0;j<nitem->q.size();j++) {
+				LibpqQuery* q = &(nitem->q.at(j));
 
-	if(ritem==NULL) {
-		ritem = ths->peek();
-	}
+				if(ths->isPipelined && q->isMulti) {
+					fprintf(stderr, "Multi query not allowed in pipeline mode...");
+					if(nitem->fcb1!=NULL) {
+						nitem->fcb1(nitem->ctx, false, q->query, q->pos);
+					}
+					remove.push_back(j);
+					break;
+				}
 
-	if(ritem!=NULL) {
-		if(ritem->q.size()>0) {
-			if(q==NULL) {
-				counter ++;
-				q = ritem->peek();
+				if(q->isMulti || (!ths->isPipelined && q->isTrx) || !q->isPrepared) {
+					query(q->query, rd);
+				} else {
+					preparedQuery(*q, rd);
+				}
 			}
-
-			if(q->isMulti || q->isTrx) {
-				query(q->query);
-				return;
-			}
-
-			preparedQuery(*q);
-			flux = true;
-		} else {
-			ritem = NULL;
-			ths->pop();
+			ths->writeTo(&rd);
+			nitem->processed = true;
 		}
+	}
+	for(int i=0;i<remove.size();i++) {
+		ths->Q.erase(ths->Q.begin()+i);
 	}
 }
