@@ -264,6 +264,7 @@ then
 	sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' $FFEAD_CPP_PATH/resources/server.prop
 	if [[ $3 == *"-async"* ]]
 	then
+		rm -f ${WEB_DIR}/config/cache.xml
 		for i in $(seq 0 $(($(nproc --all)-1))); do
 			if [ "$6" = "pool" ]
 			then

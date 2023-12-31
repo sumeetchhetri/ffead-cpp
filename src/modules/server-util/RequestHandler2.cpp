@@ -32,7 +32,7 @@ RequestHandler2::RequestHandler2(ServiceHandler* sh, const bool& isMain, bool is
 	this->complete = 0;
 	this->isMain = isMain;
 	this->isSSLEnabled = isSSLEnabled;
-#ifndef USE_IO_URING
+#if !defined(USE_IO_URING) && !defined(USE_PICOEV)
 	this->acceptor.setCtx(this);
 #endif
 	this->selector.setCtx(this);
@@ -88,7 +88,7 @@ void RequestHandler2::addListenerSocket(doRegisterListener drl, const SOCKET& li
 		}
 		std::cout << "All initializations are now complete...." << std::endl;
 	}
-#ifndef USE_IO_URING
+#if !defined(USE_IO_URING) && !defined(USE_PICOEV)
 	acceptor.initialize(listenerSock, -1);
 	acceptor.addListeningSocket(this->listenerSock);
 	Thread* pthread = new Thread(&handleAcceptor, this);
@@ -104,7 +104,7 @@ void RequestHandler2::start(unsigned int cid, bool withWQ) {
 	}
 	if(!run) {
 		run = true;
-#ifndef USE_IO_URING
+#if !defined(USE_IO_URING) && !defined(USE_PICOEV)
 		selector.initialize(0, -1);
 		acceptor.initialize(listenerSock, -1);
 		Thread* pthread = new Thread(&handleAcceptor, this);
@@ -223,7 +223,7 @@ void* RequestHandler2::handleAcceptor(void* inp) {
 		Writer::onWriterEvent((Writer*)sock, 2);
 		_i->shi->closeConnection((BaseSocket*)sock);
 	};
-#ifndef USE_IO_URING
+#if !defined(USE_IO_URING) && !defined(USE_PICOEV)
 	ins->acceptor.loop(&loopContinue, &loopEventCb, &ins->selector);
 #endif
 
@@ -238,7 +238,7 @@ void* RequestHandler2::handle(void* inp) {
 		_i->shi->closeConnection((BaseSocket*)sock);
 	};
 	ins->selector.loop(&loopContinue, &loopEventCb);
-#ifdef USE_IO_URING
+#if defined(USE_IO_URING) || defined(USE_PICOEV)
 	close_(ins);
 #endif
 	return 0;
