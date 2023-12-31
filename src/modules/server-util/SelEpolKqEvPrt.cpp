@@ -333,7 +333,7 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout, eventLoopCont
 		io_uring_submit(&ring);
 		return;
 	#endif
-	if(sockfd>0)registerRead(dsi, true);
+	if(sockfd>0) registerRead(dsi, true);
 }
 
 

@@ -34,6 +34,7 @@ void SearchEngineManager::triggerAppInitCompletion(std::string appNameN) {
 		StringUtil::replaceAll(appName, "-", "_");
 		RegexUtil::replace(appName, "[^a-zA-Z0-9_]+", "");
 	}
+	std::cout << "triggerAppInitCompletion called for " << appName << std::endl;
 	if(appInitCompletionStatus.find(appName)!=appInitCompletionStatus.end()) {
 		appInitCompletionStatus[appName] = true;
 	}
@@ -86,6 +87,7 @@ void SearchEngineManager::initSearch(const ConnectionProperties& props, const st
 					const Method& meth = cbi.clas->getMethod(v.at(1), argus);
 					if(meth.getMethodName()!="")
 					{
+						std::cout << "initSearch called for " << appName << std::endl;
 						appInitCompletionStatus[appName] = false;
 						ref->invokeMethodGVP(_temp, meth, valus);
 					}

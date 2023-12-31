@@ -59,6 +59,7 @@ class RequestHandler2 {
 	bool isActive();
 	static void* handleAcceptor(void* inp);
 	static void* handle(void* inp);
+	static void close_(RequestHandler2* ins);
 	static void* handleWrites(void* inp);
 	static RequestHandler2* _i;
 	httpSockHandle hsh;

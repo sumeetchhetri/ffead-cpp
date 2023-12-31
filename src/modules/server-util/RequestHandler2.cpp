@@ -32,7 +32,9 @@ RequestHandler2::RequestHandler2(ServiceHandler* sh, const bool& isMain, bool is
 	this->complete = 0;
 	this->isMain = isMain;
 	this->isSSLEnabled = isSSLEnabled;
+#ifndef USE_IO_URING
 	this->acceptor.setCtx(this);
+#endif
 	this->selector.setCtx(this);
 	this->hsh = h;
 	this->sf = NULL;
@@ -86,10 +88,14 @@ void RequestHandler2::addListenerSocket(doRegisterListener drl, const SOCKET& li
 		}
 		std::cout << "All initializations are now complete...." << std::endl;
 	}
+#ifndef USE_IO_URING
 	acceptor.initialize(listenerSock, -1);
 	acceptor.addListeningSocket(this->listenerSock);
 	Thread* pthread = new Thread(&handleAcceptor, this);
 	pthread->execute();
+#else
+	selector.addListeningSocket(this->listenerSock);
+#endif
 }
 
 void RequestHandler2::start(unsigned int cid, bool withWQ) {
@@ -98,10 +104,14 @@ void RequestHandler2::start(unsigned int cid, bool withWQ) {
 	}
 	if(!run) {
 		run = true;
+#ifndef USE_IO_URING
 		selector.initialize(0, -1);
 		acceptor.initialize(listenerSock, -1);
 		Thread* pthread = new Thread(&handleAcceptor, this);
 		pthread->execute();
+#else
+		selector.initialize(listenerSock, -1);
+#endif
 		Thread* pthread_ = new Thread(&handle, this);
 		pthread_->execute(cid);
 		if(withWQ) {
@@ -193,18 +203,10 @@ BaseSocket* RequestHandler2::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* bi, in
 	return NULL;
 }
 
-void* RequestHandler2::handleAcceptor(void* inp) {
-	RequestHandler2* ins  = static_cast<RequestHandler2*>(inp);
-	BaseSocket::sockCloseFunc = [](void* sock) {
-		Writer::onWriterEvent((Writer*)sock, 2);
-		_i->shi->closeConnection((BaseSocket*)sock);
-	};
-	ins->acceptor.loop(&loopContinue, &loopEventCb, &ins->selector);
-
+void RequestHandler2::close_(RequestHandler2* ins) {
 	for(int i=0;i<(int)ins->clsdConns.size();i++) {
 		delete ins->clsdConns.at(i);
 	}
-
 	if(ins->isMain) {
 		ins->shi->stop();
 		while(ins->shi->run) {
@@ -213,14 +215,32 @@ void* RequestHandler2::handleAcceptor(void* inp) {
 	}
 	Thread::mSleep(500);
 	ins->complete += 1;
+}
+
+void* RequestHandler2::handleAcceptor(void* inp) {
+	RequestHandler2* ins  = static_cast<RequestHandler2*>(inp);
+	BaseSocket::sockCloseFunc = [](void* sock) {
+		Writer::onWriterEvent((Writer*)sock, 2);
+		_i->shi->closeConnection((BaseSocket*)sock);
+	};
+#ifndef USE_IO_URING
+	ins->acceptor.loop(&loopContinue, &loopEventCb, &ins->selector);
+#endif
+
+	close_(ins);
 	return 0;
 }
 
 void* RequestHandler2::handle(void* inp) {
 	RequestHandler2* ins  = static_cast<RequestHandler2*>(inp);
+	BaseSocket::sockCloseFunc = [](void* sock) {
+		Writer::onWriterEvent((Writer*)sock, 2);
+		_i->shi->closeConnection((BaseSocket*)sock);
+	};
 	ins->selector.loop(&loopContinue, &loopEventCb);
-	Thread::mSleep(500);
-	ins->complete += 1;
+#ifdef USE_IO_URING
+	close_(ins);
+#endif
 	return 0;
 }
 

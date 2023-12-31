@@ -5,7 +5,8 @@ LABEL description="Base v docker image with ffead-cpp v4.0 commit id - master"
 
 ENV IROOT=/installs
 
-RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libt3* /usr/local/lib/libinter.so /usr/local/lib/libdinter.so && \
+RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libt3* /usr/local/lib/libt4* /usr/local/lib/libt6* /usr/local/lib/libt7* \
+	/usr/local/lib/libinter.so /usr/local/lib/libdinter.so && \
 	ln -s ${IROOT}/ffead-cpp-7.0-sql/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
 	ln -s ${IROOT}/ffead-cpp-7.0-sql/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
 	ln -s ${IROOT}/ffead-cpp-7.0-sql/lib/libinter.so /usr/local/lib/libinter.so && \

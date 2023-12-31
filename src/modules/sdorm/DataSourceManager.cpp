@@ -41,6 +41,7 @@ void DataSourceManager::triggerAppInitCompletion(std::string appNameN) {
 		StringUtil::replaceAll(appName, "-", "_");
 		RegexUtil::replace(appName, "[^a-zA-Z0-9_]+", "");
 	}
+	std::cout << "triggerAppInitCompletion called for " << appName << std::endl;
 	if(appInitCompletionStatus.find(appName)!=appInitCompletionStatus.end()) {
 		appInitCompletionStatus[appName] = true;
 	}
@@ -102,6 +103,7 @@ void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping
 					const Method& meth = cbi.clas->getMethod(v.at(1), argus);
 					if(meth.getMethodName()!="")
 					{
+						std::cout << "initDSN called for " << appName << std::endl;
 						appInitCompletionStatus[appName] = false;
 						ref->invokeMethodGVP(_temp, meth, valus);
 					}

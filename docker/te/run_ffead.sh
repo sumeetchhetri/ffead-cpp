@@ -6,6 +6,8 @@ rm -f /usr/local/lib/libt2.so*
 rm -f /usr/local/lib/libt3.so*
 rm -f /usr/local/lib/libt4.so*
 rm -f /usr/local/lib/libt5.so*
+rm -f /usr/local/lib/libt6.so*
+rm -f /usr/local/lib/libt7.so*
 rm -f /usr/local/lib/libinter.so
 rm -f /usr/local/lib/libdinter.so
 
@@ -16,6 +18,8 @@ ln -s ${FFEAD_CPP_PATH}/lib/libt2.so /usr/local/lib/libt2.so
 ln -s ${FFEAD_CPP_PATH}/lib/libt3.so /usr/local/lib/libt3.so
 ln -s ${FFEAD_CPP_PATH}/lib/libt4.so /usr/local/lib/libt4.so
 ln -s ${FFEAD_CPP_PATH}/lib/libt5.so /usr/local/lib/libt5.so
+ln -s ${FFEAD_CPP_PATH}/lib/libt4.so /usr/local/lib/libt6.so
+ln -s ${FFEAD_CPP_PATH}/lib/libt5.so /usr/local/lib/libt7.so
 ln -s ${FFEAD_CPP_PATH}/lib/libffead-modules.so /usr/local/lib/libffead-modules.so
 ln -s ${FFEAD_CPP_PATH}/lib/libffead-framework.so /usr/local/lib/libffead-framework.so
 ln -s ${FFEAD_CPP_PATH}/lib/libinter.so /usr/local/lib/libinter.so
