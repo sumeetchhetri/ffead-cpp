@@ -70,6 +70,7 @@ nginx-*/
 docker/test/src
 docker/test/web
 docker/te/temp
+docker/all/temp
 **/Makefile
 **/*.tar.gz*
 **/.swiftpm
@@ -91,3 +92,4 @@ bazel-ffead-cpp
 code-snippets-build/
 .bztmp
 prelude
+**/BUILD.bazel

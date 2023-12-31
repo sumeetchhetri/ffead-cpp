@@ -45,6 +45,6 @@ docker rmi -f sumeetchhetri/ffead-cpp-java-base:${VERSION}
 docker build --progress plain -f ffead-cpp-java-base.dockerfile -t sumeetchhetri/ffead-cpp-java-base:${VERSION} .
 docker push sumeetchhetri/ffead-cpp-java-base:${VERSION}
 
-docker rmi -f sumeetchhetri/ffead-cpp-seastar-base:${VERSION}
-docker build --progress plain -f ffead-cpp-seastar-base.dockerfile -t sumeetchhetri/ffead-cpp-seastar-base:${VERSION} .
-docker push sumeetchhetri/ffead-cpp-seastar-base:${VERSION}
+#docker rmi -f sumeetchhetri/ffead-cpp-seastar-base:${VERSION}
+#docker build --progress plain -f ffead-cpp-seastar-base.dockerfile -t sumeetchhetri/ffead-cpp-seastar-base:${VERSION} .
+#docker push sumeetchhetri/ffead-cpp-seastar-base:${VERSION}

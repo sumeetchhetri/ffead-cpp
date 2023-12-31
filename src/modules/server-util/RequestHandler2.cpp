@@ -80,14 +80,14 @@ void RequestHandler2::addListenerSocket(doRegisterListener drl, const SOCKET& li
 		while(!drl()) {
 			Thread::sSleep(1);
 			if(counter++==60) {
-				logger << "Cannot wait more than 60 seconds for cache/database to initialize, will forcefully start server now...." << std::endl;
+				std::cout << "Cannot wait more than 60 seconds for cache/database to initialize, will forcefully start server now...." << std::endl;
 				break;
 			}
 		}
-		logger << "All initializations are now complete...." << std::endl;
+		std::cout << "All initializations are now complete...." << std::endl;
 	}
-	acceptor.addListeningSocket(this->listenerSock);
 	acceptor.initialize(listenerSock, -1);
+	acceptor.addListeningSocket(this->listenerSock);
 	Thread* pthread = new Thread(&handleAcceptor, this);
 	pthread->execute();
 }
@@ -147,7 +147,7 @@ BaseSocket* RequestHandler2::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* bi, in
 	switch(type) {
 		case ACCEPTED: {
 			Http11Socket* si = (Http11Socket*)ins->sf(fd);
-			si->eh = &(ins->acceptor);
+			si->eh = &(ins->selector);
 			bi->onOpen();
 			Writer::onWriterEvent((Writer*)si, 1);
 			if(!ins->run) {

@@ -70,11 +70,11 @@ void RequestReaderHandler::addListenerSocket(doRegisterListener drl, const SOCKE
 		while(!drl()) {
 			Thread::sSleep(1);
 			if(counter++==60) {
-				Logger logger = LoggerFactory::getLogger("RequestReaderHandler");
-				logger << "Cannot wait more than 60 seconds for cache/database to initialize, will forcefully start server now...." << std::endl;
+				std::cout << "Cannot wait more than 60 seconds for cache/database to initialize, will forcefully start server now...." << std::endl;
 				break;
 			}
 		}
+		std::cout << "All initializations are now complete...." << std::endl;
 	}
 	selector.addListeningSocket(this->listenerSock);
 }

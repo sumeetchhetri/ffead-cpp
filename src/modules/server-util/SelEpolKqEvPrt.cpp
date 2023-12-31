@@ -197,7 +197,7 @@ void SelEpolKqEvPrt::addListeningSocket(SOCKET sockfd) {
 	    io_uring_submit(&ring);
 	    return;
 	#endif
-	if(sockfd>0)registerRead(dsi, true);
+	if(sockfd>0) registerRead(dsi, true);
 }
 
 void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout, eventLoopContinue elcCb, onEvent eCb)
@@ -665,7 +665,12 @@ bool SelEpolKqEvPrt::registerRead(BaseSocket* obj, const bool& isListeningSock, 
 		struct kevent change;
 		memset(&change, 0, sizeof(change));
 		EV_SET(&change, descriptor, EVFILT_READ, EV_ADD, 0, 0, obj);
-		kevent(kq, &change, 1, NULL, 0, NULL);
+		if (kevent(kq, &change, 1, NULL, 0, NULL) < 0)
+		{
+			perror("kevent");
+			//std::cout << "Error adding to kqueue cntl list" << std::endl;
+			return false;
+		}
 	#elif defined USE_DEVPOLL
 		if(isListeningSock) {
 			polled_fds[0].fd = descriptor;

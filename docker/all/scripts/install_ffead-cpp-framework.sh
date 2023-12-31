@@ -55,8 +55,11 @@ sed -i 's|ENABLE_JOBS=true|ENABLE_JOBS=false|g' resources/server.prop
 sed -i 's|LOGGING_ENABLED=true|LOGGING_ENABLED=false|g' resources/server.prop
 sed -i 's|EVH_SINGLE=true|EVH_SINGLE=false|g' resources/server.prop
 
-rm -rf web/default web/oauthApp web/flexApp web/markers web/te-benchmark web/peer-server web/t1 web/t2
+rm -rf web/default web/oauthApp web/flexApp web/markers web/te-benchmark web/peer-server
+#rm -rf web/t1 web/t2
 
+sed -i 's|localhost|tfb-database|g' web/t1/config/sdorm.xml
+sed -i 's|localhost|tfb-database|g' web/t2/config/sdorm.xml
 sed -i 's|localhost|tfb-database|g' web/t3/config/sdorm.xml
 sed -i 's|localhost|tfb-database|g' web/t4/config/sdorm.xml
 sed -i 's|localhost|tfb-database|g' web/t5/config/sdorm.xml
@@ -68,40 +71,40 @@ sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/oauthApp)||g' CMakeLists.tx
 sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/markers)||g' CMakeLists.txt
 sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark)||g' CMakeLists.txt
 sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/peer-server)||g' CMakeLists.txt
-sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/t1)||g' CMakeLists.txt
-sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/t2)||g' CMakeLists.txt
+#sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/t1)||g' CMakeLists.txt
+#sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/t2)||g' CMakeLists.txt
 sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/default/libdefault${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/flexApp/libflexApp${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/oauthApp/liboauthApp${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/markers/libmarkers${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/te-benchmark/libte-benchmark${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/peer-server/libpeer-server${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
-sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/t1/libt1${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
-sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/t2/libt2{LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+#sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/t1/libt1${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+#sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/t2/libt2{LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/default")||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/flexApp")||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/oauthApp")||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/markers")||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/peer-server")||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/te-benchmark")||g' CMakeLists.txt
-sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/t1")||g' CMakeLists.txt
-sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/t2")||g' CMakeLists.txt
+#sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/t1")||g' CMakeLists.txt
+#sed -i 's|install(DIRECTORY DESTINATION "${PROJECT_NAME}-bin/web/t2")||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/default/ DESTINATION ${PROJECT_NAME}-bin/web/default)||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/flexApp/ DESTINATION ${PROJECT_NAME}-bin/web/flexApp)||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/oauthApp/ DESTINATION ${PROJECT_NAME}-bin/web/oauthApp)||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/markers/ DESTINATION ${PROJECT_NAME}-bin/web/markers)||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/peer-server/ DESTINATION ${PROJECT_NAME}-bin/web/peer-server)||g' CMakeLists.txt
 sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/te-benchmark/ DESTINATION ${PROJECT_NAME}-bin/web/te-benchmark)||g' CMakeLists.txt
-sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/t1/ DESTINATION ${PROJECT_NAME}-bin/web/t1)||g' CMakeLists.txt
-sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/t1/ DESTINATION ${PROJECT_NAME}-bin/web/t2)||g' CMakeLists.txt
+#sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/t1/ DESTINATION ${PROJECT_NAME}-bin/web/t1)||g' CMakeLists.txt
+#sed -i 's|install(DIRECTORY ${PROJECT_SOURCE_DIR}/web/t2/ DESTINATION ${PROJECT_NAME}-bin/web/t2)||g' CMakeLists.txt
 sed -i 's|web/default/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/flexApp/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/oauthApp/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/markers/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/te-benchmark/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/peer-server/src/autotools/Makefile||g' configure.ac
-sed -i 's|web/t1/src/autotools/Makefile||g' configure.ac
-sed -i 's|web/t2/src/autotools/Makefile||g' configure.ac
+#sed -i 's|web/t1/src/autotools/Makefile||g' configure.ac
+#sed -i 's|web/t2/src/autotools/Makefile||g' configure.ac
 
 #./autogen.sh
 #./configure --enable-debug=no --enable-apachemod=yes --enable-nginxmod=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes CPPFLAGS="$CPPFLAGS -I${IROOT}/include/libmongoc-1.0 -I${IROOT}/include/libbson-1.0 -I${IROOT}/include/" LDFLAGS="$LDFLAGS -L${IROOT} -L${IROOT}/lib"
@@ -160,7 +163,7 @@ do
 done
 echo "ffead-cpp start successful"
 sleep 5
-cd tests && rm -f test.csv && cp ${IROOT}/ffead-cpp-src/tests/test-te.csv test.csv && chmod +x *.sh && ./runTests.sh
+cd tests && rm -f test.csv && cp ${IROOT}/ffead-cpp-src/tests/test-te-all.csv test.csv && chmod +x *.sh && ./runTests.sh
 echo "ffead-cpp normal shutdown"
 pkill ffead-cpp
 
@@ -219,7 +222,7 @@ do
 done
 echo "ffead-cpp start successful"
 sleep 5
-cd tests && rm -f test.csv && cp ${IROOT}/ffead-cpp-src/tests/test-te.csv test.csv && chmod +x *.sh && ./runTests.sh
+cd tests && rm -f test.csv && cp ${IROOT}/ffead-cpp-src/tests/test-te-all.csv test.csv && chmod +x *.sh && ./runTests.sh
 echo "ffead-cpp normal shutdown"
 pkill ffead-cpp
 
@@ -276,7 +279,7 @@ do
 done
 echo "ffead-cpp start successful - picoev backend"
 sleep 5
-cd tests && rm -f test.csv && cp ${IROOT}/ffead-cpp-src/tests/test-te.csv test.csv && chmod +x *.sh && ./runTests.sh
+cd tests && rm -f test.csv && cp ${IROOT}/ffead-cpp-src/tests/test-te-all.csv test.csv && chmod +x *.sh && ./runTests.sh
 echo "ffead-cpp normal shutdown - picoev backend"
 pkill ffead-cpp
 
@@ -342,7 +345,7 @@ do
 done
 echo "ffead-cpp start successful - io_uring backend"
 sleep 5
-cd tests && rm -f test.csv && cp ${IROOT}/ffead-cpp-src/tests/test-te.csv test.csv && chmod +x *.sh && ./runTests.sh
+cd tests && rm -f test.csv && cp ${IROOT}/ffead-cpp-src/tests/test-te-all.csv test.csv && chmod +x *.sh && ./runTests.sh
 echo "ffead-cpp normal shutdown - io_uring backend"
 pkill ffead-cpp
 

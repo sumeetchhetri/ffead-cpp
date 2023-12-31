@@ -385,8 +385,8 @@ bool ServerInitUtil::isInited() {
 }
 
 void ServerInitUtil::init(Logger& logger) {
-	logger << "FFEAD in init" << std::endl;
-	logger << "Initializing ffead-cpp....." << std::endl;
+	std::cout << "FFEAD in init" << std::endl;
+	std::cout << "Initializing ffead-cpp....." << std::endl;
 #ifdef INC_COMP
 	try {
 		if(srprps["CMP_PORT"]!="")
@@ -434,24 +434,24 @@ void ServerInitUtil::init(Logger& logger) {
 
 	//Load all the FFEADContext beans so that the same copy is shared by all process
 	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
-	logger << ("Initializing ffeadContext....") << std::endl;
+	std::cout << ("Initializing ffeadContext....") << std::endl;
 	ConfigurationData::getInstance()->initializeAllSingletonBeans();
 	GenericObject::init(ConfigurationData::getReflector());
-	logger << ("Initializing ffeadContext done....") << std::endl;
+	std::cout << ("Initializing ffeadContext done....") << std::endl;
 
 #ifdef INC_SDORM
-	logger << ("Initializing DataSources....") << std::endl;
+	std::cout << ("Initializing DataSources....") << std::endl;
 	ConfigurationHandler::initializeDataSources();
-	logger << ("Initializing DataSources done....") << std::endl;
+	std::cout << ("Initializing DataSources done....") << std::endl;
 #endif
 
-	logger << ("Initializing Caches....") << std::endl;
+	std::cout << ("Initializing Caches....") << std::endl;
 	ConfigurationHandler::initializeCaches();
-	logger << ("Initializing Caches done....") << std::endl;
+	std::cout << ("Initializing Caches done....") << std::endl;
 
-	logger << ("Initializing Searches....") << std::endl;
+	std::cout << ("Initializing Searches....") << std::endl;
 	ConfigurationHandler::initializeSearches();
-	logger << ("Initializing Searches done....") << std::endl;
+	std::cout << ("Initializing Searches done....") << std::endl;
 
 #ifdef INC_JOBS
 	if(ConfigurationData::getInstance()->isJobsEnabled()) {
