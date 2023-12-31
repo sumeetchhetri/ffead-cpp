@@ -69,6 +69,7 @@ extern void ffead_cpp_resp_cleanup(void* ptr);
 extern void ffead_cpp_bootstrap(const char* srv, size_t srv_len, int type);
 extern void ffead_cpp_init();
 extern void ffead_cpp_init_for_pv(cb_reg_ext_fd_pv pvregfd, cb_into_pv cb, cb_into_pv_for_date cdt);
+extern bool ffead_cpp_is_inited();
 extern void ffead_cpp_cleanup();
 extern void* ffead_cpp_handle_picov_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
     const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len,

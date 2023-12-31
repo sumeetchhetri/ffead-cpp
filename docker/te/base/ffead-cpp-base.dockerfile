@@ -1,7 +1,7 @@
 FROM ubuntu:latest
 LABEL maintainer="Sumeet Chhetri"
 LABEL version="7.0"
-LABEL description="Base ffead-cpp docker image with commit id - master"
+LABEL description="Base ffead-cpp min docker image with commit id - master"
 
 ENV IROOT=/installs
 ENV DEBUG=off

@@ -36,6 +36,7 @@ struct ffead_request {
 extern void ffead_cpp_resp_cleanup(void* ptr);
 extern void ffead_cpp_bootstrap(const char* srv, size_t srv_len, int type);
 extern void ffead_cpp_init();
+extern bool ffead_cpp_is_inited();
 extern void ffead_cpp_cleanup();
 extern void* ffead_cpp_handle_rust_swift_1(const struct ffead_request *request, int* scode,
     const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len,

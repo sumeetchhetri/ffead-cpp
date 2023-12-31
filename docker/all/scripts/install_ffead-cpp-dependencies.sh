@@ -2,7 +2,7 @@
 
 apt update -yqq && apt install --no-install-recommends -yqq autoconf-archive unzip uuid-dev odbc-postgresql unixodbc unixodbc-dev \
 	apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev \
-	zlib1g-dev cmake make clang-format ninja-build libcurl4-openssl-dev git libpq-dev \
+	zlib1g-dev cmake make clang-format ninja-build libcurl4-openssl-dev git libpq-dev libpugixml-dev \
 	wget build-essential pkg-config libpcre3-dev curl libgtk2.0-dev libgdk-pixbuf2.0-dev bison flex libreadline-dev
 apt-get install --reinstall ca-certificates
 

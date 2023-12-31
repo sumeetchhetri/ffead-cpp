@@ -38,6 +38,7 @@ extern (C) pure @nogc nothrow int phr_parse_request_fcp(const char *buf, size_t 
 extern (C) pure @nogc nothrow void ffead_cpp_resp_cleanup(void* ptr);
 extern (C) pure @nogc nothrow void ffead_cpp_bootstrap(const char* srv, size_t srv_len, int type);
 extern (C) pure @nogc nothrow void ffead_cpp_init();
+extern (C) pure @nogc nothrow bool ffead_cpp_is_inited();
 extern (C) pure @nogc nothrow void ffead_cpp_cleanup();
 extern (C) pure @nogc nothrow void* ffead_cpp_handle_d_1(const ffead_request *request, int* done,
 	    const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len,

@@ -36,6 +36,7 @@ var void_ptr = ref.refType(ref.types.void);
 
 var libffeadcpp = ffi.Library('libffead-framework', {
     'ffead_cpp_init': ['void', []],
+	'ffead_cpp_is_inited': ['bool', []],
     'ffead_cpp_cleanup': ['void', []],
     'ffead_cpp_bootstrap': ['void', ['CString', 'size_t', 'int']],
     /*

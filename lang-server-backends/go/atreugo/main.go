@@ -29,6 +29,7 @@ typedef struct phr_header_fcp {
 #cgo LDFLAGS: -lffead-framework
 extern void ffead_cpp_bootstrap(const char* srv, size_t srv_len, int type);
 extern void ffead_cpp_init();
+extern bool ffead_cpp_is_inited();
 extern void ffead_cpp_cleanup();
 extern void* ffead_cpp_handle_go_1(const char *server_str, size_t server_str_len,
 	const char *method, size_t method_len, const char *path, size_t path_len, const char *query, size_t query_len, int version,
@@ -42,7 +43,6 @@ import "C"
 import (
 	"flag"
 	"fmt"
-	"github.com/savsgio/atreugo/v11"
 	"io/ioutil"
 	"log"
 	"os"
@@ -50,6 +50,8 @@ import (
 	"runtime"
 	"strings"
 	"unsafe"
+
+	"github.com/savsgio/atreugo/v11"
 )
 
 var (

@@ -25,9 +25,9 @@ find . -type f -name '*.dockerfile' | xargs sed -i'' -e "s|-base-2:6.0|-base-2:$
 find . -type f -name '*.dockerfile' | xargs sed -i'' -e "s|version=\"6.0\"|version=\"${VERSION}\"|g"
 
 #DOCKER_BUILDKIT=0 
-#docker rmi -f sumeetchhetri/ffead-cpp-deps:${VERSION}
-#docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-deps.dockerfile -t sumeetchhetri/ffead-cpp-deps:${VERSION} .
-#docker push sumeetchhetri/ffead-cpp-deps:${VERSION}
+docker rmi -f sumeetchhetri/ffead-cpp-deps:${VERSION}
+docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-deps.dockerfile -t sumeetchhetri/ffead-cpp-deps:${VERSION} .
+docker push sumeetchhetri/ffead-cpp-deps:${VERSION}
 
 docker rmi -f sumeetchhetri/ffead-cpp-all-base:${VERSION}
 docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-all-base.dockerfile -t sumeetchhetri/ffead-cpp-all-base:${VERSION} .

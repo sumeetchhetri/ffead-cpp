@@ -29,6 +29,7 @@ typedef struct phr_header_fcp {
 #cgo LDFLAGS: -lffead-framework
 extern void ffead_cpp_bootstrap(const char* srv, size_t srv_len, int type);
 extern void ffead_cpp_init();
+extern bool ffead_cpp_is_inited();
 extern void ffead_cpp_cleanup();
 extern void* ffead_cpp_handle_go_1(const char *server_str, size_t server_str_len,
 	const char *method, size_t method_len, const char *path, size_t path_len, const char *query, size_t query_len, int version,
@@ -43,13 +44,14 @@ import "C"
 import (
 	"flag"
 	"fmt"
-	"github.com/valyala/fasthttp"
 	"log"
 	"os"
 	"reflect"
 	"runtime"
 	"strings"
 	"unsafe"
+
+	"github.com/valyala/fasthttp"
 	fastprefork "github.com/valyala/fasthttp/prefork"
 )
 
@@ -57,7 +59,7 @@ var (
 	serverDirectory = flag.String("server_directory", "", "TCP address to listen to")
 	addr            = flag.String("addr", ":8080", "TCP address to listen to")
 	compress        = flag.Bool("compress", false, "Whether to enable transparent response compression")
-	prefork			= flag.Bool("prefork", true, "use prefork")
+	prefork         = flag.Bool("prefork", true, "use prefork")
 )
 
 var (

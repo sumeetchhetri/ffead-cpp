@@ -1,7 +1,5 @@
 #!/bin/bash
 
-apt update -yqq && apt install --no-install-recommends -yqq libpugixml-dev
-
 #From https://github.com/TechEmpower/FrameworkBenchmarks/blob/master/frameworks/C%2B%2B/ulib/setup_json.sh
 MAX_THREADS=$(( 3 * `nproc` / 2 ))
 
