@@ -539,7 +539,9 @@ void TeBkUmFpgAsyncRouter::fortunes(Writer* sif, HttpResponse* res) {
 }
 
 void TeBkUmFpgAsyncRouter::routeAsync(HttpRequest* req, HttpResponse* res, Writer* sif) {
-	route(req, res, sif);
+	AsyncReqData* dbreq = (AsyncReqData*)sif->getData();
+	dbreq->reset();
+	route(req, &dbreq->r, sif);
 }
 
 bool TeBkUmFpgAsyncRouter::route(HttpRequest* req, HttpResponse* res, Writer* sif) {

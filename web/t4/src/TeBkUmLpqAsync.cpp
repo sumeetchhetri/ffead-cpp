@@ -14,7 +14,7 @@
     limitations under the License.
 */
 /*
- * TeBkUmLpqAsyncUm.cpp
+ * TeBkUmLpqAsync.cpp
  *
  *  Created on: 03-Feb-2020
  *      Author: sumeetc
@@ -134,7 +134,6 @@ void TeBkUmLpqAsyncRouter::dbAsync(Writer* sif) {
 	q->withSelectQuery(WORLD_ONE_QUERY).withContext(sif).withCb0([](void** ctx, PGresult* res) {
 		Writer* sif = (Writer*)ctx[0];
 		AsyncReqData* reqdt = (AsyncReqData*)sif->getData();
-		reqdt->reset();
 		TeBkUmLpqAsyncWorld w(ntohl(*((uint32_t *) PQgetvalue(res, 0, 0))), ntohl(*((uint32_t *) PQgetvalue(res, 0, 1))));
 		w.tmplJson(reqdt->r.getContentP());
 		reqdt->r.sendJson(sif);
@@ -168,7 +167,6 @@ void TeBkUmLpqAsyncRouter::queriesAsync(const char* q, int ql, Writer* sif) {
 		}
 
 		AsyncReqData* reqdt = (AsyncReqData*)sif->getData();
-		reqdt->reset();
 		TeBkUmLpqAsyncWorld::tmplJson(vec, reqdt->r.getContentP());
 		reqdt->r.sendJson(sif);
 		sif->unUse();
@@ -219,7 +217,6 @@ void TeBkUmLpqAsyncRouter::queriesMultiAsync(const char* q, int ql, Writer* sif)
 		}
 
 		AsyncReqData* reqdt = (AsyncReqData*)sif->getData();
-		reqdt->reset();
 		TeBkUmLpqAsyncWorld::tmplJson(vec, reqdt->r.getContentP());
 		reqdt->r.sendJson(sif);
 		sif->unUse();
@@ -283,7 +280,6 @@ void TeBkUmLpqAsyncRouter::updatesMulti(const char* q, int ql, AsyncUpdatesReq* 
 				AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx[0];
 				if(status) {
 					AsyncReqData* reqdt = (AsyncReqData*)req->sif->getData();
-					reqdt->reset();
 					TeBkUmLpqAsyncWorld::tmplJson(req->vec, reqdt->r.getContentP());
 					reqdt->r.sendJson(req->sif);
 				} else {
@@ -388,7 +384,6 @@ void TeBkUmLpqAsyncRouter::updatesAsyncb(const char* q, int ql, AsyncUpdatesReq*
 			AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx[0];
 			if(status) {
 				AsyncReqData* reqdt = (AsyncReqData*)req->sif->getData();
-				reqdt->reset();
 				TeBkUmLpqAsyncWorld::tmplJson(req->vec, reqdt->r.getContentP());
 				reqdt->r.sendJson(req->sif);
 			} else {
@@ -468,7 +463,6 @@ void TeBkUmLpqAsyncRouter::updatesAsync(const char* q, int ql, AsyncUpdatesReq* 
 		areq->withContext(req).withFinalCb([](void** ctx,bool status, std::vector<PGresult*>* results, const std::string& query, int counter) {
 			AsyncUpdatesReq* req = (AsyncUpdatesReq*)ctx[0];
 			AsyncReqData* reqdt = (AsyncReqData*)req->sif->getData();
-			reqdt->reset();
 			if(status) {
 				TeBkUmLpqAsyncWorld::tmplJson(req->vec, reqdt->r.getContentP());
 				reqdt->r.sendJson(req->sif);
@@ -569,8 +563,6 @@ void TeBkUmLpqAsyncRouter::fortunes(Writer* sif) {
 		context.emplace("fortunes", &flst);
 
 		AsyncReqData* dbreq = (AsyncReqData*)sif->getData();
-		dbreq->reset();
-
 		tmplFunc(&context, dbreq->r.getContent());
 		dbreq->r.sendHtml(sif);
 		sif->unUse();
@@ -584,20 +576,21 @@ void TeBkUmLpqAsyncRouter::fortunes(Writer* sif) {
 
 void TeBkUmLpqAsyncRouter::routeAsync(HttpRequest* req, HttpResponse* res, Writer* sif) {
 	AsyncReqData* dbreq = (AsyncReqData*)sif->getData();
+	dbreq->reset();
 	route(req, &dbreq->r, sif);
 }
 
 bool TeBkUmLpqAsyncRouter::route(HttpRequest* req, HttpResponse* res, Writer* sif) {
 	sif->use();
 	if(StringUtil::endsWith(req->getPath(), "/plaint")) {
+		AsyncReqData* dbreq = (AsyncReqData*)sif->getData();
 		res->setContent(HELLO_WORLD).sendText(sif);
 		sif->unUse();
 	} else if(StringUtil::endsWith(req->getPath(), "/j")) {
 		TeBkUmLpqAsyncMessage msg(HELLO_WORLD);
 		AsyncReqData* dbreq = (AsyncReqData*)sif->getData();
-		dbreq->reset();
-		msg.tmplJson(res->getContentP());
-		res->sendJson(sif);
+		msg.tmplJson(dbreq->r.getContentP());
+		dbreq->r.sendJson(sif);
 		sif->unUse();
 	} else if(StringUtil::endsWith(req->getPath(), "/d")) {
 		dbAsync(sif);
@@ -635,9 +628,8 @@ bool TeBkUmLpqAsyncRouter::route(HttpRequest* req, HttpResponse* res, Writer* si
 		std::vector<TeBkUmLpqAsyncWorld> vec;
 		cachedWorlds(params[0].val, params[0].val_len, vec);
 		AsyncReqData* dbreq = (AsyncReqData*)sif->getData();
-		dbreq->reset();
-		TeBkUmLpqAsyncWorld::tmplJson(vec, res->getContentP());
-		res->sendJson(sif);
+		TeBkUmLpqAsyncWorld::tmplJson(vec, dbreq->r.getContentP());
+		dbreq->r.sendJson(sif);
 		sif->unUse();
 	} else {
 		res->sendStatus(HTTPResponseStatus::NotFound, sif);
