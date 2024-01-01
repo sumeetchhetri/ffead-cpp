@@ -59,12 +59,7 @@ void RequestReaderHandler::startNL(unsigned int cid) {
 	}
 }
 
-void RequestReaderHandler::addListenerSocket(doRegisterListener drl, const SOCKET& listenerSock) {
-	if(listenerSock != INVALID_SOCKET) {
-		this->listenerSock = listenerSock;
-	} else {
-		return;
-	}
+SOCKET RequestReaderHandler::addListenerSocket(doRegisterListener drl, const std::string& ipAddress, const int& port, bool isSinglEVH) {
 	if(drl!=NULL) {
 		int counter = 0;
 		while(!drl()) {
@@ -76,7 +71,14 @@ void RequestReaderHandler::addListenerSocket(doRegisterListener drl, const SOCKE
 		}
 		std::cout << "All initializations are now complete...." << std::endl;
 	}
+	SOCKET listenerSock = Server::createListener(ipAddress, port, true, isSinglEVH);
+	if(listenerSock != INVALID_SOCKET) {
+		this->listenerSock = listenerSock;
+	} else {
+		return listenerSock;
+	}
 	selector.addListeningSocket(this->listenerSock);
+	return listenerSock;
 }
 
 void RequestReaderHandler::start(unsigned int cid) {

@@ -319,6 +319,8 @@ fn main() {
 
 	println('Initializing ffead-cpp end...')
 	
+	pv.listen(server_port, is_async)
+	println('Listening on port $server_port ...')
 	pv.serve()
 
 	println('Cleaning up ffead-cpp start...')

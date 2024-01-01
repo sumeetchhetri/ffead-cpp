@@ -73,7 +73,7 @@ public:
 	static RequestHandler2* getInstance();
 	void start(unsigned int cid, bool withWQ);
 	void startNL(unsigned int cid, bool withWQ);
-	void addListenerSocket(doRegisterListener drl, const SOCKET& listenerSock);
+	SOCKET addListenerSocket(doRegisterListener drl, const std::string& ipAddress, const int& port, bool isSinglEVH);
 	void stop(std::string, int, bool);
 	RequestHandler2(ServiceHandler* shi, const bool& isMain, bool isSSLEnabled, httpSockHandle hsh, const SOCKET& listenerSock = INVALID_SOCKET);
 	virtual ~RequestHandler2();

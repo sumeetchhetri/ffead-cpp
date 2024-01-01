@@ -1305,22 +1305,31 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	//struct sockaddr_storage their_addr; // connector's address information
 	//socklen_t sin_size;
-	SOCKET sockfd = Server::createListener(ipaddr, CastUtil::toInt(port), true, isSinglEVH);
+	/*SOCKET sockfd = Server::createListener(ipaddr, CastUtil::toInt(port), true, isSinglEVH);
+	if(sockfd==-1)
+	{
+		logger << "Unable to start the server on the specified ip/port..." << std::endl;
+		return;
+	}*/
+
+	SOCKET sockfd;
+	if(isrHandler1) {
+		RequestReaderHandler* rh = (RequestReaderHandler*)rHandleIns;
+		sockfd = rh->addListenerSocket(&doRegisterListenerFunc, ipaddr, CastUtil::toInt(port), isSinglEVH);
+	} else {
+		RequestHandler2* rh = (RequestHandler2*)rHandleIns;
+		sockfd = rh->addListenerSocket(&doRegisterListenerFunc, ipaddr, CastUtil::toInt(port), isSinglEVH);
+	}
+
 	if(sockfd==-1)
 	{
 		logger << "Unable to start the server on the specified ip/port..." << std::endl;
 		return;
 	}
+
 #if defined(OS_LINUX) && !defined(OS_ANDROID) && !defined(DISABLE_BPF)
 	Server::set_cbpf(sockfd, get_nprocs());
 #endif
-	if(isrHandler1) {
-		RequestReaderHandler* rh = (RequestReaderHandler*)rHandleIns;
-		rh->addListenerSocket(&doRegisterListenerFunc, sockfd);
-	} else {
-		RequestHandler2* rh = (RequestHandler2*)rHandleIns;
-		rh->addListenerSocket(&doRegisterListenerFunc, sockfd);
-	}
 
 	bool enableJobs = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["ENABLE_JOBS"])=="true";
 #ifdef INC_JOBS

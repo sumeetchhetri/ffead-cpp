@@ -66,7 +66,7 @@ public:
 	static RequestReaderHandler* getInstance();
 	void start(unsigned int cid);
 	void startNL(unsigned int cid);
-	void addListenerSocket(doRegisterListener drl, const SOCKET& listenerSock);
+	SOCKET addListenerSocket(doRegisterListener drl, const std::string& ipAddress, const int& port, bool isSinglEVH);
 	void stop(std::string, int, bool);
 	RequestReaderHandler(ServiceHandler* shi, const bool& isMain, bool isSinglEVH, const SOCKET& listenerSock = INVALID_SOCKET);
 	void registerSocketInterfaceFactory(const SocketInterfaceFactory& f);

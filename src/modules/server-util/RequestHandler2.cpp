@@ -70,12 +70,7 @@ void RequestHandler2::startNL(unsigned int cid, bool withWQ) {
 	}
 }
 
-void RequestHandler2::addListenerSocket(doRegisterListener drl, const SOCKET& listenerSock) {
-	if(listenerSock != INVALID_SOCKET) {
-		this->listenerSock = listenerSock;
-	} else {
-		return;
-	}
+SOCKET RequestHandler2::addListenerSocket(doRegisterListener drl, const std::string& ipAddress, const int& port, bool isSinglEVH) {
 	if(drl!=NULL) {
 		int counter = 0;
 		Logger logger = LoggerFactory::getLogger("RequestHandler2");
@@ -88,6 +83,12 @@ void RequestHandler2::addListenerSocket(doRegisterListener drl, const SOCKET& li
 		}
 		std::cout << "All initializations are now complete...." << std::endl;
 	}
+	SOCKET listenerSock = Server::createListener(ipAddress, port, true, isSinglEVH);
+	if(listenerSock != INVALID_SOCKET) {
+		this->listenerSock = listenerSock;
+	} else {
+		return listenerSock;
+	}
 #if !defined(USE_IO_URING) && !defined(USE_PICOEV)
 	acceptor.initialize(listenerSock, -1);
 	//acceptor.addListeningSocket(this->listenerSock);
@@ -96,6 +97,7 @@ void RequestHandler2::addListenerSocket(doRegisterListener drl, const SOCKET& li
 #else
 	selector.addListeningSocket(this->listenerSock);
 #endif
+	return listenerSock;
 }
 
 void RequestHandler2::start(unsigned int cid, bool withWQ) {

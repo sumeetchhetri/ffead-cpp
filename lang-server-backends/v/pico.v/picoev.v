@@ -303,7 +303,7 @@ fn accept_callback_async(loop &C.picoev_loop, fd, events int, cb_arg voidptr) {
 }
 
 __global pv Picoev
-pub fn new(port int, cb voidptr, open_cb voidptr, close_cb voidptr, cb_ext_fd_cb voidptr, is_async bool) &Picoev {
+pub fn (pv Picoev) listen(port int, is_async bool) {
 	fd := C.socket(C.AF_INET, C.SOCK_STREAM, 0)
 	assert fd != -1
 
@@ -331,6 +331,40 @@ pub fn new(port int, cb voidptr, open_cb voidptr, close_cb voidptr, cb_ext_fd_cb
 
 	setup_sock(fd)
 
+	if !is_async {
+		C.picoev_add(pv.loop, fd, C.PICOEV_READ, 0, accept_callback, &pv)
+	} else {
+		C.picoev_add(pv.loop, fd, C.PICOEV_READ, 0, accept_callback_async, &pv)
+	}
+}
+pub fn new(port int, cb voidptr, open_cb voidptr, close_cb voidptr, cb_ext_fd_cb voidptr, is_async bool) &Picoev {
+	/*fd := C.socket(C.AF_INET, C.SOCK_STREAM, 0)
+	assert fd != -1
+
+	flag := 1
+	assert C.setsockopt(fd, C.SOL_SOCKET, C.SO_REUSEADDR, &flag, sizeof(int)) == 0
+	assert C.setsockopt(fd, C.SOL_SOCKET, C.SO_REUSEPORT, &flag, sizeof(int)) == 0
+	$if linux {
+		assert C.setsockopt(fd, C.IPPROTO_TCP, C.TCP_QUICKACK, &flag, sizeof(int)) == 0
+		timeout := 10
+		assert C.setsockopt(fd, C.IPPROTO_TCP, C.TCP_DEFER_ACCEPT, &timeout, sizeof(int)) == 0
+		queue_len := 4096
+		assert C.setsockopt(fd, C.IPPROTO_TCP, C.TCP_FASTOPEN, &queue_len, sizeof(int)) == 0
+	}
+
+	mut addr := C.sockaddr_in{}
+	addr.sin_family = C.AF_INET
+	addr.sin_port = C.htons(port)
+	addr.sin_addr.s_addr = C.htonl(C.INADDR_ANY)
+	size := 16 // sizeof(C.sockaddr_in)
+	bind_res := C.bind(fd, &addr, size)
+	assert bind_res == 0
+
+	listen_res := C.listen(fd, C.SOMAXCONN)
+	assert listen_res == 0
+
+	setup_sock(fd)*/
+
 	C.picoev_init(max_fds)
 	loop := C.picoev_create_loop(max_timeout)
 	if !is_async {
@@ -341,7 +375,7 @@ pub fn new(port int, cb voidptr, open_cb voidptr, close_cb voidptr, cb_ext_fd_cb
 			buf: malloc(max_fds * max_read + 1)
 			out: malloc(max_fds * max_write + 1)
 		}
-		C.picoev_add(loop, fd, C.PICOEV_READ, 0, accept_callback, pv)
+		//C.picoev_add(loop, fd, C.PICOEV_READ, 0, accept_callback, pv)
 		go update_date(mut pv)
 		return pv
 	} else {
@@ -354,7 +388,7 @@ pub fn new(port int, cb voidptr, open_cb voidptr, close_cb voidptr, cb_ext_fd_cb
 			buf: malloc(max_fds * max_read + 1)
 			out: malloc(max_fds * max_write + 1)
 		}
-		C.picoev_add(loop, fd, C.PICOEV_READ, 0, accept_callback_async, pv)
+		//C.picoev_add(loop, fd, C.PICOEV_READ, 0, accept_callback_async, pv)
 		return pv
 	}
 }
