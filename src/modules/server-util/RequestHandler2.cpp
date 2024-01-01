@@ -90,7 +90,7 @@ void RequestHandler2::addListenerSocket(doRegisterListener drl, const SOCKET& li
 	}
 #if !defined(USE_IO_URING) && !defined(USE_PICOEV)
 	acceptor.initialize(listenerSock, -1);
-	acceptor.addListeningSocket(this->listenerSock);
+	//acceptor.addListeningSocket(this->listenerSock);
 	Thread* pthread = new Thread(&handleAcceptor, this);
 	pthread->execute();
 #else
