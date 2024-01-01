@@ -19,11 +19,13 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 
 WORKDIR ${IROOT}
 
-COPY install_ffead-cpp-framework.sh install_ffead-cpp-httpd.sh install_ffead-cpp-nginx.sh server.sh ${IROOT}/
+COPY install_ffead-cpp-dependencies.sh install_ffead-cpp-framework.sh install_post_process.sh server.sh ${IROOT}/
 RUN chmod 755 ${IROOT}/*.sh
-RUN ./install_ffead-cpp-framework.sh && cd ${IROOT}/ffead-cpp-src && make clean && rm -rf CMakeFiles
+RUN ./install_ffead-cpp-dependencies.sh
+RUN ./install_ffead-cpp-framework.sh
+RUN ./install_post_process.sh && cd ${IROOT}/ffead-cpp-src && ninja clean && rm -rf CMakeFiles CMakeCache.txt
 
 COPY run_ffead.sh /
 RUN chmod 755 /run_ffead.sh
 
-RUN apt update -yqq && apt install -yqq gdb net-tools vim
+RUN apt update -yqq && apt --fix-broken -yqq install && apt install -yqq gdb net-tools vim
