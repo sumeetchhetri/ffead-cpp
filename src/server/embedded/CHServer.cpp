@@ -1357,10 +1357,6 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	//printf("server: waiting for connections...\n");
 	logger.write("Server: waiting for connections on %s\n", ipport.c_str());
 
-	//Sleep for some time so as to make sure all the new child processes are set correctly
-	//and all init is complete...
-	sleep(5);
-
 	//Thread* pthread = new Thread(&gracefullShutdown_monitor, &ipport);
 	//pthread->execute();
 

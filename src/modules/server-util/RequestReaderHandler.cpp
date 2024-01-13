@@ -69,8 +69,13 @@ SOCKET RequestReaderHandler::addListenerSocket(doRegisterListener drl, const std
 				break;
 			}
 		}
-		std::cout << "All initializations are now complete...." << std::endl;
 	}
+	
+	//Sleep for some time so as to make sure all the new child processes are set correctly
+	//and all init is complete...
+	sleep(5);
+	std::cout << "All initializations are now complete...." << std::endl;
+
 	SOCKET listenerSock = Server::createListener(ipAddress, port, true, isSinglEVH);
 	if(listenerSock != INVALID_SOCKET) {
 		this->listenerSock = listenerSock;

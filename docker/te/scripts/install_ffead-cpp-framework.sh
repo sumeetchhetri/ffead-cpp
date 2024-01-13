@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#Get the number of threads -
+#Set the number of threads
 MAX_THREADS=$(( 3 * `nproc` / 2 ))
 
 WRIT_THREADS=$(( $MAX_THREADS / 3 ))
