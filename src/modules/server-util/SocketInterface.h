@@ -36,6 +36,8 @@ public:
 typedef void (*CleanerFunc) (void* data);
 typedef void (*SockCloseEvent) (void* data);
 
+enum CT {HTTP, LIBPQ, MONGO};
+
 class BaseSocket: public Writer {
 protected:
 	//static std::atomic<int> openSocks;
@@ -72,7 +74,10 @@ public:
 	BaseSocket();
 	BaseSocket(const SOCKET& fd);
 	virtual ~BaseSocket();
-	int type() {
+	virtual CT connectionType() {
+		return HTTP;
+	}
+	int _type() {
 		return 1;
 	}
 	int readFrom();

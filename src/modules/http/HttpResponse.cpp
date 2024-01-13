@@ -152,7 +152,7 @@ void HttpResponse::init() {
 
 HttpResponse& HttpResponse::sendJson(Writer* wr) {
 	std::tuple<std::string, int, int, std::string, std::string, std::string>& tup = HDR_DATA_BY_CNT["application/json"];
-	switch(wr->type()) {
+	switch(wr->_type()) {
 		case 0: {
 			wr->internalWrite(std::get<3>(tup).data(), std::get<3>(tup).length(), content.data(), content.length());
 			break;
@@ -172,7 +172,7 @@ HttpResponse& HttpResponse::sendJson(Writer* wr) {
 
 HttpResponse& HttpResponse::sendText(Writer* wr) {
 	std::tuple<std::string, int, int, std::string, std::string, std::string>& tup = HDR_DATA_BY_CNT["text/plain"];
-	switch(wr->type()) {
+	switch(wr->_type()) {
 		case 0: {
 			wr->internalWrite(std::get<3>(tup).data(), std::get<3>(tup).length(), content.data(), content.length());
 			break;
@@ -192,7 +192,7 @@ HttpResponse& HttpResponse::sendText(Writer* wr) {
 
 HttpResponse& HttpResponse::sendHtml(Writer* wr) {
 	std::tuple<std::string, int, int, std::string, std::string, std::string>& tup = HDR_DATA_BY_CNT["text/html"];
-	switch(wr->type()) {
+	switch(wr->_type()) {
 		case 0: {
 			wr->internalWrite(std::get<3>(tup).data(), std::get<3>(tup).length(), content.data(), content.length());
 			break;
@@ -211,7 +211,7 @@ HttpResponse& HttpResponse::sendHtml(Writer* wr) {
 }
 
 HttpResponse& HttpResponse::sendStatus(HTTPResponseStatus& status, Writer* wr) {
-	switch(wr->type()) {
+	switch(wr->_type()) {
 		case 0: {
 			content = "";
 			status.getResponseLine(1.1, content);

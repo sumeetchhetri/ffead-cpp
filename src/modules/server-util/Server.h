@@ -231,7 +231,7 @@ public:
 		return -1;
 	}
 	virtual int writeData(void* data)=0;
-	virtual int type() {
+	virtual int _type() {
 		return 0;
 	}
 	/*

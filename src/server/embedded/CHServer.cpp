@@ -1312,6 +1312,14 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		return;
 	}*/
 
+	HTTPResponseStatus::init();
+
+	HttpRequest::init(isLazyHeaderParsing);
+
+	HttpResponse::init();
+
+	MultipartContent::init();
+
 	SOCKET sockfd;
 	if(isrHandler1) {
 		RequestReaderHandler* rh = (RequestReaderHandler*)rHandleIns;
@@ -1355,15 +1363,6 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	//Thread* pthread = new Thread(&gracefullShutdown_monitor, &ipport);
 	//pthread->execute();
-
-
-	HTTPResponseStatus::init();
-
-	HttpRequest::init(isLazyHeaderParsing);
-
-	HttpResponse::init();
-
-	MultipartContent::init();
 
 	int counter = 0;
 	struct stat buffer;
@@ -1482,6 +1481,7 @@ BaseSocket* CHServer::createSocketInterface(SOCKET fd) {
 }
 
 void CHServer::clearSocketInterface(BaseSocket* bs) {
+	if(bs->connectionType()!=HTTP) return;
 	if(!isrHandler1) {
 		delete (Http11Socket*)bs;
 	} else {

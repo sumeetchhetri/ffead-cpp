@@ -135,9 +135,10 @@ typedef void (*LipqCbFunc6) (void** ctx, int row, int col, char* value);
 typedef void (*LipqCbFunc7) (void** ctx, int row, FpgIter* iter);
 
 
-
+class LibpqAsyncReq;
 class LibpqQuery {
 	std::list<LibpqParam> pvals;
+	LibpqAsyncReq* a_;
 	bool isPrepared;
 	bool prepared;
 	bool isSelect;
@@ -260,6 +261,7 @@ class LibpqAsyncReq {
 	LipqCbFuncF fcb;
 	LipqCbFuncF0 fcb1;
 	void* ctx[5];
+	int qC;
 	bool processed;
 #ifdef HAVE_LIBPQ
 	std::vector<PGresult*> results;
@@ -360,6 +362,7 @@ class FpgWireRow {
 class FpgWire;
 class FpgWire : public PgReadTask, public BaseSocket, public FpgIter {
     int pos;
+	std::atomic<int> nQ;
     std::string upmd5;
     std::string password;
     char state;
@@ -399,7 +402,7 @@ class FpgWire : public PgReadTask, public BaseSocket, public FpgIter {
     bool sendExecute(LibpqQuery& q, std::string& sbuff);
     bool sendParse(LibpqQuery& q, std::string& sbuff);
     bool sendBind(LibpqQuery& q, std::string& sbuff);
-	void checkUnderFlowAndRead(int);
+	bool isMessageReady(int& ml);
 	std::string_view next();
 	friend class LibpqDataSourceImpl;
 protected:
@@ -444,6 +447,9 @@ class LibpqDataSourceImpl : public DataSourceType, public SocketInterface {
 	friend class FpgWire;
 	//friend class PgWireReadTask;
 public:
+	CT connectionType() {
+		return LIBPQ;
+	}
 	DSType getType();
 	LibpqDataSourceImpl(const ConnectionNode&, const ConnectionProperties&);
 	virtual ~LibpqDataSourceImpl();

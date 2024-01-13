@@ -1715,6 +1715,8 @@ LibpqQuery& LibpqQuery::withPrepared() {
 LibpqQuery* LibpqAsyncReq::getQuery() {
 	LibpqQuery& query = q.emplace_back();
 	query.pos = q.size();
+	query.a_ = this;
+	query.a_->qC++;
 	//LibpqQuery& query = q.back();
 	return &query;
 }
@@ -1745,6 +1747,7 @@ LibpqAsyncReq::LibpqAsyncReq() {
 	fcb = NULL;
 	fcb1 = NULL;
 	processed = false;
+	qC = 0;
 }
 
 LibpqAsyncReq& LibpqAsyncReq::withContext(void* ctx, void* ctx1, void* ctx2, void* ctx3, void* ctx4) {
@@ -1837,6 +1840,7 @@ LibpqParamsBase* LibpqDataSourceImpl::getParams(int size) {
 
 
 FpgWire::FpgWire(SocketInterface* sif, bool isAsync): PgReadTask(sif), pos(0), state('0'), pstat(false), bstat(false), rowNum(-1), querystatus(0) {
+	this->nQ = 0;
 	this->isAsync = isAsync;
 }
 bool FpgWire::connect(std::string url, bool isAsync, bool isAutoCommitMode) {
@@ -1870,6 +1874,17 @@ bool FpgWire::connect(std::string host, int port, bool isAsync, std::string data
 	upmd5 = CryptoHandler::md5((unsigned char*)rp.data(), (unsigned int)rp.size());
 	fd = Client::conn(host, port);
 	if(fd==-1) return false;
+	if(!isAsync) {
+#if defined(CYGWIN) || defined(MINGW)
+	DWORD timeout = 1 * 1000;
+	setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof timeout);
+#else
+	struct timeval tv;
+	tv.tv_sec = 1;
+	tv.tv_usec = 0;
+	setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+#endif
+	}
 	this->password = password;
 	this->isAsync = isAsync;
 	return sendStart(user, database);
@@ -1917,15 +1932,19 @@ std::vector<FpgWireRow>& FpgWire::selectQuery(LibpqQuery& q) {
 	return rows;
 }
 bool FpgWire::handleSync() {
-	if(readSync()==0) {
+	int ret = readSync();
+	if(ret==0) {
 		return true;
 	}
 	
-	while(buffer.length()>0) {
+	while(buffer.length()>pos+1) {
 		handleResponse();
-		buffer = buffer.substr(pos);
-		pos = 0;
+		//buffer = buffer.substr(pos);
+		//pos = 0;
 	}
+
+	buffer = buffer.substr(pos);
+	pos = 0;
 	
 	if(isClosed()) {
 		return true;
@@ -1935,40 +1954,37 @@ bool FpgWire::handleSync() {
 	return false;
 }
 
-void FpgWire::checkUnderFlowAndRead(int len) {
-	/*if(len<=0 || len>100000) {
-		std::cout << "ERR" <<std::endl;
-	}*/
-	if((pos+len)>buffer.length()) {
-		readFrom();
-		//std::cout << "read from socket " << pos << " " << len << " " << buffer.length() << std::endl;
+bool FpgWire::isMessageReady(int& ml) {
+	if((pos+4)<=buffer.length()) {
+		ml = readInt32();
+		if((pos+ml-4)<=buffer.length()) {
+			return true;
+		}
+		pos -= 4;
 	}
+	pos--;
+	return false;
 }
 
 int FpgWire::readInt32() {
-	checkUnderFlowAndRead(4);
 	int irv =(int)CommonUtils::btn(&buffer[pos], 4);
 	pos += 4;
 	return irv;
 }
 int FpgWire::readInt16() {
-	checkUnderFlowAndRead(2);
 	int irv =(int)CommonUtils::btn(&buffer[pos], 2);
 	pos += 2;
 	return irv;
 }
 char FpgWire::readChar() {
-	checkUnderFlowAndRead(1);
 	pos++;
 	return (char)buffer[pos-1];
 }
 std::string FpgWire::readString(int ml) {
-	checkUnderFlowAndRead(ml);
 	pos += ml;
 	return buffer.substr(pos-ml, ml);
 }
 std::string FpgWire::readString() {
-	checkUnderFlowAndRead(1);
 	size_t npos = buffer.find('\0', pos);
 	if(npos==std::string::npos) {
 		return "";
@@ -1998,12 +2014,12 @@ void FpgWire::writeInt16(int num, std::string& sendBuf) {
 	CommonUtils::ntb(sendBuf, num, 2);
 }
 void FpgWire::writeChar(char num, std::string& sendBuf) {
-		sendBuf.push_back(num);
+	sendBuf.push_back(num);
 }
 std::string_view FpgWire::next() {
 	int length = readInt32();
 	pos += length;
-	//if(pos>10000 || pos<0) std::cout << "next()" << pos << std::endl;
+	//if(pos<0) std::cout << "next()" << pos << " " << length << std::endl;
 	std::string_view a = std::string_view(&buffer[pos-length], (size_t)length);
 	return a;
 }
@@ -2016,6 +2032,7 @@ int FpgWire::handleResponse() {
 	//std::cout << buffer[pos] << std::endl;
 	int cd = 0;
 	char cmd = buffer[pos++];
+	int ml = 0;
 	switch(cmd) {
 		case FpgRes::AuthenticationOk: {
 			readInt32();
@@ -2067,16 +2084,20 @@ int FpgWire::handleResponse() {
 			break;
 		}
 		case FpgRes::ErrorResponse: {
-			int ml = readInt32();
+			if(!isMessageReady(ml)) {
+				return -1;
+			}
 			err = readString(ml-4);
 			std::cout << "error received = " << err << std::endl;
 			querystatus = -1;
-			cd = -1;
+			cd = 1;
 			state = 'I';
 			break;
 		}
 		case FpgRes::ParameterStatus: {
-			int ml = readInt32();
+			if(!isMessageReady(ml)) {
+				return -1;
+			}
 			std::string pvstr = readString(ml-4);
 			std::string nc;
 			nc.push_back('\0');
@@ -2085,7 +2106,9 @@ int FpgWire::handleResponse() {
 			break;
 		}
 		case FpgRes::BackendKeyData: {
-			readInt32();
+			if(!isMessageReady(ml)) {
+				return -1;
+			}
 			int pi = readInt32();
 			int sec = readInt32();
 			//std::cout << "Cancellation Key Data , process and secret are " << pi << "," << sec << std::endl;
@@ -2093,7 +2116,9 @@ int FpgWire::handleResponse() {
 		}
 		case FpgRes::ReadyForQuery: {
 			//std::cout << "ReadyForQuery" << std::endl;
-			readInt32();
+			if(!isMessageReady(ml)) {
+				return -1;
+			}
 			state = readChar();//I - Idle, T - In Trx, E - In Failed Trx, Q - In Query(custom)
 			break;
 		}
@@ -2101,7 +2126,9 @@ int FpgWire::handleResponse() {
 			currentMD.clear();
 			rows.clear();
 			rowNum = -1;
-			int ml = readInt32();
+			if(!isMessageReady(ml)) {
+				return -1;
+			}
 			int cc = readInt16();
 			for(int i=0;i<cc;++i) {
 				FpgWireColumnMD& c = currentMD[i];
@@ -2117,7 +2144,9 @@ int FpgWire::handleResponse() {
 		}
 		case FpgRes::DataRow: {
 			//std::cout << "DataRow" << std::endl;
-			int ml = readInt32();
+			if(!isMessageReady(ml)) {
+				return -1;
+			}
 			int cols = readInt16();
 			/*if(isAsync) {
 				rowNum++;
@@ -2205,7 +2234,9 @@ int FpgWire::handleResponse() {
 		}
 		case FpgRes::CommandComplete: {
 			//std::cout << "CommandComplete" << std::endl;
-			int ml = readInt32();
+			if(!isMessageReady(ml)) {
+				return -1;
+			}
 			readString(ml-4);
 			querystatus = 3;
 			state = 'I';
@@ -2213,7 +2244,9 @@ int FpgWire::handleResponse() {
 			break;
 		}
 		case FpgRes::PortalSuspended: {
-			int ml = readInt32();
+			if(!isMessageReady(ml)) {
+				return -1;
+			}
 			readString(ml-4);
 			querystatus = 4;
 			cd = 4;
@@ -2221,26 +2254,34 @@ int FpgWire::handleResponse() {
 			break;
 		}
 		case FpgRes::EmptyQueryResponse: {
-			readInt32();
+			if(!isMessageReady(ml)) {
+				return -1;
+			}
 			querystatus = 2;
 			cd = 2;
 			state = 'I';
 			break;
 		}
 		case FpgRes::NoticeResponse: {
-			int ml = readInt32();
+			if(!isMessageReady(ml)) {
+				return -1;
+			}
 			readString(ml-4);
 			break;
 		}
 		case FpgRes::NotificationResponse: {
-			readInt32();
+			if(!isMessageReady(ml)) {
+				return -1;
+			}
 			readInt32();
 			readString();
 			readString();
 			break;
 		}
 		case FpgRes::ParseComplete: {
-			readInt32();
+			if(!isMessageReady(ml)) {
+				return -1;
+			}
 			pstat = true;
 			if(q!=NULL) {
 				q->prepared = true;
@@ -2249,7 +2290,9 @@ int FpgWire::handleResponse() {
 		}
 		case FpgRes::BindComplete: {
 			//std::cout << "BindComplete" << std::endl;
-			readInt32();
+			if(!isMessageReady(ml)) {
+				return -1;
+			}
 			bstat = true;
 			break;
 		}
@@ -2489,13 +2532,15 @@ bool FpgWire::sendBind(LibpqQuery& q, std::string& sbuff) {
 }
 
 void FpgWire::run() {
-	if(readFrom()==0) {
+	int ret = readFrom();
+	if(ret==0) {
 		return;
 	}
 
 	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)this->sif;
 	auto fn = [this](LibpqDataSourceImpl* ths, int cd) {
-		if(ritem!=NULL && cd==-1) {
+		if(ritem!=NULL && cd==1) {
+			nQ -= ritem->qC;
 			fprintf(stderr, "Query failed: %s\n", err.c_str());
 			if(ritem->fcb1!=NULL) {
 				ritem->fcb1(ritem->ctx, false, q->query, q->pos);
@@ -2506,6 +2551,7 @@ void FpgWire::run() {
 			ths->pop();
 			flux = false;
 		} else if(ritem!=NULL && (cd==2 || cd==3)) {
+			nQ--;
 			if(ritem->q.size()==1) {
 				if(q->isMulti) {
 					q->mulQCnt--;
@@ -2533,14 +2579,15 @@ void FpgWire::run() {
 		}
 	};
 	
-	while(buffer.length()>0) {
+	//std::cout << pos << " read data " << buffer.length() << std::endl;
+	while(buffer.length()>pos+1) {
 		ritem = ths->peek();
 		if(ritem!=NULL) {
 			q = ritem->peek();
 		}
 
 		int cd = handleResponse();
-		if(cd!=0) fn(ths, cd);
+		if(cd>0) fn(ths, cd);
 		if(isClosed()) {
 			//handle all pending queries and notify them about connection closure
 			for(int i=0;i<ths->Q.size();i++) {
@@ -2552,37 +2599,52 @@ void FpgWire::run() {
 					nitem->fcb1(nitem->ctx, false, "", -1);
 				}
 			}
+			submit(NULL);
 			return;
 		}
-		if(pos>buffer.length()) {
-			return;
+		if(cd==-1) {
+			break;
+		} else if(pos+1>=buffer.length()) {
+			//std::cout << pos << " " << buffer.length() << std::endl;
+			break;
 		}
+	}
+
+	if(pos<buffer.length()) {
 		buffer = buffer.substr(pos);
+		pos = 0;
+	} else if(pos==buffer.length()) {
+		buffer.clear();
 		pos = 0;
 	}
 	
 	if(isClosed()) {
+		submit(NULL);
 		return;
 	} else {
 		doneRead();
 	}
 
-	//if(querystatus==2) {
-		submit(NULL);
-	//}
+	submit(NULL);
 }
 void FpgWire::submit(LibpqAsyncReq* _nitem) {
+	//std::cout << "pending - " << nQ << " " << buffer.length() << std::endl;
+	if(nQ>=100) {
+		return;
+	}
 	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)this->sif;
 
 	std::vector<int> remove;
+	ResponseData rd;
+	int sQ = 0;
 	for(int i=0;i<ths->Q.size();i++) {
 		LibpqAsyncReq* nitem = &(ths->Q.at(i));
 		if(!nitem->processed) {
-			ResponseData rd;
 			for (int j=0;j<nitem->q.size();j++) {
 				LibpqQuery* q = &(nitem->q.at(j));
 
 				if(ths->isPipelined && q->isMulti) {
+					nQ += q->isMulti?q->mulQCnt:1;
 					fprintf(stderr, "Multi query not allowed in pipeline mode...");
 					if(nitem->fcb1!=NULL) {
 						nitem->fcb1(nitem->ctx, false, q->query, q->pos);
@@ -2592,13 +2654,33 @@ void FpgWire::submit(LibpqAsyncReq* _nitem) {
 				}
 
 				if(q->isMulti || (!ths->isPipelined && q->isTrx) || !q->isPrepared) {
+					nQ += q->isMulti?q->mulQCnt:1;
+					sQ += q->isMulti?q->mulQCnt:1;
 					query(q->query, rd);
 				} else {
 					preparedQuery(*q, rd);
+					nQ++;
+					sQ++;
 				}
+				//std::cout << "Query--" << std::endl;
+
+				/*if(rd._b.length()>=7552) {
+					ths->writeTo(&rd);
+					rd.oft = 0;
+					rd._b.clear();
+				}*/
 			}
-			ths->writeTo(&rd);
 			nitem->processed = true;
+			if(sQ>100) {
+				//std::cout << "send - " << sQ << std::endl;
+				break;
+			}
+		}
+	}
+	if(sQ>0) {
+		int ret = ths->writeTo(&rd);
+		if(ret==-1) {
+			std::cout << "send more " << std::endl;
 		}
 	}
 	for(int i=0;i<remove.size();i++) {

@@ -545,11 +545,17 @@ int BaseSocket::readSync()
 	if(!isSecure()) {
 		int er = 0;
 		do {
+			/*#if defined(MINGW) || defined(MINGW)
+			unsigned long l;
+			ioctlsocket(fd, FIONREAD, &l);
+			er = recv(fd, buff, l, 0);
+			#else*/
 			er = recv(fd, buff, 8192, 0);
+			//#endif
 			switch(er) {
 				case -1:
 				case 0:
-					if (er == -1 && errno == EAGAIN) {
+					if (errno == EAGAIN || errno == EWOULDBLOCK) {
 						return -1;
 					} else {
 #if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL)

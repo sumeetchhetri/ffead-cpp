@@ -1,0 +1,26 @@
+name: Verify for TE
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+# This is what will cancel the workflow
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: "contains(github.event.head_commit.message, '[docker_verify]')"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Verify tfb
+      run: |
+        git clone https://github.com/TechEmpower/FrameworkBenchmarks
+        cd docker/all/
+        cp -rf benchmark_config.json lang/*.dockerfile base/*.dockerfile scripts/*.sh *.sh *.dockerfile ../../FrameworkBenchmarks/frameworks/C++/ffead-cpp/
+        cd ../../FrameworkBenchmarks
+        ./tfb --mode verify --test-dir C++/ffead-cpp
