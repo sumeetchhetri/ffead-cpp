@@ -1366,10 +1366,11 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	int counter = 0;
 	struct stat buffer;
+	CommonUtils::setDate();
 	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 	{
-		CommonUtils::setDate();
 		Thread::sSleep(1);
+		CommonUtils::setDate();
 		if(counter++>=5) {
 			handler->closeConnectionsInternal();
 			counter = 0;

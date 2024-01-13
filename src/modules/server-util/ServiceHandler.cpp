@@ -54,9 +54,10 @@ void ServiceHandler::closeConnectionsInternal() {
 void* ServiceHandler::closeConnections(void *arg) {
 	ServiceHandler* ths = (ServiceHandler*)arg;
 	int counter = 0;
+	CommonUtils::setDate();
 	while(ths->run) {
-		CommonUtils::setDate();
 		Thread::sSleep(1);
+		CommonUtils::setDate();
 		if(counter++>=5) {
 			ths->closeConnectionsInternal();
 			counter = 0;
