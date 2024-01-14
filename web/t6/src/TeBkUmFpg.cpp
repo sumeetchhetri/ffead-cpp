@@ -193,7 +193,7 @@ void TeBkUmFpgRouter::queriesMulti(const char* q, int ql, std::vector<TeBkUmFpgW
 	LibpqDataSourceImpl* sqli = getDb();
 	std::string& query = getMultiQuery(queryCount);
 	LibpqQuery qu;
-	qu.withSelectQuery(query).withContext(&wlst).withCb5([](void** ctx, int rn, int cn, char * d, int l) {
+	qu.withSelectQuery(query).withMulti(queryCount).withContext(&wlst).withCb5([](void** ctx, int rn, int cn, char * d, int l) {
 		std::vector<TeBkUmFpgWorld>* wlst = (std::vector<TeBkUmFpgWorld>*)ctx[0];
 		int tmp = 0;
 		CommonUtils::naiveStrToNum(d, l, tmp);
@@ -296,7 +296,7 @@ void TeBkUmFpgRouter::updatesMulti(const char* q, int ql, std::vector<TeBkUmFpgW
 
 	LibpqQuery qu;
 #ifdef HAVE_LIBPQ
-	qu.withSelectQuery(ssq.str()).withContext(&updt).withCb5([](void** ctx, int rn, int cn, char * d, int l) {
+	qu.withSelectQuery(ssq.str()).withMulti(queryCount).withContext(&updt).withCb5([](void** ctx, int rn, int cn, char * d, int l) {
 		t6::UpdQrData* updt = (t6::UpdQrData*)ctx[0];
 		int tmp = 0;
 		CommonUtils::naiveStrToNum(d, l, tmp);
@@ -337,7 +337,7 @@ void TeBkUmFpgRouter::updatesMulti(const char* q, int ql, std::vector<TeBkUmFpgW
 	updt.ss << ");commit;";
 
 	qu.reset();
-	qu.withUpdateQuery(updt.ss.str());
+	qu.withUpdateQuery(updt.ss.str()).withMulti(3);//begin-query-commit
 	sqli->executeUpdateMultiQuery(&qu);
 }
 
