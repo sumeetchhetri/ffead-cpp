@@ -33,7 +33,7 @@ MongoDBConnectionPool::MongoDBConnectionPool() {
 }
 
 MongoDBConnectionPool::MongoDBConnectionPool(const ConnectionProperties& props) {
-	logger = LoggerFactory::getLogger("SQLConnectionPool");
+	logger = LoggerFactory::getLogger("MongoDBConnectionPool");
 	std::map<std::string, std::string> mp = props.getProperties();
 	isReplicaSet = StringUtil::toLowerCopy(mp["isReplicaSet"])=="true";
 	isSSL = StringUtil::toLowerCopy(mp["isSSL"])=="true";

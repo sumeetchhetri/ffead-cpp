@@ -113,7 +113,7 @@ impl Default for FfeadResponse {
 extern "C" {
     pub fn ffead_cpp_bootstrap(srv: *const c_char, srv_len: size_t, server_type: c_int);
     pub fn ffead_cpp_init();
-	pub fn ffead_cpp_is_inited() -> bool;
+	pub fn ffead_cpp_is_inited() -> c_int;
     pub fn ffead_cpp_cleanup();
     pub fn ffead_cpp_handle_rust_1(ffead_request: *const ffead_request, status_code: *mut c_int,
         out_url: *mut *const c_char, out_url_len: *mut size_t, out_headers: *mut phr_header, out_headers_len: *mut c_int, 

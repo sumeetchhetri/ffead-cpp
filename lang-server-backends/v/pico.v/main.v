@@ -28,7 +28,7 @@ import flag
 fn C.ffead_cpp_bootstrap(byteptr, u64, int)
 //no args
 fn C.ffead_cpp_init()
-fn C.ffead_cpp_is_inited() bool
+fn C.ffead_cpp_is_inited() int
 type Cb_into_pv = fn (hline byteptr, hline_len u64, body byteptr, body_len u64, fd int, pv voidptr) int
 type Cb_into_pv_for_date = fn ()
 type Cb_reg_ext_fd_pv = fn (int, voidptr)
@@ -311,7 +311,7 @@ fn main() {
 	if is_async {
 		for {
 			C.usleep(1000000)
-			if C.ffead_cpp_is_inited() {
+			if C.ffead_cpp_is_inited() == 1 {
 				break
 			}
 		}

@@ -42,7 +42,7 @@ typedef struct ffead_request {
 extern void ffead_cpp_resp_cleanup(void* ptr);
 extern void ffead_cpp_bootstrap(const char* srv, size_t srv_len, int type);
 extern void ffead_cpp_init();
-extern bool ffead_cpp_is_inited();
+extern int ffead_cpp_is_inited();
 extern void ffead_cpp_cleanup();
 extern void* ffead_cpp_handle_c_1(const ffead_request *request, int* scode, const char** smsg, size_t *smsg_len,
 		const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,

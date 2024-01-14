@@ -33,7 +33,7 @@ public class FfeadCppInterface {
 	public static interface FfeadCppFrameworkLib {
 		void ffead_cpp_bootstrap(@In String srv, @In @size_t long srv_len, @In int type);
 		void ffead_cpp_init();
-		boolean ffead_cpp_is_inited();
+		int ffead_cpp_is_inited();
 		void ffead_cpp_cleanup();
 		Pointer ffead_cpp_handle_java(@Out Pointer scode, @Out PointerByReference out_url, @Out Pointer out_url_len, 
 			@Out PointerByReference out_mime, @Out Pointer out_mime_len, 

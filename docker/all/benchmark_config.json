@@ -49,6 +49,30 @@
 			"versus": "",
 			"tags": []
 		},
+		"postgresql": {
+			"json_url": "/t1/j",
+			"plaintext_url": "/plaintext",
+			"db_url": "/t1/d",
+			"query_url": "/t1/quer?queries=",
+			"fortune_url": "/t1/fortu",
+			"update_url": "/t1/updt?queries=",
+			"cached_query_url": "/t1/cached-wld?count=",
+			"port": 8080,
+			"approach": "Realistic",
+			"classification": "Fullstack",
+			"database": "postgresql",
+			"framework": "ffead-cpp",
+			"language": "C++",
+			"orm": "Full",
+			"platform": "None",
+			"webserver": "ffead-cpp",
+			"os": "Linux",
+			"database_os": "Linux",
+			"display_name": "ffead-cpp-postgresql",
+			"notes": "postgresql redis",
+			"versus": "",
+			"tags": []
+		},
 		"libreactor": {
 			"json_url": "/t1/j",
 			"plaintext_url": "/plaintext",
@@ -431,7 +455,7 @@
 			"display_name": "ffead-cpp-rust-rocket",
 			"notes": "",
 			"versus": "",
-			"tags": []
+			"tags": ["broken"]
 		},
 		"v-picov": {
 			"json_url": "/t3/j",

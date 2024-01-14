@@ -1,4 +1,4 @@
-name: Verify for TE
+name: Verify All Lang Tests
 
 on:
   push:

@@ -36,8 +36,8 @@ void ffead_cpp_init_for_pv(cb_reg_ext_fd_pv pvregfd, cb_into_pv cb, cb_into_pv_f
     ServerInitUtil::initIB(pvregfd, cb, cdt);
 }
 
-bool ffead_cpp_is_inited() {
-	return ServerInitUtil::isInited();
+int ffead_cpp_is_inited() {
+	return ServerInitUtil::isInited()?1:0;
 }
 
 /*

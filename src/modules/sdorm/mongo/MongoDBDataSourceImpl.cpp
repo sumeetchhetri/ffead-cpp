@@ -297,8 +297,11 @@ void MongoDBDataSourceImpl::populateQueryComponents(QueryComponent* sq)
 				}
 			}
 		}
-		if(andChildQs.size()>0 || orChildQs.size()>0)
-		{
+		if(andChildQs.size()==1) {
+			sq->actualQuery = andChildQs.at(0);
+		} else if(orChildQs.size()==1) {
+			sq->actualQuery = orChildQs.at(0);
+		} else if(andChildQs.size()>0 || orChildQs.size()>0) {
 			bson_t* dbo = bson_new();
 			if(andChildQs.size()>0)
 			{
