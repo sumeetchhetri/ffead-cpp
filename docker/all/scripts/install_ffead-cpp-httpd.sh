@@ -55,18 +55,18 @@ EOL'
 #</IfModule>
 #EOL'
 
-bash -c 'cat > /etc/apache2/mods-enabled/mpm_worker.conf <<EOL
-<IfModule mpm_worker_module>
-    ServerLimit              250
-    StartServers              10
-    MinSpareThreads           75
-    MaxSpareThreads          250 
-    ThreadLimit               64
-    ThreadsPerChild           32
-    MaxRequestWorkers       8000
-    MaxConnectionsPerChild 10000
-</IfModule>
-EOL'
+#bash -c 'cat > /etc/apache2/mods-enabled/mpm_worker.conf <<EOL
+#<IfModule mpm_worker_module>
+#    ServerLimit              250
+#    StartServers              10
+#    MinSpareThreads           75
+#    MaxSpareThreads          250 
+#    ThreadLimit               64
+#    ThreadsPerChild           32
+#    MaxRequestWorkers       8000
+#    MaxConnectionsPerChild 10000
+#</IfModule>
+#EOL'
 
 mv /etc/apache2/sites-enabled/000-default.conf /etc/apache2/sites-enabled/ffead-site.conf
 bash -c 'cat > /etc/apache2/sites-enabled/ffead-site.conf <<EOL

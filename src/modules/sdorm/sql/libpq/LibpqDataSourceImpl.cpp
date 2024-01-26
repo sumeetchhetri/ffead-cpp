@@ -2125,7 +2125,7 @@ int FpgWire::handleResponse() {
 		case FpgRes::RowDescription: {
 			currentMD.clear();
 			rows.clear();
-			rowNum = -1;
+			rowNum = 0;
 			if(!isMessageReady(ml)) {
 				return -1;
 			}
@@ -2178,43 +2178,49 @@ int FpgWire::handleResponse() {
 					case 1: {
 						for (int j = 0; j < cols; ++j) {
 							int length = readInt32();
-							q->cb1(q->ctx, false, rowNum++, j, (char*)currentMD[j].name.c_str(), (char*)readString(length).c_str(), length);
+							q->cb1(q->ctx, false, rowNum, j, (char*)currentMD[j].name.c_str(), (char*)readString(length).c_str(), length);
 						}
+						rowNum++;
 						break;
 					}
 					case 2: {
 						for (int j = 0; j < cols; ++j) {
 							int length = readInt32();
-							q->cb2(q->ctx, false, rowNum++, j, (char*)readString(length).c_str(), length);
+							q->cb2(q->ctx, false, rowNum, j, (char*)readString(length).c_str(), length);
 						}
+						rowNum++;
 						break;
 					}
 					case 3: {
 						for (int j = 0; j < cols; ++j) {
 							int length = readInt32();
-							q->cb3(q->ctx, false, rowNum++, j, (char*)readString(length).c_str());
+							q->cb3(q->ctx, false, rowNum, j, (char*)readString(length).c_str());
 						}
+						rowNum++;
 						break;
 					}
 					case 4: {
 						for (int j = 0; j < cols; ++j) {
 							int length = readInt32();
-							q->cb4(q->ctx, rowNum++, j, (char*)currentMD[j].name.c_str(), (char*)readString(length).c_str(), length);
+							q->cb4(q->ctx, rowNum, j, (char*)currentMD[j].name.c_str(), (char*)readString(length).c_str(), length);
 						}
+						rowNum++;
 						break;
 					}
 					case 5: {
 						for (int j = 0; j < cols; ++j) {
 							int length = readInt32();
-							q->cb5(q->ctx, rowNum++, j, (char*)readString(length).c_str(), length);
+							q->cb5(q->ctx, rowNum, j, (char*)readString(length).c_str(), length);
 						}
+						rowNum++;
 						break;
 					}
 					case 6: {
 						for (int j = 0; j < cols; ++j) {
 							int length = readInt32();
-							q->cb6(q->ctx, rowNum++, j, (char*)readString(length).c_str());
+							q->cb6(q->ctx, rowNum, j, (char*)readString(length).c_str());
 						}
+						rowNum++;
 						break;
 					}
 					default: {

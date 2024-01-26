@@ -20,10 +20,10 @@ require "./ffead-cpp-lib"
 
 class HttpServerFfeadCppCry
     @[ThreadLocal]
-    @fresponse: Pointer(Void)
+    @fresponse : Pointer(Void)
     @ffead_cpp_directory = "/root/ffead-cpp-7.0"
     @port = 8080
-    @server: HTTP::Server
+    @server : HTTP::Server
 
     def initialize
         @fresponse = Pointer(Void).null

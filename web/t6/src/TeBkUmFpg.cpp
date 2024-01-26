@@ -353,6 +353,9 @@ void TeBkUmFpgRouter::updateCache() {
 		CommonUtils::naiveStrToNum(value, vlen, tmp);
 		if(cn==0) wlst->emplace_back(tmp);
 		else wlst->back().setRandomNumber(tmp);
+		if(row%500==0 || row==9999) {
+			fprintf(stderr, "rows = %d\n", row);
+		}
 	});
 	sqli->executeQuery(&q);
 

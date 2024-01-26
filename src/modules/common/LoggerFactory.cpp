@@ -131,6 +131,7 @@ void LoggerFactory::init(const std::string& configFile, const std::string& serve
 				std::string name = StringUtil::toUpperCopy(ele->getAttribute("name"));
 				std::string mode = StringUtil::toUpperCopy(ele->getAttribute("mode"));
 				std::string level = StringUtil::toUpperCopy(ele->getAttribute("level"));
+				std::string inverted = StringUtil::toUpperCopy(ele->getAttribute("inverted"));
 				std::string dfstr = "%d/%m/%Y %H:%M:%S";
 				if(ele->getAttribute("dateformat")!="") {
 					dfstr = ele->getAttribute("dateformat");
@@ -260,7 +261,10 @@ void LoggerFactory::init(const std::string& configFile, const std::string& serve
 				}
 				else
 				{
-					config->out = &std::cout;
+					config->out = StringUtil::trimCopy(StringUtil::toLowerCopy(inverted))!="true"?&std::cout:&std::cerr;
+					if(StringUtil::trimCopy(StringUtil::toLowerCopy(inverted))=="true") {
+						*config->out << "\033[0;31m";
+					}
 				}
 				config->lock->unlock();
 				instance->configs[loggerName] = config;

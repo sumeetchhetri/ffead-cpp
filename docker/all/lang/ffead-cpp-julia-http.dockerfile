@@ -11,12 +11,14 @@ RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/li
 	ldconfig
 
 WORKDIR ${IROOT}
-#RUN apt-get update -y && apt-get install -y --no-install-recommends julia
-RUN wget --no-check-certificate -q https://julialang-s3.julialang.org/bin/linux/x64/1.5/julia-1.5.2-linux-x86_64.tar.gz
-RUN tar -xzf julia-1.5.2-linux-x86_64.tar.gz
-RUN mv julia-1.5.2 /opt/
-RUN rm -f julia-1.5.2-linux-x86_64.tar.gz
-ENV PATH="/opt/julia-1.5.2/bin:${PATH}"
+#RUN wget --no-check-certificate -q https://julialang-s3.julialang.org/bin/linux/x64/1.5/julia-1.5.2-linux-x86_64.tar.gz
+#RUN tar -xzf julia-1.5.2-linux-x86_64.tar.gz
+#RUN mv julia-1.5.2 /opt/
+#RUN rm -f julia-1.5.2-linux-x86_64.tar.gz
+#ENV PATH="/opt/julia-1.5.2/bin:${PATH}"
+RUN curl -fsSL https://install.julialang.org | sh -s -- -y --default-channel release
+ENV PATH="/root/.juliaup/bin:${PATH}"
+RUN juliaup default release
 
 RUN julia -e 'import Pkg; Pkg.update()' && \
     julia -e 'import Pkg; Pkg.add("HTTP")' && \
@@ -24,4 +26,6 @@ RUN julia -e 'import Pkg; Pkg.update()' && \
 
 WORKDIR /
 
+RUN rm -f /root/.julia/juliaup/julia-1.10.0+0.x64.linux.gnu/lib/julia/libcurl.*
+RUN cp /usr/lib/x86_64-linux-gnu/libcurl.so* /root/.julia/juliaup/julia-1.10.0+0.x64.linux.gnu/lib/julia/
 CMD ./run_ffead.sh ffead-cpp-7.0 julia-http

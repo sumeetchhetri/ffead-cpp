@@ -113,6 +113,8 @@ cmake -DSRV_ALL=on -DCINATRA_INCLUDES=${IROOT}/cinatra/include -DMOD_APACHE=on -
 cp resources/sample-odbcinst.ini ${IROOT}/odbcinst.ini
 cp resources/sample-odbc.ini ${IROOT}/odbc.ini
 
+sed -i 's|127.0.0.1|tfb-database|g' ${IROOT}/odbcinst.ini
+
 #Start building for mongodb as the World model is different for SQL use case
 cd ${IROOT}/ffead-cpp-src/
 cp -f web/t1/sql-src/TeBkUmWorldmongo.h web/t1/include/TeBkUmWorld.h

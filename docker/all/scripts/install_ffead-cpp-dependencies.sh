@@ -1,10 +1,14 @@
 #!/bin/bash
 
 apt update -yqq && apt install --no-install-recommends -yqq autoconf-archive unzip uuid-dev odbc-postgresql unixodbc unixodbc-dev \
-	apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev \
+	apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev lsb-release gnupg \
 	zlib1g-dev cmake make clang-format ninja-build libcurl4-openssl-dev git libpq-dev libpugixml-dev \
 	wget build-essential pkg-config libpcre3-dev curl libgtk2.0-dev libgdk-pixbuf2.0-dev bison flex libreadline-dev
 apt-get install --reinstall ca-certificates
+
+wget -q https://repo.mysql.com/apt/ubuntu/pool/mysql-apt-config/m/mysql-apt-config/mysql-apt-config_0.8.29-1_all.deb
+dpkg -i mysql-apt-config_0.8.29-1_all.deb
+apt update -yqq && apt install -yqq mysql-connector-odbc mysql-connector-odbc-setup
 
 cd $IROOT
 
@@ -33,11 +37,11 @@ make install
 cd $IROOT
 rm -rf libcuckoo
 
-wget -q https://mirror.csclub.uwaterloo.ca/mysql/Downloads/Connector-ODBC/8.0/mysql-connector-odbc_8.0.29-1ubuntu21.10_amd64.deb
-dpkg -i mysql-connector-odbc_8.0.29-1ubuntu21.10_amd64.deb
-wget -q https://mirror.csclub.uwaterloo.ca/mysql/Downloads/Connector-ODBC/8.0/mysql-connector-odbc-setup_8.0.29-1ubuntu21.10_amd64.deb
-dpkg -i mysql-connector-odbc-setup_8.0.29-1ubuntu21.10_amd64.deb
-rm -f *.deb
+#wget -q https://mirror.csclub.uwaterloo.ca/mysql/Downloads/Connector-ODBC/8.0/mysql-connector-odbc_8.0.29-1ubuntu21.10_amd64.deb
+#dpkg -i mysql-connector-odbc_8.0.29-1ubuntu21.10_amd64.deb
+#wget -q https://mirror.csclub.uwaterloo.ca/mysql/Downloads/Connector-ODBC/8.0/mysql-connector-odbc-setup_8.0.29-1ubuntu21.10_amd64.deb
+#dpkg -i mysql-connector-odbc-setup_8.0.29-1ubuntu21.10_amd64.deb
+#rm -f *.deb
 
 wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
 tar xf mongo-c-driver-1.4.2.tar.gz

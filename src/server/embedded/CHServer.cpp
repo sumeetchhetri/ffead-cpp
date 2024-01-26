@@ -478,6 +478,10 @@ int main(int argc, char* argv[])
 		//std::streambuf* cout_buff = std::cout.rdbuf();
 		std::cout.rdbuf(local.rdbuf());
 	}
+	/*if(StringUtil::toLowerCopy(srprps["LOGGING_ENABLED_INV"])=="true") {
+		//std::streambuf* cout_buff = std::cout.rdbuf();
+		std::cerr.rdbuf(local.rdbuf());
+	}*/
 
 	if(argc > 2)
 	{

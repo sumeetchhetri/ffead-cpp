@@ -239,10 +239,16 @@ async fn main() -> std::io::Result<()> {
 	println!("Initializing ffead-cpp end...");
 
     let addr_str = format!("{}:{}", "0.0.0.0", arg1);
-    HttpServer::new(|| App::new().route("/*", web::to(handle)))
-        .bind(addr_str)?
-        .run()
-        .await?;
+	let addr: String = addr_str.parse().unwrap();
+	let port: u16 = arg1.parse().unwrap();
+
+    let server = HttpServer::new(|| App::new().route("/*", web::to(handle)))
+        .bind(("0.0.0.0", port))?
+        .run();
+
+	println!("Listening on http://{}", addr);
+
+	server.await?;
 
     println!("Cleaning up ffead-cpp start...");
     unsafe {
