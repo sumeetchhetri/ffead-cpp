@@ -151,6 +151,8 @@ chmod 700 resources/*.sh
 chmod 700 tests/*
 chmod 700 rtdcf/*
 
+sed -i 's|localhost|tfb-database|g' ${WEB_DIR}/config/sdorm.xml
+
 if [ "$2" = "apache" ]
 then
 	sed -i 's|<pool-size>30</pool-size>|<pool-size>3</pool-size>|g' ${WEB_DIR}/config/sdorm.xml

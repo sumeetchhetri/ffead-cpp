@@ -65,7 +65,7 @@ export PATH=/tmp/ffead-cpp-7.0-bin/lib:$PATH
 #  fi
 #done
 #echo "ffead-cpp start successful"
-#sleep 5
+#sleep 20
 #cd tests && chmod +x *.sh && ./runTests.sh
 #cd -
 #echo "ffead-cpp normal shutdown"

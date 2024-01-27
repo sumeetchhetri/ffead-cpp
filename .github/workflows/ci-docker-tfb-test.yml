@@ -23,4 +23,5 @@ jobs:
         cd docker/te/
         cp -rf benchmark_config.json base/*.dockerfile scripts/*.sh *.sh *.dockerfile ../../FrameworkBenchmarks/frameworks/C++/ffead-cpp/
         cd ../../FrameworkBenchmarks
+        sed -i 's|db.close()|connection.close()|g' toolset/databases/mongodb/mongodb.py
         ./tfb --mode verify --test-dir C++/ffead-cpp

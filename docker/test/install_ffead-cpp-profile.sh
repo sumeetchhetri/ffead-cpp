@@ -46,7 +46,7 @@ pkill ffead-cpp
 
 sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' resources/server.prop
 nohup bash -c "./server.sh > ffead.log &"
-sleep 5
+sleep 20
 echo "ffead-cpp with sql-raw support launched"
 wrk -H 'Host: localhost' -H 'Accept: application/json,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7' \
 	-H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://localhost:8080/t4/j"

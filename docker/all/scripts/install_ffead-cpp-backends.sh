@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd $IROOT
-apt purge -y mysql-connector-odbc  mysql-connector-odbc-setup
+#apt purge -y mysql-connector-odbc  mysql-connector-odbc-setup
 
 CURR_TYPE="lithium"
 if [ "$CURR_TYPE" = "lithium" ]

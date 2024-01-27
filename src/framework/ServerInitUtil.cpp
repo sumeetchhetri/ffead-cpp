@@ -480,8 +480,8 @@ void ServerInitUtil::init(Logger& logger) {
 
 	//Sleep for some time so as to make sure all the new child processes are set correctly
 	//and all init is complete...
-	sleep(15);
 	std::cout << "All initializations are now complete...." << std::endl;
+	sleep(10);
 }
 
 void ServerInitUtil::cleanUp() {

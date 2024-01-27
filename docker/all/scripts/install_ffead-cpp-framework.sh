@@ -164,7 +164,7 @@ do
     fi
 done
 echo "ffead-cpp start successful"
-sleep 5
+sleep 20
 cd tests && rm -f test.csv && cp ${IROOT}/ffead-cpp-src/tests/test-te-all.csv test.csv && chmod +x *.sh && ./runTests.sh
 echo "ffead-cpp normal shutdown"
 pkill ffead-cpp
@@ -223,7 +223,7 @@ do
     fi
 done
 echo "ffead-cpp start successful"
-sleep 5
+sleep 20
 cd tests && rm -f test.csv && cp ${IROOT}/ffead-cpp-src/tests/test-te-all.csv test.csv && chmod +x *.sh && ./runTests.sh
 echo "ffead-cpp normal shutdown"
 pkill ffead-cpp
@@ -280,7 +280,7 @@ do
     fi
 done
 echo "ffead-cpp start successful - picoev backend"
-sleep 5
+sleep 20
 cd tests && rm -f test.csv && cp ${IROOT}/ffead-cpp-src/tests/test-te-all.csv test.csv && chmod +x *.sh && ./runTests.sh
 echo "ffead-cpp normal shutdown - picoev backend"
 pkill ffead-cpp
@@ -346,7 +346,7 @@ do
     fi
 done
 echo "ffead-cpp start successful - io_uring backend"
-sleep 5
+sleep 20
 cd tests && rm -f test.csv && cp ${IROOT}/ffead-cpp-src/tests/test-te-all.csv test.csv && chmod +x *.sh && ./runTests.sh
 echo "ffead-cpp normal shutdown - io_uring backend"
 pkill ffead-cpp
