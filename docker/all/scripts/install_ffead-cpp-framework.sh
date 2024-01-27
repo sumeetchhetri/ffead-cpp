@@ -113,7 +113,7 @@ cmake -DSRV_ALL=on -DCINATRA_INCLUDES=${IROOT}/cinatra/include -DMOD_APACHE=on -
 cp resources/sample-odbcinst.ini ${IROOT}/odbcinst.ini
 cp resources/sample-odbc.ini ${IROOT}/odbc.ini
 
-sed -i 's|127.0.0.1|tfb-database|g' ${IROOT}/odbcinst.ini
+sed -i 's|127.0.0.1|tfb-database|g' ${IROOT}/odbc.ini
 
 #Start building for mongodb as the World model is different for SQL use case
 cd ${IROOT}/ffead-cpp-src/

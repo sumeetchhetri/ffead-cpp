@@ -9,6 +9,7 @@ apt-get install --reinstall ca-certificates
 wget -q https://repo.mysql.com/apt/ubuntu/pool/mysql-apt-config/m/mysql-apt-config/mysql-apt-config_0.8.29-1_all.deb
 dpkg -i mysql-apt-config_0.8.29-1_all.deb
 apt update -yqq && apt install -yqq mysql-connector-odbc mysql-connector-odbc-setup
+ls -ltr /usr/lib/x86_64-linux-gnu/odbc/
 
 cd $IROOT
 
@@ -20,9 +21,9 @@ git config --global http.sslCAinfo /etc/ssl/certs/ca-certificates.crt
 #redis will not start correctly on bionic with this config
 sed -i "s/bind .*/bind 127.0.0.1/g" /etc/redis/redis.conf
 
-echo never > /sys/kernel/mm/transparent_hugepage/enabled
-echo 'echo never > /sys/kernel/mm/transparent_hugepage/enabled' >> /etc/rc.local
-sysctl vm.overcommit_memory=1
+#echo never > /sys/kernel/mm/transparent_hugepage/enabled
+#echo 'echo never > /sys/kernel/mm/transparent_hugepage/enabled' >> /etc/rc.local
+#sysctl vm.overcommit_memory=1
 
 service apache2 stop
 service memcached stop

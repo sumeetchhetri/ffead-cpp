@@ -85,7 +85,7 @@ SOCKET RequestHandler2::addListenerSocket(doRegisterListener drl, const std::str
 	
 	//Sleep for some time so as to make sure all the new child processes are set correctly
 	//and all init is complete...
-	sleep(5);
+	sleep(15);
 	std::cout << "All initializations are now complete...." << std::endl;
 
 	SOCKET listenerSock = Server::createListener(ipAddress, port, true, isSinglEVH);

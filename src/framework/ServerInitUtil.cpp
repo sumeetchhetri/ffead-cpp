@@ -468,6 +468,20 @@ void ServerInitUtil::init(Logger& logger) {
 	HttpResponse::init();
 
 	MultipartContent::init();
+
+	int counter = 0;
+	while(!isInited()) {
+		Thread::sSleep(1);
+		if(counter++==60) {
+			std::cout << "Cannot wait more than 60 seconds for cache/database to initialize, will forcefully start server now...." << std::endl;
+			break;
+		}
+	}
+
+	//Sleep for some time so as to make sure all the new child processes are set correctly
+	//and all init is complete...
+	sleep(15);
+	std::cout << "All initializations are now complete...." << std::endl;
 }
 
 void ServerInitUtil::cleanUp() {

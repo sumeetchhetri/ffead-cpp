@@ -26,6 +26,10 @@ ln -s ${FFEAD_CPP_PATH}/lib/libinter.so /usr/local/lib/libinter.so
 ln -s ${FFEAD_CPP_PATH}/lib/libdinter.so /usr/local/lib/libdinter.so
 ldconfig
 
+echo never > /sys/kernel/mm/transparent_hugepage/enabled
+echo 'echo never > /sys/kernel/mm/transparent_hugepage/enabled' >> /etc/rc.local
+sysctl vm.overcommit_memory=1
+
 if [ "$2" = "nginx" ]
 then
 	if [ "$3" = "mysql" ] || [ "$3" = "postgresql" ]
