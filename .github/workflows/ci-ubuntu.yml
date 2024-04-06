@@ -19,7 +19,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: |
-        sudo apt update -yqq && sudo apt install --no-install-recommends -yqq ninja-build libpq-dev libcurl4-openssl-dev autoconf-archive unzip uuid-dev odbc-postgresql unixodbc unixodbc-dev apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev zlib1g-dev cmake make clang-format ninja-build libjsoncpp-dev libboost-all-dev
+        sudo apt update -yqq && sudo apt install --no-install-recommends -yqq ninja-build libpq-dev libcurl4-openssl-dev autoconf-archive unzip uuid-dev odbc-postgresql unixodbc unixodbc-dev apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev zlib1g-dev cmake make clang-format ninja-build libjsoncpp-dev libboost-all-dev libbson-dev libmongoc-dev
         sudo apt remove -y libsqlite3-dev
         #sudo apt-get install libseccomp-dev
         #git clone https://github.com/opencontainers/runc
@@ -34,12 +34,12 @@ jobs:
         cmake -DCMAKE_INSTALL_PREFIX=/usr . && sudo make install
         cd /tmp
         rm -rf libcuckoo-master
-        wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
-        tar xf mongo-c-driver-1.4.2.tar.gz
-        rm -f mongo-c-driver-1.4.2.tar.gz
-        cd mongo-c-driver-1.4.2/ && ./configure --disable-automatic-init-and-cleanup && make && sudo make install
-        cd /tmp
-        rm -rf mongo-c-driver-1.4.2
+        #wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
+        #tar xf mongo-c-driver-1.4.2.tar.gz
+        #rm -f mongo-c-driver-1.4.2.tar.gz
+        #cd mongo-c-driver-1.4.2/ && ./configure --disable-automatic-init-and-cleanup && make && sudo make install
+        #cd /tmp
+        #rm -rf mongo-c-driver-1.4.2
         wget -q https://github.com/redis/hiredis/archive/v1.0.0.tar.gz
         tar xf v1.0.0.tar.gz
         rm -f v1.0.0.tar.gz

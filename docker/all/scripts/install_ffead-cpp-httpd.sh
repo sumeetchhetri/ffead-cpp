@@ -47,10 +47,11 @@ EOL'
 #<IfModule mpm_event_module>
 #    AsyncRequestWorkerFactor   2
 #    ThreadsPerChild           64
-#    ServerLimit              100
-#    StartServers              20
+#    ServerLimit               5
+#    StartServers              5
 #    MinSpareThreads          100
 #    MaxSpareThreads          200
+#    MaxRequestWorkers		  320
 #    ListenBacklog 			4096
 #</IfModule>
 #EOL'

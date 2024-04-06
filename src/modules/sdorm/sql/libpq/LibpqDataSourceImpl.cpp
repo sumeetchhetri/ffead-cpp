@@ -1951,6 +1951,10 @@ bool FpgWire::handleSync() {
 	} else {
 		doneRead();
 	}
+	ret = checkReadSync();
+	if(ret>0) {
+		return handleSync();
+	}
 	return false;
 }
 

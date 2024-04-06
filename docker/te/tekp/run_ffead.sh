@@ -191,19 +191,6 @@ then
 		sed -i 's|/installs/ffead-cpp-7.0|'/installs/ffead-cpp-7.0-sql'|g' /etc/apache2/apache2.conf
 		sed -i 's|/installs/ffead-cpp-7.0|'/installs/ffead-cpp-7.0-sql'|g' /etc/apache2/sites-enabled/000-default.conf /etc/apache2/sites-enabled/ffead-site.conf
 	fi
-> /etc/apache2/mods-enabled/mpm_event.conf
-bash -c 'cat > /etc/apache2/mods-enabled/mpm_event.conf <<EOL
-<IfModule mpm_event_module>
-    AsyncRequestWorkerFactor   2
-    ThreadsPerChild           64
-    ServerLimit               5
-    StartServers              5
-    MinSpareThreads          100
-    MaxSpareThreads          200
-	MaxRequestWorkers		 320
-    ListenBacklog 			4096
-</IfModule>
-EOL'
 	apachectl -D FOREGROUND
 elif [ "$2" = "nginx" ]
 then
@@ -281,8 +268,9 @@ elif [ "$2" = "v-picov" ]
 then
 	cd ${IROOT}
 	sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' $FFEAD_CPP_PATH/resources/server.prop
-	if [ "$3" = "postgresql-raw-async" ]
+	if [[ $3 == *"-async"* ]]
 	then
+		rm -f ${WEB_DIR}/config/cache.xml
 		for i in $(seq 0 $(($(nproc --all)-1))); do
 			if [ "$6" = "pool" ]
 			then
@@ -298,6 +286,7 @@ then
 		done
 	else
 		sed -i 's|"TeBkUmLpqRouter"|"TeBkUmLpqRouterPicoV"|g' ${WEB_DIR}/config/application.xml
+		sed -i 's|"TeBkUmFpgRouter"|"TeBkUmFpgRouterPicoV"|g' ${WEB_DIR}/config/application.xml
 		for i in $(seq 0 $(($(nproc --all)-1))); do
 			taskset -c $i ./main --server_dir=$FFEAD_CPP_PATH --server_port=8080 --is_async=false &
 		done

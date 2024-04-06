@@ -365,7 +365,7 @@ void TeBkUmFpgRouter::updateCache() {
 		cchi->setRaw((*it).getId(), str);
 	}
 	CacheManager::cleanImpl(cchi);
-	Thread::sSleep(30);
+	//Thread::sSleep(30);
 	CacheManager::triggerAppInitCompletion();
 }
 

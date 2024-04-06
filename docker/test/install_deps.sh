@@ -14,7 +14,7 @@ echo "deb https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse"
 apt-get -yqq update > /dev/null
 apt-get -yqq install locales autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpcre3-dev zlib1g-dev \
 	libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat \
-	memcached redis-server gdb ninja-build telnet net-tools vim
+	memcached redis-server gdb ninja-build telnet net-tools vim libbson-dev libmongoc-dev
 
 #POSTGRESQL
 # install postgresql on database machine
@@ -110,12 +110,12 @@ cd /tmp
 rm -rf redis-plus-plus-1.3.10
 
 #Install mongodb c driver
-wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
-tar xf mongo-c-driver-1.4.2.tar.gz
-rm -f mongo-c-driver-1.4.2.tar.gz
-cd mongo-c-driver-1.4.2/ && ./configure --disable-automatic-init-and-cleanup --disable-tests --disable-ssl --disable-sasl && make && make install
-cd  /tmp
-rm -rf mongo-c-driver-1.4.2
+#wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
+#tar xf mongo-c-driver-1.4.2.tar.gz
+#rm -f mongo-c-driver-1.4.2.tar.gz
+#cd mongo-c-driver-1.4.2/ && ./configure --disable-automatic-init-and-cleanup --disable-tests --disable-ssl --disable-sasl && make && make install
+#cd  /tmp
+#rm -rf mongo-c-driver-1.4.2
 
 #WRK
 cd  /tmp/wrk
