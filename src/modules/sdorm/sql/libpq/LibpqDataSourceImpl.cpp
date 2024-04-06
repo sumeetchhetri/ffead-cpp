@@ -1938,7 +1938,7 @@ bool FpgWire::handleSync() {
 	}
 	
 	while(buffer.length()>pos+1) {
-		handleResponse();
+		if(handleResponse()==-1 || isClosed()) break;
 		//buffer = buffer.substr(pos);
 		//pos = 0;
 	}
