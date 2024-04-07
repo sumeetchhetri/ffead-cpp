@@ -51,7 +51,7 @@ jobs:
         -D BUILD_VERSION="$VERSION" \
         -D ENABLE_SSL=OFF \
         -D ENABLE_SASL=OFF \
-        -D ENABLE_MONGOC=ON && cmake --build _build --config RelWithDebInfo --parallel && cmake --install _build
+        -D ENABLE_MONGOC=ON && cmake --build _build --config RelWithDebInfo --parallel && sudo cmake --install _build
         rm -rf "mongo-c-driver-$VERSION"
         wget -q https://github.com/redis/hiredis/archive/v1.0.0.tar.gz
         tar xf v1.0.0.tar.gz
