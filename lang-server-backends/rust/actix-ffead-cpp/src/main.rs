@@ -242,7 +242,10 @@ async fn main() -> std::io::Result<()> {
 	let addr: String = addr_str.parse().unwrap();
 	let port: u16 = arg1.parse().unwrap();
 
-    let server = HttpServer::new(|| App::new().route("/*", web::to(handle)))
+    let server = HttpServer::new(|| App::new().default_service(
+        	web::route().to(handle)
+    	))
+		//App::new().route("/*", web::to(handle)))
         .bind(("0.0.0.0", port))?
         .run();
 

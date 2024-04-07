@@ -1938,7 +1938,13 @@ bool FpgWire::handleSync() {
 	}
 	
 	while(buffer.length()>pos+1) {
-		if(handleResponse()==-1 || isClosed()) break;
+		if(isClosed()) break;
+		else if(handleResponse()==-1) {
+			ret = readSync();
+			if(ret==0) {
+				return true;
+			}
+		}
 		//buffer = buffer.substr(pos);
 		//pos = 0;
 	}
@@ -1950,10 +1956,6 @@ bool FpgWire::handleSync() {
 		return true;
 	} else {
 		doneRead();
-	}
-	ret = checkReadSync();
-	if(ret>0) {
-		return handleSync();
 	}
 	return false;
 }

@@ -162,7 +162,7 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 	}
 	apr_brigade_destroy(bb) ;
 
-	HttpRequest req((const char*)r->uri, strlen(r->uri), (const char*)r->args, strlen(r->args),
+	HttpRequest req((const char*)r->uri, strlen(r->uri), (const char*)r->args, r->args!=NULL?strlen(r->args):0,
 					(const char*)r->method, strlen(r->method), std::move(content), r->proto_num);
 
 	const apr_array_header_t* fields = apr_table_elts(r->headers_in);

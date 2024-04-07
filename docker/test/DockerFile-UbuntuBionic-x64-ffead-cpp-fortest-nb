@@ -25,7 +25,7 @@ RUN echo "deb https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multive
 RUN apt-get -yqq update > /dev/null
 RUN apt-get -yqq install locales autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpcre3-dev zlib1g-dev \
 	libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat \
-	memcached redis-server gdb ninja-build telnet net-tools vim libbson-dev libmongoc-dev
+	memcached redis-server gdb ninja-build telnet net-tools vim
 
 #POSTGRESQL
 ENV PG_VERSION 14
@@ -146,6 +146,19 @@ RUN rm -rf redis-plus-plus-1.3.10
 #RUN cd mongo-c-driver-1.4.2/ && ./configure --disable-automatic-init-and-cleanup --disable-tests --disable-ssl --disable-sasl && make && make install
 #WORKDIR /tmp
 #RUN rm -rf mongo-c-driver-1.4.2
+ENV VERSION=1.26.2
+RUN wget "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/$VERSION.tar.gz" --output-document="mongo-c-driver-$VERSION.tar.gz"
+RUN tar xf "mongo-c-driver-$VERSION.tar.gz"
+RUN rm -f "mongo-c-driver-$VERSION.tar.gz"
+RUN cd mongo-c-driver-$VERSION/ && mkdir _build && cmake -S . -B _build \
+-D ENABLE_EXTRA_ALIGNMENT=OFF \
+-D ENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF \
+-D CMAKE_BUILD_TYPE=RelWithDebInfo \
+-D BUILD_VERSION="$VERSION" \
+-D ENABLE_SSL=OFF \
+-D ENABLE_SASL=OFF \
+-D ENABLE_MONGOC=ON && cmake --build _build --config RelWithDebInfo --parallel && cmake --install _build
+RUN rm -rf "mongo-c-driver-$VERSION"
 
 #WRK
 WORKDIR /tmp/wrk

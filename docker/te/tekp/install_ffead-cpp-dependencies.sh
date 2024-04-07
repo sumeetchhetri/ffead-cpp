@@ -3,7 +3,7 @@
 apt update -yqq && apt install --no-install-recommends -yqq autoconf-archive unzip uuid-dev odbc-postgresql unixodbc unixodbc-dev \
 	apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev \
 	zlib1g-dev cmake make clang-format ninja-build libcurl4-openssl-dev git libpq-dev libpugixml-dev\
-	wget build-essential pkg-config libpcre3-dev curl libgtk2.0-dev libgdk-pixbuf2.0-dev bison flex libreadline-dev libbson-dev libmongoc-dev 
+	wget build-essential pkg-config libpcre3-dev curl libgtk2.0-dev libgdk-pixbuf2.0-dev bison flex libreadline-dev 
 apt-get install --reinstall ca-certificates
 
 cd $IROOT
@@ -47,6 +47,19 @@ rm -f *.deb
 #    make && make install
 #cd $IROOT
 #rm -rf mongo-c-driver-1.4.2 
+ENV VERSION=1.26.2
+RUN wget "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/$VERSION.tar.gz" --output-document="mongo-c-driver-$VERSION.tar.gz"
+RUN tar xf "mongo-c-driver-$VERSION.tar.gz"
+RUN rm -f "mongo-c-driver-$VERSION.tar.gz"
+RUN cd mongo-c-driver-$VERSION/ && mkdir _build && cmake -S . -B _build \
+-D ENABLE_EXTRA_ALIGNMENT=OFF \
+-D ENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF \
+-D CMAKE_BUILD_TYPE=RelWithDebInfo \
+-D BUILD_VERSION="$VERSION" \
+-D ENABLE_SSL=OFF \
+-D ENABLE_SASL=OFF \
+-D ENABLE_MONGOC=ON && cmake --build _build --config RelWithDebInfo --parallel && cmake --install _build
+RUN rm -rf "mongo-c-driver-$VERSION"
 
 wget -q https://github.com/redis/hiredis/archive/v1.0.2.tar.gz
 tar xf v1.0.2.tar.gz

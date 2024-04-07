@@ -280,7 +280,7 @@
 			"display_name": "ffead-cpp-apache",
 			"notes": "apache mongo",
 			"versus": "",
-			"tags": ["broken"]
+			"tags": []
 		},
 		"mysql": {
 			"json_url": "/t1/j",
@@ -436,7 +436,7 @@
 			"display_name": "ffead-cpp-rust-actix",
 			"notes": "",
 			"versus": "",
-			"tags": ["broken"]
+			"tags": []
 		},
 		"rust-rocket": {
 			"json_url": "/t1/j",

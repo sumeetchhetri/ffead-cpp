@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add autoconf-archive autoconf automake libtool gcc g++ make cmake unzip postgresql-dev openssl openssl-dev psqlodbc unixodbc unixodbc-dev curl-dev libmemcached libmemcached-dev wget netcat-openbsd bash mongo-c-driver-dev
+RUN apk add autoconf-archive autoconf automake libtool gcc g++ make cmake unzip postgresql-dev openssl openssl-dev psqlodbc unixodbc unixodbc-dev curl-dev libmemcached libmemcached-dev wget netcat-openbsd bash
 RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing ossp-uuid-dev
 
 #Install libcuckoo headers
@@ -21,6 +21,19 @@ RUN rm -rf /tmp/libcuckoo-master
 #RUN cd mongo-c-driver-1.4.2/ &&  ./configure --disable-automatic-init-and-cleanup &&  make && make install
 #WORKDIR /tmp
 #RUN rm -rf mongo-c-driver-1.4.2
+ENV VERSION=1.26.2
+RUN wget "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/$VERSION.tar.gz" --output-document="mongo-c-driver-$VERSION.tar.gz"
+RUN tar xf "mongo-c-driver-$VERSION.tar.gz"
+RUN rm -f "mongo-c-driver-$VERSION.tar.gz"
+RUN cd mongo-c-driver-$VERSION/ && mkdir _build && cmake -S . -B _build \
+-D ENABLE_EXTRA_ALIGNMENT=OFF \
+-D ENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF \
+-D CMAKE_BUILD_TYPE=RelWithDebInfo \
+-D BUILD_VERSION="$VERSION" \
+-D ENABLE_SSL=OFF \
+-D ENABLE_SASL=OFF \
+-D ENABLE_MONGOC=ON && cmake --build _build --config RelWithDebInfo --parallel && cmake --install _build
+RUN rm -rf "mongo-c-driver-$VERSION"
 
 RUN wget -q https://github.com/redis/hiredis/archive/v1.0.0.tar.gz
 RUN tar xf v1.0.0.tar.gz
