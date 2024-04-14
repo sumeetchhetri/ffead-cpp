@@ -6,6 +6,11 @@ MAX_THREADS=$(( 3 * `nproc` / 2 ))
 WRIT_THREADS=$(( $MAX_THREADS / 3 ))
 SERV_THREADS=$(( $MAX_THREADS - $WRIT_THREADS ))
 
+#temporary workaround till this gets fixed by the framework author of CppServer
+sed -i 's|explicit constexpr UUID(const char\* uuid, size_t size);|explicit UUID(const char\* uuid, size_t size);|g' /usr/local/include/system/uuid.h
+sed -i 's|constexpr CppCommon::UUID operator ""|CppCommon::UUID operator ""|g' /usr/local/include/system/uuid.h
+sed -i 's|inline constexpr UUID::UUID|inline UUID::UUID|g' /usr/local/include/system/uuid.inl
+
 git clone https://github.com/sumeetchhetri/ffead-cpp
 #git checkout 92c3a9e3d5ec1de4a909fe688d649d7f31e050c0 -b 6.0
 cd ffead-cpp
