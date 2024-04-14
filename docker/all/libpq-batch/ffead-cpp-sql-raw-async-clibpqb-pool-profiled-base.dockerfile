@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-all-base:7.0
+FROM sumeetchhetri/ffead-cpp-base:7.0
 LABEL maintainer="Sumeet Chhetri"
 LABEL version="7.0"
 LABEL description="SQL Raw Custom libpq batch patched Base ffead-cpp docker image with commit id - master"

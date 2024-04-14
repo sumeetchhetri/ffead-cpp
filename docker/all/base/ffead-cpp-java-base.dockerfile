@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-all-base:7.0
+FROM sumeetchhetri/ffead-cpp-base:7.0
 LABEL maintainer="Sumeet Chhetri"
 LABEL version="7.0"
 LABEL description="Base java docker image with master code"

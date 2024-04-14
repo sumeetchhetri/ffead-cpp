@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-base:7.0
+FROM sumeetchhetri/ffead-cpp-base:7.0-te
 LABEL maintainer="Sumeet Chhetri"
 LABEL version="7.0"
 LABEL description="SQL Raw Async Profiled Base ffead-cpp docker image with commit id - master"

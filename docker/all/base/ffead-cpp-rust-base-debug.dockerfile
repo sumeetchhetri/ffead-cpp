@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-base:7.0
+FROM sumeetchhetri/ffead-cpp-base:7.0-debug
 LABEL maintainer="Sumeet Chhetri"
 LABEL version="7.0"
 LABEL description="Base rust docker image with ffead-cpp v4.0 - commit id - master"
@@ -15,7 +15,7 @@ RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/li
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-RUN cd ${IROOT}/lang-server-backends/rust/actix-ffead-cpp && RUSTFLAGS="-C target-cpu=native" cargo build --release && cp target/release/actix-ffead-cpp $IROOT/ && rm -rf target && \
-	cd ${IROOT}/lang-server-backends/rust/hyper-ffead-cpp && RUSTFLAGS="-C target-cpu=native" cargo build --release && cp target/release/hyper-ffead-cpp $IROOT/ && rm -rf target && \
-	cd ${IROOT}/lang-server-backends/rust/thruster-ffead-cpp && RUSTFLAGS="-C target-cpu=native" cargo build --release && cp target/release/thruster-ffead-cpp $IROOT/ && rm -rf target && \
+RUN cd ${IROOT}/lang-server-backends/rust/actix-ffead-cpp && RUSTFLAGS="-C target-cpu=native" cargo build && cp target/debug/actix-ffead-cpp $IROOT/ && rm -rf target && \
+	cd ${IROOT}/lang-server-backends/rust/hyper-ffead-cpp && RUSTFLAGS="-C target-cpu=native" cargo build && cp target/debug/hyper-ffead-cpp $IROOT/ && rm -rf target && \
+	cd ${IROOT}/lang-server-backends/rust/thruster-ffead-cpp && RUSTFLAGS="-C target-cpu=native" cargo build && cp target/debug/thruster-ffead-cpp $IROOT/ && rm -rf target && \
 	rm -rf ${IROOT}/lang-server-backends && rm -rf /root/.rustup /root/.cargo

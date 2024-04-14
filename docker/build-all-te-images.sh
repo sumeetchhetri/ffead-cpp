@@ -31,11 +31,11 @@ docker push sumeetchhetri/ffead-cpp-deps:${VERSION}
 
 docker rmi -f sumeetchhetri/ffead-cpp-all-base:${VERSION}
 docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-all-base.dockerfile -t sumeetchhetri/ffead-cpp-all-base:${VERSION} .
-docker push sumeetchhetri/ffead-cpp-all-base:${VERSION}
+docker push sumeetchhetri/ffead-cpp-base:${VERSION}
 
-docker rmi -f sumeetchhetri/ffead-cpp-v-base:${VERSION}-all
-docker build --progress plain -f ffead-cpp-v-base.dockerfile -t sumeetchhetri/ffead-cpp-v-base:${VERSION}-all .
-docker push sumeetchhetri/ffead-cpp-v-base:${VERSION}-all
+docker rmi -f sumeetchhetri/ffead-cpp-v-base:${VERSION}
+docker build --progress plain -f ffead-cpp-v-base.dockerfile -t sumeetchhetri/ffead-cpp-v-base:${VERSION} .
+docker push sumeetchhetri/ffead-cpp-v-base:${VERSION}
 
 docker rmi -f sumeetchhetri/ffead-cpp-rust-base:${VERSION}
 docker build --progress plain -f ffead-cpp-rust-base.dockerfile -t sumeetchhetri/ffead-cpp-rust-base:${VERSION} .

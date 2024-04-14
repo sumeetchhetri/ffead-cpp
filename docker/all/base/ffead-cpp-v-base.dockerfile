@@ -1,7 +1,7 @@
-FROM sumeetchhetri/ffead-cpp-all-base:7.0
+FROM sumeetchhetri/ffead-cpp-base:7.0
 LABEL maintainer="Sumeet Chhetri"
 LABEL version="7.0"
-LABEL description="Base v docker image with ffead-cpp v4.0 commit id - master"
+LABEL description="Base v docker image with ffead-cpp v7.0 commit id - master"
 
 ENV IROOT=/installs
 
