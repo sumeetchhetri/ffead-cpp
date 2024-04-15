@@ -29,8 +29,11 @@ docker rmi -f sumeetchhetri/ffead-cpp-deps:${VERSION}
 docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-deps.dockerfile -t sumeetchhetri/ffead-cpp-deps:${VERSION} .
 docker push sumeetchhetri/ffead-cpp-deps:${VERSION}
 
-docker rmi -f sumeetchhetri/ffead-cpp-all-base:${VERSION}
-docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-all-base.dockerfile -t sumeetchhetri/ffead-cpp-all-base:${VERSION} .
+docker rmi -f sumeetchhetri/ffead-cpp-base:${VERSION}
+#docker buildx create --use --name insecbuild --buildkitd-flags '--allow-insecure-entitlement security.insecure'
+#docker buildx build --ulimit memlock=102400000:102400000 --allow security.insecure --progress plain -f ffead-cpp-all-base.dockerfile -t sumeetchhetri/ffead-cpp-base:${VERSION} .
+docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-all-base.dockerfile -t sumeetchhetri/ffead-cpp-base:${VERSION} .
+#docker buildx rm --all-inactive --force
 docker push sumeetchhetri/ffead-cpp-base:${VERSION}
 
 docker rmi -f sumeetchhetri/ffead-cpp-v-base:${VERSION}
@@ -45,6 +48,6 @@ docker rmi -f sumeetchhetri/ffead-cpp-java-base:${VERSION}
 docker build --progress plain -f ffead-cpp-java-base.dockerfile -t sumeetchhetri/ffead-cpp-java-base:${VERSION} .
 docker push sumeetchhetri/ffead-cpp-java-base:${VERSION}
 
-#docker rmi -f sumeetchhetri/ffead-cpp-seastar-base:${VERSION}
-#docker build --progress plain -f ffead-cpp-seastar-base.dockerfile -t sumeetchhetri/ffead-cpp-seastar-base:${VERSION} .
-#docker push sumeetchhetri/ffead-cpp-seastar-base:${VERSION}
+docker rmi -f sumeetchhetri/ffead-cpp-seastar-base:${VERSION}
+docker build --progress plain -f ffead-cpp-seastar-base.dockerfile -t sumeetchhetri/ffead-cpp-seastar-base:${VERSION} .
+docker push sumeetchhetri/ffead-cpp-seastar-base:${VERSION}

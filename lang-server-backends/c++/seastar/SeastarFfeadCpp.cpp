@@ -102,7 +102,7 @@ public:
 			}
 			rep->set_status(static_cast<reply::status_type>(scode));
 			if(out_body_len>0) {
-				rep->_content = reply_content(std::string_view(out_body, out_body_len));
+				rep->_content = http::reply_content(std::string_view(out_body, out_body_len));
 			}
 			rep->done();
 			return make_ready_future<std::unique_ptr<reply>>(std::move(rep));

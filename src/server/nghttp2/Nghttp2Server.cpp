@@ -46,7 +46,7 @@ void Nghttp2Server::handle(const request &req2, const response &res2, std::strin
 	HttpResponse respo;
 	ServiceTask::handle(&req, &respo);
 
-	header_map hm;
+	auto hm = header_map();
 	if(respo.isDone()) {
 		for (int var = 0; var < (int)respo.getCookies().size(); var++)
 		{
@@ -57,7 +57,7 @@ void Nghttp2Server::handle(const request &req2, const response &res2, std::strin
 			hm.emplace(it->first, header_value{value: std::string(it->second)});
 		}
 
-		res2.write_head(respo.getCode(), hm);
+		res2.write_head(respo.getCode(), std::move(hm));
 		std::string& data = respo.generateNginxApacheResponse();
 		if(data.length()>0) {
 			res2.end(data);

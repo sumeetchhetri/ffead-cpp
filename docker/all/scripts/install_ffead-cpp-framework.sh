@@ -132,6 +132,8 @@ rm -f /usr/local/lib/libt2.so*
 rm -f /usr/local/lib/libt3.so*
 rm -f /usr/local/lib/libt4.so*
 rm -f /usr/local/lib/libt5.so*
+rm -f /usr/local/lib/libt6.so*
+rm -f /usr/local/lib/libt7.so*
 rm -f /usr/local/lib/libinter.so
 rm -f /usr/local/lib/libdinter.so
 
@@ -304,11 +306,11 @@ rm -f tmp/*.sess
 
 #Start building for io_uring backend
 cd /tmp
-wget -q https://github.com/axboe/liburing/archive/liburing-2.2.tar.gz
-tar xf liburing-2.2.tar.gz
-rm -f liburing-2.2.tar.gz
-cd liburing-liburing-2.2 && ./configure --prefix=/usr/local && make install
-cd /tmp && rm -rf liburing-liburing-2.2
+wget -q https://github.com/axboe/liburing/archive/liburing-2.5.tar.gz
+tar xf liburing-2.5.tar.gz
+rm -f liburing-2.5.tar.gz
+cd liburing-liburing-2.5 && ./configure --prefix=/usr/local && make install
+cd /tmp && rm -rf liburing-liburing-2.5
 
 cd ${IROOT}/ffead-cpp-src/
 rm -rf CMakeCache.txt CMakeFiles
@@ -351,8 +353,9 @@ do
     fi
 done
 echo "ffead-cpp start successful - io_uring backend"
-sleep 20
-cd tests && rm -f test.csv && cp ${IROOT}/ffead-cpp-src/tests/test-te-all.csv test.csv && chmod +x *.sh && ./runTests.sh
+#sleep 20
+#Executing io_uring in docker needs --security-opt seccomp=unconfined flags to be passed to docker run
+#cd tests && rm -f test.csv && cp ${IROOT}/ffead-cpp-src/tests/test-te-all.csv test.csv && chmod +x *.sh && ./runTests.sh
 echo "ffead-cpp normal shutdown - io_uring backend"
 pkill ffead-cpp
 

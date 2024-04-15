@@ -239,6 +239,7 @@ class SelEpolKqEvPrt : public EventHandler {
 	    socklen_t client_len;
 	    struct io_uring_params params;
 	    struct io_uring ring;
+		std::atomic<bool> inited;
 	    //int efd;
 		//BaseSocket* efdbs;
 		//std::atomic<int> pending;

@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-all-base:7.0
+FROM sumeetchhetri/ffead-cpp-base:7.0
 
 ENV NODE_MAJOR 16
 #ffi-napi install fails for latest node versions

@@ -90,7 +90,7 @@
 			"display_name": "ffead-cpp-libreactor",
 			"notes": "",
 			"versus": "",
-			"tags": ["broken"]
+			"tags": []
 		},
 		"lithium": {
 			"json_url": "/t1/j",
@@ -261,7 +261,7 @@
 			"display_name": "ffead-cpp-seastar",
 			"notes": "",
 			"versus": "",
-			"tags": ["broken"]
+			"tags": []
 		},
 		"apache": {
 			"json_url": "/t1/j",
@@ -398,7 +398,7 @@
 			"display_name": "ffead-cpp-rust-hyper",
 			"notes": "",
 			"versus": "",
-			"tags": []
+			"tags": ["broken"]
 		},
 		"rust-thruster": {
 			"json_url": "/t1/j",

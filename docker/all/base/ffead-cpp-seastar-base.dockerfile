@@ -20,7 +20,7 @@ RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/li
 ENV FFEAD_CPP_PATH=${IROOT}/ffead-cpp-7.0
 ENV LD_LIBRARY_PATH=${IROOT}/:${IROOT}/lib:${FFEAD_CPP_PATH}/lib:/usr/local/lib:$LD_LIBRARY_PATH
 
-#seastar need hwloc 2
+#seastar needs hwloc 2
 RUN cd /tmp && wget -q https://github.com/open-mpi/hwloc/releases/download/hwloc-2.1.0/hwloc-2.1.0.tar.gz && \
 	tar xvf hwloc-2.1.0.tar.gz && cd hwloc-2.1.0 && ./configure --prefix=/usr/local/ && make install
 RUN rm -rf /tmp/hwloc-2.1.0
@@ -36,7 +36,7 @@ RUN sudo adduser $(whoami) libvirt-dnsmasq
 #RUN sudo chmod 777 /dev/kvm
 
 #seastar needs gcc-10
-RUN git clone https://github.com/sumeetchhetri/seastar && cd seastar && git checkout for_ffead
+RUN git clone https://github.com/sumeetchhetri/seastar && cd seastar && git checkout latest_for_ffead
 RUN cd seastar && chmod +x *.sh && apt update -y && ./install-dependencies.sh && apt remove -y libfmt-dev && \
 	./configure.py --mode=release --cook fmt && ./configure.py --mode=release --prefix=/usr/local
 RUN cd seastar && ninja -C build/release install && cp build/release/_cooking/installed/lib/libfmt.a /usr/local/lib/ && \

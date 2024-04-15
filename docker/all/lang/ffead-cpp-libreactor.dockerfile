@@ -14,8 +14,8 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends build-essent
 RUN wget -q https://github.com/fredrikwidlund/libdynamic/releases/download/v1.3.0/libdynamic-1.3.0.tar.gz \
 	&& tar fvxz libdynamic-1.3.0.tar.gz && cd libdynamic-1.3.0 && ./configure --prefix=/usr AR=gcc-ar NM=gcc-nm RANLIB=gcc-ranlib \
 	&& make install && rm -rf ${IROOT}/libdynamic-1.3.0 && rm -f ${IROOT}/libdynamic-1.3.0.tar.gz && \
-	cd /installs && wget -q https://github.com/fredrikwidlund/libreactor/releases/download/v1.0.1/libreactor-1.0.1.tar.gz \
-	&& tar fvxz libreactor-1.0.1.tar.gz && cd libreactor-1.0.1 && ./configure --prefix=/usr AR=gcc-ar NM=gcc-nm RANLIB=gcc-ranlib \
+	cd /installs && git clone https://github.com/sumeetchhetri/libreactor && cd libreactor && ./autogen.sh \
+	&& ./configure --prefix=/usr AR=gcc-ar NM=gcc-nm RANLIB=gcc-ranlib \
 	&& make install && rm -rf ${IROOT}/libreactor-1.0.1 && rm -f ${IROOT}/libreactor-1.0.1.tar.gz
 
 WORKDIR ${IROOT}/lang-server-backends/c/libreactor

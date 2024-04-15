@@ -38,6 +38,8 @@ SelEpolKqEvPrt::SelEpolKqEvPrt() {
 	timeoutsec = 1;
 #elif defined(USE_KQUEUE)
 	kq = -1;
+#elif defined USE_IO_URING
+	inited = false;
 #endif
 	dsi = NULL;
 	context = NULL;
@@ -115,6 +117,7 @@ void SelEpolKqEvPrt::initialize(const int& timeout, eventLoopContinue elcCb, onE
 		}
 	#elif defined USE_IO_URING
 		memset(&params, 0, sizeof(params));
+		params.flags = 0;//Not setting flags to 0 will cause segfault
 
 		if (io_uring_queue_init_params(2048, &ring, &params) < 0) {
 			perror("io_uring_init_failed...\n");
@@ -126,6 +129,7 @@ void SelEpolKqEvPrt::initialize(const int& timeout, eventLoopContinue elcCb, onE
 			printf("IORING_FEAT_FAST_POLL not available in the kernel, quiting...\n");
 			return;
 		}
+
 		/*efd = eventfd(0, O_NONBLOCK);
 		if (efd < 0) {
 			perror("eventfd");
@@ -195,6 +199,7 @@ void SelEpolKqEvPrt::addListeningSocket(SOCKET sockfd) {
 	    dsi->io_uring_type = ACCEPT;
 	    io_uring_sqe_set_data(sqe, dsi);
 	    io_uring_submit(&ring);
+		inited = true;
 	    return;
 	#endif
 	if(sockfd>0) registerRead(dsi, true);
@@ -873,7 +878,7 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev, SelEpolKqEvPrt* op
 	}
 
 #ifdef USE_IO_URING
-	if(dsi==NULL) {
+	while(!inited) {
 		sleep(1);
 	}
 #endif
