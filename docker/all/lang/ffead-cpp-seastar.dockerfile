@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-seastar:7.0
+FROM sumeetchhetri/ffead-cpp-seastar-base:7.0
 
 WORKDIR /
 

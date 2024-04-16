@@ -3,7 +3,7 @@
 	"tests": [{
 		"default": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"db_url": "/t1/d",
 			"query_url": "/t1/quer?queries=",
 			"fortune_url": "/t1/fortu",
@@ -27,7 +27,7 @@
 		},
 		"mongo-raw": {
 			"json_url": "/t2/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t2/plaint",
 			"db_url": "/t2/d",
 			"query_url": "/t2/quer?queries=",
 			"fortune_url": "/t2/fortu",
@@ -51,7 +51,7 @@
 		},
 		"postgresql": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"db_url": "/t1/d",
 			"query_url": "/t1/quer?queries=",
 			"fortune_url": "/t1/fortu",
@@ -75,7 +75,7 @@
 		},
 		"libreactor": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -94,7 +94,7 @@
 		},
 		"lithium": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -113,7 +113,7 @@
 		},
 		"cinatra": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -132,7 +132,7 @@
 		},
 		"drogon": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -151,7 +151,7 @@
 		},
 		"h2o": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -170,7 +170,7 @@
 		},
 		"crystal-h2o": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -189,7 +189,7 @@
 		},
 		"crystal-http": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -208,7 +208,7 @@
 		},
 		"d-hunt": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -227,7 +227,7 @@
 		},
 		"nginx": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -246,7 +246,7 @@
 		},
 		"seastar": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -265,7 +265,7 @@
 		},
 		"apache": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -284,7 +284,7 @@
 		},
 		"mysql": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"db_url": "/t1/d",
 			"query_url": "/t1/quer?queries=",
 			"fortune_url": "/t1/fortu",
@@ -307,7 +307,7 @@
 		},
 		"go-gnet": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -326,7 +326,7 @@
 		},
 		"go-fasthttp": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -345,7 +345,7 @@
 		},
 		"julia-http": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -364,7 +364,7 @@
 		},
 		"swift-nio": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -383,7 +383,7 @@
 		},
 		"rust-hyper": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -402,7 +402,7 @@
 		},
 		"rust-thruster": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -421,7 +421,7 @@
 		},
 		"rust-actix": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -440,7 +440,7 @@
 		},
 		"rust-rocket": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -459,7 +459,7 @@
 		},
 		"v-picov": {
 			"json_url": "/t3/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t3/plaint",
 			"db_url": "/t3/d",
 			"query_url": "/t3/quer?queries=",
 			"fortune_url": "/t3/fortu",
@@ -483,7 +483,7 @@
 		},
 		"v-vweb": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -502,7 +502,7 @@
 		},
 		"java-rapidoid": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -521,7 +521,7 @@
 		},
 		"java-wizzardo-http": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -540,7 +540,7 @@
 		},
 		"java-firenio": {
 			"json_url": "/t1/j",
-			"plaintext_url": "/plaintext",
+			"plaintext_url": "/t1/plaint",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
