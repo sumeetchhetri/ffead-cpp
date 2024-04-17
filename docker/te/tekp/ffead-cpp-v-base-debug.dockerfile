@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-base:7.0-te-debug
+FROM sumeetchhetri/ffead-cpp-base:7.0-debug
 LABEL maintainer="Sumeet Chhetri"
 LABEL version="7.0-debug"
 LABEL description="Base v docker image with ffead-cpp v7.0 commit id - master"

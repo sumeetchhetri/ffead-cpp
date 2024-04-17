@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-base:7.0-te
+FROM sumeetchhetri/ffead-cpp-base:7.0
 
 ENV IROOT=/installs
 
