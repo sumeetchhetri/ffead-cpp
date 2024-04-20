@@ -24,6 +24,13 @@ cd hiredis-0.13.3/ && rm -f net.c && wget https://raw.githubusercontent.com/sume
 cd /tmp
 rm -rf hiredis-0.13.3
 
+wget https://github.com/kkos/oniguruma/releases/download/v6.9.9/onig-6.9.9.tar.gz
+tar zxf onig-6.9.9.tar.gz
+rm -f onig-6.9.9.tar.gz
+cd onig-6.9.9 && ./configure --enable-posix-api=yes --prefix=/usr && make && make install
+cd /tmp
+rm -rf onig-6.9.9
+
 wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
 unzip -qq master.zip
 mv ffead-cpp-master ffead-cpp-src

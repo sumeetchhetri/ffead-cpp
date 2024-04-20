@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip_build]')"
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Build ffead-cpp with xmake
       run: |
         cd docker/os-based

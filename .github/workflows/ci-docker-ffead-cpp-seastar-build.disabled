@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     if: "contains(github.event.head_commit.message, '[docker_seastar_push]')"
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Build docker image for ffead-cpp with seastar backend
       run: |
         cd docker/techempower-config-deprecated

@@ -105,7 +105,7 @@ Examples (as per feedback from HN)
 - REST API example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/te-benchmark/include/TeBkRestController.h
 - Template example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/markers/tpe/mark.tpe & https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/DefTemp.cpp
 - Websocket example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/DefaultWebSocketHandler.cpp
-- Wefilter example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/DefaultIOFilter.cpp
+- Webfilter example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/DefaultIOFilter.cpp
 - Webcontroller example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/DefaultController.cpp
 - Dynamic C++ page example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/dcp/test.dcp
 - Action based view example - https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/fviews/test.html & https://github.com/sumeetchhetri/ffead-cpp/blob/master/web/default/src/TestFormController.cpp
