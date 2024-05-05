@@ -178,7 +178,7 @@ void MongoDBRawDataSourceImpl::executeQuery(const std::string &query, void* ctx,
 	bson_destroy(qb);
 }
 
-void MongoDBRawDataSourceImpl::executeQuery(const bson_t* query, void* ctx, MgRawResFunc cb, int start, int count) {
+void MongoDBRawDataSourceImpl::executeQuery(bson_t* query, void* ctx, MgRawResFunc cb, int start, int count) {
 	bool qi = false;
 	if(query==NULL) {
 		qi = true;
@@ -272,7 +272,7 @@ bool MongoDBRawDataSourceImpl::executeUpdateQuery(const std::string &query, cons
 	return fl;
 }
 
-bool MongoDBRawDataSourceImpl::executeUpdateQuery(const bson_t* query, const bson_t* data, MongoDBRawOper oper) {
+bool MongoDBRawDataSourceImpl::executeUpdateQuery(bson_t* query, bson_t* data, MongoDBRawOper oper) {
 	bson_error_t er;
 	switch(oper) {
 		case INSERT:

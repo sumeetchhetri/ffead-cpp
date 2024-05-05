@@ -82,10 +82,10 @@ public:
 	void addBulk(bson_t* q, bson_t* d);
 	bool endBulk();
 
-	void executeQuery(const bson_t* query, void* ctx, MgRawResFunc cb, int start = 0, int count = 0);
+	void executeQuery(bson_t* query, void* ctx, MgRawResFunc cb, int start = 0, int count = 0);
 	void executeQuery(const std::string &query, void* ctx, MgRawResFunc cb, int start = 0, int count = 0);
 	bool executeUpdateQuery(const std::string &query, const std::string &data, MongoDBRawOper oper);
-	bool executeUpdateQuery(const bson_t* query, const bson_t* data, MongoDBRawOper oper);
+	bool executeUpdateQuery(bson_t* query, bson_t* data, MongoDBRawOper oper);
 	bool executeUpdateBulkQuery(int len, MgRawBlkFunc cb);
 };
 

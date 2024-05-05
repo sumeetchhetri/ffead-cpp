@@ -61,6 +61,7 @@ jobs:
         pacman -S --noconfirm mingw-w64-x86_64-hiredis
         pacman -S --noconfirm diffutils
         pacman -S --noconfirm unzip
+        pacman -S --noconfirm dos2unix
         echo 'Installed all dependencies'
     - name: Install dependencies and ffead-cpp
       run: |
