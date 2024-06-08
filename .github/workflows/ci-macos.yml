@@ -23,7 +23,7 @@ jobs:
     - name: Install dependencies
       run: |
         #brew unlink bazel
-        brew install ossp-uuid libmemcached boost jsoncpp apr apr-util httpd ninja mongo-c-driver
+        brew install ossp-uuid libmemcached boost jsoncpp apr apr-util httpd ninja
         pushd /tmp
         wget -q https://ftp.osuosl.org/pub/blfs/conglomeration/unixODBC/unixODBC-2.3.12.tar.gz
         tar zxf unixODBC-2.3.12.tar.gz
@@ -31,6 +31,19 @@ jobs:
         ./configure && make && sudo make install
         cd /tmp
         rm -rf unixODBC-2.3.12
+        VERSION=1.26.2
+        wget "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/$VERSION.tar.gz" --output-document="mongo-c-driver-$VERSION.tar.gz"
+        tar xf "mongo-c-driver-$VERSION.tar.gz"
+        rm -f "mongo-c-driver-$VERSION.tar.gz"
+        cd mongo-c-driver-$VERSION/ && mkdir _build && cmake -S . -B _build \
+        -D ENABLE_EXTRA_ALIGNMENT=OFF \
+        -D ENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF -D ENABLE_TESTS=OFF -D ENABLE_EXAMPLES=OFF \
+        -D CMAKE_BUILD_TYPE=RelWithDebInfo \
+        -D BUILD_VERSION="$VERSION" \
+        -D ENABLE_SSL=OFF \
+        -D ENABLE_SASL=OFF \
+        -D ENABLE_MONGOC=ON && cmake --build _build --config RelWithDebInfo --parallel && sudo cmake --install _build
+        rm -rf "mongo-c-driver-$VERSION"
         #if [ -f /usr/local/lib/libssl.dylib ]; then
         #  sudo mv /usr/local/lib/libssl.dylib /usr/local/lib/libssl_bak.dylib
         #fi
