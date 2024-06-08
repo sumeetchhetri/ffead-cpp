@@ -8,14 +8,14 @@ make install
 cd /tmp
 rm -rf libcuckoo-master
 
-wget -q https://ftp.osuosl.org/pub/blfs/conglomeration/unixODBC/unixODBC-2.3.7.tar.gz
-tar zxf unixODBC-2.3.7.tar.gz
-cd unixODBC-2.3.7
+wget -q https://ftp.osuosl.org/pub/blfs/conglomeration/unixODBC/unixODBC-2.3.12.tar.gz
+tar zxf unixODBC-2.3.12.tar.gz
+cd unixODBC-2.3.12
 ./configure
 make
 make install
 cd /tmp
-rm -rf unixODBC-2.3.7
+rm -rf unixODBC-2.3.12
 
 wget -q https://github.com/redis/hiredis/archive/v0.13.3.tar.gz
 tar zxf v0.13.3.tar.gz

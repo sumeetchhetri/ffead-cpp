@@ -1,4 +1,4 @@
-FROM archlinux:latest
+FROM archlinux:base-devel
 
 #RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst && \
 #    curl -LO "https://repo.archlinuxcn.org/x86_64/$patched_glibc" && \
@@ -48,7 +48,7 @@ RUN tar xf "mongo-c-driver-$VERSION.tar.gz"
 RUN rm -f "mongo-c-driver-$VERSION.tar.gz"
 RUN cd mongo-c-driver-$VERSION/ && mkdir _build && cmake -S . -B _build \
 -D ENABLE_EXTRA_ALIGNMENT=OFF \
--D ENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF \
+-D ENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF -D ENABLE_TESTS=OFF -D ENABLE_EXAMPLES=OFF \
 -D CMAKE_BUILD_TYPE=RelWithDebInfo \
 -D BUILD_VERSION="$VERSION" \
 -D ENABLE_SSL=OFF \

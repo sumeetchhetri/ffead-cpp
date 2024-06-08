@@ -38,15 +38,15 @@ cd /tmp
 rm -rf libcuckoo-master
 
 cd /tmp
-wget -q https://ftp.osuosl.org/pub/blfs/conglomeration/unixODBC/unixODBC-2.3.7.tar.gz
-tar xf unixODBC-2.3.7.tar.gz
-rm -f unixODBC-2.3.7.tar.gz
-cd unixODBC-2.3.7
+wget -q https://ftp.osuosl.org/pub/blfs/conglomeration/unixODBC/unixODBC-2.3.12.tar.gz
+tar xf unixODBC-2.3.12.tar.gz
+rm -f unixODBC-2.3.12.tar.gz
+cd unixODBC-2.3.12
 ./configure
 make
 make install
 cd /tmp
-rm -rf unixODBC-2.3.7
+rm -rf unixODBC-2.3.12
 
 crle -u -s /usr/local/lib/
 crle -64 -u -s /usr/local/lib/

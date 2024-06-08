@@ -89,7 +89,7 @@ tar xf "mongo-c-driver-$VERSION.tar.gz"
 rm -f "mongo-c-driver-$VERSION.tar.gz"
 cd mongo-c-driver-$VERSION/ && mkdir _build && cmake -G "MinGW Makefiles" -S . -B _build \
 -D ENABLE_EXTRA_ALIGNMENT=OFF \
--D ENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF \
+-D ENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF -D ENABLE_TESTS=OFF -D ENABLE_EXAMPLES=OFF \
 -D CMAKE_BUILD_TYPE=RelWithDebInfo \
 -D BUILD_VERSION="$VERSION" \
 -D ENABLE_SSL=OFF \

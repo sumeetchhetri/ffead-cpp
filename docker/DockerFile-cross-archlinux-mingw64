@@ -24,16 +24,16 @@ RUN pacman -S --noconfirm --noprogressbar gcc gcc-libs glibc libtool mingw-w64-g
 ENV TARGET=x86_64-w64-mingw32
 
 WORKDIR /tmp
-RUN wget -q https://ftp.osuosl.org/pub/blfs/conglomeration/unixODBC/unixODBC-2.3.7.tar.gz
-RUN tar zxvf unixODBC-2.3.7.tar.gz
-RUN rm -f unixODBC-2.3.7.tar.gz
-WORKDIR unixODBC-2.3.7
+RUN wget -q https://ftp.osuosl.org/pub/blfs/conglomeration/unixODBC/unixODBC-2.3.12.tar.gz
+RUN tar zxvf unixODBC-2.3.12.tar.gz
+RUN rm -f unixODBC-2.3.12.tar.gz
+WORKDIR unixODBC-2.3.12
 RUN env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar \
 	RANLIB=${TARGET}-ranlib CFLAGS="-D_FORTIFY_SOURCE=2" LDFLAGS="-lssp" ./configure --host=${TARGET} --prefix=/usr/${TARGET}
 RUN ${TARGET}-make
 RUN ${TARGET}-make install
 WORKDIR /tmp
-RUN rm -rf unixODBC-2.3.7
+RUN rm -rf unixODBC-2.3.12
 
 RUN wget -q https://github.com/sean-/ossp-uuid/archive/master.zip
 RUN unzip -qq master.zip

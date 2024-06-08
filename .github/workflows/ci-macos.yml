@@ -23,7 +23,14 @@ jobs:
     - name: Install dependencies
       run: |
         #brew unlink bazel
-        brew install libpq openssl ossp-uuid unixodbc libmemcached boost jsoncpp apr apr-util pkgconfig httpd ninja mongo-c-driver
+        brew install ossp-uuid libmemcached boost jsoncpp apr apr-util httpd ninja mongo-c-driver
+        pushd /tmp
+        wget -q https://ftp.osuosl.org/pub/blfs/conglomeration/unixODBC/unixODBC-2.3.12.tar.gz
+        tar zxf unixODBC-2.3.12.tar.gz
+        cd unixODBC-2.3.12
+        ./configure && make && make install
+        cd /tmp
+        rm -rf unixODBC-2.3.12
         #if [ -f /usr/local/lib/libssl.dylib ]; then
         #  sudo mv /usr/local/lib/libssl.dylib /usr/local/lib/libssl_bak.dylib
         #fi
@@ -42,7 +49,6 @@ jobs:
         #if [ -d /usr/local/Cellar/openssl@1.1/1.1.1g/include ]; then
         #	sudo ln -s /usr/local/Cellar/openssl@1.1/1.1.1g/include /usr/local/include/openssl
         #fi
-        pushd /tmp
         wget -q https://github.com/efficient/libcuckoo/archive/master.zip
         unzip master.zip
         rm -f master.zip
