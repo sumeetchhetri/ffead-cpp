@@ -28,7 +28,7 @@ jobs:
         wget -q https://ftp.osuosl.org/pub/blfs/conglomeration/unixODBC/unixODBC-2.3.12.tar.gz
         tar zxf unixODBC-2.3.12.tar.gz
         cd unixODBC-2.3.12
-        ./configure && make && make install
+        ./configure && make && sudo make install
         cd /tmp
         rm -rf unixODBC-2.3.12
         #if [ -f /usr/local/lib/libssl.dylib ]; then
