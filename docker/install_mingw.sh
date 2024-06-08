@@ -74,14 +74,28 @@ rm -rf libcuckoo-master
 #cd /tmp
 #rm -rf hiredis-8e0264cfd6889b73c241b60736fe96ba1322ee6e
 
-wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.16.2/mongo-c-driver-1.16.2.tar.gz
-tar xf mongo-c-driver-1.16.2.tar.gz
-rm -f mongo-c-driver-1.16.2.tar.gz
-cd mongo-c-driver-1.16.2/
-cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64/ -DCMAKE_C_FLAGS="-D__USE_MINGW_ANSI_STDIO=1" .
-mingw32-make -j4 install
-cd /tmp
-rm -rf mongo-c-driver-1.16.2
+#wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.16.2/mongo-c-driver-1.16.2.tar.gz
+#tar xf mongo-c-driver-1.16.2.tar.gz
+#rm -f mongo-c-driver-1.16.2.tar.gz
+#cd mongo-c-driver-1.16.2/
+#cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64/ -DCMAKE_C_FLAGS="-D__USE_MINGW_ANSI_STDIO=1" .
+#mingw32-make -j4 install
+#cd /tmp
+#rm -rf mongo-c-driver-1.16.2
+
+VERSION=1.26.2
+wget "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/$VERSION.tar.gz" --output-document="mongo-c-driver-$VERSION.tar.gz"
+tar xf "mongo-c-driver-$VERSION.tar.gz"
+rm -f "mongo-c-driver-$VERSION.tar.gz"
+cd mongo-c-driver-$VERSION/ && mkdir _build && cmake -G "MinGW Makefiles" -S . -B _build \
+-D ENABLE_EXTRA_ALIGNMENT=OFF \
+-D ENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF \
+-D CMAKE_BUILD_TYPE=RelWithDebInfo \
+-D BUILD_VERSION="$VERSION" \
+-D ENABLE_SSL=OFF \
+-D ENABLE_SASL=OFF -DCMAKE_INSTALL_PREFIX=/mingw64/ -DCMAKE_C_FLAGS="-D__USE_MINGW_ANSI_STDIO=1" \
+-D ENABLE_MONGOC=ON && cmake --build _build --config RelWithDebInfo --parallel && cmake --install _build
+rm -rf "mongo-c-driver-$VERSION"
 
 cd /tmp/ffead-cpp-src
 mkdir build

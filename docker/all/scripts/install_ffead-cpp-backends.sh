@@ -83,7 +83,7 @@ CURR_TYPE="CppServer"
 if [ "$CURR_TYPE" = "CppServer" ]
 then
 	apt install --no-install-recommends -y python3 python3-pip
-	pip3 install gil
+	pip3 install gil --break-system-packages
 	cd $IROOT
 	git clone https://github.com/chronoxor/CppServer
 	cd CppServer

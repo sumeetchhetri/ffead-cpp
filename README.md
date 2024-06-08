@@ -172,7 +172,7 @@ Quickstart (Using meson)
 
 Quickstart (Using scons)
 ===========
-- Install scons `pip3 install scons` and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
+- Install scons `pip3 install scons --break-system-packages` and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
 - scons -Q (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
 - cd ../ffead-cpp-7.0-bin/ (Navigate to the ffead-cpp binary folder)

@@ -1875,7 +1875,7 @@ bool FpgWire::connect(std::string host, int port, bool isAsync, std::string data
 	fd = Client::conn(host, port);
 	if(fd==-1) return false;
 	if(!isAsync) {
-#if defined(CYGWIN) || defined(MINGW)
+#if defined(MINGW)
 	DWORD timeout = 1 * 1000;
 	setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof timeout);
 #else
