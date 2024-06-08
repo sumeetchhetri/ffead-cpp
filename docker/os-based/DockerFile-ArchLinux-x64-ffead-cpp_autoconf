@@ -5,7 +5,7 @@ FROM archlinux:latest
 #    bsdtar -C / -xvf "$patched_glibc"
 #RUN echo "IgnorePkg   = glibc" >> /etc/pacman.conf
 
-RUN pacman -Sy --noconfirm gcc gcc-libs glibc autoconf-archive autoconf automake libtool make clang unixodbc curl postgresql-libs libmemcached cmake openssh wget gnu-netcat tar gzip zlib unzip gawk grep sed core/binutils diffutils procps-ng openldap
+RUN pacman -Sy --noconfirm gcc gcc-libs autoconf-archive clang unixodbc postgresql-libs libmemcached cmake openssh wget gnu-netcat unzip
 
 #Install libcuckoo headers
 WORKDIR /tmp
