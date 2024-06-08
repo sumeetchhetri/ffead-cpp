@@ -3,7 +3,7 @@ FROM ubuntu:latest
 ENV DEBIAN_FRONTEND noninteractive
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 RUN apt update -yqq && apt install -yqq gcc g++ software-properties-common cmake unzip libpcre3-dev zlib1g-dev libpq-dev \
-	libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat \
+	libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat-traditional \
 	libreadline-dev ccache git rapidjson-dev libpugixml-dev && rm -rf /var/lib/apt/lists/*
 RUN wget https://cdn.jsdelivr.net/gh/xmake-io/xmake@master/scripts/get.sh -O -  | bash
 ENV PATH="/root/.local/bin:${PATH}"

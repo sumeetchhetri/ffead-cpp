@@ -13,7 +13,7 @@ echo "deb https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse"
 
 apt-get -yqq update > /dev/null
 apt-get -yqq install locales autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpcre3-dev zlib1g-dev \
-	libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat \
+	libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat-traditional \
 	memcached redis-server gdb ninja-build telnet net-tools vim
 
 #POSTGRESQL

@@ -21,7 +21,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg ma
 
 RUN apt-get -yqq update > /dev/null
 RUN apt-get -yqq install dirmngr gnupg apt-transport-https ca-certificates software-properties-common locales autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpcre3-dev zlib1g-dev \
-	libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat \
+	libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev wget netcat-traditional \
 	memcached redis-server gdb ninja-build telnet net-tools vim
 
 #POSTGRESQL
