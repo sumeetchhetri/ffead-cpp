@@ -14,7 +14,7 @@ concurrency:
 jobs:
   macos:
     runs-on: ${{ matrix.os }}
-    if: "!contains(github.event.head_commit.message, '[skip_build]')"
+    if: "!contains(github.event.head_commit.message, '[skip_build_mac]')"
     strategy:
       matrix:
         os: [macOS-latest]
@@ -22,28 +22,30 @@ jobs:
     - uses: actions/checkout@v4
     - name: Install dependencies
       run: |
-        #brew unlink bazel
-        brew install ossp-uuid libmemcached boost jsoncpp apr apr-util httpd ninja
+        brew install openssl ossp-uuid libmemcached boost jsoncpp apr apr-util httpd ninja unixodbc mongo-c-driver
+        ls -ltr /usr/local/opt/
+        ls -ltr /opt/homebrew/include
+        ls -ltr /opt/homebrew/lib
         pushd /tmp
-        wget -q https://ftp.osuosl.org/pub/blfs/conglomeration/unixODBC/unixODBC-2.3.12.tar.gz
-        tar zxf unixODBC-2.3.12.tar.gz
-        cd unixODBC-2.3.12
-        ./configure && make && sudo make install
-        cd /tmp
-        rm -rf unixODBC-2.3.12
-        VERSION=1.26.2
-        wget "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/$VERSION.tar.gz" --output-document="mongo-c-driver-$VERSION.tar.gz"
-        tar xf "mongo-c-driver-$VERSION.tar.gz"
-        rm -f "mongo-c-driver-$VERSION.tar.gz"
-        cd mongo-c-driver-$VERSION/ && mkdir _build && cmake -S . -B _build \
-        -D ENABLE_EXTRA_ALIGNMENT=OFF \
-        -D ENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF -D ENABLE_TESTS=OFF -D ENABLE_EXAMPLES=OFF \
-        -D CMAKE_BUILD_TYPE=RelWithDebInfo \
-        -D BUILD_VERSION="$VERSION" \
-        -D ENABLE_SSL=OFF \
-        -D ENABLE_SASL=OFF \
-        -D ENABLE_MONGOC=ON && cmake --build _build --config RelWithDebInfo --parallel && sudo cmake --install _build
-        rm -rf "mongo-c-driver-$VERSION"
+        #wget -q https://ftp.osuosl.org/pub/blfs/conglomeration/unixODBC/unixODBC-2.3.12.tar.gz
+        #tar zxf unixODBC-2.3.12.tar.gz
+        #cd unixODBC-2.3.12
+        #./configure && make && sudo make install
+        #cd /tmp
+        #rm -rf unixODBC-2.3.12
+        #VERSION=1.26.2
+        #wget "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/$VERSION.tar.gz" --output-document="mongo-c-driver-$VERSION.tar.gz"
+        #tar xf "mongo-c-driver-$VERSION.tar.gz"
+        #rm -f "mongo-c-driver-$VERSION.tar.gz"
+        #cd mongo-c-driver-$VERSION/ && mkdir _build && cmake -S . -B _build \
+        #-D ENABLE_EXTRA_ALIGNMENT=OFF \
+        #-D ENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF -D ENABLE_TESTS=OFF -D ENABLE_EXAMPLES=OFF \
+        #-D CMAKE_BUILD_TYPE=RelWithDebInfo \
+        #-D BUILD_VERSION="$VERSION" \
+        #-D ENABLE_SSL=OFF \
+        #-D ENABLE_SASL=OFF \
+        #-D ENABLE_MONGOC=ON && cmake --build _build --config RelWithDebInfo --parallel && sudo cmake --install _build
+        #rm -rf "mongo-c-driver-$VERSION"
         #if [ -f /usr/local/lib/libssl.dylib ]; then
         #  sudo mv /usr/local/lib/libssl.dylib /usr/local/lib/libssl_bak.dylib
         #fi
