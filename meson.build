@@ -145,9 +145,9 @@ if get_option('MOD_SDORM_SQL') == true
 					if not cc.has_header('libpq-fe.h', args : '-I/usr/local/include/postgresql')
 						if cc.has_header('libpq-fe.h', args : '-I/usr/local/include/pgsql')
 							pqincpath = '/usr/local/include/pgsql'
-						else if cc.has_header('libpq-fe.h', args : '-I/opt/homebrew/include/postgresql')
+						elif cc.has_header('libpq-fe.h', args : '-I/opt/homebrew/include/postgresql')
 							pqincpath = '/opt/homebrew/include/postgresql'
-						else if cc.has_header('libpq-fe.h', args : '-I/opt/homebrew/include/pgsql')
+						elif cc.has_header('libpq-fe.h', args : '-I/opt/homebrew/include/pgsql')
 							pqincpath = '/opt/homebrew/include/pgsql'
 						else
 							error('libpq headers not found')
@@ -189,7 +189,7 @@ if get_option('MOD_SDORM_MONGO') == true
 	if not cc.has_header('bson.h', args : '-I/usr/include/libbson-1.0')
 		if cc.has_header('bson.h', args : '-I/usr/local/include/libbson-1.0')
 			global_includes += ['/usr/local/include/libbson-1.0']
-		else notif cc.has_header('bson.h', args : '-I/opt/homebrew/include/libbson-1.0')
+		elif cc.has_header('bson.h', args : '-I/opt/homebrew/include/libbson-1.0')
 			global_includes += ['/opt/homebrew/include/libbson-1.0']
 		else
 			error('bson headers not found')
@@ -200,7 +200,7 @@ if get_option('MOD_SDORM_MONGO') == true
 	if not cc.has_header('mongoc.h', args : '-I/usr/include/libmongoc-1.0')
 		if cc.has_header('mongoc.h', args : '-I/usr/local/include/libmongoc-1.0')
 			global_includes += ['/usr/local/include/libmongoc-1.0']
-		else notif cc.has_header('mongoc.h', args : '-I/opt/homebrew/include/libmongoc-1.0')
+		elif cc.has_header('mongoc.h', args : '-I/opt/homebrew/include/libmongoc-1.0')
 			global_includes += ['/opt/homebrew/include/libmongoc-1.0']
 		else
 			error('mongoc headers not found')

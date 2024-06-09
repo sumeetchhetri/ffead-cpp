@@ -170,14 +170,14 @@ if bool(mod_mongo):
 		if FindFile('bson.h', '/usr/include/libbson-1.0'):
 			conf.env.Append(CPPPATH=['/usr/include/libbson-1.0'])
 			conf.env.Append(CPPPATH=['/usr/include/libmongoc-1.0'])
+			conf.env.Append(CPPDEFINES=['HAVE_BSONLIB', 'HAVE_MONGOCLIB', 'HAVE_BSONINC', 'HAVE_MONGOINC', 'INC_SDORM', 'INC_SDORM_MONGO'])
 		elif FindFile('bson.h', '/usr/local/include/libbson-1.0'):
 			conf.env.Append(CPPPATH=['/usr/local/include/libbson-1.0'])
 			conf.env.Append(CPPPATH=['/usr/local/include/libmongoc-1.0'])
+			conf.env.Append(CPPDEFINES=['HAVE_BSONLIB', 'HAVE_MONGOCLIB', 'HAVE_BSONINC', 'HAVE_MONGOINC', 'INC_SDORM', 'INC_SDORM_MONGO'])
 		elif FindFile('bson.h', '/opt/homebrewinclude/libbson-1.0'):
 			conf.env.Append(CPPPATH=['/opt/homebrew/include/libbson-1.0'])
 			conf.env.Append(CPPPATH=['/opt/homebrew/include/libmongoc-1.0'])
-			
-		if oi or li:
 			conf.env.Append(CPPDEFINES=['HAVE_BSONLIB', 'HAVE_MONGOCLIB', 'HAVE_BSONINC', 'HAVE_MONGOINC', 'INC_SDORM', 'INC_SDORM_MONGO'])
 	else:
 		print('Did not find mongo development files!')
