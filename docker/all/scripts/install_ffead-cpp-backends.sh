@@ -31,6 +31,7 @@ then
 	SRV_TYPE=SRV_DROGON
 	git clone --recurse-submodules https://github.com/sumeetchhetri/drogon
 	cd  drogon
+	sed -i "s/#include <stdio.h>/#include <stdio.h>\n#include <cstdint>/g" trantor/trantor/utils/MsgBuffer.h
 	mkdir build
 	cd build
 	cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_CTL=off -DBUILD_EXAMPLES=off -DBUILD_ORM=off ..
@@ -73,6 +74,8 @@ then
 	cd $IROOT
 	git clone https://github.com/sumeetchhetri/uv-cpp
 	cd uv-cpp
+	sed -i "s/#include <string>/#include <string>\n#include <cstdint>/g" uv/include/GlobalConfig.hpp
+	sed -i "s/#include <string>/#include <string>\n#include <cstdint>/g" uv/include/http/HttpCommon.hpp
 	cmake .
 	make -j4 install
 	cd $IROOT

@@ -113,6 +113,10 @@ sed -i 's|web/peer-server/src/autotools/Makefile||g' configure.ac
 
 #./autogen.sh
 #./configure --enable-debug=no --enable-apachemod=yes --enable-nginxmod=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes CPPFLAGS="$CPPFLAGS -I${IROOT}/include/libmongoc-1.0 -I${IROOT}/include/libbson-1.0 -I${IROOT}/include/" LDFLAGS="$LDFLAGS -L${IROOT} -L${IROOT}/lib"
+sed -i "s/if(NOT DEBUG)/if(DEBUG)/g" CMakeLists.txt
+sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/ffead-cpp-nghttp2|#install(FILES ${PROJECT_BINARY_DIR}/ffead-cpp-nghttp2|g' CMakeLists.txt
+mv /usr/local/lib/libnghttp2.so* /tmp/
+find / -name "libnghttp2.so*"
 cmake -DSRV_ALL=on -DCINATRA_INCLUDES=${IROOT}/cinatra/include -DMOD_APACHE=on -DMOD_NGINX=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DDEBUG=${DEBUG} -DWITH_RAPIDJSON=on -DWITH_PUGIXML=on -GNinja .
 
 cp resources/sample-odbcinst.ini ${IROOT}/odbcinst.ini
