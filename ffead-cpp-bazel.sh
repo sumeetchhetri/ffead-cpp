@@ -33,7 +33,8 @@ function do_start() {
 		cpp_flags "-g"
 	fi
 	l_flags ""
-	add_lib_path "/usr/local/opt/openssl/lib" "/usr/local/lib"
+	add_lib_path "/usr/local/opt/openssl/lib" "/usr/local/lib" "/opt/homebrew/lib"
+	add_inc_path "/opt/homebrew/include" "/opt/homebrew/include/postgresql" "/opt/homebrew/include/pgsql" "/opt/homebrew/include/libmongoc-1.0" "/opt/homebrew/include/libbson-1.0"
 	add_inc_path "/usr/local/opt/openssl/include" "/usr/local/include" "/usr/include/libmongoc-1.0"
 	add_inc_path "/usr/include/libbson-1.0" "/usr/local/include/libmongoc-1.0" "/usr/local/include/libbson-1.0"
 	add_inc_path "/usr/include/postgresql" "/usr/include/pgsql" "/usr/local/include/postgresql" "/usr/local/include/pgsql"

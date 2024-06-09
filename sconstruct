@@ -54,6 +54,8 @@ if platform == 'darwin':
 
 library_paths.append("/usr/local/lib")
 cppPath.append("/usr/local/include")
+library_paths.append("/opt/homebrew/lib")
+cppPath.append("/opt/homebrew/include")
 print("library_paths = %s" % library_paths)
 
 common_env.Append(CPPPATH 		= cppPath)
@@ -139,15 +141,21 @@ if bool(mod_sql):
 		if FindFile('libpq-fe.h', '/usr/include/postgresql'):
 			pqhdr = True
 			conf.env.Append(CPPPATH=['/usr/include/postgresql'])
-		if FindFile('libpq-fe.h', '/usr/include/pgsql'):
+		elif FindFile('libpq-fe.h', '/usr/include/pgsql'):
 			pqhdr = True
 			conf.env.Append(CPPPATH=['/usr/include/pgsql'])
-		if FindFile('libpq-fe.h', '/usr/local/include/postgresql'):
+		elif FindFile('libpq-fe.h', '/usr/local/include/postgresql'):
 			pqhdr = True
 			conf.env.Append(CPPPATH=['/usr/local/include/postgresql'])
-		if FindFile('libpq-fe.h', '/usr/local/include/pgsql'):
+		elif FindFile('libpq-fe.h', '/usr/local/include/pgsql'):
 			pqhdr = True
 			conf.env.Append(CPPPATH=['/usr/local/include/pgsql'])
+		elif FindFile('libpq-fe.h', '/opt/homebrew/include/postgresql'):
+			pqhdr = True
+			conf.env.Append(CPPPATH=['/opt/homebrew/include/postgresql'])
+		elif FindFile('libpq-fe.h', '/opt/homebrew/include/pgsql'):
+			pqhdr = True
+			conf.env.Append(CPPPATH=['/opt/homebrew/include/pgsql'])
 		if pqhdr:
 			conf.env.Append(CPPDEFINES=['HAVE_PQHDR', 'HAVE_LIBPQ'])
 			if conf.CheckFunc('PQenterBatchMode', '#include <libpq-fe.h>'):
@@ -159,14 +167,15 @@ if bool(mod_sql):
 mod_mongo = ARGUMENTS.get('MOD_SDORM_MONGO', True)
 if bool(mod_mongo):
 	if conf.CheckLib('bson-1.0') and conf.CheckLib('mongoc-1.0'):
-		oi = FindFile('bson.h', '/usr/include/libbson-1.0')
-		li = FindFile('bson.h', '/usr/local/include/libbson-1.0')
-		if oi:
+		if FindFile('bson.h', '/usr/include/libbson-1.0'):
 			conf.env.Append(CPPPATH=['/usr/include/libbson-1.0'])
 			conf.env.Append(CPPPATH=['/usr/include/libmongoc-1.0'])
-		elif li:
+		elif FindFile('bson.h', '/usr/local/include/libbson-1.0'):
 			conf.env.Append(CPPPATH=['/usr/local/include/libbson-1.0'])
 			conf.env.Append(CPPPATH=['/usr/local/include/libmongoc-1.0'])
+		elif FindFile('bson.h', '/opt/homebrewinclude/libbson-1.0'):
+			conf.env.Append(CPPPATH=['/opt/homebrew/include/libbson-1.0'])
+			conf.env.Append(CPPPATH=['/opt/homebrew/include/libmongoc-1.0'])
 			
 		if oi or li:
 			conf.env.Append(CPPDEFINES=['HAVE_BSONLIB', 'HAVE_MONGOCLIB', 'HAVE_BSONINC', 'HAVE_MONGOINC', 'INC_SDORM', 'INC_SDORM_MONGO'])

@@ -163,9 +163,9 @@ case "$host" in
     is_librt_available="no"
     #AC_DEFINE(OS_BSD, [], [set OS to bsd])
     AC_DEFINE(OS_DARWIN, [1], [set OS to darwin])
-    CPPFLAGS="$CPPFLAGS -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -O3"
-    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -O3"
-    LDFLAGS="$LDFLAGS -L/usr/local/opt/unixodbc/lib/ -L/usr/local/lib"
+    CPPFLAGS="$CPPFLAGS -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -I/opt/homebrew/include -O3"
+    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -I/opt/homebrew/include -O3"
+    LDFLAGS="$LDFLAGS -L/usr/local/opt/unixodbc/lib/ -L/usr/local/lib -L/opt/homebrew/lib"
     local_os_type="darwin"
     AC_ARG_WITH([ssl_inc_dir],
 		[],
@@ -369,8 +369,8 @@ if test "x$mod_sdormsql" = "xyes"; then
 		AM_CXXFLAGS="$AM_CXXFLAGS -I${with_top_inc_dir}/postgresql -I${with_top_inc_dir}/pgsql -I${with_top_inc_dir}/unixodbc"
 	    CPPFLAGS="$CPPFLAGS -I${with_top_inc_dir}/postgresql -I${with_top_inc_dir}/pgsql -I${with_top_inc_dir}/unixodbc"
 	else
-		AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/include/postgresql -I/usr/include/pgsql -I/usr/local/include/postgresql -I/usr/local/include/pgsql -I/usr/local/include/unixodbc"
-	    CPPFLAGS="$CPPFLAGS -I/usr/include/postgresql -I/usr/include/pgsql -I/usr/local/include/postgresql -I/usr/local/include/pgsql -I/usr/local/include/unixodbc"
+		AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/include/postgresql -I/usr/include/pgsql -I/opt/homebrew/include/postgresql -I/opt/homebrew/include/pgsql -I/usr/local/include/postgresql -I/usr/local/include/pgsql -I/usr/local/include/unixodbc"
+	    CPPFLAGS="$CPPFLAGS -I/usr/include/postgresql -I/usr/include/pgsql -I/opt/homebrew/include/postgresql -I/opt/homebrew/include/pgsql -I/usr/local/include/postgresql -I/usr/local/include/pgsql -I/usr/local/include/unixodbc"
 	fi
     AC_DEFINE(INC_SDORM_SQL, [], [enable data-source-orm-sql module])
     AC_DEFINE(INC_SDORM, [], [enable data-source-orm module])
@@ -392,8 +392,8 @@ if test "x$mod_sdormmongo" = "xyes"; then
 		AM_CXXFLAGS="$AM_CXXFLAGS -I${with_top_inc_dir}/libmongoc-1.0/ -I${with_top_inc_dir}/libbson-1.0"
 	    CPPFLAGS="$CPPFLAGS -I${with_top_inc_dir}/libmongoc-1.0/ -I${with_top_inc_dir}/libbson-1.0"
 	else
-		AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
-	    CPPFLAGS="$CPPFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
+		AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/opt/homebrew/include/libmongoc-1.0 -I/opt/homebrew/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
+	    CPPFLAGS="$CPPFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/opt/homebrew/include/libmongoc-1.0 -I/opt/homebrew/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
 	fi
     AC_DEFINE(INC_SDORM_MONGO, [], [enable data-source-orm-mongo module])
     AC_DEFINE(INC_SDORM, [], [enable data-source-orm module])
@@ -1206,7 +1206,11 @@ if test "x$mod_gtm" = "xyes"; then
      if test -f /usr/local/include/gtmxc_types.h; then
 		echo 'gtm gtmxc_types.h header found..'
      else
-		AC_CHECK_HEADER([gtmxc_types.h],,[AC_MSG_ERROR([gtm gtmxc_types.h header not found])])	
+	 	if test -f /opt/homebrew/include/gtmxc_types.h; then
+			echo 'gtm gtmxc_types.h header found..'
+		else
+			AC_CHECK_HEADER([gtmxc_types.h],,[AC_MSG_ERROR([gtm gtmxc_types.h header not found])])
+		fi
      fi
 fi
 

@@ -168,7 +168,8 @@ option("LIBPQ")
 			import("lib.detect.find_path")
 			local p = find_path("libpq-fe.h", {"/usr/include", "/usr/local/include", 
 												"/usr/include/postgresql", "/usr/local/include/postgresql", 
-												"/usr/include/pgsql", "/usr/local/include/pgsql"})
+												"/usr/include/pgsql", "/usr/local/include/pgsql",
+												"/opt/homebrew/include/postgresql", "/opt/homebrew/include/pgsql"})
 			if not p then
 				raise('libpq headers not found')
 			end
@@ -178,9 +179,9 @@ option("LIBPQ")
 	        option:add(l)
 	        
 	        import("lib.detect.find_path")
-			local p = find_path("libpq-fe.h", {"/usr/include", "/usr/local/include", "/usr/include/postgresql", "/usr/local/include/postgresql"})
+			local p = find_path("libpq-fe.h", {"/usr/include", "/usr/local/include", "/usr/include/postgresql", "/usr/local/include/postgresql", "/opt/homebrew/include/postgresql"})
 			if not p then
-				p = find_path("libpq-fe.h", {"/usr/include/pgsql", "/usr/local/include/pgsql"})
+				p = find_path("libpq-fe.h", {"/usr/include/pgsql", "/usr/local/include/pgsql", "/opt/homebrew/include/pgsql"})
 				if not p then
 					raise('libpq headers not found')
 				end
@@ -287,9 +288,9 @@ option("CHECK_REGEX")
 		        option:set("configvar", "HAVE_ONIG_REGEX_LIB", 1)
 		        
 		        import("lib.detect.find_path")
-				local p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp"})
+				local p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp", "/opt/homebrew/include/ossp"})
 				if not p then
-					p = find_path("uuid.h", {"/usr/include", "/usr/local/include"})
+					p = find_path("uuid.h", {"/usr/include", "/usr/local/include", "/opt/homebrew/include"})
 					if not p then
 						raise('uuid headers not found')
 					end
@@ -313,7 +314,7 @@ option("CHECK_UUID")
 				raise('uuid library not found')
 			else
 				import("lib.detect.find_path")
-				local p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp"})
+				local p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp", "/opt/homebrew/include/ossp"})
 				if not p then
 					p = find_path("uuid.h", {"/usr/include", "/usr/local/include"})
 					if not p then
@@ -387,13 +388,13 @@ option("MOD_SDORM_MONGO")
 			option:set("configvar", "INC_SDORM_MONGO", 1)
 			
 			import("lib.detect.find_path")
-			local p = find_path("mongoc.h", {"/usr/include/libmongoc-1.0", "/usr/local/include/libmongoc-1.0"})
+			local p = find_path("mongoc.h", {"/usr/include/libmongoc-1.0", "/usr/local/include/libmongoc-1.0", "/opt/homebrew/include/libmongoc-1.0"})
 			if not p then
 				raise('mongoc headers not found')
 			end
 			option:add("includedirs", p)
 			
-			p = find_path("bson.h", {"/usr/include/libbson-1.0", "/usr/local/include/libbson-1.0"})
+			p = find_path("bson.h", {"/usr/include/libbson-1.0", "/usr/local/include/libbson-1.0", "/opt/homebrew/include/libbson-1.0"})
 			if not p then
 				raise('bson headers not found')
 			end

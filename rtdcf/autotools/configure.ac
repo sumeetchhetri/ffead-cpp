@@ -116,7 +116,8 @@ case "$host" in
     AC_DEFINE(OS_DARWIN, [], [set OS to darwin])
     local_os_type="darwin"
     is_librt_available="no"
-    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
+    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include -I/opt/homebrew/include"
+    LDFLAGS="$LDFLAGS -L/usr/local/lib -L/opt/homebrew/lib"
     ;;
 *-sco*)
     AC_DEFINE(OS_SCO, [], [set OS to sco])
@@ -130,7 +131,7 @@ if test "x$mod_script" = "xtrue"; then
 fi
 
 if test "x$mod_sdormmongo" = "xtrue"; then
-	AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
+	AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/opt/homebrew/include/libmongoc-1.0 -I/opt/homebrew/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
 fi
 
 # store current user given compiler flags to avoid default setup via AC_PROG_CXX

@@ -26,6 +26,10 @@ if not cc.has_header('libpq-fe.h')
 			if not cc.has_header('libpq-fe.h', args : '-I/usr/local/include/postgresql')
 				if cc.has_header('libpq-fe.h', args : '-I/usr/local/include/pgsql')
 					pqincpath = '/usr/local/include/pgsql'
+				else if cc.has_header('libpq-fe.h', args : '-I/opt/homebrew/include/postgresql')
+					pqincpath = '/opt/homebrew/include/postgresql'
+				else if cc.has_header('libpq-fe.h', args : '-I/opt/homebrew/include/pgsql')
+					pqincpath = '/opt/homebrew/include/pgsql'
 				endif
 			else
 				pqincpath = '/usr/local/include/postgresql'
@@ -42,6 +46,8 @@ endif
 if not cc.has_header('bson.h', args : '-I/usr/include/libbson-1.0')
 	if cc.has_header('bson.h', args : '-I/usr/local/include/libbson-1.0')
 		wd_includes += ['/usr/local/include/libbson-1.0']
+	else if cc.has_header('bson.h', args : '-I/opt/homebrew/include/libbson-1.0')
+		wd_includes += ['/opt/homebrew/include/libbson-1.0']
 	endif
 else
 	wd_includes += ['/usr/include/libbson-1.0']
@@ -49,6 +55,8 @@ endif
 if not cc.has_header('mongoc.h', args : '-I/usr/include/libmongoc-1.0')
 	if cc.has_header('mongoc.h', args : '-I/usr/local/include/libmongoc-1.0')
 		wd_includes += ['/usr/local/include/libmongoc-1.0']
+	else if cc.has_header('mongoc.h', args : '-I/opt/homebrew/include/libmongoc-1.0')
+		wd_includes += ['/opt/homebrew/include/libmongoc-1.0']
 	endif
 else
 	wd_includes += ['/usr/include/libmongoc-1.0']

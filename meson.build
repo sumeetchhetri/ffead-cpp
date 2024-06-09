@@ -57,8 +57,8 @@ endif
 libssl = []
 libcrypto = []
 if build_machine.system().contains('darwin')
-	libssl = cc.find_library('ssl', required: false, dirs: ['/usr/local/opt/openssl/lib/', '/usr/local/lib'])
-	libcrypto = cc.find_library('crypto', required: false, dirs: ['/usr/local/opt/openssl/lib/', '/usr/local/lib'])
+	libssl = cc.find_library('ssl', required: false, dirs: ['/usr/local/opt/openssl/lib/', '/usr/local/lib', '/opt/homebrew/lib'])
+	libcrypto = cc.find_library('crypto', required: false, dirs: ['/usr/local/opt/openssl/lib/', '/usr/local/lib', '/opt/homebrew/lib'])
 else
 	libssl = cc.find_library('ssl', required: false)
 	libcrypto = cc.find_library('crypto', required: false)
@@ -143,10 +143,14 @@ if get_option('MOD_SDORM_SQL') == true
 			if not cc.has_header('libpq-fe.h', args : '-I/usr/include/postgresql')
 				if not cc.has_header('libpq-fe.h', args : '-I/usr/include/pgsql')
 					if not cc.has_header('libpq-fe.h', args : '-I/usr/local/include/postgresql')
-						if not cc.has_header('libpq-fe.h', args : '-I/usr/local/include/pgsql')
-							error('libpq headers not found')
-						else
+						if cc.has_header('libpq-fe.h', args : '-I/usr/local/include/pgsql')
 							pqincpath = '/usr/local/include/pgsql'
+						else if cc.has_header('libpq-fe.h', args : '-I/opt/homebrew/include/postgresql')
+							pqincpath = '/opt/homebrew/include/postgresql'
+						else if cc.has_header('libpq-fe.h', args : '-I/opt/homebrew/include/pgsql')
+							pqincpath = '/opt/homebrew/include/pgsql'
+						else
+							error('libpq headers not found')
 						endif
 					else
 						pqincpath = '/usr/local/include/postgresql'
@@ -183,19 +187,23 @@ if get_option('MOD_SDORM_MONGO') == true
 	libbson = cc.find_library('bson-1.0', dirs: ['/usr/local/lib'])
 	libmongoc = cc.find_library('mongoc-1.0', dirs: ['/usr/local/lib'])
 	if not cc.has_header('bson.h', args : '-I/usr/include/libbson-1.0')
-		if not cc.has_header('bson.h', args : '-I/usr/local/include/libbson-1.0')
-			error('bson headers not found')
-		else
+		if cc.has_header('bson.h', args : '-I/usr/local/include/libbson-1.0')
 			global_includes += ['/usr/local/include/libbson-1.0']
+		else notif cc.has_header('bson.h', args : '-I/opt/homebrew/include/libbson-1.0')
+			global_includes += ['/opt/homebrew/include/libbson-1.0']
+		else
+			error('bson headers not found')
 		endif
 	else
 		global_includes += ['/usr/include/libbson-1.0']
 	endif
 	if not cc.has_header('mongoc.h', args : '-I/usr/include/libmongoc-1.0')
-		if not cc.has_header('mongoc.h', args : '-I/usr/local/include/libmongoc-1.0')
-			error('mongoc headers not found')
-		else
+		if cc.has_header('mongoc.h', args : '-I/usr/local/include/libmongoc-1.0')
 			global_includes += ['/usr/local/include/libmongoc-1.0']
+		else notif cc.has_header('mongoc.h', args : '-I/opt/homebrew/include/libmongoc-1.0')
+			global_includes += ['/opt/homebrew/include/libmongoc-1.0']
+		else
+			error('mongoc headers not found')
 		endif
 	else
 		global_includes += ['/usr/include/libmongoc-1.0']
@@ -249,7 +257,7 @@ if get_option('MOD_SOLR') == true
 endif
 
 if get_option('MOD_ELASTIC') == true
-	if cc.has_header('elasticlient/client.h', args : '-I/usr/local/include/')
+	if cc.has_header('elasticlient/client.h', args : '-I/usr/local/include/ -I/opt/homebrew/include')
 		conf_data.set('HAVE_ELASTIC', 1)
 	else
 		error('elasticlient headers not found')
@@ -261,7 +269,7 @@ if get_option('MOD_ELASTIC') == true
 	else
 		error('elastic lib not found')
 	endif
-	if cc.has_header('cpr/response.h', args : '-I/usr/local/include/')
+	if cc.has_header('cpr/response.h', args : '-I/usr/local/include/ -I/opt/homebrew/include')
 		conf_data.set('HAVE_CPR', 1)
 	else
 		error('cpr headers not found')
@@ -275,16 +283,16 @@ if get_option('MOD_ELASTIC') == true
 	endif
 endif
 
-if not cc.has_header('libcuckoo/cuckoohash_map.hh', args : '-I/usr/local/include/')
+if not cc.has_header('libcuckoo/cuckoohash_map.hh', args : '-I/usr/local/include/ -I/opt/homebrew/include')
 	error('libcuckoo headers not found')
 endif
 
-if get_option('WITH_RAPIDJSON') == true and cc.has_header('rapidjson/document.h', args : '-I/usr/local/include/')
+if get_option('WITH_RAPIDJSON') == true and cc.has_header('rapidjson/document.h', args : '-I/usr/local/include/ -I/opt/homebrew/include')
 	conf_data.set('HAVE_RAPID_JSON', 1)
 endif
 
 if get_option('WITH_PUGIXML') == true
-	if cc.has_header('pugixml.hpp', args : '-I/usr/local/include/')
+	if cc.has_header('pugixml.hpp', args : '-I/usr/local/include/ -I/opt/homebrew/include')
 		conf_data.set('HAVE_PUGI_XML', 1)
 	else
 		error('pugixml headers not found')

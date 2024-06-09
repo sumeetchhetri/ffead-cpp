@@ -17,21 +17,21 @@ function setup(target)
 	target:add({links = 'ffead-framework'})
 	
 	import("lib.detect.find_path")
-	local p = find_path("mongoc.h", {"/usr/include/libmongoc-1.0", "/usr/local/include/libmongoc-1.0"})
+	local p = find_path("mongoc.h", {"/usr/include/libmongoc-1.0", "/usr/local/include/libmongoc-1.0", "/opt/homebrew/include/libmongoc-1.0"})
 	if not p then
 		raise('mongoc headers not found')
 	else
 		target:add({includedirs = p})
 	end
-	p = find_path("bson.h", {"/usr/include/libbson-1.0", "/usr/local/include/libbson-1.0"})
+	p = find_path("bson.h", {"/usr/include/libbson-1.0", "/usr/local/include/libbson-1.0", "/opt/homebrew/include/libbson-1.0"})
 	if not p then
 		raise('bson headers not found')
 	else
 		target:add({includedirs = p})
 	end
-	p = find_path("uuid.h", {"/usr/include/uuid", "/usr/local/include/uuid", "/usr/include", "/usr/local/include"})
+	p = find_path("uuid.h", {"/usr/include/uuid", "/usr/local/include/uuid", "/usr/include", "/usr/local/include", "/opt/homebrew/include", "/opt/homebrew/include/uuid"})
 	if not p then
-		p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp"})
+		p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp", "/opt/homebrew/include/ossp"})
 		if not p then
 			raise('uuid headers not found')
 		else
@@ -40,9 +40,9 @@ function setup(target)
 	else
 		target:add({includedirs = p})
 	end
-	p = find_path("libpq-fe.h", {"/usr/include", "/usr/local/include", "/usr/include/postgresql", "/usr/local/include/postgresql"})
+	p = find_path("libpq-fe.h", {"/usr/include", "/usr/local/include", "/usr/include/postgresql", "/usr/local/include/postgresql", "/opt/homebrew/include/postgresql"})
 	if not p then
-		p = find_path("libpq-fe.h", {"/usr/include/pgsql", "/usr/local/include/pgsql"})
+		p = find_path("libpq-fe.h", {"/usr/include/pgsql", "/usr/local/include/pgsql", "/opt/homebrew/include/pgsql"})
 		if not p then
 			raise('libpq headers not found')
 		else
@@ -63,9 +63,9 @@ function setup(target)
 			raise('uuid library not found')
 		end
 		target:add({links = "ossp-uuid"})
-		p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp"})
+		p = find_path("uuid.h", {"/usr/include/ossp", "/usr/local/include/ossp", "/opt/homebrew/include/ossp"})
 		if not p then
-			p = find_path("uuid.h", {"/usr/include", "/usr/local/include"})
+			p = find_path("uuid.h", {"/usr/include", "/usr/local/include", "/opt/homebrew/include"})
 			if not p then
 				raise('uuid headers not found')
 			end
@@ -76,6 +76,7 @@ function setup(target)
 		target:add({links = "uuid"})
 	end
 	target:add({linkdirs = "/usr/local/lib"})
+	target:add({linkdirs = "/opt/homebrew/lib"})
 	target:add({linkdirs = "../lib"})
 end
 

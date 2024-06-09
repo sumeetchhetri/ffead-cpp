@@ -93,3 +93,5 @@ code-snippets-build/
 .bztmp
 prelude
 **/BUILD.bazel
+Cargo.lock
+temp/
