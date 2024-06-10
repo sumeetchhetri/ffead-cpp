@@ -1,16 +1,24 @@
+FROM ubuntu:22.04
+RUN apt-get update -y && apt-get install -yqq libh2o-evloop-dev
+
 FROM sumeetchhetri/ffead-cpp-base:7.0
 
 ENV IROOT=/installs
 
 RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/libinter.so /usr/local/lib/libdinter.so && \
-	ln -s ${IROOT}/ffead-cpp-7.0/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
-	ln -s ${IROOT}/ffead-cpp-7.0/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
-	ln -s ${IROOT}/ffead-cpp-7.0/lib/libinter.so /usr/local/lib/libinter.so && \
-	ln -s ${IROOT}/ffead-cpp-7.0/lib/libdinter.so /usr/local/lib/libdinter.so && \
-	ldconfig
+        ln -s ${IROOT}/ffead-cpp-7.0/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
+        ln -s ${IROOT}/ffead-cpp-7.0/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
+        ln -s ${IROOT}/ffead-cpp-7.0/lib/libinter.so /usr/local/lib/libinter.so && \
+        ln -s ${IROOT}/ffead-cpp-7.0/lib/libdinter.so /usr/local/lib/libdinter.so && \
+        ldconfig
 
-RUN apt-get update -y && apt-get install -yqq libh2o-evloop-dev libwslay-dev libyaml-0-2 libevent-dev libpcre3-dev \
-    	gcc wget git libssl-dev libuv1-dev ca-certificates --no-install-recommends && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y && apt-get install -yqq libwslay-dev libyaml-0-2 libevent-dev libpcre3-dev \
+        gcc wget git libssl-dev libuv1-dev ca-certificates --no-install-recommends && rm -rf /var/lib/apt/lists/*
+
+COPY --from=0 /usr/lib/x86_64-linux-gnu/libh2o* /usr/lib/x86_64-linux-gnu/
+COPY --from=0 /usr/include/h2o.h /usr/include/h2o.h
+COPY --from=0 /usr/include/h2o /usr/include/h2o
+		
 RUN wget -q https://github.com/crystal-lang/crystal/releases/download/0.26.1/crystal-0.26.1-1-linux-x86_64.tar.gz \
 	&& tar --strip-components=1 -xzf crystal-0.26.1-1-linux-x86_64.tar.gz -C /usr/ && rm -f *.tar.gz
 WORKDIR ${IROOT}/lang-server-backends/crystal/h2o.cr

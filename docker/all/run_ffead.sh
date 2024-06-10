@@ -172,7 +172,7 @@ then
 	then
 		sed -i 's|QUEUED_WRITES=false|QUEUED_WRITES=true|g' $FFEAD_CPP_PATH/resources/server.prop
 	fi
-	for i in $(seq 0 $(($(nproc --all)-1))); do
+	for i in $(seq 0 $(($(taskset 1 getconf _NPROCESSORS_ONLN)-1))); do
 		taskset -c $i ./ffead-cpp $FFEAD_CPP_PATH &
 	done
 elif [ "$2" = "lithium" ]
@@ -225,18 +225,18 @@ then
 elif [ "$2" = "crystal-http" ]
 then
 	cd ${IROOT}
-	for i in $(seq 0 $(($(nproc --all)-1))); do
+	for i in $(seq 0 $(($(taskset 1 getconf _NPROCESSORS_ONLN)-1))); do
 		taskset -c $i ./crystal-ffead-cpp.out --ffead-cpp-dir=$FFEAD_CPP_PATH --to=8080 &
 	done
 elif [ "$2" = "crystal-h2o" ]
 then
 	cd ${IROOT}
-	for i in $(seq 0 $(($(nproc --all)-1))); do
+	for i in $(seq 0 $(($(taskset 1 getconf _NPROCESSORS_ONLN)-1))); do
 	  taskset -c $i ./h2o-evloop-ffead-cpp.out --ffead-cpp-dir=$FFEAD_CPP_PATH --to=8080 &
 	done
 elif [ "$2" = "julia-http" ]
 then
-	for i in $(seq 0 $(($(nproc --all)-1))); do
+	for i in $(seq 0 $(($(taskset 1 getconf _NPROCESSORS_ONLN)-1))); do
 		julia ${IROOT}/lang-server-backends/julia/http.jl/server.jl $FFEAD_CPP_PATH
 	done
 elif [ "$2" = "swift-nio" ]
@@ -274,7 +274,7 @@ then
 elif [ "$2" = "v-vweb" ]
 then
 	cd ${IROOT}
-	for i in $(seq 0 $(($(nproc --all)-1))); do
+	for i in $(seq 0 $(($(taskset 1 getconf _NPROCESSORS_ONLN)-1))); do
 		taskset -c $i ./vweb --server_dir=$FFEAD_CPP_PATH --server_port=8080 &
 	done
 elif [ "$2" = "v-picov" ]
@@ -283,7 +283,7 @@ then
 	sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' $FFEAD_CPP_PATH/resources/server.prop
 	if [ "$3" = "postgresql-raw-async" ]
 	then
-		for i in $(seq 0 $(($(nproc --all)-1))); do
+		for i in $(seq 0 $(($(taskset 1 getconf _NPROCESSORS_ONLN)-1))); do
 			if [ "$6" = "pool" ]
 			then
 				if [ -f "main_async_pool" ]
@@ -298,7 +298,7 @@ then
 		done
 	else
 		sed -i 's|"TeBkUmLpqRouter"|"TeBkUmLpqRouterPicoV"|g' ${WEB_DIR}/config/application.xml
-		for i in $(seq 0 $(($(nproc --all)-1))); do
+		for i in $(seq 0 $(($(taskset 1 getconf _NPROCESSORS_ONLN)-1))); do
 			taskset -c $i ./main --server_dir=$FFEAD_CPP_PATH --server_port=8080 --is_async=false &
 		done
 	fi
@@ -309,7 +309,6 @@ then
 	    -server                    \
 	    -XX:+UseNUMA               \
 	    -XX:+UseParallelGC         \
-	    -XX:+AggressiveOpts        \
 	    -Dlite=false               \
 	    -Dcore=1                   \
 	    -Dframe=16                 \
@@ -327,13 +326,13 @@ then
 elif [ "$2" = "java-rapidoid" ]
 then
 	cd ${IROOT}
-	java -server -XX:+UseNUMA -XX:+UseParallelGC -XX:+AggressiveOpts \
+	java -server -XX:+UseNUMA -XX:+UseParallelGC \
 		-classpath rapidoid-ffead-cpp-1.0-jar-with-dependencies.jar \
 		com.rapidoid.ffeadcpp.Main $FFEAD_CPP_PATH 8080 profiles=production
 elif [ "$2" = "java-wizzardo-http" ]
 then
 	cd ${IROOT}
-	java -Xmx2G -Xms2G -server -XX:+UseNUMA -XX:+UseParallelGC -XX:+AggressiveOpts \
+	java -Xmx2G -Xms2G -server -XX:+UseNUMA -XX:+UseParallelGC \
 		-jar wizzardo-ffead-cpp-all-1.0.jar $FFEAD_CPP_PATH 8080 env=prod
 elif [ "$2" = "seastar" ]
 then

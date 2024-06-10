@@ -79,11 +79,11 @@ class H2oFfeadCppCry < H2o
       freq.headers_len = counter
 
 	  scode = 0
-	  smsg_len: UInt64 = 0
-	  out_mime_len: UInt64 = 0
-	  out_url_len: UInt64 = 0
-	  out_headers_len: UInt64 = 0
-	  out_body_len: UInt64 = 0
+	  smsg_len: UInt64 = 0_u64
+	  out_mime_len: UInt64 = 0_u64
+	  out_url_len: UInt64 = 0_u64
+	  out_headers_len: UInt64 = 0_u64
+	  out_body_len: UInt64 = 0_u64
 
       FfeadCppRespTL.set LibFfeadCpp.ffead_cpp_handle_crystal_js_1(pointerof(freq), pointerof(scode), out smsg, pointerof(smsg_len), out out_mime, pointerof(out_mime_len),
               out out_url, pointerof(out_url_len), freq.headers, pointerof(out_headers_len), out out_body, pointerof(out_body_len))

@@ -10,7 +10,7 @@ let package = Package(
         .executable(name: "app", targets: ["App"])
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.66.0"),
         .package(path: "../FfeadCpp"),
     ],
     targets: [
