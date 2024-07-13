@@ -32,7 +32,7 @@
 			"query_url": "/t2/quer?queries=",
 			"fortune_url": "/t2/fortu",
 			"update_url": "/t2/updt?queries=",
-			"cached_query_url": "/t2/cached-wld?count=",
+			"cached_query_url_disabled": "/t2/cached-wld?count=",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",

@@ -298,6 +298,7 @@ then
 	    -server                    \
 	    -XX:+UseNUMA               \
 	    -XX:+UseParallelGC         \
+	    -XX:+AggressiveOpts        \
 	    -Dlite=false               \
 	    -Dcore=1                   \
 	    -Dframe=16                 \
@@ -315,13 +316,13 @@ then
 elif [ "$2" = "java-rapidoid" ]
 then
 	cd ${IROOT}
-	java -server -XX:+UseNUMA -XX:+UseParallelGC \
+	java -server -XX:+UseNUMA -XX:+UseParallelGC -XX:+AggressiveOpts \
 		-classpath rapidoid-ffead-cpp-1.0-jar-with-dependencies.jar \
 		com.rapidoid.ffeadcpp.Main $FFEAD_CPP_PATH 8080 profiles=production
 elif [ "$2" = "java-wizzardo-http" ]
 then
 	cd ${IROOT}
-	java -Xmx2G -Xms2G -server -XX:+UseNUMA -XX:+UseParallelGC \
+	java -Xmx2G -Xms2G -server -XX:+UseNUMA -XX:+UseParallelGC -XX:+AggressiveOpts \
 		-jar wizzardo-ffead-cpp-all-1.0.jar $FFEAD_CPP_PATH 8080 env=prod
 elif [ "$2" = "seastar" ]
 then

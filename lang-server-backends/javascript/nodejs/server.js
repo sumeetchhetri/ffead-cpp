@@ -42,13 +42,11 @@ var libffeadcpp = ffi.Library('libffead-framework', {
     /*
 	  	void* ffead_cpp_handle_js_1(const ffead_request *request, int* scode, size_t *out_url_len, size_t *out_headers_len, size_t *out_body_len);
 		const char* ffead_cpp_handle_js_out_url(void* res);
-		const char* ffead_cpp_handle_js_out_mime(void* res);
 		const char* ffead_cpp_handle_js_out_body(void* res);
 		const char* ffead_cpp_handle_js_out_hdr_name(void* res, int pos, size_t* name_len);
 		const char* ffead_cpp_handle_js_out_hdr_value(void* res, int pos, size_t* name_len);
   	*/
     'ffead_cpp_handle_js_1': ['pointer', [ffead_request_js_ptr, c_int_ptr, c_size_t_ptr, c_size_t_ptr, c_size_t_ptr]],
-    'ffead_cpp_handle_js_out_mime': ['char *', [void_ptr]],
     'ffead_cpp_handle_js_out_url': ['char *', [void_ptr]],
     'ffead_cpp_handle_js_out_body': ['char *', [void_ptr]],
     'ffead_cpp_handle_js_out_hdr_name': ['char *', [void_ptr, 'int', c_size_t_ptr]],
