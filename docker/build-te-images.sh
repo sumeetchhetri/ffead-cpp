@@ -1,6 +1,8 @@
 ####As some images use "-march=native -mtune=native" we need to build these below images locally and push to docker
 VERSION=""
 
+#./build-te-images.sh "7.0" > build.log 2>&1 &
+
 if [ ! -z "$1" ]
 then
 	VERSION=$1
@@ -27,7 +29,7 @@ find . -type f -name '*.dockerfile' | xargs sed -i'' -e "s|-base-2:6.0|-base-2:$
 find . -type f -name '*.dockerfile' | xargs sed -i'' -e "s|version=\"6.0\"|version=\"${VERSION}\"|g"
 
 docker rmi -f sumeetchhetri/ffead-cpp-base:${VERSION}
-#DOCKER_BUILDKIT=0 
+#DOCKER_BUILDKIT=0 ----     --no-cache
 docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-base.dockerfile -t sumeetchhetri/ffead-cpp-base:${VERSION} .
 docker push sumeetchhetri/ffead-cpp-base:${VERSION}
 

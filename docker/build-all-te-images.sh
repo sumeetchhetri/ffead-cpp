@@ -1,6 +1,8 @@
 ####As some images use "-march=native -mtune=native" we need to build these below images locally and push to docker
 VERSION=""
 
+#./build-all-te-images.sh "7.0" > build.log 2>&1 &
+
 if [ ! -z "$1" ]
 then
 	VERSION=$1
