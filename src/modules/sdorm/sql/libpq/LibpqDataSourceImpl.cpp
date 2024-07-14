@@ -2310,6 +2310,10 @@ int FpgWire::handleResponse() {
 		}
 		default:
 			cmd = '\0';
+			if(!isMessageReady(ml)) {
+				return -1;
+			}
+			pos += (ml - 4);
 			break;
 	}
 	//std::cout << "buffer.size " << buffer.length() << " pos " << pos << std::endl;
