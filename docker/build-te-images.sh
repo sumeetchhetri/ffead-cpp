@@ -15,11 +15,11 @@ then
 fi
 
 cd te
-rm -rf tekp
-mkdir tekp
-cp base/*.dockerfile scripts/*.sh *.sh *.dockerfile tekp/
-#cp -rf postgresql tekp/
-cd  tekp
+rm -rf temp
+mkdir temp
+cp base/*.dockerfile scripts/*.sh *.sh *.dockerfile temp/
+#cp -rf postgresql temp/
+cd  temp
 
 VERSION="${VERSION}-te"
 
