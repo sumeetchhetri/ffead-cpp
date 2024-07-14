@@ -14,7 +14,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: "contains(github.event.head_commit.message, '[build_only_nodejs]')"
+    if: "!contains(github.event.head_commit.message, '[skip_build]')"
     steps:
     - uses: actions/checkout@v4
     - name: Build ffead-cpp with nodejs backend

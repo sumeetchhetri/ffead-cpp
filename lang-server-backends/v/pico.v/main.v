@@ -58,7 +58,6 @@ pub mut:
 }
 
 struct C.ffead_request3_t {}
-
 /*
 	const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
 	const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len, 
@@ -70,7 +69,6 @@ fn C.ffead_cpp_handle_picov_2_init_sock(int, voidptr) voidptr
 fn C.ffead_cpp_handle_picov_2_deinit_sock(int, voidptr)
 fn C.ffead_cpp_handle_picov_ext_fd_cb(int, voidptr)
 fn C.ffead_cpp_handle_picov_clean_sockets()
-
 fn C.ffead_cpp_resp_cleanup(voidptr)
 
 fn cpy_str_1(dst byteptr, src string) byteptr {
@@ -295,9 +293,9 @@ fn main() {
 	println('Bootstrapping ffead-cpp end...')
 
 	if is_async {
-		mut pv = picoev.new(server_port, &callback_async, &open_cb_async, &close_cb_async, &C.ffead_cpp_handle_picov_ext_fd_cb, true)
+		mut pv = picoev.new(server_port, &callback_async, &open_cb_async, &close_cb_async, &C.ffead_cpp_handle_picov_ext_fd_cb, true, true)
 	} else {
-		mut pv = picoev.new(server_port, &callback, &open_cb_async, &close_cb_async, &C.ffead_cpp_handle_picov_ext_fd_cb, false)
+		mut pv = picoev.new(server_port, &callback, &open_cb_async, &close_cb_async, &C.ffead_cpp_handle_picov_ext_fd_cb, false, true)
 	}
 
 	println('Initializing ffead-cpp start...')
@@ -319,7 +317,7 @@ fn main() {
 
 	println('Initializing ffead-cpp end...')
 	
-	pv.listen(server_port, is_async)
+	pv.listen(server_port)
 	println('Listening on port $server_port ...')
 	pv.serve()
 
