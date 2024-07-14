@@ -293,7 +293,7 @@ fn main() {
 	println('Bootstrapping ffead-cpp end...')
 
 	if is_async {
-		mut pv = picoev.new(server_port, &callback_async, &open_cb_async, &close_cb_async, &C.ffead_cpp_handle_picov_ext_fd_cb, true, true)
+		mut pv = picoev.new(server_port, &callback_async, &open_cb_async, &close_cb_async, &C.ffead_cpp_handle_picov_ext_fd_cb, true, false)
 	} else {
 		mut pv = picoev.new(server_port, &callback, &open_cb_async, &close_cb_async, &C.ffead_cpp_handle_picov_ext_fd_cb, false, true)
 	}
