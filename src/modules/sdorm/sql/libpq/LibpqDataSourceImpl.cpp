@@ -853,6 +853,7 @@ void LibpqDataSourceImpl::executeMultiQuery(LibpqQuery* q) {
 		q->isPrepared = false;
 		wire->q = q;
 		wire->selectQuery(*q);
+		wire->q = NULL;
 		return;
 	}
 #ifdef HAVE_LIBPQ
@@ -973,6 +974,7 @@ void LibpqDataSourceImpl::executeUpdateMultiQuery(LibpqQuery* q) {
 		q->isPrepared = false;
 		wire->q = q;
 		wire->selectQuery(*q);
+		wire->q = NULL;
 		return;
 	}
 #ifdef HAVE_LIBPQ
@@ -1009,6 +1011,7 @@ void LibpqDataSourceImpl::executeQuery(LibpqQuery* q) {
 		q->isSelect = true;
 		wire->q = q;
 		wire->selectQuery(*q);
+		wire->q = NULL;
 		return;
 	}
 #ifdef HAVE_LIBPQ
@@ -1104,7 +1107,9 @@ bool LibpqDataSourceImpl::executeUpdateQuery(LibpqQuery* q) {
 	if(isWire) {
 		if(isAsync) return false;
 		wire->q = q;
-		return wire->updateQuery(*q);
+		bool fl = wire->updateQuery(*q);
+		wire->q = NULL;
+		return fl;
 	}
 #ifdef HAVE_LIBPQ
 	PGresult *res = executeSync(q);

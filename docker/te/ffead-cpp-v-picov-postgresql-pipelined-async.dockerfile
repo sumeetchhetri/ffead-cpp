@@ -4,4 +4,4 @@ ENV IROOT=/installs
 
 WORKDIR /
 
-CMD ./run_ffead.sh ffead-cpp-7.0-sql v-picov postgresql-raw-async memory batch
+CMD ./run_ffead.sh ffead-cpp-7.0-sql v-picov postgresql-raw-async none batch

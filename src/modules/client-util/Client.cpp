@@ -53,7 +53,7 @@ int Client::conn(const std::string& host, const int& port) {
 	if(host!="localhost" && host!="0.0.0.0" && host!="127.0.0.1") {
 		if(!isIPAddress(host.c_str())) {
 			char* ip = get_ip((char*)host.c_str());
-			fprintf(stderr, "IP is %s\n", ip);
+			//fprintf(stderr, "IP is %s\n", ip);
 			int tmpres = inet_pton(AF_INET, ip, (void *)(&(remote->sin_addr.s_addr)));
 			if( tmpres < 0)
 			{
@@ -144,7 +144,7 @@ bool Client::connection(const std::string& host, const int& port)
 
 	if(host!="localhost" && host!="0.0.0.0" && host!="127.0.0.1") {
 		char* ip = get_ip((char*)host.c_str());
-		fprintf(stderr, "IP is %s\n", ip);
+		//fprintf(stderr, "IP is %s\n", ip);
 		int tmpres = inet_pton(AF_INET, ip, (void *)(&(remote->sin_addr.s_addr)));
 		if( tmpres < 0)
 		{
