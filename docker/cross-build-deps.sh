@@ -104,12 +104,14 @@ build_curl() {
 				LD=$TOOLCHAIN/bin/ld RANLIB=$TOOLCHAIN/bin/llvm-ranlib STRIP=$TOOLCHAIN/bin/llvm-strip LIBS="-lssl -lcrypto" \
 				LDFLAGS="-L${STAGE_DIR}/lib" CPPFLAGS="-I${STAGE_DIR}/include" ./configure --build=`./config.guess` --target="${TARGET}" --host="${TARGET}" --prefix=${STAGE_DIR} \
 				--with-ssl=${STAGE_DIR} --with-zlib --disable-ftp --disable-gopher --disable-file --disable-imap --disable-ldap --disable-ldaps --disable-pop3 --disable-proxy \
-				--disable-rtsp --disable-smtp --disable-telnet --disable-tftp --without-gnutls --without-libidn --without-librtmp --disable-dict
+				--disable-rtsp --disable-smtp --disable-telnet --disable-tftp --without-gnutls --without-libidn --without-librtmp --disable-dict --without-nghttp2 --without-libidn2 \
+				--without-libpsl --disable-ldap --disable-ldaps --enable-shared --disable-dependency-tracking
     	else
 			env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib \
 				LDFLAGS="-L${STAGE_DIR}/lib" CPPFLAGS="-I${STAGE_DIR}/include" ./configure --build=`./config.guess` --target="${TARGET}" --host="${TARGET}" --prefix=${STAGE_DIR} \
 				--with-ssl=${STAGE_DIR} --with-zlib --disable-ftp --disable-gopher --disable-file --disable-imap --disable-ldap --disable-ldaps --disable-pop3 --disable-proxy \
-				--disable-rtsp --disable-smtp --disable-telnet --disable-tftp --without-gnutls --without-libidn --without-librtmp --disable-dict
+				--disable-rtsp --disable-smtp --disable-telnet --disable-tftp --without-gnutls --without-libidn --without-librtmp --disable-dict --without-nghttp2 --without-libidn2 \
+				--without-libpsl --disable-ldap --disable-ldaps --enable-shared --disable-dependency-tracking
 		fi
 		make -j"$(nproc)" > /dev/null
 		make install

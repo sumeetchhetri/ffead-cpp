@@ -51,7 +51,8 @@ echo "https://www.openssl.org/source/${LIB_NAME}.tar.gz"
 DEVELOPER=
 SDK_VERSION=
 #rm -rf "${LIB_DEST_DIR}" "${LIB_NAME}"
-[ -f "${LIB_NAME}.tar.gz" ] || curl https://www.openssl.org/source/${LIB_NAME}.tar.gz >${LIB_NAME}.tar.gz
+#[ -f "${LIB_NAME}.tar.gz" ] || curl https://www.openssl.org/source/${LIB_NAME}.tar.gz >${LIB_NAME}.tar.gz
+wget -q https://www.openssl.org/source/${LIB_NAME}.tar.gz
 
 set_android_toolchain_bin
 
