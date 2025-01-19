@@ -58,7 +58,7 @@
 /*Fix for Windows Cygwin*///#include <sys/epoll.h>
 
 #define MAXEPOLLSIZES 10000
-#define BACKLOGM 500
+#define BACKLOGM 4096
 
 class Writer;
 class BaseSocket;

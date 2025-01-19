@@ -2093,8 +2093,22 @@ int FpgWire::handleResponse() {
 			if(!isMessageReady(ml)) {
 				return -1;
 			}
-			err = readString(ml-4);
-			std::cout << "error received = " << err << std::endl;
+			FpgWirePgError error;
+			int remaining = ml - 4;
+			while(remaining > 0) {
+				char fieldType = readChar();
+				std::string value = readString();
+				remaining -= (value.length() + 2);  // +2 for field type and null terminator
+				
+				switch(fieldType) {
+					case 'S': error.severity = value[0]; break;
+					case 'C': error.code = value; break;
+					case 'M': error.message = value; break;
+					case 'D': error.detail = value; break;
+					case 'H': error.hint = value; break;
+				}
+			}
+			std::cout << "error received = " << error.severity << "|" << error.code << "|" << error.message << "|" << error.detail << "|" << error.hint << std::endl;
 			querystatus = -1;
 			cd = 1;
 			state = 'I';

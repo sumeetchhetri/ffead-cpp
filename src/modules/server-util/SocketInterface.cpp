@@ -512,25 +512,33 @@ int BaseSocket::readFrom()
 #endif
 	if(!isSecure()) {
 		int er = 0;
-		do {
+		while(true) {
 			er = recv(fd, buff, 8192, 0);
-			switch(er) {
-				case -1:
-				case 0:
-					if (er == -1 && errno == EAGAIN) {
-						return -1;
-					} else {
+			if (er == 0) {
+                // Connection closed by peer
 #if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL)
-						eh->unRegisterRead(fd);
+				eh->unRegisterRead(fd);
 #endif
-						closeSocket();
-						return 0;
-					}
-				default:
-					buffer.append(buff, er);
-					break;
-			}
-		} while(er>0);
+				closeSocket();
+                return 0;
+            }
+            
+            if (er < 0) {
+                if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                    return -1;  // Would block, try again later
+                }
+                if (errno == EINTR) {
+                    continue;  // Interrupted, try again
+                }
+#if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL)
+				eh->unRegisterRead(fd);
+#endif
+				closeSocket();
+                return -1;
+            }
+			buffer.append(buff, er);
+			if(er<8192) break;
+		}
 	} else {
 		return secureReadFrom();
 	}
@@ -544,31 +552,33 @@ int BaseSocket::readSync()
 #endif
 	if(!isSecure()) {
 		int er = 0;
-		do {
-			/*#if defined(MINGW) || defined(MINGW)
-			unsigned long l;
-			ioctlsocket(fd, FIONREAD, &l);
-			er = recv(fd, buff, l, 0);
-			#else*/
+		while(true) {
 			er = recv(fd, buff, 8192, 0);
-			//#endif
-			switch(er) {
-				case -1:
-				case 0:
-					if (errno == EAGAIN || errno == EWOULDBLOCK) {
-						return -1;
-					} else {
+			if (er == 0) {
+                // Connection closed by peer
 #if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL)
-						eh->unRegisterRead(fd);
+				eh->unRegisterRead(fd);
 #endif
-						closeSocket();
-						return 0;
-					}
-				default:
-					buffer.append(buff, er);
-					break;
-			}
-		} while(er==8192);
+				closeSocket();
+                return 0;
+            }
+            
+            if (er < 0) {
+                if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                    return -1;  // Would block, try again later
+                }
+                if (errno == EINTR) {
+                    continue;  // Interrupted, try again
+                }
+#if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL)
+				eh->unRegisterRead(fd);
+#endif
+				closeSocket();
+                return -1;
+            }
+			buffer.append(buff, er);
+			if(er<8192) break;
+		}
 	} else {
 		return secureReadSync();
 	}

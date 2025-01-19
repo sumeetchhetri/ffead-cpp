@@ -30,7 +30,7 @@
 #include "SSLHandler.h"
 #endif
 
-#define MAXDESCRIPTORS 1024
+#define MAXDESCRIPTORS 4096
 #define OP_READ     0
 #define OP_WRITE    1
 #define MAX_TIMEOUT 10

@@ -358,6 +358,14 @@ class FpgWireRow {
     friend class FpgWire;
 };
 
+struct FpgWirePgError {
+    char severity;
+    std::string code;
+    std::string message;
+    std::string detail;
+    std::string hint;
+};
+
 #define FPG_PROTOCOL(m,n)    (((m) << 16) | (n))
 class FpgWire;
 class FpgWire : public PgReadTask, public BaseSocket, public FpgIter {
