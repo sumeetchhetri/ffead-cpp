@@ -181,6 +181,9 @@ bool SSLClient::connection(const std::string& host, const int& port)
 
 		if ((rv = getaddrinfo(host.c_str(), ports.c_str(), &hints, &servinfo)) != 0) {
 			fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+			if (servinfo) {
+				freeaddrinfo(servinfo);  // Ensure memory is freed even if getaddrinfo fails
+			}
 			return 1;
 		}
 

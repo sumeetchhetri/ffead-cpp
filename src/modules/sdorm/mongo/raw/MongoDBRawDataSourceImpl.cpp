@@ -82,7 +82,7 @@ void MongoDBRawConnectionPool::initEnv() {
 			}
 		}
 
-		if(connectionString.at(connectionString.length()-1)==',') {
+		if(connectionString.length()>0 && connectionString.at(connectionString.length()-1)==',') {
 			connectionString = connectionString.substr(0, connectionString.length()-1);
 		}
 

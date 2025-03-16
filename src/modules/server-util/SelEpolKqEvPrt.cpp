@@ -189,7 +189,7 @@ void SelEpolKqEvPrt::addListeningSocket(SOCKET sockfd) {
 	#elif defined(USE_SELECT)
 		fdMax = sockfd;
 	#endif
-	dsi = new BaseSocket();
+	dsi = new DummySocket();
 	dsi->fd = sockfd;
 	#ifdef USE_IO_URING
 	    client_len = sizeof(client_addr);
@@ -272,7 +272,7 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout, eventLoopCont
 			polled_fds[i].revents = 0;
 		}
 	#endif
-	dsi = new BaseSocket();
+	dsi = new DummySocket();
 	dsi->fd = sockfd;
 	#ifdef USE_IO_URING
 		memset(&params, 0, sizeof(params));
@@ -867,9 +867,6 @@ void SelEpolKqEvPrt::picoevRwcb(picoev_loop* loop, int descriptor, int events, v
 #endif
 
 void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev, SelEpolKqEvPrt* optSel) {
-	BaseSocket df;
-	df.io_uring_type = PROV_BUF;
-
 	if(evlc!=NULL) {
 		this->elcCb = evlc;
 	}
@@ -882,6 +879,8 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev, SelEpolKqEvPrt* op
 		sleep(1);
 	}
 #endif
+
+	//Logger logger = LoggerFactory::getLogger("SelEpolKqEvPrt");
 
 	while (elcCb(this)) {
 #ifdef USE_IO_URING
@@ -1021,11 +1020,16 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev, SelEpolKqEvPrt* op
 								break;
 							}
 						}
+
 						BaseSocket* sifd = ev(this, udata, ACCEPTED, newSocket, NULL, -1, false);
+						sifd->getTimeout();
+						//logger.info("Accepted New socket " + CastUtil::lexical_cast<std::string>(sifd->fd));
 						if(optSel!=NULL) {
 							optSel->registerRead(sifd);
+							//logger.info("optSel Registered New socket " + CastUtil::lexical_cast<std::string>(sifd->fd));
 						} else {
 							registerRead(sifd);
+							//logger.info("Registered New socket " + CastUtil::lexical_cast<std::string>(sifd->fd));
 						}
 					}
 					reRegisterServerSock(udata);
@@ -1037,6 +1041,7 @@ void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev, SelEpolKqEvPrt* op
 						unRegisterRead(descriptor);
 #endif
 					}
+					//logger.info("Handling event on socket " + CastUtil::lexical_cast<std::string>(descriptor));
 					eCb(this, udata, isRead?READ_READY:WRITE_READY, descriptor, NULL, -1, false);
 				}
 			}

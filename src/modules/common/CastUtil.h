@@ -430,13 +430,13 @@ public:
 		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
-			void* d = NULL;
+			std::string* d = NULL;
 			if(val)
 				d = new std::string("true");
 			else
 				d = new std::string("false");
-			t = *(T*)d;
-			delete ((std::string*)d);
+			t = static_cast<T>(*d);
+			delete d;
 			return t;
 		}
 		std::stringstream ss;
@@ -744,9 +744,9 @@ public:
 		{
 			std::string str = vval;
 			if(vval.length()==0)return t;
-			void* d = new std::string(vval);
-			t = *(T*)d;
-			delete ((std::string*)d);
+			std::string* d = new std::string(vval);
+			t = *(T*)d; 
+			delete d;
 		}
 		else
 		{

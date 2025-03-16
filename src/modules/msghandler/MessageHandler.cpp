@@ -35,7 +35,7 @@ Message MessageHandler::readMessageFromQ(const std::string& fileName, const bool
 {
 	std::ifstream file;
 	size_t fileSize;
-	char *fileContents, *remcontents;
+	char *fileContents = NULL, *remcontents;
 	file.open(fileName.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
 	if (file.is_open())
 	{
@@ -64,10 +64,11 @@ Message MessageHandler::readMessageFromQ(const std::string& fileName, const bool
 		}
 		file.close();
 	}
+	Message m;
+	if(fileContents==NULL) return m;
 	std::string f(fileContents);
 	AMEFDecoder dec;
 	AMEFObject* obj = dec.decodeB(f, false);
-	Message m;
 	m.setTimestamp(obj->getPackets().at(0)->getValue());
 	m.setType(obj->getPackets().at(1)->getValue());
 	m.setPriority(obj->getPackets().at(2)->getValue());

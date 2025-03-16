@@ -1,0 +1,3 @@
+# Suppress data race on vptr between RequestHandler2::loopEventCb and BaseSecureSocket constructor
+race:*RequestHandler2::loopEventCb*
+race:*BaseSecureSocket::BaseSecureSocket*

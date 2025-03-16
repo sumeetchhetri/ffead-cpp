@@ -87,6 +87,9 @@ class ClassStructure
 	friend class Reflection;
 	friend class ConfigurationHandler;
 public:
+	ClassStructure() {
+		prosetser = false;
+	}
 	std::string appName, incfile;
 	std::string toString()
 	{

@@ -95,3 +95,4 @@ prelude
 **/BUILD.bazel
 Cargo.lock
 temp/
+report/*

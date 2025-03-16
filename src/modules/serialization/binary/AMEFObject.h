@@ -75,7 +75,7 @@ public:
 		for (int i = 0; i<ind; i++)
 		{
 			int offset = (ind - 1 - i) * 8;
-			result.push_back((char) ((lon >> offset) & 0xFF));
+			result.push_back((char) ((lon >> abs(offset)) & 0xFF));
 		}
 	}
 

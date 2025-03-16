@@ -48,6 +48,10 @@ void RequestHandler2::setInstance(RequestHandler2* ins) {
 
 void RequestHandler2::registerSocketInterfaceFactory(const SocketInterfaceFactory& f) {
 	this->sf = f;
+	BaseSocket::sockCloseFunc = [](void* sock) {
+		Writer::onWriterEvent((Writer*)sock, 2);
+		_i->shi->closeConnection((BaseSocket*)sock);
+	};
 }
 
 RequestHandler2* RequestHandler2::getInstance() {
@@ -71,13 +75,13 @@ void RequestHandler2::startNL(unsigned int cid, bool withWQ) {
 }
 
 SOCKET RequestHandler2::addListenerSocket(doRegisterListener drl, const std::string& ipAddress, const int& port, bool isSinglEVH) {
+	Logger logger = LoggerFactory::getLogger("RequestHandler2");
 	if(drl!=NULL) {
 		int counter = 0;
-		Logger logger = LoggerFactory::getLogger("RequestHandler2");
 		while(!drl()) {
 			Thread::sSleep(1);
 			if(counter++==60) {
-				std::cout << "Cannot wait more than 60 seconds for cache/database to initialize, will forcefully start server now...." << std::endl;
+				logger << "Cannot wait more than 60 seconds for cache/database to initialize, will forcefully start server now...." << std::endl;
 				break;
 			}
 		}
@@ -86,7 +90,7 @@ SOCKET RequestHandler2::addListenerSocket(doRegisterListener drl, const std::str
 	//Sleep for some time so as to make sure all the new child processes are set correctly
 	//and all init is complete...
 	sleep(15);
-	std::cout << "All initializations are now complete...." << std::endl;
+	logger << "All initializations are now complete...." << std::endl;
 
 	SOCKET listenerSock = Server::createListener(ipAddress, port, true, isSinglEVH);
 	if(listenerSock != INVALID_SOCKET) {
@@ -112,8 +116,8 @@ void RequestHandler2::start(unsigned int cid, bool withWQ) {
 	if(!run) {
 		run = true;
 #if !defined(USE_IO_URING) && !defined(USE_PICOEV)
-		selector.initialize(0, -1);
 		acceptor.initialize(listenerSock, -1);
+		selector.initialize(0, -1);
 		Thread* pthread = new Thread(&handleAcceptor, this);
 		pthread->execute();
 #else
@@ -173,7 +177,7 @@ BaseSocket* RequestHandler2::loopEventCb(SelEpolKqEvPrt* ths, BaseSocket* bi, in
 			return si;
 		}
 		case READ_READY: {
-			BaseSocket* si = (BaseSocket*)bi;
+			Http11Socket* si = (Http11Socket*)bi;
 			si->handle();
 			break;
 		}
@@ -226,10 +230,6 @@ void RequestHandler2::close_(RequestHandler2* ins) {
 
 void* RequestHandler2::handleAcceptor(void* inp) {
 	RequestHandler2* ins  = static_cast<RequestHandler2*>(inp);
-	BaseSocket::sockCloseFunc = [](void* sock) {
-		Writer::onWriterEvent((Writer*)sock, 2);
-		_i->shi->closeConnection((BaseSocket*)sock);
-	};
 #if !defined(USE_IO_URING) && !defined(USE_PICOEV)
 	ins->acceptor.loop(&loopContinue, &loopEventCb, &ins->selector);
 #endif
@@ -240,10 +240,6 @@ void* RequestHandler2::handleAcceptor(void* inp) {
 
 void* RequestHandler2::handle(void* inp) {
 	RequestHandler2* ins  = static_cast<RequestHandler2*>(inp);
-	BaseSocket::sockCloseFunc = [](void* sock) {
-		Writer::onWriterEvent((Writer*)sock, 2);
-		_i->shi->closeConnection((BaseSocket*)sock);
-	};
 	ins->selector.loop(&loopContinue, &loopEventCb);
 #if defined(USE_IO_URING) || defined(USE_PICOEV)
 	close_(ins);

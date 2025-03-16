@@ -352,6 +352,11 @@ const std::string HttpResponse::HDR_SEPT = ":";
 const std::string HttpResponse::HDR_END = "\r\n";
 const std::string HttpResponse::HDR_FIN = "\r\n\r\n";
 
+std::string* HttpResponse::generateNginxApacheResponseP() {
+	generateNginxApacheResponse();
+	return &content;
+}
+
 std::string& HttpResponse::generateNginxApacheResponse() {
 	std::string boundary;
 	if(this->contentList.size()>0)
@@ -394,83 +399,82 @@ std::string& HttpResponse::generateNginxApacheResponse() {
 	return content;
 }
 
-const std::string& HttpResponse::getHeadersStr(const std::string& server, bool status_line, bool with_content, bool with_serverline)
+const char* HttpResponse::getHeadersStr(const std::string& server, bool status_line, bool with_content, bool with_serverline, size_t *out_headers_len)
 {
-	if(_headers_str.length()==0) {
-		bool isTE = isHeaderValue(TransferEncoding, "chunked");
-		std::string boundary;
-		if(this->contentList.size()>0)
-		{
-			content.clear();
-			boundary = "FFEAD_SERVER_";
-			CastUtil::fromNumber(Timer::getCurrentTime(), &boundary);
-			for (int var = 0; var < (int)contentList.size(); ++var) {
-				content.append("--");
-				content.append(boundary);
-				content.append(HDR_END);
-				RMap headers = contentList.at(var).getHeaders();
-				RMap::iterator it;
-				for(it=headers.begin();it!=headers.end();++it)
-				{
-					content.append(it->first);
-					content.append(HDR_SEP);
-					content.append(it->second);
-					content.append(HDR_END);
-				}
-				content.append(HDR_END);
-				content.append(contentList.at(var).getContent());
-				content.append(HDR_END);
-			}
+	bool isTE = isHeaderValue(TransferEncoding, "chunked");
+	std::string boundary;
+	if(this->contentList.size()>0)
+	{
+		content.clear();
+		boundary = "FFEAD_SERVER_";
+		CastUtil::fromNumber(Timer::getCurrentTime(), &boundary);
+		for (int var = 0; var < (int)contentList.size(); ++var) {
 			content.append("--");
 			content.append(boundary);
-			content.append("--");
+			content.append(HDR_END);
+			RMap headers = contentList.at(var).getHeaders();
+			RMap::iterator it;
+			for(it=headers.begin();it!=headers.end();++it)
+			{
+				content.append(it->first);
+				content.append(HDR_SEP);
+				content.append(it->second);
+				content.append(HDR_END);
+			}
+			content.append(HDR_END);
+			content.append(contentList.at(var).getContent());
 			content.append(HDR_END);
 		}
-		if(status_line) {
-			status->getResponseLine(httpVers, _headers_str);
-		}
-		if(server.length()>0) {
-			_headers_str.append("Server: ");
-			_headers_str.append(server);
-			_headers_str.append(HDR_END);
-		} else if(with_serverline) {
-			_headers_str.append(HDR_SRV);
-		}
-		if(!hasHeader(ContentType) && this->contentList.size()>0)
-		{
-			this->addHeader(ContentType, "multipart/mixed");
-		}
-		if(hasHeader(ContentType) && boundary!="")
-		{
-			headers[ContentType].append("; boundary=\"");
-			headers[ContentType].append(boundary);
-			headers[ContentType].append("\"");
-		}
-		if(!isTE && !hasHeader(ContentLength))
-		{
-			addHeader(ContentLength, CastUtil::fromNumber((int)content.length()));
-		}
-		RMap::iterator it;
-		for(it=headers.begin();it!=headers.end();++it)
-		{
-			_headers_str.append(it->first);
-			_headers_str.append(HDR_SEP);
-			_headers_str.append(it->second);
-			_headers_str.append(HDR_END);
-		}
-		for (int var = 0; var < (int)this->cookies.size(); var++)
-		{
-			_headers_str.append(SetCookie);
-			_headers_str.append(HDR_SEP);
-			_headers_str.append(this->cookies.at(var));
-			_headers_str.append(HDR_END);
-		}
-		_headers_str.append(HDR_END);
-		if(with_content) {
-			_headers_str.append(content);
-		}
+		content.append("--");
+		content.append(boundary);
+		content.append("--");
+		content.append(HDR_END);
 	}
-	return _headers_str;
+	if(status_line) {
+		status->getResponseLine(httpVers, _headers_str);
+	}
+	if(server.length()>0) {
+		_headers_str.append("Server: ");
+		_headers_str.append(server);
+		_headers_str.append(HDR_END);
+	} else if(with_serverline) {
+		_headers_str.append(HDR_SRV);
+	}
+	if(!hasHeader(ContentType) && this->contentList.size()>0)
+	{
+		this->addHeader(ContentType, "multipart/mixed");
+	}
+	if(hasHeader(ContentType) && boundary!="")
+	{
+		headers[ContentType].append("; boundary=\"");
+		headers[ContentType].append(boundary);
+		headers[ContentType].append("\"");
+	}
+	if(!isTE && !hasHeader(ContentLength))
+	{
+		addHeader(ContentLength, CastUtil::fromNumber((int)content.length()));
+	}
+	RMap::iterator it;
+	for(it=headers.begin();it!=headers.end();++it)
+	{
+		_headers_str.append(it->first);
+		_headers_str.append(HDR_SEP);
+		_headers_str.append(it->second);
+		_headers_str.append(HDR_END);
+	}
+	for (int var = 0; var < (int)this->cookies.size(); var++)
+	{
+		_headers_str.append(SetCookie);
+		_headers_str.append(HDR_SEP);
+		_headers_str.append(this->cookies.at(var));
+		_headers_str.append(HDR_END);
+	}
+	_headers_str.append(HDR_END);
+	if(with_content) {
+		_headers_str.append(content);
+	}
+	*out_headers_len = _headers_str.length()-2;
+	return (const char*)_headers_str.c_str();
 }
 
 HttpResponse& HttpResponse::generateHeadResponseMinimal(std::string& resp, std::string& contentType, int content_length, bool conn_clos)

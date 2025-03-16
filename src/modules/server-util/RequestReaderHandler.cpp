@@ -123,6 +123,10 @@ bool RequestReaderHandler::isActive() {
 
 void RequestReaderHandler::registerSocketInterfaceFactory(const SocketInterfaceFactory& f) {
 	this->sf = f;
+	BaseSocket::sockCloseFunc = [](void* sock) {
+		Writer::onWriterEvent((Writer*)sock, 2);
+		_i->shi->closeConnection((BaseSocket*)sock);
+	};
 }
 
 void RequestReaderHandler::addSf(SocketInterface* psi) {

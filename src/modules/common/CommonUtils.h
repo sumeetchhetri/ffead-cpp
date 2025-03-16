@@ -68,7 +68,7 @@ class CommonUtils {
 	std::map<std::string, std::string> mimeTypes;
 	std::map<std::string, std::string> locales;
 	std::vector<std::string> appNames;
-	static const char* dateStr;
+	static std::atomic<const char*> dateStr;
 	friend class ConfigurationHandler;
 	friend class CHServer;
 	friend class ServiceHandler;
@@ -103,6 +103,7 @@ public:
 	static std::string getAppName(std::string_view);
 	static void loadMimeTypes(const std::string& file);
 	static void loadLocales(const std::string& file);
+	static const char* getMimeTypeP(const std::string& extension);
 	static const std::string& getMimeType(const std::string& extension);
 	static const std::string& getLocale(const std::string& abbrev);
 	static std::vector<std::string> getFiles(const std::string& cwd, const std::string& suffix, const bool& isAbs = true);

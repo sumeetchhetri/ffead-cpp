@@ -69,6 +69,7 @@ protected:
 	friend class LibpqDataSourceImpl;
 	friend class RequestHandler2;
 	friend class Http11Socket;
+	friend class DummySocket;
 	static SockCloseEvent sockCloseFunc;
 public:
 	BaseSocket();
@@ -105,7 +106,7 @@ public:
 	virtual void closeSocket();
 
 	virtual int getType(void* context){return -1;};
-	virtual int getTimeout(){return -1;};
+	virtual int getTimeout()=0;
 	virtual bool isEmbedded(){return true;};
 	virtual bool isSecure();
 	virtual int writeWsData(void* d){return -1;}
@@ -121,6 +122,12 @@ public:
 	}
 };
 
+class DummySocket: public BaseSocket {
+public:
+	int getTimeout() {
+		return -1;
+	}
+};
 
 class BaseSecureSocket: public BaseSocket {
 protected:

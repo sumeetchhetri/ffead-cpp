@@ -30,11 +30,11 @@ find . -type f -name '*.dockerfile' | xargs sed -i'' -e "s|version=\"6.0\"|versi
 
 docker rmi -f sumeetchhetri/ffead-cpp-base:${VERSION}
 #DOCKER_BUILDKIT=0 ----     --no-cache
-docker build --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-base.dockerfile -t sumeetchhetri/ffead-cpp-base:${VERSION} .
+docker build --platform linux/amd64 --ulimit memlock=102400000:102400000 --progress plain -f ffead-cpp-base.dockerfile -t sumeetchhetri/ffead-cpp-base:${VERSION} .
 docker push sumeetchhetri/ffead-cpp-base:${VERSION}
 
 docker rmi -f sumeetchhetri/ffead-cpp-v-base:${VERSION}
-docker build --progress plain -f ffead-cpp-v-base.dockerfile -t sumeetchhetri/ffead-cpp-v-base:${VERSION} .
+docker build --platform linux/amd64 --progress plain -f ffead-cpp-v-base.dockerfile -t sumeetchhetri/ffead-cpp-v-base:${VERSION} .
 docker push sumeetchhetri/ffead-cpp-v-base:${VERSION}
 
 #docker rmi -f sumeetchhetri/ffead-cpp-base:${VERSION}-debug

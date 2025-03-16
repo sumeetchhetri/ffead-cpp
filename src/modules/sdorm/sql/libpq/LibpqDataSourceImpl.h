@@ -424,6 +424,7 @@ public:
     bool updateQuery(LibpqQuery& q);
     std::vector<FpgWireRow>& selectQuery(LibpqQuery& q);
     bool handleSync();
+	int getTimeout() {return -1;}
 };
 
 class LibpqDataSourceImpl : public DataSourceType, public SocketInterface {

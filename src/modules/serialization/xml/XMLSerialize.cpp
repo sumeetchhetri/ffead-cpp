@@ -49,6 +49,7 @@ std::string XMLSerialize::serializePrimitive(int serOpt, const std::string& clas
 		case 2: {
 			if(str!=NULL) {
 				str->startElement("element");
+				char t[2] = {((char*)t)[0], '\0'};
 				str->content((char*)t);
 				str->closeElement();
 				return CommonUtils::BLANK;
@@ -60,6 +61,7 @@ std::string XMLSerialize::serializePrimitive(int serOpt, const std::string& clas
 		case 3: {
 			if(str!=NULL) {
 				str->startElement("element");
+				unsigned char t[2] = {((unsigned  char*)t)[0], '\0'};
 				str->content((char*)t);
 				str->closeElement();
 				return CommonUtils::BLANK;

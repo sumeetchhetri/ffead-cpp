@@ -1723,8 +1723,8 @@ bool SQLDataSourceImpl::executeInsert(Query& cquery, void* entity) {
 	query += (") values("+vals+")");
 	cquery.setQuery(query);
 
-	bool* flag = (bool*)executeQueryInternal(cquery, true);
-	bool ffl = *flag;
+	void* flag = (bool*)executeQueryInternal(cquery, true);
+	bool ffl = flag!=NULL?*(bool*)flag:false;
 	delete flag;
 
 	/*if(remFields.size()>0) {
@@ -1847,8 +1847,8 @@ bool SQLDataSourceImpl::executeUpdate(Query& cquery, void* entity) {
 
 	cquery.setQuery(query);
 
-	bool* flag = (bool*)executeQueryInternal(cquery, true);
-	bool ffl = *flag;
+	void* flag = (bool*)executeQueryInternal(cquery, true);
+	bool ffl = flag!=NULL?*(bool*)flag:false;
 	delete flag;
 
 	/*if(remFields.size()>0) {
@@ -1886,8 +1886,8 @@ bool SQLDataSourceImpl::remove(const std::string& clasName, GenericObject& id) {
 	}
 	cquery.setQuery(query);
 
-	bool* flag = (bool*)executeQueryInternal(cquery, false);
-	bool ffl = *flag;
+	void* flag = executeQueryInternal(cquery, false);
+	bool ffl = flag!=NULL?*(bool*)flag:false;
 	delete flag;
 
 	return ffl;

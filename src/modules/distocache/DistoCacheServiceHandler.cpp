@@ -45,6 +45,7 @@ DistoCacheServiceHandler::~DistoCacheServiceHandler() {
 
 int DistoCacheServiceHandler::getLength(const std::string& header, const int& size)
 {
+	if(size<=0 || header.length()<size) return -1;
 	int totsize = header[size-1] & 0xff;
 	for (int var = 0; var < size-1; var++)
 	{

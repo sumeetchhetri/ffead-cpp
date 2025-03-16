@@ -42,7 +42,6 @@ extern "C" {
   this->functionStatus = functioncall ;		\
   if (0 != this->functionStatus ) {				\
     gtm_zstatus( this->statusMessage, maxMessageLength );			\
-    /*std::cerr << this->statusMessage << std::endl;		\*/
     tcsetattr( 2, 0, &stderr_sav );		\
     tcsetattr( 1, 0, &stdout_sav );		\
     tcsetattr( 0, 0, &stdin_sav );		\

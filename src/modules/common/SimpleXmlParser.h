@@ -143,14 +143,14 @@ private:
 	}
 
 	inline void write_escape(const char* str) {
-		for (; *str; str++) {
+		for (int i=0;i<strlen(str);i++) {
 			switch (*str) {
 			case '&': os << "&amp;"; break;
 			case '<': os << "&lt;"; break;
 			case '>': os << "&gt;"; break;
 			case '\'': os << "&apos;"; break;
 			case '"': os << "&quot;"; break;
-			default: os.put(*str); break;
+			default: os.put(str[i]); break;
 			}
 		}
 	}
@@ -212,14 +212,14 @@ private:
 	}
 
 	inline void write_escape(const char* str) {
-		for (; *str; str++) {
+		for (int i=0;i<strlen(str);i++) {
 			switch (*str) {
 			case '&': os->append("&amp;"); break;
 			case '<': os->append("&lt;"); break;
 			case '>': os->append("&gt;"); break;
 			case '\'': os->append("&apos;"); break;
 			case '"': os->append("&quot;"); break;
-			default: os->push_back(*str); break;
+			default: os->push_back(str[i]); break;
 			}
 		}
 	}

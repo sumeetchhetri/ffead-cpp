@@ -1,11 +1,11 @@
 #pragma once
 /*
-CSV for C++, version 2.1.3
+CSV for C++, version 2.3.0
 https://github.com/vincentlaucsb/csv-parser
 
 MIT License
 
-Copyright (c) 2017-2020 Vincent La
+Copyright (c) 2017-2024 Vincent La
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -5051,6 +5051,7 @@ namespace csv {
  */
 
 #include <cmath>
+#include <deque>
 #include <iterator>
 #include <memory> // For CSVField
 #include <limits> // For CSVField
@@ -5085,6 +5086,7 @@ namespace csv {
         CSV_INT16,  /**< 16-bit integer (short on MSVC/GCC) */
         CSV_INT32,  /**< 32-bit integer (int on MSVC/GCC) */
         CSV_INT64,  /**< 64-bit integer (long long on MSVC/GCC) */
+        CSV_BIGINT, /**< Value too big to fit in a 64-bit in */
         CSV_DOUBLE  /**< Floating point value */
     };
 
@@ -5150,7 +5152,8 @@ namespace csv {
         template<> inline DataType type_num<std::nullptr_t>() { return DataType::CSV_NULL; }
         template<> inline DataType type_num<std::string>() { return DataType::CSV_STRING; }
 
-        CONSTEXPR_14 DataType data_type(csv::string_view in, long double* const out = nullptr);
+        CONSTEXPR_14 DataType data_type(csv::string_view in, long double* const out = nullptr, 
+            const char decimalsymbol = '.');
 #endif
 
         /** Given a byte size, return the largest number than can be stored in
@@ -5280,7 +5283,7 @@ namespace csv {
             else if (number <= internals::CSV_INT64_MAX)
                 return DataType::CSV_INT64;
             else // Conversion to long long will cause an overflow
-                return DataType::CSV_DOUBLE;
+                return DataType::CSV_BIGINT;
         }
 
         /** Distinguishes numeric from other text values. Used by various
@@ -5293,17 +5296,19 @@ namespace csv {
          *  @param[in]  in  String value to be examined
          *  @param[out] out Pointer to long double where results of numeric parsing
          *                  get stored
+         *  @param[in]  decimalSymbol  the character separating integral and decimal part,
+         *                             defaults to '.' if omitted
          */
         CONSTEXPR_14
-        DataType data_type(csv::string_view in, long double* const out) {
+        DataType data_type(csv::string_view in, long double* const out, const char decimalSymbol) {
             // Empty string --> NULL
             if (in.size() == 0)
                 return DataType::CSV_NULL;
 
             bool ws_allowed = true,
-                neg_allowed = true,
                 dot_allowed = true,
                 digit_allowed = true,
+                is_negative = false,
                 has_digit = false,
                 prob_float = false;
 
@@ -5327,22 +5332,22 @@ namespace csv {
                         }
                     }
                     break;
+                case '+':
+                    if (!ws_allowed) {
+                        return DataType::CSV_STRING;
+                    }
+
+                    break;
                 case '-':
-                    if (!neg_allowed) {
+                    if (!ws_allowed) {
                         // Ex: '510-123-4567'
                         return DataType::CSV_STRING;
                     }
 
-                    neg_allowed = false;
+                    is_negative = true;
                     break;
-                case '.':
-                    if (!dot_allowed) {
-                        return DataType::CSV_STRING;
-                    }
-
-                    dot_allowed = false;
-                    prob_float = true;
-                    break;
+                // case decimalSymbol: not allowed because decimalSymbol is not a literal,
+                // it is handled in the default block
                 case 'e':
                 case 'E':
                     // Process scientific notation
@@ -5357,7 +5362,7 @@ namespace csv {
 
                         return _process_potential_exponential(
                             in.substr(exponent_start_idx),
-                            neg_allowed ? integral_part + decimal_part : -(integral_part + decimal_part),
+                            is_negative ? -(integral_part + decimal_part) : integral_part + decimal_part,
                             out
                         );
                     }
@@ -5381,6 +5386,11 @@ namespace csv {
                         else
                             integral_part = (integral_part * 10) + digit;
                     }
+                    // case decimalSymbol: not allowed because decimalSymbol is not a literal. 
+                    else if (dot_allowed && current == decimalSymbol) {
+                        dot_allowed = false;
+                        prob_float = true;
+                    }
                     else {
                         return DataType::CSV_STRING;
                     }
@@ -5391,7 +5401,7 @@ namespace csv {
             if (has_digit) {
                 long double number = integral_part + decimal_part;
                 if (out) {
-                    *out = neg_allowed ? number : -number;
+                    *out = is_negative ? -number : number;
                 }
 
                 return prob_float ? DataType::CSV_DOUBLE : _determine_integral_type(number);
@@ -5459,14 +5469,13 @@ namespace csv {
             // CSVFieldArrays may be moved
             CSVFieldList(CSVFieldList&& other) :
                 _single_buffer_capacity(other._single_buffer_capacity) {
-                buffers = std::move(other.buffers);
+
+                for (auto&& buffer : other.buffers) {
+                    this->buffers.emplace_back(std::move(buffer));
+                }
+
                 _current_buffer_size = other._current_buffer_size;
                 _back = other._back;
-            }
-
-            ~CSVFieldList() {
-                for (auto& buffer : buffers)
-                    delete[] buffer;
             }
 
             template <class... Args>
@@ -5488,7 +5497,14 @@ namespace csv {
         private:
             const size_t _single_buffer_capacity;
 
-            std::vector<RawCSVField*> buffers = {};
+            /**
+             * Prefer std::deque over std::vector because it does not
+             * reallocate upon expansion, allowing pointers to its members
+             * to remain valid & avoiding potential race conditions when 
+             * CSVFieldList is accesssed simulatenously by a reading thread and
+             * a writing thread
+             */
+            std::deque<std::unique_ptr<RawCSVField[]>> buffers = {};
 
             /** Number of items in the current buffer */
             size_t _current_buffer_size = 0;
@@ -5499,7 +5515,6 @@ namespace csv {
             /** Allocate a new page of memory */
             void allocate();
         };
-
 
         /** A class for storing raw CSV data and associated metadata */
         struct RawCSVData {
@@ -5602,6 +5617,14 @@ namespace csv {
 
         /** Parse a hexadecimal value, returning false if the value is not hex. */
         bool try_parse_hex(int& parsedValue);
+
+        /** Attempts to parse a decimal (or integer) value using the given symbol,
+         *  returning `true` if the value is numeric.
+         *
+         *  @note This method also updates this field's type
+         *
+         */
+        bool try_parse_decimal(long double& dVal, const char decimalSymbol = '.');
 
         /** Compares the contents of this field to a numeric value. If this
          *  field does not contain a numeric value, then all comparisons return
@@ -5723,15 +5746,7 @@ namespace csv {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
             using value_type = CSVField;
             using difference_type = int;
-
-            // Using CSVField * as pointer type causes segfaults in MSVC debug builds
-            // but using shared_ptr as pointer type won't compile in g++
-#ifdef _MSC_BUILD
             using pointer = std::shared_ptr<CSVField>;
-#else
-            using pointer = CSVField * ;
-#endif
-
             using reference = CSVField & ;
             using iterator_category = std::random_access_iterator_tag;
 #endif
@@ -6229,7 +6244,7 @@ namespace csv {
             size_t header;
         };
 
-        CSV_INLINE GuessScore calculate_score(csv::string_view head, CSVFormat format);
+        CSV_INLINE GuessScore calculate_score(csv::string_view head, const CSVFormat& format);
 
         CSVGuessResult _guess_format(csv::string_view head, const std::vector<char>& delims = { ',', '|', '\t', ';', '^', '~' });
     }
@@ -6282,8 +6297,7 @@ namespace csv {
             CONSTEXPR_14 pointer operator->() { return &(this->row); }
 
             iterator& operator++();   /**< Pre-increment iterator */
-            iterator operator++(int); /**< Post-increment ierator */
-            iterator& operator--();
+            iterator operator++(int); /**< Post-increment iterator */
 
             /** Returns true if iterators were constructed from the same CSVReader
              *  and point to the same row
@@ -6532,6 +6546,65 @@ namespace csv {
     namespace internals {
         static int DECIMAL_PLACES = 5;
 
+        /**
+         * Calculate the absolute value of a number
+         */
+        template<typename T = int>
+        inline T csv_abs(T x) {
+            return abs(x);
+        }
+
+        template<>
+        inline int csv_abs(int x) {
+            return abs(x);
+        }
+
+        template<>
+        inline long int csv_abs(long int x) {
+            return labs(x);
+        }
+
+        template<>
+        inline long long int csv_abs(long long int x) {
+            return llabs(x);
+        }
+
+        template<>
+        inline float csv_abs(float x) {
+            return fabsf(x);
+        }
+
+        template<>
+        inline double csv_abs(double x) {
+            return fabs(x);
+        }
+
+        template<>
+        inline long double csv_abs(long double x) {
+            return fabsl(x);
+        }
+
+        /** 
+         * Calculate the number of digits in a number
+         */
+        template<
+            typename T,
+            csv::enable_if_t<std::is_arithmetic<T>::value, int> = 0
+        >
+        int num_digits(T x)
+        {
+            x = csv_abs(x);
+
+            int digits = 0;
+
+            while (x >= 1) {
+                x /= 10;
+                digits++;
+            }
+
+            return digits;
+        }
+
         /** to_string() for unsigned integers */
         template<typename T,
             csv::enable_if_t<std::is_unsigned<T>::value, int> = 0>
@@ -6566,7 +6639,11 @@ namespace csv {
             csv::enable_if_t<std::is_floating_point<T>::value, int> = 0
         >
             inline std::string to_string(T value) {
-                std::string result;
+#ifdef __clang__
+            return std::to_string(value);
+#else
+            // TODO: Figure out why the below code doesn't work on clang
+                std::string result = "";
 
                 T integral_part;
                 T fractional_part = std::abs(std::modf(value, &integral_part));
@@ -6576,12 +6653,11 @@ namespace csv {
                 if (value < 0) result = "-";
 
                 if (integral_part == 0) {
-                    result = "0";
+                    result += "0";
                 }
                 else {
-                    for (int n_digits = (int)(std::log(integral_part) / std::log(10));
-                         n_digits + 1 > 0; n_digits --) {
-                        int digit = (int)(std::fmod(integral_part, pow10(n_digits + 1)) / pow10(n_digits));
+                    for (int n_digits = num_digits(integral_part); n_digits > 0; n_digits --) {
+                        int digit = (int)(std::fmod(integral_part, pow10(n_digits)) / pow10(n_digits - 1));
                         result += (char)('0' + digit);
                     }
                 }
@@ -6601,6 +6677,7 @@ namespace csv {
                 }
 
                 return result;
+#endif
         }
     }
 
@@ -6608,9 +6685,11 @@ namespace csv {
      *
      *  @param  precision   Number of decimal places
      */
+#ifndef __clang___
     inline static void set_decimal_places(int precision) {
         internals::DECIMAL_PLACES = precision;
     }
+#endif
 
     /** @name CSV Writing */
     ///@{
@@ -6916,7 +6995,8 @@ namespace csv {
             bool empty_last_field = this->data_ptr
                 && this->data_ptr->_data
                 && !this->data_ptr->data.empty()
-                && parse_flag(this->data_ptr->data.back()) == ParseFlags::DELIMITER;
+                && (parse_flag(this->data_ptr->data.back()) == ParseFlags::DELIMITER
+                    || parse_flag(this->data_ptr->data.back()) == ParseFlags::QUOTE);
 
             // Push field
             if (this->field_length > 0 || empty_last_field) {
@@ -7000,8 +7080,8 @@ namespace csv {
                 case ParseFlags::NEWLINE:
                     this->data_pos++;
 
-                    // Catches CRLF (or LFLF)
-                    if (this->data_pos < in.size() && parse_flag(in[this->data_pos]) == ParseFlags::NEWLINE)
+                    // Catches CRLF (or LFLF, CRCRLF, or any other non-sensical combination of newlines)
+                    while (this->data_pos < in.size() && parse_flag(in[this->data_pos]) == ParseFlags::NEWLINE)
                         this->data_pos++;
 
                     // End of record -> Write record
@@ -7285,7 +7365,7 @@ namespace csv {
             return CSVRow(std::move(rows[format.get_header()]));
         }
 
-        CSV_INLINE GuessScore calculate_score(csv::string_view head, CSVFormat format) {
+        CSV_INLINE GuessScore calculate_score(csv::string_view head, const CSVFormat& format) {
             // Frequency counter of row length
             std::unordered_map<size_t, size_t> row_tally = { { 0, 0 } };
 
@@ -7571,6 +7651,7 @@ namespace csv {
             if (this->records->empty()) return this->end();
         }
 
+        this->_n_rows++;
         CSVReader::iterator ret(this, this->records->pop_front());
         return ret;
     }
@@ -7633,10 +7714,10 @@ namespace csv {
         }
 
         CSV_INLINE void CSVFieldList::allocate() {
-            RawCSVField * buffer = new RawCSVField[_single_buffer_capacity];
-            buffers.push_back(buffer);
+            buffers.push_back(std::unique_ptr<RawCSVField[]>(new RawCSVField[_single_buffer_capacity]));
+
             _current_buffer_size = 0;
-            _back = &(buffers.back()[0]);
+            _back = buffers.back().get();
         }
     }
 
@@ -7723,7 +7804,7 @@ namespace csv {
         for (; start < this->sv.size() && this->sv[start] == ' '; start++);
         for (end = start; end < this->sv.size() && this->sv[end] != ' '; end++);
         
-        unsigned long long int value = 0;
+        int value_ = 0;
 
         size_t digits = (end - start);
         size_t base16_exponent = digits - 1;
@@ -7774,12 +7855,33 @@ namespace csv {
                 return false;
             }
 
-            value += digit * pow(16, base16_exponent);
+            value_ += digit * (int)pow(16, (double)base16_exponent);
             base16_exponent--;
         }
 
-        parsedValue = value;
+        parsedValue = value_;
         return true;
+    }
+
+    CSV_INLINE bool CSVField::try_parse_decimal(long double& dVal, const char decimalSymbol) {
+        // If field has already been parsed to empty, no need to do it aagin:
+        if (this->_type == DataType::CSV_NULL)
+                    return false;
+
+        // Not yet parsed or possibly parsed with other decimalSymbol
+        if (this->_type == DataType::UNKNOWN || this->_type == DataType::CSV_STRING || this->_type == DataType::CSV_DOUBLE)
+            this->_type = internals::data_type(this->sv, &this->value, decimalSymbol); // parse again
+
+        // Integral types are not affected by decimalSymbol and need not be parsed again
+
+        // Either we already had an integral type before, or we we just got any numeric type now.
+        if (this->_type >= DataType::CSV_INT8 && this->_type <= DataType::CSV_DOUBLE) {
+            dVal = this->value;
+            return true;
+        }
+
+        // CSV_NULL or CSV_STRING, not numeric
+        return false;
     }
 
 #ifdef _MSC_VER
@@ -7822,12 +7924,7 @@ namespace csv {
     }
 
     CSV_INLINE CSVRow::iterator::pointer CSVRow::iterator::operator->() const {
-        // Using CSVField * as pointer type causes segfaults in MSVC debug builds
-        #ifdef _MSC_BUILD
         return this->field;
-        #else
-        return this->field.get();
-        #endif
     }
 
     CSV_INLINE CSVRow::iterator& CSVRow::iterator::operator++() {
@@ -7972,7 +8069,8 @@ namespace csv {
             }
 
             // create a result string of necessary size
-            std::string result(s.size() + space, '\\');
+            size_t result_size = s.size() + space;
+            std::string result(result_size, '\\');
             std::size_t pos = 0;
 
             for (const auto& c : s)
@@ -8047,7 +8145,7 @@ namespace csv {
                     if (c >= 0x00 && c <= 0x1f)
                     {
                         // print character c as \uxxxx
-                        sprintf(&result[pos + 1], "u%04x", int(c));
+                        snprintf(&result[pos + 1], result_size - pos - 1, "u%04x", int(c));
                         pos += 6;
                         // overwrite trailing null character
                         result[pos] = '\\';
@@ -8137,6 +8235,7 @@ namespace csv {
         return ret;
     }
 }
+
 /** @file
  *  Calculates statistics from CSV files
  */

@@ -74,6 +74,7 @@ int picoev_w32_init(int max_fd) {
     picoev_deinit();
     return -1;
   }
+  return r;
 }
 
 int picoev_w32_deinit(void) {

@@ -62,10 +62,9 @@ std::string ServicePool::registerService(const std::string& name, const Service&
 
 bool ServicePool::unRegisterService(const std::string& name)//unregister will require the unique id
 {
-	std::map<std::string,Service>::iterator it;
+	std::map<std::string,Service>::iterator it = servicePool.find(name);
 	if(it==servicePool.end())
 		return false;
-	it = servicePool.find(name);
 	servicePool.erase(it);
 	return true;
 }

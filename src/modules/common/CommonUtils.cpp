@@ -56,7 +56,7 @@ std::atomic<long long> CommonUtils::cReqs = 0;
 std::atomic<long long> CommonUtils::cResps = 0;
 int CommonUtils::g_seed = 0;
 
-const char* CommonUtils::dateStr;
+std::atomic<const char*> CommonUtils::dateStr;
 
 static const char* get_date() {
 	time_t t;
@@ -75,7 +75,7 @@ static const char* get_date() {
 }
 
 void CommonUtils::setDate() {
-	dateStr = get_date();
+	dateStr.store(get_date());
 }
 
 CommonUtils::CommonUtils() {
@@ -155,6 +155,15 @@ const std::string& CommonUtils::getMimeType(const std::string& extension)
 	return BLANK;
 }
 
+const char* CommonUtils::getMimeTypeP(const std::string& extension)
+{
+	if(getInstance()->mimeTypes.find(extension)!=getInstance()->mimeTypes.end())
+	{
+		return (const char*)getInstance()->mimeTypes[extension].c_str();
+	}
+	return (const char*)BLANK.c_str();
+}
+
 void CommonUtils::loadLocales(const std::string& file)
 {
 	if(getInstance()->locales.size()>0)return;
@@ -227,7 +236,7 @@ void CommonUtils::ntb(std::string& result, const unsigned long long& lon, int in
     for (int i = 0; i<ind; i++)
     {
         int offset = (ind - 1 - i) * 8;
-        result.push_back((char) ((lon >> offset) & 0xFF));
+        result.push_back((char) ((lon >> abs(offset)) & 0xFF));
     }
 }
 
@@ -286,7 +295,7 @@ std::string CommonUtils::ulonglongTocharArray(const unsigned long long& lon, con
 	for (int i = 0; i<ind; i++)
 	{
 		int offset = (ind - 1 - i) * 8;
-		result.push_back((char) ((lon >> offset) & 0xFF));
+		result.push_back((char) ((lon >> abs(offset)) & 0xFF));
 	}
 	return result;
 }
@@ -477,13 +486,13 @@ std::string CommonUtils::getTpeFnName(const std::string& tpe, const std::string&
 }
 
 void CommonUtils::getDateStr(std::string& resp) {
-	resp.append(dateStr);
+	resp.append(dateStr.load());
 }
 
 std::string CommonUtils::getDateStr() {
-	return std::string(dateStr);
+	return std::string(dateStr.load());
 }
 
 const char* CommonUtils::getDateStrP() {
-	return dateStr;
+	return dateStr.load();
 }

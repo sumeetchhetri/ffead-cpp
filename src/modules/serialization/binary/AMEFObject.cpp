@@ -32,7 +32,7 @@ std::string AMEFObject::intTocharArray(const int& l, const int& ind)
 	for (int i = 0; i<ind; i++)
 	{
 		int offset = (ind - 1 - i) * 8;
-		result.push_back((char) ((l >> offset) & 0xFF));
+		result.push_back((char) ((l >> abs(offset)) & 0xFF));
 	}
 	return result;
 }
@@ -79,7 +79,7 @@ std::string AMEFObject::ulonglongTocharArray(const unsigned long long& lon, int 
 	for (int i = 0; i<ind; i++)
 	{
 		int offset = (ind - 1 - i) * 8;
-		result.push_back((char) ((lon >> offset) & 0xFF));
+		result.push_back((char) ((lon >> abs(offset)) & 0xFF));
 	}
 	return result;
 }
@@ -123,7 +123,7 @@ std::string AMEFObject::ulonglongTocharArrayWithLI(const unsigned long long& lon
 	for (int i = 0; i<ind; i++)
 	{
 		int offset = (ind - 1 - i) * 8;
-		result.push_back((char) ((lon >> offset) & 0xFF));
+		result.push_back((char) ((lon >> abs(offset)) & 0xFF));
 	}
 	return result;
 }

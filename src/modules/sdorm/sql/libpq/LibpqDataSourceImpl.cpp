@@ -2099,6 +2099,7 @@ int FpgWire::handleResponse() {
 				return -1;
 			}
 			FpgWirePgError error;
+			error.severity = '\0';
 			int remaining = ml - 4;
 			while(remaining > 0) {
 				char fieldType = readChar();

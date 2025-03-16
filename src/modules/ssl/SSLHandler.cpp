@@ -263,7 +263,8 @@ int SSLHandler::select_next_protocol(unsigned char **out, unsigned char *outlen,
 
 int SSLHandler::next_proto_cb(SSL *s, const unsigned char **data, unsigned int *len, void *arg) {
 	std::vector<unsigned char>* next_proto = static_cast<std::vector<unsigned char> *>(arg);
-	*data = next_proto->data();
+	const unsigned char* proto_data = next_proto->data();
+	*data = proto_data;
 	*len = next_proto->size();
 	return SSL_TLSEXT_ERR_OK;
 }

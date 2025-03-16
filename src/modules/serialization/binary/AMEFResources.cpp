@@ -27,7 +27,7 @@ char* AMEFResources::longTocharArray(const long& l, const int& ind)
 	for (int i = 0; i<ind; i++)
 	{
 		int offset = (ind - 1 - i) * 8;
-		result[i] = (char) ((l >> offset) & 0xFF);
+		result[i] = (char) ((l >> abs(offset)) & 0xFF);
 	}
 	return result;
 }
@@ -38,7 +38,7 @@ std::string AMEFResources::longTocharArrayS(const long& l, const int& ind)
 	for (int i = 0; i<ind; i++)
 	{
 		int offset = (ind - 1 - i) * 8;
-		result[i] = (char) ((l >> offset) & 0xFF);
+		result[i] = (char) ((l >> abs(offset)) & 0xFF);
 	}
 	std::string tem(result);
 	return tem;
@@ -50,7 +50,7 @@ char* AMEFResources::intTocharArray(const int& l, const int& ind)
 	for (int i = 0; i<ind; i++)
 	{
 		int offset = (ind - 1 - i) * 8;
-		result[i] = (char) ((l >> offset) & 0xFF);
+		result[i] = (char) ((l >> abs(offset)) & 0xFF);
 	}
 	return result;
 }
@@ -70,7 +70,7 @@ char* AMEFResources::intTocharArrayWI(const int& l)
 	for (int i = 0; i<ind; i++)
 	{
 		int offset = (ind - 1 - i) * 8;
-		result[i] = (char) ((l >> offset) & 0xFF);
+		result[i] = (char) ((l >> abs(offset)) & 0xFF);
 	}
 	return result;
 }
@@ -111,7 +111,7 @@ std::string AMEFResources::intTocharArrayS(const int& l, const int& ind)
 	for (int i = 0; i<ind; i++)
 	{
 		int offset = (ind - 1 - i) * 8;
-		result[i] = (char) ((l >> offset) & 0xFF);
+		result[i] = (char) ((l >> abs(offset)) & 0xFF);
 	}
 	std::string tem(result);
 	return tem;
@@ -140,7 +140,7 @@ std::string AMEFResources::intTocharArrayS(const int& l, const int& ind)
 		for (int i = 0; i<ind; i++)
 		{
 			int offset = (ind - 1 - i) * 8;
-			result.push_back((char) ((l >> offset) & 0xFF));
+			result.push_back((char) ((l >> abs(offset)) & 0xFF));
 		}
 		return result;
 	}
@@ -167,7 +167,7 @@ std::string AMEFResources::intTocharArrayS(const int& l, const int& ind)
 		for (int i = 0; i<ind; i++)
 		{
 			int offset = (ind - 1 - i) * 8;
-			result.push_back((char) ((l >> offset) & 0xFF));
+			result.push_back((char) ((l >> abs(offset)) & 0xFF));
 		}
 		return result;
 	}
@@ -195,7 +195,7 @@ std::string AMEFResources::intTocharArrayS(const int& l, const int& ind)
 		for (int i = 0; i<ind; i++)
 		{
 			int offset = (ind - 1 - i) * 8;
-			result.push_back((char) ((l >> offset) & 0xFF));
+			result.push_back((char) ((l >> abs(offset)) & 0xFF));
 		}
 		return result;
 	}
@@ -214,7 +214,7 @@ std::string AMEFResources::intTocharArrayS(const int& l, const int& ind)
 		for (int i = 0; i<ind; i++)
 		{
 			int offset = (ind - 1 - i) * 8;
-			result.push_back((char) ((l >> offset) & 0xFF));
+			result.push_back((char) ((l >> abs(offset)) & 0xFF));
 		}
 		return result;
 	}

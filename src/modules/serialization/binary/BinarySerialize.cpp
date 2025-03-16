@@ -39,8 +39,8 @@ std::string BinarySerialize::serializePrimitive(int serOpt, const std::string& c
 	AMEFObject object;
 	switch(serOpt) {
 		case 1: object.addPacket(*(std::string*)t, className);break;
-		case 2: object.addPacket((char*)t, className);break;
-		case 3: object.addPacket((unsigned char*)t, className);break;
+		case 2: object.addPacket(((char*)t)[0], className);break;
+		case 3: object.addPacket(((unsigned char*)t)[0], className);break;
 		case 4: object.addPacket(*(int*)t, className);break;
 		case 5: object.addPacket(*(unsigned int*)t, className);break;
 		case 6: object.addPacket(*(short*)t, className);break;

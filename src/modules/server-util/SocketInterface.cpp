@@ -24,8 +24,7 @@
 
 //std::atomic<int> BaseSocket::openSocks = 0;
 
-SockCloseEvent BaseSocket::sockCloseFunc = [](void* data) {
-};
+SockCloseEvent BaseSocket::sockCloseFunc = NULL;
 
 BaseSocket::BaseSocket() {
 	eh = NULL;
@@ -694,7 +693,7 @@ void BaseSocket::closeSocket()
 #endif
 	if(!closed) {
 		close(fd);
-		BaseSocket::sockCloseFunc(this);
+		if(BaseSocket::sockCloseFunc!=NULL) BaseSocket::sockCloseFunc(this);
 	} else {
 		return;
 	}
@@ -718,7 +717,7 @@ void BaseSecureSocket::closeSocket()
 		{
 			close(fd);
 		}
-		BaseSocket::sockCloseFunc(this);
+		if(BaseSocket::sockCloseFunc!=NULL) BaseSocket::sockCloseFunc(this);
 	} else {
 		return;
 	}

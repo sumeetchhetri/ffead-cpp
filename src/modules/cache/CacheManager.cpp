@@ -215,6 +215,10 @@ CacheInterface* CacheManager::getImpl(std::string name, std::string appName) {
 		}
 #endif
 	}
+	if(t==NULL)
+	{
+		return t;
+	}
 	t->init();
 	//This will cause serious issues if set/used in multi-threaded mode instead of single process mode
 	if(isSinglEVH) {

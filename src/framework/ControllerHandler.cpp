@@ -406,8 +406,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 								break;
 							}
 							case 1: argus.push_back(rft->params.at(var).type);valus.push_back(new std::string(pmvalue));break;
-							case 2: argus.push_back(rft->params.at(var).type);valus.push_back(new char(CastUtil::lexical_cast<char>(pmvalue)));break;
-							case 3: argus.push_back(rft->params.at(var).type);valus.push_back(new unsigned char(CastUtil::lexical_cast<unsigned char>(pmvalue)));break;
+							case 2: argus.push_back(rft->params.at(var).type);valus.push_back(new char((char)pmvalue[0]));break;
+							case 3: argus.push_back(rft->params.at(var).type);valus.push_back(new unsigned char((unsigned char)pmvalue[0]));break;
 							case 4: argus.push_back(rft->params.at(var).type);valus.push_back(new int(CastUtil::toInt(pmvalue)));break;
 							case 5: argus.push_back(rft->params.at(var).type);valus.push_back(new unsigned int(CastUtil::toUInt(pmvalue)));break;
 							case 6: argus.push_back(rft->params.at(var).type);valus.push_back(new short(CastUtil::toShort(pmvalue)));break;
